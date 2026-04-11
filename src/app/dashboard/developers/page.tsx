@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,7 +20,7 @@ const CSS_STYLES = `
   .dev-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
   .dev-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
   .dev-card-header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f1f5f9; }
-  .dev-logo { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .dev-logo { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; background: #E6F1FB; color: #185FA5; }
   .dev-name { font-size: 14px; font-weight: 600; color: #0f172a; }
   .dev-location { font-size: 11px; color: #64748b; margin-top: 2px; }
   .dev-card-body { padding: 12px 16px; }
@@ -35,20 +36,11 @@ const CSS_STYLES = `
   .btn-edit { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 12px; font-weight: 500; cursor: pointer; color: #475569; }
   .btn-edit:hover { background: #f1f5f9; }
   .btn-rules { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #0f1c2e; font-size: 12px; font-weight: 500; cursor: pointer; color: #fff; }
-  .summary-strip { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e2e8f0; }
-  .sum-col { padding: 16px 20px; border-right: 1px solid #e2e8f0; }
-  .sum-col:last-child { border-right: none; }
-  .sum-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
-  .sum-val { font-size: 20px; font-weight: 600; color: #0f172a; }
-  
-  /* Sidebar styles */
   .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; min-height: calc(100vh - 48px); }
   .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; transition: 0.2s; }
   .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
   .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
   .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #fff; border-radius: 12px 0 0 0; border: 1px solid #e2e8f0; border-right: none; margin-top: 1px; }
-
-  /* Modal styles */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 28, 46, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
   .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 550px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
   .modal-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
@@ -61,15 +53,11 @@ const CSS_STYLES = `
   .form-input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
   .form-input:focus { border-color: #185FA5; }
   .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; }
-  
-  /* Table styles */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 12px 20px; color: #64748b; font-weight: 500; border-bottom: 1px solid #e2e8f0; font-size: 12px; background: #f8fafc; }
-  td { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; color: #0f172a; vertical-align: middle; }
-  tr:hover td { background: #f8fafc; }
-  
+  .btn-cancel { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; color: #475569; }
+  .btn-confirm { padding: 8px 16px; border: none; border-radius: 6px; background: #0f1c2e; color: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .btn-confirm:disabled { opacity: 0.7; cursor: not-allowed; }
   .rules-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-  .rules-table th { background: transparent; padding: 8px 10px; }
+  .rules-table th { background: transparent; padding: 8px 10px; text-align: left; }
   .rules-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
   .rule-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 `;
@@ -79,16 +67,76 @@ export default function DevelopersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('all');
+  
+  const [developers, setDevelopers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const devsData = [
-    { id: 1, name: 'Pyramids Developments', city: '6th of October', rules: [{ type: 'Primary', pct: 5, days: 60 }, { type: 'Resale', pct: 2.5, days: 45 }, { type: 'Commercial', pct: 6, days: 90 }], deals: 1, totalComm: 446200, bg: '#E6F1FB', txt: '#0C447C' },
-    { id: 2, name: 'Taj Misr Developments', city: 'New Administrative Capital', rules: [{ type: 'Primary', pct: 4.5, days: 60 }, { type: 'Resale', pct: 2.5, days: 45 }, { type: 'Commercial', pct: 5, days: 75 }], deals: 2, totalComm: 235350, bg: '#E1F5EE', txt: '#085041' },
-    { id: 3, name: 'TBK Developments', city: 'New Cairo', rules: [{ type: 'Primary', pct: 2.25, days: 60 }, { type: 'Resale', pct: 2, days: 30 }, { type: 'Commercial', pct: 3, days: 60 }], deals: 1, totalComm: 343193, bg: '#FAEEDA', txt: '#633806' },
-    { id: 4, name: 'Edge Holding Urban Dev', city: 'New Administrative Capital', rules: [{ type: 'Primary', pct: 5, days: 60 }, { type: 'Resale', pct: 3, days: 45 }, { type: 'Commercial', pct: 6, days: 90 }], deals: 0, totalComm: 0, bg: '#EEEDFE', txt: '#3C3489' },
-    { id: 5, name: 'Inertia Egypt', city: 'North Coast', rules: [{ type: 'Primary', pct: 4, days: 90 }, { type: 'Resale', pct: 2, days: 60 }, { type: 'Commercial', pct: 5, days: 90 }], deals: 0, totalComm: 0, bg: '#EAF3DE', txt: '#27500A' },
-  ];
+  const [formData, setFormData] = useState({
+    name: '', city: 'New Administrative Capital', email: '', phone: '',
+    primary_pct: '5', primary_days: '60',
+    resale_pct: '2.5', resale_days: '45',
+    comm_pct: '6', comm_days: '90'
+  });
 
-  const filteredDevs = devsData.filter(d => 
+  const fetchDevelopers = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.from('developers').select('*, commission_rules(*)');
+      if (error) throw error;
+      setDevelopers(data || []);
+    } catch (err: any) {
+      console.error('Error fetching developers:', err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDevelopers();
+  }, []);
+
+  const handleSaveDeveloper = async () => {
+    if (!formData.name) {
+      alert('الرجاء إدخال اسم المطور العقاري');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const { data: devData, error: devError } = await supabase
+        .from('developers')
+        .insert([{ name: formData.name, city: formData.city, email: formData.email, phone: formData.phone }])
+        .select();
+
+      if (devError) throw devError;
+      const devId = devData[0].id;
+
+      const rules = [
+        { developer_id: devId, sale_type: 'Primary', commission_pct: parseFloat(formData.primary_pct), payout_days: parseInt(formData.primary_days) },
+        { developer_id: devId, sale_type: 'Resale', commission_pct: parseFloat(formData.resale_pct), payout_days: parseInt(formData.resale_days) },
+        { developer_id: devId, sale_type: 'Commercial', commission_pct: parseFloat(formData.comm_pct), payout_days: parseInt(formData.comm_days) }
+      ];
+
+      const { error: rulesError } = await supabase.from('commission_rules').insert(rules);
+      if (rulesError) throw rulesError;
+
+      alert('تم حفظ المطور وقواعد العمولات بنجاح!');
+      setIsModalOpen(false);
+      setFormData({
+        name: '', city: 'New Administrative Capital', email: '', phone: '',
+        primary_pct: '5', primary_days: '60', resale_pct: '2.5', resale_days: '45', comm_pct: '6', comm_days: '90'
+      });
+      fetchDevelopers(); 
+      
+    } catch (error: any) {
+      alert('حدث خطأ أثناء الحفظ: ' + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const filteredDevs = developers.filter(d => 
     (cityFilter === 'all' || d.city === cityFilter) &&
     (d.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -97,7 +145,6 @@ export default function DevelopersPage() {
     <div style={{ background: '#f0f2f5', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
 
-      {/* Topbar */}
       <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#185FA5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -112,7 +159,6 @@ export default function DevelopersPage() {
       </div>
 
       <div style={{ display: 'flex' }}>
-        {/* Sidebar */}
         <div className="sidebar">
           <Link href="/dashboard" className="nav-item" title="Dashboard">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -127,21 +173,12 @@ export default function DevelopersPage() {
           <Link href="/dashboard/developers" className="nav-item active" title="Developers">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           </Link>
-          <Link href="/dashboard/reports" className="nav-item" title="Reports">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </Link>
-          <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-          <Link href="/dashboard/settings" className="nav-item" title="Settings">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </Link>
         </div>
 
-        {/* Main Content */}
         <div className="main">
           <div className="tabs">
             <div className={`tab ${activeTab === 'list' ? 'active' : ''}`} onClick={() => setActiveTab('list')}>All Developers</div>
             <div className={`tab ${activeTab === 'rules' ? 'active' : ''}`} onClick={() => setActiveTab('rules')}>Commission Rules</div>
-            <div className={`tab ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Performance</div>
           </div>
 
           {activeTab === 'list' && (
@@ -158,133 +195,69 @@ export default function DevelopersPage() {
                 <button className="add-btn" onClick={() => setIsModalOpen(true)}>+ Add Developer</button>
               </div>
 
-              <div className="summary-strip">
-                <div className="sum-col"><div className="sum-label">Total developers</div><div className="sum-val">{filteredDevs.length}</div></div>
-                <div className="sum-col"><div className="sum-label">Avg. primary comm.</div><div className="sum-val">4.05%</div></div>
-                <div className="sum-col"><div className="sum-label">Avg. payout (days)</div><div className="sum-val">62</div></div>
-                <div className="sum-col" style={{ borderRight: 'none' }}><div className="sum-label">Active deals</div><div className="sum-val">4</div></div>
-              </div>
-
-              <div className="dev-grid">
-                {filteredDevs.map((dev) => (
-                  <div key={dev.id} className="dev-card">
-                    <div className="dev-card-header">
-                      <div className="dev-logo" style={{ background: dev.bg, color: dev.txt }}>{dev.name.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>
-                      <div>
-                        <div className="dev-name">{dev.name}</div>
-                        <div className="dev-location">{dev.city}</div>
+              {isLoading ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Loading developers...</div>
+              ) : developers.length === 0 ? (
+                 <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>لا يوجد مطورين مسجلين بعد. ابدأ بإضافة مطور جديد!</div>
+              ) : (
+                <div className="dev-grid">
+                  {filteredDevs.map((dev) => (
+                    <div key={dev.id} className="dev-card">
+                      <div className="dev-card-header">
+                        <div className="dev-logo">{dev.name.split(' ').slice(0, 2).map((w: string) => w[0]).join('')}</div>
+                        <div>
+                          <div className="dev-name">{dev.name}</div>
+                          <div className="dev-location">{dev.city}</div>
+                        </div>
+                      </div>
+                      <div className="dev-card-body">
+                        {dev.commission_rules?.map((rule: any, i: number) => (
+                          <div key={i} className="rule-row">
+                            <span className="rule-label">{rule.sale_type}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="rule-val">{rule.commission_pct}%</span>
+                              <span style={{ fontSize: '11px', color: '#94a3b8' }}>{rule.payout_days}d</span>
+                              <span className={`rule-badge ${rule.sale_type === 'Primary' ? 'badge-primary' : rule.sale_type === 'Resale' ? 'badge-resale' : 'badge-secondary'}`}>{rule.sale_type}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="dev-card-footer">
+                        <button className="btn-edit" onClick={() => alert('ميزة التعديل سيتم تفعيلها قريباً')}>Edit</button>
+                        <button className="btn-rules" onClick={() => setActiveTab('rules')}>Commission Rules</button>
                       </div>
                     </div>
-                    <div className="dev-card-body">
-                      {dev.rules.map((rule, i) => (
-                        <div key={i} className="rule-row">
-                          <span className="rule-label">{rule.type}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span className="rule-val">{rule.pct}%</span>
-                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>{rule.days}d</span>
-                            <span className={`rule-badge ${rule.type === 'Primary' ? 'badge-primary' : rule.type === 'Resale' ? 'badge-resale' : 'badge-secondary'}`}>{rule.type}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="dev-card-footer">
-                      <button className="btn-edit" onClick={() => setIsModalOpen(true)}>Edit</button>
-                      <button className="btn-rules" onClick={() => setActiveTab('rules')}>Commission Rules</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === 'rules' && (
-            <div>
-              <div className="toolbar">
-                <input className="search-box" placeholder="Filter by developer..." />
-                <select className="filter-select">
-                  <option>All Sale Types</option>
-                  <option>Primary</option>
-                  <option>Resale</option>
-                  <option>Commercial</option>
-                </select>
-              </div>
-              <div style={{ overflowX: 'auto', padding: '0 20px 20px' }}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Developer</th>
-                      <th>Sale Type</th>
-                      <th>Commission %</th>
-                      <th>Payout Days</th>
-                      <th>Effective From</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {devsData.flatMap(dev => dev.rules.map((rule, idx) => (
-                      <tr key={`${dev.id}-${idx}`}>
-                        <td style={{ fontWeight: '600' }}>{dev.name}</td>
-                        <td><span className={`rule-badge ${rule.type === 'Primary' ? 'badge-primary' : rule.type === 'Resale' ? 'badge-resale' : 'badge-secondary'}`}>{rule.type}</span></td>
-                        <td style={{ fontWeight: '600', color: '#0f172a' }}>{rule.pct}%</td>
-                        <td>{rule.days} days</td>
-                        <td style={{ color: '#64748b' }}>Jan 2026</td>
-                        <td><span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#EAF3DE', color: '#3B6D11' }}>Active</span></td>
-                      </tr>
-                    )))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'stats' && (
             <div style={{ padding: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                {devsData.map(dev => (
-                  <div key={dev.id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: dev.bg, color: dev.txt, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{dev.name.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>
-                      <div style={{ fontSize: '14px', fontWeight: '600' }}>{dev.name}</div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px' }}>
-                        <div style={{ fontSize: '11px', color: '#64748b' }}>Total deals</div>
-                        <div style={{ fontSize: '16px', fontWeight: '600' }}>{dev.deals}</div>
-                      </div>
-                      <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px' }}>
-                        <div style={{ fontSize: '11px', color: '#64748b' }}>Primary %</div>
-                        <div style={{ fontSize: '16px', fontWeight: '600' }}>{dev.rules.find(r => r.type === 'Primary')?.pct || '—'}%</div>
-                      </div>
-                      <div style={{ background: '#EAF3DE', borderRadius: '8px', padding: '10px', gridColumn: '1 / -1' }}>
-                        <div style={{ fontSize: '11px', color: '#3B6D11' }}>Total commissions earned</div>
-                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#27500A' }}>EGP {dev.totalComm.toLocaleString()}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+               <h3 style={{ marginBottom: '15px' }}>جدول العمولات الشامل (قريباً)</h3>
+               <p style={{ color: '#64748b', fontSize: '13px' }}>هنا سيتم عرض جدول مجمع لكل المطورين وقواعدهم ليسهل مقارنتها والبحث فيها.</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal - Add/Edit Developer */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <div className="modal-title">Add / Edit Developer</div>
+              <div className="modal-title">Add Developer to Database</div>
               <div className="modal-close" onClick={() => setIsModalOpen(false)}>×</div>
             </div>
             <div className="modal-body">
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Developer Name *</label>
-                  <input className="form-input" placeholder="e.g. Edge Holding" />
+                  <input className="form-input" placeholder="e.g. Edge Holding" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
                 </div>
                 <div className="form-field">
                   <label className="form-label">City / Location</label>
-                  <select className="form-input">
+                  <select className="form-input" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}>
                     <option>New Administrative Capital</option>
                     <option>New Cairo</option>
                     <option>6th of October</option>
@@ -295,11 +268,11 @@ export default function DevelopersPage() {
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Contact Email</label>
-                  <input className="form-input" placeholder="sales@developer.com" />
+                  <input className="form-input" placeholder="sales@developer.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
                 </div>
                 <div className="form-field">
                   <label className="form-label">Contact Phone</label>
-                  <input className="form-input" placeholder="+20 1xx xxx xxxx" />
+                  <input className="form-input" placeholder="+20 1xx xxx xxxx" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
                 </div>
               </div>
 
@@ -315,34 +288,27 @@ export default function DevelopersPage() {
                 <tbody>
                   <tr>
                     <td><span className="rule-badge badge-primary">Primary</span></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 4.5" defaultValue="5" /></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 60" defaultValue="60" /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 5" value={formData.primary_pct} onChange={(e) => setFormData({...formData, primary_pct: e.target.value})} /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 60" value={formData.primary_days} onChange={(e) => setFormData({...formData, primary_days: e.target.value})} /></td>
                   </tr>
                   <tr>
                     <td><span className="rule-badge badge-resale">Resale</span></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 2.5" defaultValue="2.5" /></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 45" defaultValue="45" /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 2.5" value={formData.resale_pct} onChange={(e) => setFormData({...formData, resale_pct: e.target.value})} /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 45" value={formData.resale_days} onChange={(e) => setFormData({...formData, resale_days: e.target.value})} /></td>
                   </tr>
                   <tr>
                     <td><span className="rule-badge badge-secondary">Commercial</span></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 5.0" defaultValue="6" /></td>
-                    <td><input className="rule-input" type="number" placeholder="e.g. 90" defaultValue="90" /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 6" value={formData.comm_pct} onChange={(e) => setFormData({...formData, comm_pct: e.target.value})} /></td>
+                    <td><input className="rule-input" type="number" placeholder="e.g. 90" value={formData.comm_days} onChange={(e) => setFormData({...formData, comm_days: e.target.value})} /></td>
                   </tr>
                 </tbody>
               </table>
-
-              <div style={{ marginTop: '16px', background: '#f8fafc', borderRadius: '8px', padding: '12px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px' }}>Commission preview on EGP 10,000,000 deal</div>
-                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                  <div><div style={{ fontSize: '10px', color: '#64748b' }}>Primary</div><div style={{ fontSize: '14px', fontWeight: '600', color: '#3B6D11' }}>EGP 500,000</div></div>
-                  <div><div style={{ fontSize: '10px', color: '#64748b' }}>Resale</div><div style={{ fontSize: '14px', fontWeight: '600', color: '#854F0B' }}>EGP 250,000</div></div>
-                  <div><div style={{ fontSize: '10px', color: '#64748b' }}>Commercial</div><div style={{ fontSize: '14px', fontWeight: '600', color: '#185FA5' }}>EGP 600,000</div></div>
-                </div>
-              </div>
             </div>
             <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
-              <button className="btn-confirm" onClick={() => setIsModalOpen(false)}>Save Developer</button>
+              <button className="btn-confirm" onClick={handleSaveDeveloper} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Developer'}
+              </button>
             </div>
           </div>
         </div>
