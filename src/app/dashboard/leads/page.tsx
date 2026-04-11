@@ -1,166 +1,159 @@
-import { Search, SlidersHorizontal } from 'lucide-react';
+"use client";
+import React, { useState } from 'react';
 
-type LeadStatus = 'جديد' | 'متابعة' | 'مغلق';
-
-type Lead = {
-  id: number;
-  clientName: string;
-  phone: string;
-  status: LeadStatus;
-  projectInterest: string;
-  segment: 'B2B' | 'B2C';
-};
-
-const leads: Lead[] = [
-  {
-    id: 1,
-    clientName: 'أحمد خالد',
-    phone: '01012345678',
-    status: 'جديد',
-    projectInterest: 'OIA Compound',
-    segment: 'B2C',
-  },
-  {
-    id: 2,
-    clientName: 'شركة النخبة للتسويق العقاري',
-    phone: '01198765432',
-    status: 'متابعة',
-    projectInterest: 'R8',
-    segment: 'B2B',
-  },
-  {
-    id: 3,
-    clientName: 'محمود عبد الله',
-    phone: '01234567891',
-    status: 'مغلق',
-    projectInterest: 'CBD',
-    segment: 'B2C',
-  },
-  {
-    id: 4,
-    clientName: 'شركة كابيتال بروكرز',
-    phone: '01045678912',
-    status: 'متابعة',
-    projectInterest: 'Downtown',
-    segment: 'B2B',
-  },
-  {
-    id: 5,
-    clientName: 'سارة محمد',
-    phone: '01511122334',
-    status: 'جديد',
-    projectInterest: 'R7',
-    segment: 'B2C',
-  },
+// --- البيانات الوهمية للصيانة (Mock Data) ---
+const initialDeals = [
+  {id:16708,partner:'Fast Investment',agent:'Ehab Alqadi',compound:'Pyramids City',dev:'Pyramids Developments',stage:'Sale Claim',status:'Approved',comm:'442,700',commPct:'5%',value:'9,739,400',dp:'442,700',buyer:'Bakr Ibrahim Ahmed Shaaban',phone:'+201550809144',date:'29-05-2025'},
+  {id:3700,partner:'Fast Investment',agent:'Ehab Alqadi',compound:'De Joya 3 Strip Mall',dev:'Taj Misr Developments',stage:'Sale Claim',status:'Approved',comm:'144,450',commPct:'4.5%',value:'3,210,000',dp:'481,000',buyer:'أ. محمود محمد عبد الرهاب',phone:'+201101160208',date:'09-02-2024'},
+  {id:3383,partner:'Fast Investment',agent:'Ehab Alqadi',compound:'De Joya 1 Strip Mall',dev:'Taj Misr Developments',stage:'Sale Claim',status:'Rejected',comm:'90,900',commPct:'4.5%',value:'2,020,000',dp:'202,000',buyer:'Bassma Mohamed El Naboulsy',phone:'+201060078363',date:'13-02-2024'},
+  {id:2939,partner:'Fast Investment',agent:'Ehab Alqadi',compound:'Ninety Avenue',dev:'TBK Developments',stage:'Sale Claim',status:'Approved',comm:'343,193',commPct:'2.25%',value:'15,253,000',dp:'1,525,300',buyer:'Bassma Mohamed El Naboulsy',phone:'+201060078363',date:'30-04-2024'},
 ];
 
-function statusClasses(status: LeadStatus) {
-  switch (status) {
-    case 'جديد':
-      return 'bg-blue-50 text-blue-700 ring-blue-200';
-    case 'متابعة':
-      return 'bg-amber-50 text-amber-700 ring-amber-200';
-    case 'مغلق':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
-    default:
-      return 'bg-slate-50 text-slate-700 ring-slate-200';
-  }
-}
+export default function SalesPipelinePage() {
+  const [activeTab, setActiveTab] = useState('pipeline');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stage, setStage] = useState('EOI');
 
-export default function LeadsPage() {
+  const styles = `
+    .pipeline-container { font-family: system-ui, sans-serif; background: #ffffff; border-radius: 12px; overflow: hidden; border: 0.5px solid #f1f5f9; }
+    .topbar { background: #0f1c2e; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-title { color: #fff; font-size: 15px; font-weight: 500; }
+    .tabs { display: flex; border-bottom: 0.5px solid #f1f5f9; background: #fff; padding: 0 20px; }
+    .tab { padding: 12px 16px; font-size: 13px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab.active { color: #185FA5; border-bottom-color: #185FA5; font-weight: 500; }
+    .filters { display: flex; gap: 8px; padding: 12px 20px; background: #f8fafc; align-items: center; }
+    .filter-select { font-size: 12px; padding: 6px 10px; border: 0.5px solid #e2e8f0; border-radius: 6px; background: #fff; }
+    .add-btn { margin-left: auto; background: #0f1c2e; color: #fff; font-size: 12px; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
+    .summary-bar { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 0.5px solid #f1f5f9; }
+    .summary-col { padding: 16px 20px; border-right: 0.5px solid #f1f5f9; }
+    .summary-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .summary-value { font-size: 18px; font-weight: 600; color: #0f172a; }
+    .table-wrap { padding: 0 20px 20px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    th { text-align: left; padding: 10px; color: #64748b; font-weight: 400; border-bottom: 0.5px solid #f1f5f9; }
+    td { padding: 12px 10px; border-bottom: 0.5px solid #f1f5f9; }
+    .pill { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+    .pill-green { background: #EAF3DE; color: #3B6D11; border: 1px solid #97C459; }
+    .pill-red { background: #FCEBEB; color: #A32D2D; border: 1px solid #F09595; }
+    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; }
+    .modal { background:#fff; padding:24px; border-radius:12px; width:100%; max-width:500px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display:block; font-size:11px; color:#64748b; margin-bottom:4px; }
+    .form-input { width:100%; padding:8px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px; }
+  `;
+
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6 rounded-3xl border border-slate-200 bg-white px-6 py-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm font-medium text-emerald-700">
-                EHAB & ESLAM TEAM
-              </p>
-              <h1 className="mt-2 text-2xl font-bold">إدارة العملاء المحتملين</h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                متابعة عملاء B2B وB2C مع عرض واضح للحالة الحالية واهتمامات المشروعات.
-              </p>
+    <div className="pipeline-container">
+      <style dangerouslySetInnerHTML={{ __html: styles }} />
+      
+      <div className="topbar">
+        <div className="topbar-title">Sales Pipeline — FAST INVESTMENT</div>
+      </div>
+
+      <div className="tabs">
+        <div className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`} onClick={() => setActiveTab('pipeline')}>Sales Pipeline</div>
+        <div className={`tab ${activeTab === 'sales' ? 'active' : ''}`} onClick={() => setActiveTab('sales')}>All Sales</div>
+        <div className={`tab ${activeTab === 'commissions' ? 'active' : ''}`} onClick={() => setActiveTab('commissions')}>Commissions</div>
+      </div>
+
+      <div className="filters">
+        <select className="filter-select"><option>Sale Stage — All</option></select>
+        <select className="filter-select"><option>Status — All</option></select>
+        <button className="add-btn" onClick={() => setIsModalOpen(true)}>+ Add Deal</button>
+      </div>
+
+      <div className="summary-bar">
+        <div className="summary-col">
+          <div className="summary-label">EOIs</div>
+          <div className="summary-value">EGP 0</div>
+        </div>
+        <div className="summary-col">
+          <div className="summary-label">Reservations</div>
+          <div className="summary-value">EGP 0</div>
+        </div>
+        <div className="summary-col">
+          <div className="summary-label">Contracted (Claims)</div>
+          <div className="summary-value">EGP 28.2M</div>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Agent</th>
+              <th>Compound</th>
+              <th>Stage</th>
+              <th>Commission</th>
+              <th>Value</th>
+              <th>Buyer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {initialDeals.map((d, i) => (
+              <tr key={i}>
+                <td style={{ color: '#185FA5', fontWeight: '500' }}>#{d.id}</td>
+                <td>{d.agent}</td>
+                <td>
+                  <div style={{ fontWeight: '500' }}>{d.compound}</div>
+                  <div style={{ fontSize: '10px', color: '#64748b' }}>{d.dev}</div>
+                </td>
+                <td>
+                  <span className={`pill ${d.status === 'Approved' ? 'pill-green' : 'pill-red'}`}>{d.stage}</span>
+                </td>
+                <td>
+                  <div style={{ fontWeight: '600' }}>{d.comm}</div>
+                  <div style={{ fontSize: '10px', color: '#64748b' }}>{d.commPct}</div>
+                </td>
+                <td style={{ fontWeight: '500' }}>{d.value}</td>
+                <td>
+                   <div style={{ fontWeight: '500' }}>{d.buyer}</div>
+                   <div style={{ fontSize: '10px', color: '#64748b' }}>{d.phone}</div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3 style={{ marginBottom: '16px', fontSize: '16px' }}>Add New Deal</h3>
+            <div className="form-group">
+              <label className="form-label">Buyer Name *</label>
+              <input className="form-input" placeholder="Full name" />
             </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
-              <div className="relative">
-                <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="ابحث باسم العميل أو رقم الهاتف"
-                  className="h-11 w-full rounded-2xl border border-slate-200 bg-white pr-10 pl-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                />
+            <div className="form-group">
+              <label className="form-label">Compound *</label>
+              <select className="form-input">
+                <option>Pyramids City</option>
+                <option>De Joya 3</option>
+                <option>OIA Compound</option>
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="form-group">
+                <label className="form-label">Unit Value (EGP)</label>
+                <input className="form-input" type="number" />
               </div>
-
-              <div className="relative">
-                <SlidersHorizontal className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <select
-                  defaultValue=""
-                  className="h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-white pr-10 pl-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                >
-                  <option value="">تصفية حسب الحالة</option>
-                  <option value="new">جديد</option>
-                  <option value="follow-up">متابعة</option>
-                  <option value="closed">مغلق</option>
+              <div className="form-group">
+                <label className="form-label">Stage</label>
+                <select className="form-input" value={stage} onChange={(e) => setStage(e.target.value)}>
+                  <option value="EOI">EOI</option>
+                  <option value="Reservation">Reservation</option>
+                  <option value="Sale Claim">Sale Claim</option>
                 </select>
               </div>
             </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+              <button onClick={() => setIsModalOpen(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setIsModalOpen(false)} style={{ padding: '8px 16px', background: '#0f1c2e', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Save Deal</button>
+            </div>
           </div>
-        </header>
-
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-lg font-bold">جدول العملاء</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              عرض منظم للعملاء المحتملين مع تصنيف الاهتمام بالمشروع وحالة المتابعة.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-right">
-              <thead className="bg-slate-50">
-                <tr className="text-sm text-slate-500">
-                  <th className="px-6 py-4 font-medium">اسم العميل</th>
-                  <th className="px-6 py-4 font-medium">الهاتف</th>
-                  <th className="px-6 py-4 font-medium">الحالة</th>
-                  <th className="px-6 py-4 font-medium">الاهتمام بالمشروع</th>
-                  <th className="px-6 py-4 font-medium">النوع</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {leads.map((lead) => (
-                  <tr
-                    key={lead.id}
-                    className="border-t border-slate-100 text-sm text-slate-700"
-                  >
-                    <td className="px-6 py-4 font-semibold text-slate-900">
-                      {lead.clientName}
-                    </td>
-                    <td className="px-6 py-4">{lead.phone}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${statusClasses(
-                          lead.status
-                        )}`}
-                      >
-                        {lead.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{lead.projectInterest}</td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                        {lead.segment}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-    </main>
+        </div>
+      )}
+    </div>
   );
 }
