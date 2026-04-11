@@ -234,3 +234,27 @@ export default function EnhancedDashboard() {
     </div>
   );
 }
+// بداخل صفحة الـ Dashboard، قم بتعريف حالة الفلتر
+  const [timeFilter, setTimeFilter] = useState('All Time');
+
+// دالة التصفية التي يتم تشغيلها على البيانات (Deals)
+  const getFilteredDeals = () => {
+    const now = new Date();
+    return deals.filter(deal => {
+      const dealDate = new Date(deal.created_at);
+      if (timeFilter === 'Month') {
+        return dealDate.getMonth() === now.getMonth() && dealDate.getFullYear() === now.getFullYear();
+      }
+      if (timeFilter === 'Year') {
+        return dealDate.getFullYear() === now.getFullYear();
+      }
+      return true; // All Time
+    });
+  };
+
+// ثم في أزرار الـ UI قم بربطها بالحالة هكذا:
+  <div className="flex gap-2">
+    <button className={`px-4 py-2 rounded ${timeFilter === 'All Time' ? 'bg-[#0f1c2e] color-white' : 'border'}`} onClick={() => setTimeFilter('All Time')}>All Time</button>
+    <button className={`px-4 py-2 rounded ${timeFilter === 'Year' ? 'bg-[#0f1c2e] color-white' : 'border'}`} onClick={() => setTimeFilter('Year')}>Year</button>
+    <button className={`px-4 py-2 rounded ${timeFilter === 'Month' ? 'bg-[#0f1c2e] color-white' : 'border'}`} onClick={() => setTimeFilter('Month')}>Month</button>
+  </div>

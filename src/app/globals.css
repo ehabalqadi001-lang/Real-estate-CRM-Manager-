@@ -146,3 +146,24 @@ select {
   padding-right: 12px !important;
   padding-left: 30px !important;
 }
+/* إصلاح التداخل في جميع الصفحات (الصورة الثانية) */
+.main-content {
+  margin-left: 0 !important;
+  margin-right: 64px !important;
+  width: calc(100% - 64px) !important; /* يمنع دخول الكلام تحت القائمة */
+  overflow-x: hidden;
+}
+
+/* تنسيق قائمة "إدخال يدوي" في الصفقات (الصورة الثالثة) */
+.smart-source select {
+  width: 100% !important;
+  padding: 12px 16px !important;
+  border: 2px dashed #185FA5 !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  background-color: #f8fafc !important;
+  color: #0f1c2e !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  direction: rtl;
+}
