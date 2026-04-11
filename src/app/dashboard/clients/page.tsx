@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
@@ -30,11 +31,16 @@ const CSS_STYLES = `
   th { padding: 16px 24px; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
   td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
-  tr:hover { background: #f8fafc; }
   
-  .client-name { font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 10px; }
-  .client-avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F1FB; color: #185FA5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
-  .client-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+  /* Row Hover & Link effect */
+  .clickable-row { transition: background 0.2s; cursor: pointer; }
+  .clickable-row:hover { background: #f1f5f9; }
+  
+  .client-name { font-weight: 600; color: #185FA5; display: flex; align-items: center; gap: 10px; transition: color 0.2s; }
+  .clickable-row:hover .client-name { color: #0f1c2e; text-decoration: underline; }
+  
+  .client-avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F1FB; color: #185FA5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; text-decoration: none !important;}
+  .client-sub { font-size: 12px; color: #64748b; margin-top: 4px; text-decoration: none !important; }
   
   .type-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
   .type-investor { background: #FFF7ED; color: #9A3412; }
@@ -54,13 +60,13 @@ const CSS_STYLES = `
 `;
 
 export default function ClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   
-  // New Client Form State
   const [formData, setFormData] = useState({
     full_name: '', phone: '', email: '', client_type: 'End User', budget_range: ''
   });
@@ -86,60 +92,32 @@ export default function ClientsPage() {
     }
   };
 
-  // Filtering Logic
   const filteredClients = clients.filter(c => {
     const matchesSearch = c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) || c.phone.includes(searchTerm);
     const matchesType = filterType === 'All' || c.client_type === filterType;
     return matchesSearch && matchesType;
   });
 
-  // Utility for Initials
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <div className="dashboard-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
       
-      {/* Sidebar with New Clients Icon */}
+      {/* Sidebar - Updated with ALL icons including Reports */}
       <div className="sidebar">
-  {/* Dashboard */}
-  <Link href="/dashboard" className="nav-item" title="Dashboard">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-  </Link>
-  
-  {/* Clients Directory */}
-  <Link href="/dashboard/clients" className="nav-item" title="Clients">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-  </Link>
-  
-  {/* Sales Pipeline (Leads/Deals) */}
-  <Link href="/dashboard/leads" className="nav-item" title="Pipeline">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-  </Link>
-  
-  {/* Commissions */}
-  <Link href="/dashboard/commissions" className="nav-item" title="Commissions">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  </Link>
-  
-  {/* Developers */}
-  <Link href="/dashboard/developers" className="nav-item" title="Developers">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-  </Link>
-
-  {/* خط فاصل */}
-  <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-  
-  {/* Admin Approvals */}
-  <Link href="/dashboard/admin" className="nav-item" title="Admin Approvals">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-  </Link>
-  
-  {/* Settings */}
-  <Link href="/dashboard/settings" className="nav-item" title="Settings">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </Link>
-</div>
+        <Link href="/dashboard" className="nav-item" title="Dashboard"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
+        <Link href="/dashboard/clients" className="nav-item active" title="Clients"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
+        <Link href="/dashboard/leads" className="nav-item" title="Pipeline"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
+        <Link href="/dashboard/commissions" className="nav-item" title="Commissions"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></Link>
+        <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
+        
+        {/* Reports Icon */}
+        <Link href="/dashboard/reports" className="nav-item" title="Reports & Analytics"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></Link>
+        
+        <Link href="/dashboard/developers" className="nav-item" title="Developers"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></Link>
+        <Link href="/dashboard/admin" className="nav-item" title="Admin Approvals"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></Link>
+      </div>
 
       <div className="main-content">
         <div className="header">
@@ -174,12 +152,13 @@ export default function ClientsPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} style={{textAlign: 'center'}}>Loading clients...</td></tr>
+                  <tr><td colSpan={5} style={{textAlign: 'center', padding: '30px'}}>Loading clients...</td></tr>
                 ) : filteredClients.length === 0 ? (
-                  <tr><td colSpan={5} style={{textAlign: 'center', color: '#64748b'}}>No clients found. Click "Add New Client" to start building your database.</td></tr>
+                  <tr><td colSpan={5} style={{textAlign: 'center', color: '#64748b', padding: '30px'}}>No clients found. Click "Add New Client" to start building your database.</td></tr>
                 ) : (
                   filteredClients.map((client) => (
-                    <tr key={client.id}>
+                    // تم تحويل الصف بالكامل ليكون قابلاً للضغط (Clickable Row)
+                    <tr key={client.id} className="clickable-row" onClick={() => router.push(`/dashboard/clients/${client.id}`)}>
                       <td>
                         <div className="client-name">
                           <div className="client-avatar">{getInitials(client.full_name)}</div>
