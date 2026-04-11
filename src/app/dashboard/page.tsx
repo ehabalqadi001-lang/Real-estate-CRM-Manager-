@@ -148,9 +148,9 @@ export default function MainDashboard() {
               <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
             <div>
-              <div className="topbar-title">Real Estate CRM</div>
-              <div className="topbar-sub">EHAB & ESLAM TEAM</div>
-            </div>
+  <div className="topbar-title" style={{ letterSpacing: '1px', fontWeight: '600' }}>FAST INVESTMENT</div>
+  <div className="topbar-sub">Building Wealth, Securing Futures.</div>
+</div>
           </div>
           <div className="topbar-right">
             <div className="notif-wrap">
