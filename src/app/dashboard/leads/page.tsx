@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase'; // استدعاء قاعدة البيانات
 
-// تم عزل أكواد التصميم هنا في الأعلى لتجنب أي أخطاء من محرر الأكواد (Formatter)
+// تم عزل أكواد التصميم هنا في الأعلى
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   .topbar { background: #0f1c2e; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
@@ -51,24 +52,75 @@ const CSS_STYLES = `
   .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; }
   .btn-cancel { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; color: #475569; }
   .btn-confirm { padding: 8px 16px; border: none; border-radius: 6px; background: #0f1c2e; color: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
-  .alert-bar { margin: 16px 20px; padding: 12px 16px; background: #FFF7ED; border-left: 4px solid #F97316; border-radius: 0 6px 6px 0; font-size: 13px; color: #9A3412; }
+  .btn-confirm:disabled { opacity: 0.7; cursor: not-allowed; }
 `;
 
 export default function LeadsPage() {
   const [activeTab, setActiveTab] = useState('pipeline');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalStage, setModalStage] = useState('EOI');
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // حالات تخزين بيانات الإدخال (Form State)
+  const [formData, setFormData] = useState({
+    unit_id: '',
+    buyer_name: '',
+    buyer_phone: '',
+    compound: 'Pyramids City',
+    property_type: 'Apartment',
+    unit_value: '',
+    amount_paid: '',
+    stage: 'EOI',
+    contract_date: '',
+    installment_years: ''
+  });
 
-  const deals = [
+  const dummyDeals = [
     { id: 16708, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'Pyramids City', dev: 'Pyramids Developments', stage: 'Sale Claim', status: 'Approved', comm: '442,700', commPct: '5%', value: '9,739,400', dp: '442,700', buyer: 'Bakr Ibrahim Ahmed', phone: '+201550809144' },
     { id: 3700, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'De Joya 3 Strip Mall', dev: 'Taj Misr Developments', stage: 'Sale Claim', status: 'Approved', comm: '144,450', commPct: '4.5% Normal', value: '3,210,000', dp: '481,000', buyer: 'أ. محمود محمد عبد الرهاب', phone: '+201101160208' },
-    { id: 3383, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'De Joya 1 Strip Mall', dev: 'Taj Misr Developments', stage: 'Sale Claim', status: 'Rejected', comm: '90,900', commPct: '4.5% Normal', value: '2,020,000', dp: '202,000', buyer: 'Bassma Mohamed', phone: '+201060078363' },
-    { id: 2939, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'Ninety Avenue', dev: 'TBK Developments', stage: 'Sale Claim', status: 'Approved', comm: '343,193', commPct: '2.25% Normal', value: '15,253,000', dp: '1,525,300', buyer: 'Bassma Mohamed', phone: '+201060078363' },
   ];
+
+  // دالة لحفظ البيانات في Supabase
+  const handleSaveDeal = async () => {
+    try {
+      setIsSaving(true);
+      
+      const { data, error } = await supabase
+        .from('deals')
+        .insert([
+          {
+            unit_id: formData.unit_id,
+            buyer_name: formData.buyer_name,
+            buyer_phone: formData.buyer_phone,
+            compound: formData.compound,
+            property_type: formData.property_type,
+            unit_value: parseFloat(formData.unit_value) || 0,
+            amount_paid: parseFloat(formData.amount_paid) || 0,
+            stage: formData.stage,
+            contract_date: formData.contract_date || null,
+            installment_years: parseInt(formData.installment_years) || null,
+            status: formData.stage === 'Sale Claim' ? 'Pending' : 'Pending'
+          }
+        ]);
+
+      if (error) throw error;
+
+      alert('تم حفظ الصفقة بنجاح في قاعدة البيانات!');
+      setIsModalOpen(false);
+      
+      // تفريغ الحقول بعد الحفظ
+      setFormData({
+        unit_id: '', buyer_name: '', buyer_phone: '', compound: 'Pyramids City', property_type: 'Apartment', unit_value: '', amount_paid: '', stage: 'EOI', contract_date: '', installment_years: ''
+      });
+
+    } catch (error: any) {
+      alert('حدث خطأ أثناء الحفظ: ' + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div style={{ background: '#f0f2f5', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-      {/* هنا نضع أكواد التصميم بأمان */}
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
 
       <div className="topbar">
@@ -103,47 +155,17 @@ export default function LeadsPage() {
           <Link href="/dashboard/developers" className="nav-item" title="Developers">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           </Link>
-          <Link href="/dashboard/reports" className="nav-item" title="Reports">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </Link>
-          <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-          <Link href="/dashboard/settings" className="nav-item" title="Settings">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </Link>
         </div>
 
         <div className="main">
           <div className="tabs">
             <div className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`} onClick={() => setActiveTab('pipeline')}>Sales Pipeline</div>
-            <div className={`tab ${activeTab === 'sales' ? 'active' : ''}`} onClick={() => setActiveTab('sales')}>All Sales</div>
-            <div className={`tab ${activeTab === 'commissions' ? 'active' : ''}`} onClick={() => setActiveTab('commissions')}>Commissions</div>
           </div>
 
           {activeTab === 'pipeline' && (
             <div>
               <div className="filters">
-                <select className="filter-select"><option>Sale Stage — All</option><option>EOI</option><option>Reservation</option><option>Sale Claim</option></select>
-                <select className="filter-select"><option>Status — All</option><option>Approved</option><option>Rejected</option><option>Pending</option></select>
-                <div className="filter-tag">Order By ID: Desc <span style={{ cursor: 'pointer', marginLeft: '4px' }}>×</span></div>
                 <button className="add-btn" onClick={() => setIsModalOpen(true)}>+ Add Deal</button>
-              </div>
-
-              <div className="summary-bar">
-                <div className="summary-col">
-                  <div className="summary-label">EOIs</div>
-                  <div className="summary-value">EGP 0</div>
-                  <div className="summary-count">0 records</div>
-                </div>
-                <div className="summary-col">
-                  <div className="summary-label">Reservations</div>
-                  <div className="summary-value">EGP 0</div>
-                  <div className="summary-count">0 records</div>
-                </div>
-                <div className="summary-col" style={{ borderRight: 'none' }}>
-                  <div className="summary-label" style={{ color: '#185FA5', fontWeight: '500' }}>Sale Claims</div>
-                  <div className="summary-value" style={{ color: '#185FA5' }}>EGP 28M</div>
-                  <div className="summary-count">4 records</div>
-                </div>
               </div>
 
               <div className="table-wrap">
@@ -154,14 +176,12 @@ export default function LeadsPage() {
                       <th>Partner & Agent</th>
                       <th>Compound</th>
                       <th>Sale Stage</th>
-                      <th>Commission</th>
                       <th>Property Value</th>
-                      <th>Downpayment</th>
                       <th>Buyer</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {deals.map((d, i) => (
+                    {dummyDeals.map((d, i) => (
                       <tr key={i}>
                         <td><a className="id-link" href="#">#{d.id}</a></td>
                         <td>
@@ -175,15 +195,9 @@ export default function LeadsPage() {
                         <td>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                             <span className={`pill ${d.status === 'Approved' ? 'pill-green' : 'pill-red'}`}>{d.stage}</span>
-                            <span style={{ fontSize: '11px', color: '#64748b' }}>{d.status}</span>
                           </div>
                         </td>
-                        <td>
-                          <div className="agent-name">{d.comm}</div>
-                          <div className="agent-sub">{d.commPct}</div>
-                        </td>
                         <td style={{ fontWeight: '600' }}>{d.value}</td>
-                        <td>{d.dp}</td>
                         <td>
                           <div className="agent-name">{d.buyer}</div>
                           <div className="agent-sub">{d.phone}</div>
@@ -195,200 +209,81 @@ export default function LeadsPage() {
               </div>
             </div>
           )}
-
-          {activeTab === 'sales' && (
-            <div>
-              <div className="filters">
-                <select className="filter-select"><option>Compounds — All</option></select>
-                <select className="filter-select"><option>Sale Type — All</option></select>
-                <input type="text" placeholder="Search buyer..." className="filter-select" style={{ width: '200px' }} />
-              </div>
-              <div className="summary-bar" style={{ gridTemplateColumns: '1fr' }}>
-                <div className="summary-col" style={{ borderRight: 'none' }}>
-                  <div className="summary-label">3 Completed Sales</div>
-                  <div className="summary-value">EGP 27M</div>
-                </div>
-              </div>
-              <div className="alert-bar">
-                <strong>Important:</strong> VAT amount will be paid only if a VAT certificate is provided.
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Agent</th>
-                      <th>Buyer</th>
-                      <th>Type</th>
-                      <th>Compound</th>
-                      <th>Commission</th>
-                      <th>Payment</th>
-                      <th>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><div className="agent-name">23-05-2025</div><div className="agent-sub">10 months ago</div></td>
-                      <td>Ehab Alqadi</td>
-                      <td style={{ fontWeight: '500' }}>Bakr Ibrahim Ahmed</td>
-                      <td><span className="pill pill-blue">Primary</span></td>
-                      <td><div className="agent-name">Pyramids City</div><div className="agent-sub">Pyramids Dev.</div></td>
-                      <td><div className="agent-name">446,200</div><div className="agent-sub">5%</div></td>
-                      <td><span className="pill pill-green">Paid</span></td>
-                      <td style={{ fontWeight: '600' }}>15,824,000</td>
-                    </tr>
-                    <tr>
-                      <td><div className="agent-name">10-04-2024</div><div className="agent-sub">2 years ago</div></td>
-                      <td>Ehab Alqadi</td>
-                      <td style={{ fontWeight: '500' }}>Bassma Mohamed</td>
-                      <td><span className="pill pill-blue">Primary</span></td>
-                      <td><div className="agent-name">Ninety Avenue</div><div className="agent-sub">TBK Dev.</div></td>
-                      <td><div className="agent-name">343,193</div><div className="agent-sub">2.25%</div></td>
-                      <td><span className="pill pill-green">Paid</span></td>
-                      <td style={{ fontWeight: '600' }}>15,253,000</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'commissions' && (
-            <div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', padding: '20px' }}>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px' }}>Total earned</div>
-                  <div style={{ fontSize: '24px', fontWeight: '600', color: '#0f172a' }}>EGP 933,843</div>
-                </div>
-                <div style={{ background: '#EAF3DE', border: '1px solid #C5E1A5', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '13px', color: '#3B6D11', marginBottom: '8px' }}>Collected</div>
-                  <div style={{ fontSize: '24px', fontWeight: '600', color: '#27500A' }}>EGP 933,843</div>
-                </div>
-                <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontSize: '13px', color: '#9A3412', marginBottom: '8px' }}>Pending payout</div>
-                  <div style={{ fontSize: '24px', fontWeight: '600', color: '#7C2D12' }}>EGP 0</div>
-                </div>
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Deal ID</th>
-                      <th>Buyer</th>
-                      <th>Compound & Rules</th>
-                      <th>Commission</th>
-                      <th>Due Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><a className="id-link" href="#">#16708</a></td>
-                      <td style={{ fontWeight: '500' }}>Bakr Ibrahim Ahmed</td>
-                      <td><div className="agent-name">Pyramids City</div><div className="agent-sub">5% Normal</div></td>
-                      <td style={{ fontWeight: '600', color: '#3B6D11' }}>446,200</td>
-                      <td>30-07-2025</td>
-                      <td><span className="pill pill-green">Collected</span></td>
-                    </tr>
-                    <tr>
-                      <td><a className="id-link" href="#">#3383</a></td>
-                      <td style={{ fontWeight: '500' }}>Bassma Mohamed</td>
-                      <td><div className="agent-name">De Joya 1 Strip Mall</div><div className="agent-sub">4.5% Normal</div></td>
-                      <td style={{ fontWeight: '600', color: '#A32D2D' }}>90,900</td>
-                      <td>13-05-2024</td>
-                      <td><span className="pill pill-red">Rejected</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Modal - Add Deal to Supabase */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h2 className="modal-title">Add Deal / EOI</h2>
+              <h2 className="modal-title">Add Deal to Database</h2>
               <div className="modal-close" onClick={() => setIsModalOpen(false)}>×</div>
             </div>
             <div className="modal-body">
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Unit ID *</label>
-                  <input className="form-input" placeholder="e.g. CP-B04-5008" />
+                  <input className="form-input" placeholder="e.g. CP-B04-5008" value={formData.unit_id} onChange={(e) => setFormData({...formData, unit_id: e.target.value})} />
                 </div>
                 <div className="form-field">
-                  <label className="form-label">Partner Agent</label>
-                  <select className="form-input"><option>Fast Investment</option></select>
+                  <label className="form-label">Compound *</label>
+                  <select className="form-input" value={formData.compound} onChange={(e) => setFormData({...formData, compound: e.target.value})}>
+                    <option>Pyramids City</option>
+                    <option>De Joya 3</option>
+                    <option>OIA Compound</option>
+                  </select>
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Buyer Name *</label>
-                  <input className="form-input" placeholder="Full name" />
+                  <input className="form-input" placeholder="Full name" value={formData.buyer_name} onChange={(e) => setFormData({...formData, buyer_name: e.target.value})} />
                 </div>
                 <div className="form-field">
                   <label className="form-label">Buyer Phone *</label>
-                  <div style={{ display: 'flex' }}>
-                    <div style={{ padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRight: 'none', borderRadius: '6px 0 0 6px', fontSize: '13px', color: '#64748b' }}>🇪🇬 +20</div>
-                    <input className="form-input" style={{ flex: 1, borderRadius: '0 6px 6px 0' }} placeholder="10xxxxxxxx" />
-                  </div>
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-field">
-                  <label className="form-label">Compound *</label>
-                  <select className="form-input"><option>Pyramids City</option><option>De Joya 3</option><option>OIA Compound</option></select>
-                </div>
-                <div className="form-field">
-                  <label className="form-label">Property Type</label>
-                  <select className="form-input"><option>Apartment</option><option>Commercial</option><option>Villa</option></select>
+                  <input className="form-input" placeholder="010xxxxxxxx" value={formData.buyer_phone} onChange={(e) => setFormData({...formData, buyer_phone: e.target.value})} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Unit Value * (EGP)</label>
-                  <input className="form-input" type="number" placeholder="0" />
+                  <input className="form-input" type="number" placeholder="0" value={formData.unit_value} onChange={(e) => setFormData({...formData, unit_value: e.target.value})} />
                 </div>
                 <div className="form-field">
                   <label className="form-label">Amount Paid * (EGP)</label>
-                  <input className="form-input" type="number" placeholder="0" />
+                  <input className="form-input" type="number" placeholder="0" value={formData.amount_paid} onChange={(e) => setFormData({...formData, amount_paid: e.target.value})} />
                 </div>
               </div>
               <div className="form-field" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Deal Stage *</label>
-                <select className="form-input" value={modalStage} onChange={(e) => setModalStage(e.target.value)}>
+                <select className="form-input" value={formData.stage} onChange={(e) => setFormData({...formData, stage: e.target.value})}>
                   <option value="EOI">EOI</option>
                   <option value="Reservation">Reservation</option>
                   <option value="Sale Claim">Sale Claim (Contracted)</option>
                 </select>
               </div>
 
-              {modalStage === 'Sale Claim' && (
+              {formData.stage === 'Sale Claim' && (
                 <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
                   <div className="form-row">
                     <div className="form-field">
                       <label className="form-label">Contract Date *</label>
-                      <input className="form-input" type="date" />
+                      <input className="form-input" type="date" value={formData.contract_date} onChange={(e) => setFormData({...formData, contract_date: e.target.value})} />
                     </div>
                     <div className="form-field">
                       <label className="form-label">Installment Years</label>
-                      <input className="form-input" type="number" placeholder="e.g. 8" />
+                      <input className="form-input" type="number" placeholder="e.g. 8" value={formData.installment_years} onChange={(e) => setFormData({...formData, installment_years: e.target.value})} />
                     </div>
-                  </div>
-                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #cbd5e1' }}>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>Estimated Commission Preview</div>
-                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#3B6D11' }}>EGP 446,200</div>
-                    <div style={{ fontSize: '11px', color: '#185FA5', marginTop: '4px' }}>Due date: Calculated dynamically on Contract Date + 60 days</div>
                   </div>
                 </div>
               )}
             </div>
             <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
-              <button className="btn-confirm" onClick={() => setIsModalOpen(false)}>Save Deal</button>
+              <button className="btn-confirm" onClick={handleSaveDeal} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Deal to DB'}
+              </button>
             </div>
           </div>
         </div>
