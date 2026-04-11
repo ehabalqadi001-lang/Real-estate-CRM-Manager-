@@ -211,7 +211,7 @@ export default function LeadsPage() {
                       deals.map((d, i) => (
                         <tr key={i}>
                           <td>
-                            <a className="id-link" href="#">#DL-{d.deal_number}</a>
+                            <Link className="id-link" href={`/dashboard/deals/${d.id}`}>#DL-{d.deal_number}</Link>
                             <div className="agent-sub">Unit: {d.unit_id}</div>
                           </td>
                           <td>
