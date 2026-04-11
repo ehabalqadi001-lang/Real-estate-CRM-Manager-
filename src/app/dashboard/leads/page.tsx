@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase'; // استدعاء قاعدة البيانات
+import { supabase } from '@/lib/supabase';
 
-// تم عزل أكواد التصميم هنا في الأعلى
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   .topbar { background: #0f1c2e; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
@@ -37,6 +36,7 @@ const CSS_STYLES = `
   .pill-blue { background: #E6F1FB; color: #185FA5; border-color: #B5D4F4; }
   .pill-green { background: #EAF3DE; color: #3B6D11; border-color: #C5E1A5; }
   .pill-red { background: #FCEBEB; color: #A32D2D; border-color: #F8B4B4; }
+  .pill-amber { background: #FFF7ED; color: #9A3412; border-color: #FDBA74; }
   .agent-name { font-weight: 600; color: #0f172a; }
   .agent-sub { font-size: 11px; color: #64748b; }
   .id-link { color: #185FA5; text-decoration: none; font-weight: 600; }
@@ -59,8 +59,9 @@ export default function LeadsPage() {
   const [activeTab, setActiveTab] = useState('pipeline');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [deals, setDeals] = useState<any[]>([]); // حالة تخزين الصفقات الحقيقية
+  const [isLoadingDeals, setIsLoadingDeals] = useState(true);
   
-  // حالات تخزين بيانات الإدخال (Form State)
   const [formData, setFormData] = useState({
     unit_id: '',
     buyer_name: '',
@@ -74,12 +75,29 @@ export default function LeadsPage() {
     installment_years: ''
   });
 
-  const dummyDeals = [
-    { id: 16708, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'Pyramids City', dev: 'Pyramids Developments', stage: 'Sale Claim', status: 'Approved', comm: '442,700', commPct: '5%', value: '9,739,400', dp: '442,700', buyer: 'Bakr Ibrahim Ahmed', phone: '+201550809144' },
-    { id: 3700, partner: 'Fast Investment', agent: 'Ehab Alqadi', compound: 'De Joya 3 Strip Mall', dev: 'Taj Misr Developments', stage: 'Sale Claim', status: 'Approved', comm: '144,450', commPct: '4.5% Normal', value: '3,210,000', dp: '481,000', buyer: 'أ. محمود محمد عبد الرهاب', phone: '+201101160208' },
-  ];
+  // دالة جلب البيانات من قاعدة البيانات عند فتح الصفحة
+  const fetchDeals = async () => {
+    try {
+      setIsLoadingDeals(true);
+      const { data, error } = await supabase
+        .from('deals')
+        .select('*')
+        .order('created_at', { ascending: false }); // ترتيب من الأحدث للأقدم
 
-  // دالة لحفظ البيانات في Supabase
+      if (error) throw error;
+      setDeals(data || []);
+    } catch (error: any) {
+      console.error('Error fetching deals:', error.message);
+    } finally {
+      setIsLoadingDeals(false);
+    }
+  };
+
+  // تشغيل دالة الجلب مرة واحدة عند تحميل الصفحة
+  useEffect(() => {
+    fetchDeals();
+  }, []);
+
   const handleSaveDeal = async () => {
     try {
       setIsSaving(true);
@@ -98,25 +116,34 @@ export default function LeadsPage() {
             stage: formData.stage,
             contract_date: formData.contract_date || null,
             installment_years: parseInt(formData.installment_years) || null,
-            status: formData.stage === 'Sale Claim' ? 'Pending' : 'Pending'
+            status: 'Pending'
           }
         ]);
 
       if (error) throw error;
 
-      alert('تم حفظ الصفقة بنجاح في قاعدة البيانات!');
+      alert('تم حفظ الصفقة بنجاح!');
       setIsModalOpen(false);
       
-      // تفريغ الحقول بعد الحفظ
       setFormData({
         unit_id: '', buyer_name: '', buyer_phone: '', compound: 'Pyramids City', property_type: 'Apartment', unit_value: '', amount_paid: '', stage: 'EOI', contract_date: '', installment_years: ''
       });
+
+      // تحديث الجدول فوراً بالبيانات الجديدة
+      fetchDeals();
 
     } catch (error: any) {
       alert('حدث خطأ أثناء الحفظ: ' + error.message);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // دالة لاختيار لون الـ Status
+  const getStatusPillClass = (status: string) => {
+    if (status === 'Approved') return 'pill pill-green';
+    if (status === 'Rejected') return 'pill pill-red';
+    return 'pill pill-amber'; // Pending
   };
 
   return (
@@ -172,38 +199,49 @@ export default function LeadsPage() {
                 <table>
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Partner & Agent</th>
-                      <th>Compound</th>
+                      <th>Deal ID</th>
+                      <th>Compound & Type</th>
                       <th>Sale Stage</th>
                       <th>Property Value</th>
-                      <th>Buyer</th>
+                      <th>Downpayment</th>
+                      <th>Buyer Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dummyDeals.map((d, i) => (
-                      <tr key={i}>
-                        <td><a className="id-link" href="#">#{d.id}</a></td>
-                        <td>
-                          <div className="agent-name">{d.partner}</div>
-                          <div className="agent-sub">{d.agent}</div>
-                        </td>
-                        <td>
-                          <div className="agent-name">{d.compound}</div>
-                          <div className="agent-sub">{d.dev}</div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                            <span className={`pill ${d.status === 'Approved' ? 'pill-green' : 'pill-red'}`}>{d.stage}</span>
-                          </div>
-                        </td>
-                        <td style={{ fontWeight: '600' }}>{d.value}</td>
-                        <td>
-                          <div className="agent-name">{d.buyer}</div>
-                          <div className="agent-sub">{d.phone}</div>
-                        </td>
-                      </tr>
-                    ))}
+                    {isLoadingDeals ? (
+                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>Loading Deals...</td></tr>
+                    ) : deals.length === 0 ? (
+                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>No deals found. Add your first deal!</td></tr>
+                    ) : (
+                      deals.map((d, i) => (
+                        <tr key={i}>
+                          <td>
+                            <a className="id-link" href="#">#DL-{d.deal_number}</a>
+                            <div className="agent-sub">Unit: {d.unit_id}</div>
+                          </td>
+                          <td>
+                            <div className="agent-name">{d.compound}</div>
+                            <div className="agent-sub">{d.property_type}</div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                              <span className={getStatusPillClass(d.status)}>{d.stage}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{d.status}</span>
+                            </div>
+                          </td>
+                          <td style={{ fontWeight: '600' }}>
+                            EGP {Number(d.unit_value).toLocaleString()}
+                          </td>
+                          <td>
+                            EGP {Number(d.amount_paid).toLocaleString()}
+                          </td>
+                          <td>
+                            <div className="agent-name">{d.buyer_name}</div>
+                            <div className="agent-sub" style={{ direction: 'ltr', textAlign: 'left' }}>{d.buyer_phone}</div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -212,7 +250,6 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      {/* Modal - Add Deal to Supabase */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
@@ -232,6 +269,7 @@ export default function LeadsPage() {
                     <option>Pyramids City</option>
                     <option>De Joya 3</option>
                     <option>OIA Compound</option>
+                    <option>Ninety Avenue</option>
                   </select>
                 </div>
               </div>
