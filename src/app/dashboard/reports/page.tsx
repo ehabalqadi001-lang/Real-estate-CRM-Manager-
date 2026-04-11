@@ -5,205 +5,221 @@ import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; fontFamily: system-ui, sans-serif; }
-  .dashboard-container { display: flex; background: #f0f2f5; min-height: 100vh; }
-  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; }
+  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; }
+  
+  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;}
   .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; text-decoration: none; transition: 0.2s; }
   .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
   .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
-  .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #fff; border-radius: 12px 0 0 0; border: 1px solid #e2e8f0; border-right: none; }
   
-  .header { padding: 20px 30px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: 12px 0 0 0; }
-  .header-title { font-size: 20px; font-weight: 600; color: #0f172a; }
+  .main-content { margin-left: 64px; flex: 1; display: flex; flex-direction: column; }
+  .header { padding: 20px 30px; background: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
+  .header-title { font-size: 22px; font-weight: 700; color: #0f172a; }
   
-  .reports-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 30px; }
-  .chart-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  .chart-title { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 20px; }
+  .content-body { padding: 30px; max-width: 1200px; width: 100%; margin: 0 auto; }
   
-  /* Bar Chart CSS */
-  .bar-chart-container { display: flex; align-items: flex-end; gap: 12px; height: 200px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; margin-top: 20px; }
-  .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
-  .bar { width: 100%; background: #185FA5; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.5s ease; position: relative; }
-  .bar:hover { background: #0f1c2e; }
-  .bar-tooltip { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; }
-  .bar:hover .bar-tooltip { opacity: 1; }
-  .bar-label { font-size: 11px; color: #64748b; font-weight: 500; }
-
-  /* Horizontal Bar Chart CSS */
-  .h-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-  .h-bar-label { width: 120px; font-size: 12px; color: #0f172a; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .h-bar-track { flex: 1; height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
-  .h-bar-fill { height: 100%; background: #3B6D11; border-radius: 6px; }
-  .h-bar-value { width: 80px; text-align: right; font-size: 12px; font-weight: 600; color: #0f172a; }
-
-  .summary-metrics { display: flex; gap: 20px; margin-bottom: 30px; }
-  .metric-box { flex: 1; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
-  .metric-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
-  .metric-val { font-size: 24px; font-weight: bold; color: #185FA5; }
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+  .kpi-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .kpi-title { font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .kpi-sub { font-size: 12px; font-weight: 500; }
+  .text-green { color: #3B6D11; }
+  .text-blue { color: #185FA5; }
+  
+  /* Charts Area */
+  .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+  @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .chart-header { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+  .chart-header::before { content: ''; display: block; width: 4px; height: 16px; background: #185FA5; border-radius: 4px; }
+  
+  /* CSS Bar Chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 250px; padding-top: 20px; border-bottom: 1px solid #e2e8f0; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .bar-track { width: 100%; max-width: 40px; background: #f1f5f9; border-radius: 4px 4px 0 0; display: flex; align-items: flex-end; height: 100%; position: relative; }
+  .bar-fill { width: 100%; background: #185FA5; border-radius: 4px 4px 0 0; transition: height 1s ease-out; position: relative; }
+  .bar-fill:hover { background: #0f1c2e; }
+  .bar-tooltip { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: #0f1c2e; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; opacity: 0; transition: 0.2s; pointer-events: none; }
+  .bar-fill:hover .bar-tooltip { opacity: 1; }
+  .bar-label { font-size: 11px; color: #64748b; font-weight: 600; }
+  
+  /* Funnel Chart */
+  .funnel-stage { margin-bottom: 15px; }
+  .funnel-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; }
+  .funnel-track { height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+  .funnel-fill { height: 100%; background: #185FA5; border-radius: 6px; }
 `;
 
 export default function ReportsPage() {
-  const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    expectedComm: 0,
+    collectedComm: 0,
+    activeClients: 0,
+    dealsCount: 0
+  });
+  const [pipeline, setPipeline] = useState({ eoi: 0, res: 0, contract: 0, total: 0 });
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
 
   useEffect(() => {
-    async function fetchDeals() {
-      const { data } = await supabase.from('deals').select('*');
-      setDeals(data || []);
+    async function fetchAnalytics() {
+      // 1. Fetch Deals
+      const { data: deals } = await supabase.from('deals').select('*');
+      // 2. Fetch Clients
+      const { data: clients } = await supabase.from('clients').select('id');
+      
+      if (deals) {
+        let sales = 0;
+        let expComm = 0;
+        let colComm = 0;
+        let stages = { eoi: 0, res: 0, contract: 0, total: deals.length };
+        
+        // Data for monthly chart
+        const monthsMap: Record<string, number> = {};
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        deals.forEach(deal => {
+          const val = Number(deal.unit_value || 0);
+          sales += val;
+          const comm = val * 0.05; // 5% comm
+          expComm += comm;
+          
+          if (deal.finance_status === 'Commission Received' || deal.finance_status === 'Transferred to Agent') {
+            colComm += comm;
+          }
+
+          if (deal.stage === 'EOI') stages.eoi++;
+          else if (deal.stage === 'Reservation') stages.res++;
+          else if (deal.stage === 'Contracted') stages.contract++;
+
+          // Group by month
+          const date = new Date(deal.created_at);
+          const monthKey = monthNames[date.getMonth()];
+          monthsMap[monthKey] = (monthsMap[monthKey] || 0) + val;
+        });
+
+        // Format chart data (last 6 months logic simplified for UI)
+        const chartData = monthNames.map(m => ({
+          name: m,
+          value: monthsMap[m] || 0
+        })).filter(m => m.value > 0); // Only show months with sales
+
+        // If no data, show placeholder
+        if (chartData.length === 0) {
+          chartData.push({ name: 'This Month', value: 0 });
+        }
+
+        const maxVal = Math.max(...chartData.map(d => d.value), 1);
+        const formattedChartData = chartData.map(d => ({
+          ...d,
+          height: `${(d.value / maxVal) * 100}%`,
+          displayValue: d.value > 1000000 ? `${(d.value / 1000000).toFixed(1)}M` : d.value
+        }));
+
+        setStats({
+          totalSales: sales,
+          expectedComm: expComm,
+          collectedComm: colComm,
+          activeClients: clients?.length || 0,
+          dealsCount: deals.length
+        });
+        setPipeline(stages);
+        setMonthlyData(formattedChartData);
+      }
       setLoading(false);
     }
-    fetchDeals();
+    fetchAnalytics();
   }, []);
 
-  // حسابات التقارير
-  const totalSales = deals.reduce((acc, curr) => acc + Number(curr.unit_value || 0), 0);
-  const totalDeals = deals.length;
-
-  // 1. تجميع المبيعات حسب المطور (أو الكومباوند)
-  const salesByCompound = deals.reduce((acc: any, curr) => {
-    const comp = curr.compound || 'Unknown';
-    if (!acc[comp]) acc[comp] = 0;
-    acc[comp] += Number(curr.unit_value || 0);
-    return acc;
-  }, {});
-
-  // ترتيب أعلى الكومباوندات مبيعاً
-  const topCompounds = Object.keys(salesByCompound)
-    .map(key => ({ name: key, value: salesByCompound[key] }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
-  
-  const maxCompoundValue = topCompounds.length > 0 ? topCompounds[0].value : 1;
-
-  // 2. محاكاة مبيعات الأشهر (لأن البيانات الحالية قد تكون كلها في شهر واحد)
-  // لتوضيح شكل الرسم البياني، سنفترض بعض الأشهر إذا كانت البيانات قليلة
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  const monthlyData = months.map(m => {
-      // في الحقيقة، هنا يجب استخراج الشهر من created_at، 
-      // لكننا سنضع إجمالي المبيعات في الشهر الحالي (أبريل/مايو) للتوضيح
-      if (m === 'Apr' || m === 'May') return { month: m, value: totalSales / 2 };
-      return { month: m, value: 0 };
-  });
-  const maxMonthValue = Math.max(...monthlyData.map(d => d.value), 1000000);
+  if (loading) return <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'system-ui' }}>Compiling Analytics...</div>;
 
   return (
     <div className="dashboard-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
       
-      {/* Sidebar */}
+      {/* Sidebar - Added Reports Icon */}
       <div className="sidebar">
-  {/* Dashboard */}
-  <Link href="/dashboard" className="nav-item" title="Dashboard">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-  </Link>
-  
-  {/* Clients Directory */}
-  <Link href="/dashboard/clients" className="nav-item" title="Clients">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-  </Link>
-  
-  {/* Sales Pipeline (Leads/Deals) */}
-  <Link href="/dashboard/leads" className="nav-item" title="Pipeline">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-  </Link>
-  
-  {/* Commissions */}
-  <Link href="/dashboard/commissions" className="nav-item" title="Commissions">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  </Link>
-  
-  {/* Developers */}
-  <Link href="/dashboard/developers" className="nav-item" title="Developers">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-  </Link>
-
-  {/* خط فاصل */}
-  <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-  
-  {/* Admin Approvals */}
-  <Link href="/dashboard/admin" className="nav-item" title="Admin Approvals">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-  </Link>
-  
-  {/* Settings */}
-  <Link href="/dashboard/settings" className="nav-item" title="Settings">
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </Link>
-</div>
+        <Link href="/dashboard" className="nav-item" title="Dashboard"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
+        <Link href="/dashboard/clients" className="nav-item" title="Clients"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
+        <Link href="/dashboard/leads" className="nav-item" title="Pipeline"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
+        <Link href="/dashboard/commissions" className="nav-item" title="Commissions"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></Link>
+        <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
+        {/* Reports Icon */}
+        <Link href="/dashboard/reports" className="nav-item active" title="Reports & Analytics"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></Link>
+        <Link href="/dashboard/developers" className="nav-item" title="Developers"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></Link>
+      </div>
 
       <div className="main-content">
         <div className="header">
-          <div className="header-title">Analytics & Reports</div>
-          <div>
-             <button style={{ padding: '8px 16px', background: '#0f1c2e', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>
-               Export PDF
-             </button>
-          </div>
+          <div className="header-title">Performance Analytics</div>
         </div>
 
-        <div style={{ padding: '30px' }}>
-          <div className="summary-metrics">
-            <div className="metric-box">
-              <div className="metric-label">Total Pipeline Volume</div>
-              <div className="metric-val">EGP {(totalSales / 1000000).toFixed(1)}M</div>
+        <div className="content-body">
+          {/* Executive KPIs */}
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-title">Total Sales Volume</div>
+              <div className="kpi-value text-blue">EGP {stats.totalSales.toLocaleString()}</div>
+              <div className="kpi-sub text-blue">Across {stats.dealsCount} registered deals</div>
             </div>
-            <div className="metric-box">
-              <div className="metric-label">Total Deals</div>
-              <div className="metric-val">{totalDeals} Deals</div>
+            <div className="kpi-card">
+              <div className="kpi-title">Total Commission Pipeline</div>
+              <div className="kpi-value">EGP {stats.expectedComm.toLocaleString()}</div>
+              <div className="kpi-sub text-green">Collected: EGP {stats.collectedComm.toLocaleString()}</div>
             </div>
-            <div className="metric-box">
-              <div className="metric-label">Avg. Deal Size</div>
-              <div className="metric-val">EGP {totalDeals > 0 ? ((totalSales / totalDeals) / 1000000).toFixed(1) : 0}M</div>
+            <div className="kpi-card">
+              <div className="kpi-title">Client Database</div>
+              <div className="kpi-value">{stats.activeClients}</div>
+              <div className="kpi-sub" style={{color: '#64748b'}}>Active investor profiles</div>
             </div>
           </div>
 
-          {loading ? (
-             <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Generating reports...</div>
-          ) : (
-            <div className="reports-grid">
-              
-              {/* Sales Trend Bar Chart */}
-              <div className="chart-card">
-                <div className="chart-title">Sales Trend (2026)</div>
-                <div className="bar-chart-container">
-                  {monthlyData.map((d, i) => {
-                    const heightPct = (d.value / maxMonthValue) * 100;
-                    return (
-                      <div key={i} className="bar-wrapper">
-                        <div className="bar" style={{ height: `${Math.max(heightPct, 2)}%` }}>
-                          <div className="bar-tooltip">EGP {(d.value / 1000000).toFixed(1)}M</div>
-                        </div>
-                        <div className="bar-label">{d.month}</div>
+          <div className="charts-grid">
+            {/* Sales Bar Chart */}
+            <div className="chart-card">
+              <div className="chart-header">Sales Performance by Month</div>
+              <div className="bar-chart">
+                {monthlyData.map((d, i) => (
+                  <div className="bar-col" key={i}>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ height: d.height }}>
+                        <div className="bar-tooltip">EGP {d.value.toLocaleString()}</div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                    <div className="bar-label">{d.name}</div>
+                  </div>
+                ))}
               </div>
-
-              {/* Top Compounds Horizontal Bar Chart */}
-              <div className="chart-card">
-                <div className="chart-title">Top Performing Compounds</div>
-                <div style={{ marginTop: '20px' }}>
-                  {topCompounds.length === 0 ? (
-                    <div style={{ fontSize: '13px', color: '#64748b' }}>No data available yet.</div>
-                  ) : (
-                    topCompounds.map((comp, i) => {
-                      const widthPct = (comp.value / maxCompoundValue) * 100;
-                      return (
-                        <div key={i} className="h-bar-row">
-                          <div className="h-bar-label" title={comp.name}>{comp.name}</div>
-                          <div className="h-bar-track">
-                            <div className="h-bar-fill" style={{ width: `${widthPct}%` }}></div>
-                          </div>
-                          <div className="h-bar-value">EGP {(comp.value / 1000000).toFixed(1)}M</div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
             </div>
-          )}
+
+            {/* Pipeline Funnel */}
+            <div className="chart-card">
+              <div className="chart-header">Conversion Funnel</div>
+              <div style={{ marginTop: '30px' }}>
+                <div className="funnel-stage">
+                  <div className="funnel-label"><span>EOI (Expression of Interest)</span> <span>{pipeline.eoi} Deals</span></div>
+                  <div className="funnel-track">
+                    <div className="funnel-fill" style={{ width: pipeline.total ? `${(pipeline.eoi / pipeline.total) * 100}%` : '0%', background: '#94a3b8' }}></div>
+                  </div>
+                </div>
+                <div className="funnel-stage">
+                  <div className="funnel-label"><span>Reservation</span> <span>{pipeline.res} Deals</span></div>
+                  <div className="funnel-track">
+                    <div className="funnel-fill" style={{ width: pipeline.total ? `${(pipeline.res / pipeline.total) * 100}%` : '0%', background: '#BA7517' }}></div>
+                  </div>
+                </div>
+                <div className="funnel-stage">
+                  <div className="funnel-label"><span>Contracted (Final)</span> <span>{pipeline.contract} Deals</span></div>
+                  <div className="funnel-track">
+                    <div className="funnel-fill" style={{ width: pipeline.total ? `${(pipeline.contract / pipeline.total) * 100}%` : '0%', background: '#3B6D11' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
