@@ -128,7 +128,7 @@ export default function InventoryPage() {
       <div className="main-content">
         <div className="header">
           <div className="header-title">
-            <span>EHAB & ESLAM TEAM</span>
+            <span>FAST INVESTMENT</span>
             <span style={{color: '#64748b', fontSize: '18px', fontWeight: '500'}}>| Inventory Management</span>
           </div>
           <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
