@@ -1,10 +1,29 @@
 import './globals.css'
-import type { Metadata } from 'next'
-import NotificationListener from "@/components/NotificationListener";
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: "#0f1c2e",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1, // لمنع زووم المتصفح المزعج على الموبايل
+};
+
 export const metadata: Metadata = {
-  title: 'FAST INVESTMENT | CRM',
-  description: 'Enterprise Real Estate CRM System',
-}
+  title: "Fast Investment CRM",
+  description: "Enterprise Real Estate CRM System",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Fast CRM",
+  },
+  formatDetection: {
+    telephone: false, // لمنع المتصفح من تحويل الأرقام العادية لروابط اتصال بالخطأ
+  },
+};
+
+// ... باقي كود الـ RootLayout كما هو ...
+import NotificationListener from "@/components/NotificationListener";
 
 export default function RootLayout({
   children,
