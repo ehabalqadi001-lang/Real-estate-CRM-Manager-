@@ -172,7 +172,53 @@ export default function InventoryPage() {
               <div style={{gridColumn:'1 / -1'}}>
                 <label style={{fontSize:'13px', fontWeight:700}}>المشروع / الكومباوند *</label>
                 <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.compound} onChange={e => setFormData({...formData, compound: e.target.value})} />
+              </div><form onSubmit={handleAddUnit} style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+              
+              <div style={{gridColumn:'1 / -1'}}>
+                <label style={{fontSize:'13px', fontWeight:700}}>المشروع / الكومباوند *</label>
+                <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.compound} onChange={e => setFormData({...formData, compound: e.target.value})} />
               </div>
+
+              {/* 🔥 الخانة المفقودة التي أضفناها هنا 🔥 */}
+              <div style={{gridColumn:'1 / -1'}}>
+                <label style={{fontSize:'13px', fontWeight:700}}>المطور العقاري *</label>
+                <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} placeholder="مثال: إعمار، بالم هيلز..." />
+              </div>
+
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>رقم الوحدة *</label>
+                <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.unit_number} onChange={e => setFormData({...formData, unit_number: e.target.value})} />
+              </div>
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>الطابق *</label>
+                <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} placeholder="الأرضي / الثالث..." value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
+              </div>
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>المساحة (م²) *</label>
+                <input type="number" required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.area} onChange={e => setFormData({...formData, area: Number(e.target.value)})} />
+              </div>
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>عدد الغرف</label>
+                <input type="number" style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.rooms} onChange={e => setFormData({...formData, rooms: Number(e.target.value)})} />
+              </div>
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>حالة التشطيب</label>
+                <select style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.finishing_status} onChange={e => setFormData({...formData, finishing_status: e.target.value as any})}>
+                  <option value="بدون تشطيب">بدون تشطيب (Core & Shell)</option>
+                  <option value="نصف تشطيب">نصف تشطيب</option>
+                  <option value="تشطيب كامل">تشطيب كامل</option>
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:'13px', fontWeight:700}}>السعر المطلوب (EGP) *</label>
+                <input type="number" required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} />
+              </div>
+              
+              <div style={{gridColumn:'1 / -1', marginTop:'10px'}}>
+                <button type="submit" style={{width:'100%', background:'#185FA5', color:'#fff', padding:'14px', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:700}}>حفظ الوحدة في المخزون</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{width:'100%', background:'none', border:'none', marginTop:'10px', color:'#64748b', cursor:'pointer'}}>إلغاء</button>
+              </div>
+            </form>
               <div>
                 <label style={{fontSize:'13px', fontWeight:700}}>رقم الوحدة *</label>
                 <input required style={{width:'100%', padding:'10px', marginTop:'5px', borderRadius:'8px', border:'1px solid #cbd5e1'}} value={formData.unit_number} onChange={e => setFormData({...formData, unit_number: e.target.value})} />
