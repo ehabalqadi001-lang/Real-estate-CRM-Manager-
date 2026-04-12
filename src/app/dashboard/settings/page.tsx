@@ -75,7 +75,11 @@ export default function SettingsPage() {
 
   return (
     <div className="dashboard-container">
-      <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
+      {/* ❌ الشكل القديم (يزعج برامج الفحص الأمني) */}
+<style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
+
+{/* ✅ الشكل الحديث والآمن تماماً في React */}
+<style>{CSS_STYLES}</style>
       
       {/* Sidebar المحدث بوضع زر الخروج في الأسفل */}
       <div className="sidebar">

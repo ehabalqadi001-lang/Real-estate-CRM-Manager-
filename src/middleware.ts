@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -25,19 +25,23 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (user) {
-    // جلب دور المستخدم من قاعدة البيانات
-    const { data: agent } = await supabase
-      .from('agents')
-      .select('user_roles(role_name)')
-      .eq('id', user.id)
-      .single()
+    // 🛡️ التعديل الجديد: التحقق من الـ MFA (AAL2)
+    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const currentLevel = data?.currentLevel;
+    const nextLevel = data?.nextLevel;
+    
+    // إذا كان المستخدم يملك 2FA (أو الإدارة تفرضه) لكنه لم يقم بالمصادقة بعد، نوجهه لصفحة الـ 2FA
+    if (nextLevel === 'aal2' && currentLevel !== 'aal2' && !pathname.startsWith('/mfa')) {
+      return NextResponse.redirect(new URL('/mfa', request.url))
+    }
 
+    // جلب دور المستخدم من قاعدة البيانات
+    const { data: agent } = await supabase.from('agents').select('user_roles(role_name)').eq('id', user.id).single()
     const userRole = agent?.user_roles?.[0]?.role_name;
 
-    // 🔥 الحماية الصارمة لمسارات الإدارة العليا
+    // الحماية الصارمة لمسارات الإدارة العليا
     if (pathname.startsWith('/admin')) {
       if (userRole !== 'super_admin' && userRole !== 'company_admin') {
-        // إذا كان مندوباً أو مديراً فرعياً، يتم طرده للوحة تحكم المندوبين
         return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url))
       }
     }
