@@ -67,7 +67,7 @@ export default function ReportsPage() {
   const [rules, setRules] = useState<any[]>([]);
   const [developers, setDevelopers] = useState<any[]>([]);
 
-  // الأهداف الافتراضية للمبيعات (Targets)
+  // الأهداف الافتراضية للمبيعات (Targets) - يمكن ربطها بجدول الإعدادات لاحقاً
   const TARGETS = { Month: 50000000, Quarter: 150000000, Year: 600000000 };
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function ReportsPage() {
   const progressPercent = Math.min((totalSales / currentTarget) * 100, 100);
   const progressColor = progressPercent >= 100 ? '#10b981' : progressPercent >= 50 ? '#f59e0b' : '#ef4444';
 
-  // 3. قمع المبيعات (Sales Funnel) بناءً على المراحل المصرية الجديدة
+  // 3. قمع المبيعات (Sales Funnel) بناءً على المراحل المصرية
   const funnelData = {
     total_leads: filteredDeals.length,
     eoi: filteredDeals.filter(d => ['EOI', 'Reservation', 'Contracted', 'Registration', 'Handover'].includes(d.stage)).length,
@@ -138,14 +138,14 @@ export default function ReportsPage() {
     return acc;
   }, {} as Record<string, any>);
 
-  const sortedDevs = Object.entries(devStats).sort((a, b) => b[1].volume - a[1].volume);
+  const sortedDevs = Object.entries(devStats).sort((a: any, b: any) => b[1].volume - a[1].volume);
 
   // تصدير Excel
   const exportToExcel = () => {
     const BOM = "\uFEFF";
     const headers = ['المطور العقاري', 'عدد الصفقات', 'حجم المبيعات (جنيه)', 'العمولة المتوقعة (جنيه)'];
-    const rows = sortedDevs.map(([dev, data]) => [dev, data.count, data.volume, data.est_commission]);
-    const csvContent = BOM + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const rows = sortedDevs.map((item: any) => [item[0], item[1].count, item[1].volume, item[1].est_commission]);
+    const csvContent = BOM + [headers.join(','), ...rows.map((e: any) => e.join(','))].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
