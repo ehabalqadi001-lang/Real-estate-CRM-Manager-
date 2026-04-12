@@ -1,172 +1,140 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import React, { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { z } from 'zod';
+
+// 🛡️ جدار حماية Zod للتحقق من صحة المدخلات
+const LoginSchema = z.object({
+  email: z.string().email("صيغة البريد الإلكتروني غير صحيحة"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+});
 
 const CSS_STYLES = `
-  * { box-sizing: border-box; margin: 0; padding: 0; fontFamily: system-ui, sans-serif; }
-  body { background: #f8fafc; }
-  .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .login-card { background: #fff; width: 100%; max-width: 450px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; }
-  .header { background: #0f1c2e; padding: 30px; text-align: center; color: #fff; }
-  .header-title { font-size: 24px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
-  .header-sub { font-size: 14px; color: #94a3b8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
+  .login-container { display: flex; min-height: 100vh; background: #f8fafc; direction: rtl; align-items: center; justify-content: center;}
   
-  .form-body { padding: 30px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
-  .form-label { font-size: 13px; font-weight: 600; color: #475569; }
-  .form-input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: #f8fafc; }
-  .form-input:focus { border-color: #185FA5; background: #fff; }
+  .login-card { background: #fff; width: 100%; max-width: 420px; border-radius: 16px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;}
   
-  .submit-btn { width: 100%; padding: 14px; background: #185FA5; color: #fff; font-size: 15px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-  .submit-btn:hover { background: #124b82; }
-  .submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+  .logo-section { text-align: center; margin-bottom: 30px; }
+  .logo-title { font-size: 24px; font-weight: 800; color: #0f1c2e; letter-spacing: -0.5px;}
+  .logo-subtitle { font-size: 13px; color: #64748b; font-weight: 600; margin-top: 4px; letter-spacing: 2px;}
+
+  .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+  .form-label { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px; }
+  .form-input { padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: #f8fafc; color: #0f172a;}
+  .form-input:focus { border-color: #185FA5; background: #fff; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
   
-  .alert { padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; font-weight: 500; text-align: center; }
-  .alert-error { background: #FCEBEB; color: #A32D2D; border: 1px solid #F8B4B4; }
-  .alert-success { background: #EAF3DE; color: #3B6D11; border: 1px solid #C5E1A5; }
+  .btn-submit { width: 100%; padding: 14px; background: #0f1c2e; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;}
+  .btn-submit:hover { background: #185FA5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(24,95,165,0.2);}
+  .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none;}
+
+  .error-message { background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 8px;}
 `;
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [identifier, setIdentifier] = useState(''); // Email OR Phone
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // الدخول التلقائي في حال كان المستخدم مسجلاً وموافقاً عليه
-  useEffect(() => {
-    async function checkExistingSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: profile } = await supabase.from('user_profiles').select('status').eq('id', session.user.id).single();
-        if (profile?.status === 'approved' || !profile) {
-          router.push('/dashboard');
-        } else {
-          await supabase.auth.signOut();
-          setCheckingSession(false);
-        }
-      } else {
-        setCheckingSession(false);
-      }
-    }
-    checkExistingSession();
-  }, [router]);
+  // استخدام متصل المتصفح الآمن الذي أنشأناه
+  const supabase = createClient();
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: '', text: '' });
+    setErrorMsg(null);
 
-    try {
-      let targetEmail = identifier.trim();
-
-      // 1. الذكاء البرمجي: إذا كان المدخل لا يحتوي على '@' فهذا يعني أنه رقم هاتف
-      // نبحث عن الإيميل المرتبط برقم الهاتف هذا في قاعدة البيانات
-      if (!targetEmail.includes('@')) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('email')
-          .eq('phone', targetEmail)
-          .single();
-
-        if (profileError || !profileData) {
-           throw new Error("لا يوجد حساب مسجل بهذا الرقم أو البريد الإلكتروني.");
-        }
-        // إذا وجدنا الرقم، نأخذ الإيميل المرتبط به لنقوم بتسجيل الدخول
-        targetEmail = profileData.email;
-      }
-
-      // 2. تسجيل الدخول باستخدام الإيميل (سواء الذي كتبه أو الذي جلبناه برقم الهاتف)
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
-        email: targetEmail, 
-        password 
-      });
-
-      if (authError) throw new Error("بيانات الدخول غير صحيحة.");
-
-      const userId = authData.user?.id;
-      
-      // 3. التحقق من حالة الموافقة (Admin Approval)
-      if (userId) {
-        const { data: profile } = await supabase.from('user_profiles').select('status').eq('id', userId).single();
-        if (profile) {
-          if (profile.status === 'pending') {
-            await supabase.auth.signOut();
-            throw new Error("حسابك لا يزال قيد المراجعة من الإدارة. يرجى الانتظار لحين التفعيل.");
-          } else if (profile.status === 'rejected') {
-            await supabase.auth.signOut();
-            throw new Error("نأسف، تم رفض طلب التسجيل الخاص بك من قبل الإدارة.");
-          }
-        }
-      }
-
-      setMessage({ type: 'success', text: 'تم تسجيل الدخول بنجاح! جاري التوجيه...' });
-      setTimeout(() => router.push('/dashboard'), 1000);
-
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
-    } finally {
+    // 1. التحقق من صحة المدخلات باستخدام Zod قبل إرهاق السيرفر
+    const validationResult = LoginSchema.safeParse({ email, password });
+    
+    if (!validationResult.success) {
+      setErrorMsg(validationResult.error?.issues[0]?.message || "بيانات غير صالحة");
       setLoading(false);
+      return;
+    }
+
+    // 2. إرسال طلب تسجيل الدخول إلى Supabase
+    const { error } = await supabase.auth.signInWithPassword({
+      email: validationResult.data.email,
+      password: validationResult.data.password,
+    });
+
+    if (error) {
+      // ترجمة رسائل الخطأ الشائعة للعربية
+      if (error.message.includes("Invalid login credentials")) {
+        setErrorMsg("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+      } else {
+        setErrorMsg("حدث خطأ في النظام. الرجاء المحاولة لاحقاً.");
+      }
+      setLoading(false);
+    } else {
+      // 3. 🟢 تسجيل الدخول ناجح! توجيه المستخدم للوحة التحكم
+      // نستخدم window.location لعمل تحديث كامل ليتمكن الـ Middleware من قراءة الكوكيز الجديدة
+      window.location.href = '/dashboard';
     }
   };
-
-  if (checkingSession) return <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center', background:'#f8fafc', color:'#64748b'}}>Loading securely...</div>;
 
   return (
     <div className="login-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
+      
       <div className="login-card">
-        <div className="header">
-          <div className="header-title">FAST INVESTMENT</div>
-          <div className="header-sub">Partner & Broker Portal</div>
+        <div className="logo-section">
+          <div className="logo-title">EHAB & ESLAM TEAM</div>
+          <div className="logo-subtitle">ENTERPRISE CRM SYSTEM</div>
         </div>
-        
-        <div className="form-body">
-          {message.text && (
-            <div className={`alert ${message.type === 'error' ? 'alert-error' : 'alert-success'}`}>
-              {message.text}
-            </div>
-          )}
 
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label">Email or Phone Number</label>
-              <input 
-                required 
-                type="text" 
-                className="form-input" 
-                placeholder="e.g. 010xxxxxxxx or name@domain.com" 
-                value={identifier} 
-                onChange={e => setIdentifier(e.target.value)} 
-              />
-            </div>
-            
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <label className="form-label">Password</label>
-                <Link href="#" style={{ fontSize: '12px', color: '#185FA5', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
-              </div>
-              <input 
-                required 
-                type="password" 
-                className="form-input" 
-                placeholder="Enter your password" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-              />
-            </div>
-
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? 'Authenticating...' : 'Sign In'}
-            </button>
-          </form>
-          
-          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '13px', color: '#64748b' }}>
-            Don't have an account? <Link href="/register" style={{ color: '#185FA5', fontWeight: '600', textDecoration: 'none' }}>Apply now</Link>
+        {errorMsg && (
+          <div className="error-message">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {errorMsg}
           </div>
+        )}
+
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label className="form-label">البريد الإلكتروني المؤسسي</label>
+            <input 
+              type="email" 
+              className="form-input" 
+              placeholder="name@company.com" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              dir="ltr"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>كلمة المرور</span>
+            </label>
+            <input 
+              type="password" 
+              className="form-input" 
+              placeholder="••••••••" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              dir="ltr"
+            />
+          </div>
+
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? (
+              'جاري التحقق من الهوية...'
+            ) : (
+              <>
+                تسجيل الدخول الدخول
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+              </>
+            )}
+          </button>
+        </form>
+        
+        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '12px', color: '#94a3b8' }}>
+          للحصول على صلاحيات الدخول، يرجى مراجعة إدارة النظام.
         </div>
       </div>
     </div>
