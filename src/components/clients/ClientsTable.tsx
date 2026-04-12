@@ -4,20 +4,32 @@ import { useState } from 'react'
 
 interface Client {
   id: string
-  name: string
-  phone: string
-  email: string
-  status: string
+  name: string | null
+  phone: string | null
+  status: string | null
   created_at: string
 }
 
 export default function ClientsTable({ initialData }: { initialData: Client[] }) {
   const [searchTerm, setSearchTerm] = useState('')
 
-  const filteredClients = initialData.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone.includes(searchTerm)
-  )
+  // حماية الكود من الـ null (Fallback to empty string)
+  const safeData = Array.isArray(initialData) ? initialData : []
+
+  const filteredClients = safeData.filter(client => {
+    const safeName = client?.name || ''
+    const safePhone = client?.phone || ''
+    return safeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+           safePhone.includes(searchTerm)
+  })
+
+  if (safeData.length === 0) {
+    return (
+      <div className="p-10 text-center text-slate-500 font-medium">
+        لا توجد بيانات عملاء حالياً. أضف أول عميل الآن!
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">
@@ -42,8 +54,8 @@ export default function ClientsTable({ initialData }: { initialData: Client[] })
           <tbody className="divide-y divide-slate-100">
             {filteredClients.map((client) => (
               <tr key={client.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{client.name}</td>
-                <td className="px-6 py-4 text-sm text-slate-600">{client.phone}</td>
+                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{client.name || 'غير محدد'}</td>
+                <td className="px-6 py-4 text-sm text-slate-600">{client.phone || 'غير محدد'}</td>
                 <td className="px-6 py-4 text-sm">
                   <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
                     client.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
