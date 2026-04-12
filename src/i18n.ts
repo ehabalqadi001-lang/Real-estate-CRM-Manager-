@@ -1,19 +1,14 @@
-import { notFound } from 'next/navigation';
 import { getRequestConfig } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 
-// اللغات المدعومة في النظام
-const locales = ['ar', 'en', 'fr'];
+const locales = ['en', 'ar'];
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  // 1. في الإصدارات الحديثة نستخدم requestLocale كـ Promise
-  const locale = await requestLocale;
-
-  // 2. التحقق من صحة اللغة
+export default getRequestConfig(async ({ locale }) => {
+  // التأكد أن اللغة المدخلة من ضمن اللغات المسموحة
   if (!locale || !locales.includes(locale)) notFound();
 
   return {
     locale,
-    // 3. المسار الصحيح المصلّح (بنقطة واحدة)
-    messages: (await import(`./messages/${locale}.json`)).default
+    messages: (await import(`../messages/${locale}.json`)).default
   };
 });
