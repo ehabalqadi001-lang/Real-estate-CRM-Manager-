@@ -1,11 +1,6 @@
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 
-export const metadata = {
-  title: 'Fast Investment CRM',
-  description: 'Enterprise Real Estate Management System',
-};
-
 export default function RootLayout({
   children,
 }: {
@@ -13,16 +8,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className="bg-slate-50 min-h-screen">
-        <div className="flex">
-          {/* الـ Sidebar الثابت */}
-          <aside className="w-64 fixed inset-y-0 right-0 z-50">
+      <body className="bg-slate-50 min-h-screen overflow-x-hidden">
+        <div className="flex relative">
+          {/* الـ Sidebar الثابت الوحيد في النظام */}
+          <aside className="w-64 fixed inset-y-0 right-0 z-50 bg-slate-900 shadow-xl border-l border-slate-800">
             <Sidebar />
           </aside>
 
-          {/* محتوى الصفحة المتغير - مع إزاحة (Margin) لعدم التداخل مع الـ Sidebar */}
-          <main className="flex-1 mr-64 min-h-screen">
-            {children}
+          {/* محتوى الصفحات مع إزاحة صحيحة */}
+          <main className="flex-1 mr-64 min-h-screen w-full relative">
+            <div className="p-4 md:p-8">
+              {children}
+            </div>
           </main>
         </div>
       </body>
