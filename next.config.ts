@@ -1,20 +1,17 @@
 import withPWAInit from "@ducanh2912/next-pwa";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 
 const withPWA = withPWAInit({
   dest: "public",
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
-  reloadOnOnline: true,
-  disable: process.env.NODE_ENV === "development", // نعطله في بيئة التطوير لتسريع العمل
-  workboxOptions: {
-    disableDevLogs: true,
-  },
+  disable: process.env.NODE_ENV === "development",
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // ضع هنا أي إعدادات أخرى كانت موجودة مسبقاً
 };
 
-export default withPWA(nextConfig);
+// دمج الـ PWA مع الـ i18n
+export default withNextIntl(withPWA(nextConfig));
