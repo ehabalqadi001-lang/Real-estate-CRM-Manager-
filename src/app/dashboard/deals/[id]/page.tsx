@@ -5,213 +5,264 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
-  * { box-sizing: border-box; margin: 0; padding: 0; fontFamily: system-ui, sans-serif; }
-  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; }
-  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;}
-  .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; text-decoration: none; transition: 0.2s; }
-  .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
-  .main-content { margin-left: 64px; flex: 1; display: flex; flex-direction: column; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
+  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; direction: rtl; }
+  .main-content { padding: 30px; max-width: 1400px; margin: 0 auto; width: 100%; }
   
-  .header { padding: 20px 30px; border-bottom: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 10; }
-  .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; color: #0f172a; transition: 0.2s; }
-  .back-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-  .header-title { font-size: 20px; font-weight: 600; color: #0f172a; }
+  .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+  .btn-back { background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 15px;}
+  .btn-back:hover { color: #0f172a; }
   
-  .content-body { padding: 30px; max-width: 1000px; }
+  .deal-header { background: #fff; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border-right: 5px solid #185FA5;}
+  .deal-title { font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+  .deal-subtitle { font-size: 14px; color: #64748b; font-weight: 600; }
   
-  .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;}
-  .detail-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-  .card-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-  .card-title::before { content: ''; display: block; width: 4px; height: 16px; background: #185FA5; border-radius: 4px; }
+  .stage-badge { padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: #EFF6FF; color: #185FA5; border: 1px solid #BFDBFE; }
   
-  .info-row { display: flex; flex-direction: column; margin-bottom: 16px; }
-  .info-label { font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 500; text-transform: uppercase; }
-  .info-val { font-size: 14px; font-weight: 600; color: #0f172a; }
+  .grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+  @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
   
-  /* Installments Section */
-  .installments-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-top: 24px; }
-  .calc-controls { display: flex; gap: 15px; align-items: flex-end; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-  .form-group { display: flex; flex-direction: column; flex: 1; }
-  .form-input, .form-select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
-  .btn-generate { background: #0f1c2e; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .card-section { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 25px; margin-bottom: 25px; }
+  .section-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;}
   
-  table { width: 100%; border-collapse: collapse; text-align: left; }
-  th { padding: 12px 16px; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
-  td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 13px; }
-  .badge-pending { background: #FFF7ED; color: #9A3412; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .badge-paid { background: #EAF3DE; color: #3B6D11; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .btn-mark-paid { background: #fff; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #0f172a; font-weight: 600; }
-  .btn-mark-paid:hover { background: #f8fafc; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .info-item { display: flex; flex-direction: column; gap: 4px; }
+  .info-label { font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+  .info-value { font-size: 15px; color: #0f172a; font-weight: 800; }
+  
+  table { width: 100%; border-collapse: collapse; text-align: right; }
+  th { padding: 12px; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; font-weight: 600;}
+  
+  /* تمييز الأقساط المتأخرة لونياً */
+  .overdue-row { background-color: #FEF2F2 !important; }
+  .overdue-text { color: #DC2626 !important; font-weight: 800 !important; }
+  
+  .btn-pay { background: #10B981; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;}
+  .btn-pay:hover { background: #059669; }
+
+  .activity-log { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px;}
+  .log-item { border-right: 2px solid #e2e8f0; padding-right: 15px; position: relative; }
+  .log-item::before { content: ''; position: absolute; right: -5px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #185FA5; }
+  .log-date { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 2px; }
+  .log-desc { font-size: 13px; color: #0f172a; font-weight: 600; }
+  .log-user { font-size: 11px; color: #64748b; margin-top: 4px; }
 `;
 
 export default function DealDetailsPage() {
-  const params = useParams();
+  const { id } = useParams();
   const router = useRouter();
+  
   const [deal, setDeal] = useState<any>(null);
   const [installments, setInstallments] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Calculator State
-  const [years, setYears] = useState('7');
-  const [frequency, setFrequency] = useState('Quarterly');
-  const [generating, setGenerating] = useState(false);
+  const [newNote, setNewNote] = useState('');
 
   const fetchDealData = async () => {
-    const { data: dealData } = await supabase.from('deals').select('*').eq('id', params.id).single();
-    if (dealData) setDeal(dealData);
+    setLoading(true);
     
-    const { data: instData } = await supabase.from('installments').select('*').eq('deal_id', params.id).order('due_date', { ascending: true });
+    // 1. جلب بيانات الصفقة + العميل + المطور (حل مشكلة عدم ظهور المطور)
+    const { data: dealData } = await supabase
+      .from('deals')
+      .select('*, client:clients(full_name, phone, national_id), developer:developers(name)')
+      .eq('id', id)
+      .single();
+
+    // 2. جلب الأقساط (إن وجدت، أو سننشئها لاحقاً في قسم التمويل)
+    const { data: instData } = await supabase
+      .from('installments')
+      .select('*')
+      .eq('deal_id', id)
+      .order('due_date', { ascending: true });
+
+    // 3. جلب سجل النشاطات
+    const { data: actData } = await supabase
+      .from('deal_activities')
+      .select('*, user:user_profiles(full_name)')
+      .eq('deal_id', id)
+      .order('created_at', { ascending: false });
+
+    setDeal(dealData);
     setInstallments(instData || []);
-    
+    setActivities(actData || []);
     setLoading(false);
   };
 
-  useEffect(() => { if (params.id) fetchDealData(); }, [params.id]);
+  useEffect(() => {
+    if (id) fetchDealData();
+  }, [id]);
 
-  // محرك توليد الأقساط الذكي
-  const generateInstallments = async () => {
-    if (!confirm(`Are you sure? This will delete existing installments and generate a new ${years}-year schedule.`)) return;
-    setGenerating(true);
+  // إضافة ملاحظة جديدة في السجل
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNote.trim()) return;
 
-    const totalValue = Number(deal.unit_value || 0);
-    const downpayment = Number(deal.amount_paid || 0);
-    const remainingBalance = totalValue - downpayment;
-
-    const numYears = parseInt(years);
-    const paymentsPerYear = frequency === 'Monthly' ? 12 : frequency === 'Quarterly' ? 4 : 1;
-    const totalPayments = numYears * paymentsPerYear;
+    const { data: { user } } = await supabase.auth.getUser();
     
-    const amountPerPayment = remainingBalance / totalPayments;
-    
-    // مسح الأقساط القديمة
-    await supabase.from('installments').delete().eq('deal_id', deal.id);
+    await supabase.from('deal_activities').insert([{
+      deal_id: id,
+      user_id: user?.id,
+      action_type: 'note',
+      description: `أضاف ملاحظة: ${newNote}`
+    }]);
 
-    // تجهيز المصفوفة
-    let newInstallments = [];
-    let currentDate = new Date();
-    
-    for (let i = 1; i <= totalPayments; i++) {
-      // إضافة المدة حسب النوع
-      if (frequency === 'Monthly') currentDate.setMonth(currentDate.getMonth() + 1);
-      else if (frequency === 'Quarterly') currentDate.setMonth(currentDate.getMonth() + 3);
-      else if (frequency === 'Annually') currentDate.setFullYear(currentDate.getFullYear() + 1);
-
-      newInstallments.push({
-        deal_id: deal.id,
-        installment_number: i,
-        amount: amountPerPayment,
-        due_date: currentDate.toISOString().split('T')[0],
-        status: 'Pending'
-      });
-    }
-
-    // إدخال الأقساط الجديدة
-    const { error } = await supabase.from('installments').insert(newInstallments);
-    if (!error) {
-      alert('Installment schedule generated successfully!');
-      fetchDealData();
-    }
-    setGenerating(false);
+    setNewNote('');
+    fetchDealData(); // تحديث السجل
   };
 
-  const markAsPaid = async (id: string) => {
-    await supabase.from('installments').update({ status: 'Paid', paid_date: new Date().toISOString() }).eq('id', id);
+  // وظيفة لتغيير حالة الصفقة وتوثيق ذلك في السجل
+  const handleChangeStage = async (newStage: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    await supabase.from('deals').update({ stage: newStage }).eq('id', id);
+    await supabase.from('deal_activities').insert([{
+      deal_id: id,
+      user_id: user?.id,
+      action_type: 'status_change',
+      description: `تم تغيير مرحلة الصفقة من ${deal.stage} إلى ${newStage}`
+    }]);
+    
     fetchDealData();
   };
 
-  if (loading) return <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'system-ui' }}>Loading Deal...</div>;
-  if (!deal) return <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'system-ui' }}>Deal not found.</div>;
+  if (loading) return <div style={{padding: '50px', textAlign: 'center'}}>جاري فتح ملف الصفقة...</div>;
+  if (!deal) return <div style={{padding: '50px', textAlign: 'center'}}>لم يتم العثور على الصفقة.</div>;
 
-  const remainingBalance = Number(deal.unit_value || 0) - Number(deal.amount_paid || 0);
+  const today = new Date();
 
   return (
     <div className="dashboard-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
-      <div className="sidebar">
-        <Link href="/dashboard" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
-        <Link href="/dashboard/clients" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
-        <Link href="/dashboard/leads" className="nav-item active"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
-      </div>
+      
+      {/* Sidebar - يمكن إضافته هنا كالمعتاد */}
 
       <div className="main-content">
-        <div className="header">
-          <div className="back-btn" onClick={() => router.back()}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
-          <div className="header-title">Deal #{deal.deal_number || deal.id.substring(0,6).toUpperCase()}</div>
+        <div className="header-actions">
+          <button onClick={() => router.back()} className="btn-back">
+            ← العودة لقائمة المبيعات
+          </button>
         </div>
 
-        <div className="content-body">
-          <div className="details-grid">
-            <div className="detail-card">
-              <div className="card-title">Client & Property</div>
-              <div className="info-row"><div className="info-label">Client Name</div><div className="info-val">{deal.buyer_name}</div></div>
-              <div className="info-row"><div className="info-label">Property</div><div className="info-val">{deal.compound} • {deal.developer}</div></div>
-              <div className="info-row"><div className="info-label">Contract Date</div><div className="info-val">{new Date(deal.created_at).toLocaleDateString()}</div></div>
-            </div>
-
-            <div className="detail-card" style={{ background: '#f8fafc' }}>
-               <div className="info-row"><div className="info-label">Total Unit Value</div><div className="info-val" style={{fontSize:'20px'}}>EGP {Number(deal.unit_value || 0).toLocaleString()}</div></div>
-               <div className="info-row"><div className="info-label">Downpayment Paid</div><div className="info-val" style={{fontSize:'16px', color:'#3B6D11'}}>EGP {Number(deal.amount_paid || 0).toLocaleString()}</div></div>
-               <div className="info-row" style={{borderTop:'1px solid #e2e8f0', paddingTop:'10px', marginTop:'5px'}}><div className="info-label" style={{color:'#0f172a'}}>Remaining Balance</div><div className="info-val" style={{fontSize:'18px', color:'#A32D2D'}}>EGP {remainingBalance.toLocaleString()}</div></div>
+        {/* رأس الصفقة */}
+        <div className="deal-header">
+          <div>
+            <h1 className="deal-title">{deal.compound} - {deal.property_type}</h1>
+            <div className="deal-subtitle">
+              المطور: <span style={{color:'#185FA5', fontWeight:800}}>{deal.developer?.name || deal.developer || 'غير محدد'}</span> | 
+              العميل: {deal.client?.full_name || deal.buyer_name}
             </div>
           </div>
+          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px'}}>
+            <select 
+              className="stage-badge" 
+              value={deal.stage} 
+              onChange={(e) => handleChangeStage(e.target.value)}
+              style={{cursor: 'pointer', outline: 'none'}}
+            >
+              <option value="EOI">اهتمام (EOI)</option>
+              <option value="Reservation">حجز (Reservation)</option>
+              <option value="Contracted">تعاقد (Contracted)</option>
+              <option value="Registration">شهر عقاري (Registration)</option>
+              <option value="Handover">تسليم (Handover)</option>
+            </select>
+            <div style={{fontSize: '12px', color: '#64748b'}}>تاريخ التسجيل: {new Date(deal.created_at).toLocaleDateString('ar-EG')}</div>
+          </div>
+        </div>
 
-          {/* Installment Plan Manager */}
-          <div className="installments-card">
-            <div className="card-title">Installment Plan Manager</div>
-            
-            {installments.length === 0 && (
-              <div className="calc-controls">
-                <div className="form-group">
-                  <label className="info-label">Payment Plan Years</label>
-                  <input type="number" min="1" max="15" className="form-input" value={years} onChange={e => setYears(e.target.value)} />
-                </div>
-                <div className="form-group">
-                  <label className="info-label">Payment Frequency</label>
-                  <select className="form-select" value={frequency} onChange={e => setFrequency(e.target.value)}>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Quarterly">Quarterly (كل 3 شهور)</option>
-                    <option value="Annually">Annually</option>
-                  </select>
-                </div>
-                <button className="btn-generate" onClick={generateInstallments} disabled={generating}>
-                  {generating ? 'Generating...' : 'Generate Schedule'}
-                </button>
+        <div className="grid-layout">
+          {/* العمود الأيمن (التفاصيل المالية والمواصفات) */}
+          <div>
+            <div className="card-section">
+              <div className="section-title">🏢 بيانات الوحدة والعميل</div>
+              <div className="info-grid">
+                <div className="info-item"><span className="info-label">اسم العميل المشتري</span><span className="info-value">{deal.buyer_name}</span></div>
+                <div className="info-item"><span className="info-label">رقم هاتف العميل</span><span className="info-value" style={{direction: 'ltr', textAlign: 'right'}}>{deal.buyer_phone}</span></div>
+                <div className="info-item"><span className="info-label">المشروع / الكومباوند</span><span className="info-value">{deal.compound}</span></div>
+                <div className="info-item"><span className="info-label">المطور العقاري</span><span className="info-value">{deal.developer?.name || deal.developer}</span></div>
+                <div className="info-item"><span className="info-label">إجمالي قيمة الوحدة</span><span className="info-value" style={{color: '#185FA5'}}>{Number(deal.unit_value).toLocaleString()} EGP</span></div>
+                <div className="info-item"><span className="info-label">المقدم المدفوع</span><span className="info-value" style={{color: '#10B981'}}>{Number(deal.amount_paid).toLocaleString()} EGP</span></div>
+                <div className="info-item"><span className="info-label">المحافظة</span><span className="info-value">{deal.governorate}</span></div>
+                <div className="info-item"><span className="info-label">حالة الشهر العقاري</span><span className="info-value">{deal.registration_status}</span></div>
               </div>
-            )}
+            </div>
 
-            {installments.length > 0 ? (
-              <div style={{ overflowX: 'auto' }}>
+            <div className="card-section">
+              <div className="section-title">📅 جدول الأقساط (Installments)</div>
+              {installments.length === 0 ? (
+                <div style={{textAlign: 'center', color: '#64748b', padding: '20px'}}>لم يتم إعداد جدول أقساط لهذه الصفقة بعد.</div>
+              ) : (
                 <table>
                   <thead>
                     <tr>
-                      <th>Inst. #</th>
-                      <th>Due Date</th>
-                      <th>Amount (EGP)</th>
-                      <th>Status</th>
-                      <th>Action</th>
+                      <th>تاريخ الاستحقاق</th>
+                      <th>القيمة (EGP)</th>
+                      <th>الحالة</th>
+                      <th>إجراء</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {installments.map(inst => (
-                      <tr key={inst.id}>
-                        <td style={{ fontWeight: '600' }}>#{inst.installment_number}</td>
-                        <td>{new Date(inst.due_date).toLocaleDateString('en-GB')}</td>
-                        <td style={{ fontWeight: '500' }}>EGP {Number(inst.amount).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
-                        <td><span className={inst.status === 'Paid' ? 'badge-paid' : 'badge-pending'}>{inst.status}</span></td>
-                        <td>
-                          {inst.status === 'Pending' && (
-                            <button className="btn-mark-paid" onClick={() => markAsPaid(inst.id)}>Mark as Paid</button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {installments.map(inst => {
+                      const dueDate = new Date(inst.due_date);
+                      const isOverdue = dueDate < today && inst.status !== 'Paid';
+                      
+                      return (
+                        <tr key={inst.id} className={isOverdue ? 'overdue-row' : ''}>
+                          <td className={isOverdue ? 'overdue-text' : ''} style={{direction: 'ltr', textAlign: 'right'}}>{dueDate.toLocaleDateString('ar-EG')}</td>
+                          <td className={isOverdue ? 'overdue-text' : ''} style={{fontWeight: 800}}>{Number(inst.amount).toLocaleString()}</td>
+                          <td>
+                            <span style={{
+                              background: inst.status === 'Paid' ? '#ECFDF5' : isOverdue ? '#FEE2E2' : '#FFFBEB',
+                              color: inst.status === 'Paid' ? '#10B981' : isOverdue ? '#DC2626' : '#F59E0B',
+                              padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 800
+                            }}>
+                              {inst.status === 'Paid' ? '✓ مُسدد' : isOverdue ? '⚠️ متأخر' : '⏳ مستحق'}
+                            </span>
+                          </td>
+                          <td>
+                            {inst.status !== 'Paid' && <button className="btn-pay">تسديد</button>}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
+              )}
+            </div>
+          </div>
+
+          {/* العمود الأيسر (سجل النشاط والملاحظات) */}
+          <div>
+            <div className="card-section" style={{background: '#f8fafc'}}>
+              <div className="section-title">📝 سجل النشاط والملاحظات</div>
+              
+              <form onSubmit={handleAddNote} style={{marginBottom: '20px'}}>
+                <textarea 
+                  required
+                  placeholder="أضف ملاحظة أو تحديث حول هذه الصفقة..." 
+                  value={newNote}
+                  onChange={e => setNewNote(e.target.value)}
+                  style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', resize: 'vertical', minHeight: '80px', fontSize: '13px'}}
+                />
+                <button type="submit" style={{width: '100%', background: '#0f1c2e', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', marginTop: '10px'}}>
+                  حفظ الملاحظة
+                </button>
+              </form>
+
+              <div className="activity-log">
+                {activities.length === 0 ? (
+                  <div style={{color: '#94a3b8', fontSize: '12px', textAlign: 'center'}}>لا توجد نشاطات مسجلة بعد.</div>
+                ) : (
+                  activities.map(act => (
+                    <div key={act.id} className="log-item">
+                      <div className="log-date">{new Date(act.created_at).toLocaleString('ar-EG')}</div>
+                      <div className="log-desc">{act.description}</div>
+                      <div className="log-user">بواسطة: {act.user?.full_name || 'النظام'}</div>
+                    </div>
+                  ))
+                )}
               </div>
-            ) : (
-              <p style={{ fontSize: '13px', color: '#64748b' }}>No installment schedule generated yet. Use the calculator above to create one based on the remaining balance.</p>
-            )}
+            </div>
           </div>
 
         </div>
