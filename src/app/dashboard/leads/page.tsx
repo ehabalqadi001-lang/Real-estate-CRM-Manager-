@@ -293,7 +293,10 @@ export default function SalesPipelinePage() {
               
               <div className="form-grid">
                 <div className="form-group"><label className="form-label">المطور العقاري *</label>
-                  <input required className="form-input" value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})} />
+                  <select required className="form-select" value={formData.developer} onChange={e => setFormData({...formData, developer: e.target.value})}>
+  <option value="">-- اختر المطور --</option>
+  {developers.map(dev => <option key={dev.id} value={dev.id}>{dev.name}</option>)}
+</select>
                 </div>
                 <div className="form-group"><label className="form-label">المشروع / الكومباوند *</label>
                   <input required className="form-input" value={formData.compound} onChange={e => setFormData({...formData, compound: e.target.value})} />
