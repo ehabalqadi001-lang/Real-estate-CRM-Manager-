@@ -5,282 +5,216 @@ import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
-  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; }
-  
-  /* Sidebar */
-  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; border-left: 1px solid rgba(255,255,255,0.05);}
+  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; direction: rtl; }
+  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; right: 0; top: 0; bottom: 0; z-index: 50;}
   .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; text-decoration: none; transition: 0.2s; }
   .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
   .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
+  .main-content { margin-right: 64px; flex: 1; padding: 30px; max-width: 1400px; margin-left: auto; margin-right: auto;}
   
-  /* Main Content */
-  .main-content { margin-right: 64px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 64px); overflow-x: hidden;}
-  .header { padding: 20px 30px; background: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
-  .header-title { font-size: 22px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px;}
-  .content-body { padding: 30px; max-width: 1400px; width: 100%; margin: 0 auto; }
+  .welcome-section { background: linear-gradient(135deg, #0f1c2e 0%, #185FA5 100%); color: #fff; border-radius: 16px; padding: 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(24,95,165,0.2);}
+  .welcome-text h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .welcome-text p { font-size: 15px; color: #cbd5e1; }
   
-  /* Time Filters */
-  .filter-group { display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px; gap: 4px; }
-  .filter-btn { padding: 8px 16px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; transition: 0.2s; }
-  .filter-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .quick-actions { display: flex; gap: 10px; }
+  .btn-quick { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: 0.2s; backdrop-filter: blur(4px);}
+  .btn-quick:hover { background: #fff; color: #185FA5; }
 
-  /* KPI Cards */
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-  .kpi-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); position: relative; overflow: hidden;}
-  .kpi-title { font-size: 13px; color: #64748b; font-weight: 600; margin-bottom: 10px; display: flex; justify-content: space-between; }
-  .kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 8px; direction: ltr; text-align: right;}
-  .kpi-target { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px;}
-  .text-success { color: #10b981; }
-  .text-warning { color: #f59e0b; }
-  .text-primary { color: #185FA5; }
-  .progress-bg { height: 4px; background: #f1f5f9; border-radius: 2px; margin-top: 10px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #185FA5; border-radius: 2px; transition: width 1s ease-out; }
+  .kpi-card { background: #fff; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; align-items: flex-start; justify-content: space-between; transition: transform 0.2s; }
+  .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+  .kpi-info { display: flex; flex-direction: column; gap: 5px; }
+  .kpi-title { font-size: 13px; font-weight: 700; color: #64748b; }
+  .kpi-value { font-size: 24px; font-weight: 800; color: #0f172a; direction: ltr; text-align: right;}
+  .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
 
-  /* Dashboard Grid */
-  .dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-  @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
+  .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+  @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
   
-  .section-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-  .section-header { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-  .section-header::before { content: ''; display: block; width: 4px; height: 16px; background: #185FA5; border-radius: 4px; }
-
-  /* CSS Chart */
-  .chart-container { display: flex; align-items: flex-end; gap: 15px; height: 220px; padding-top: 20px; border-bottom: 1px solid #e2e8f0; }
-  .chart-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px;}
-  .chart-track { width: 100%; max-width: 40px; background: #f8fafc; border-radius: 4px 4px 0 0; display: flex; align-items: flex-end; height: 100%; position: relative;}
-  .chart-fill { width: 100%; background: #185FA5; border-radius: 4px 4px 0 0; transition: 1s; position: relative; cursor: pointer;}
-  .chart-fill:hover { background: #0f1c2e; }
-  .chart-tooltip { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: #0f1c2e; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; z-index: 10;}
-  .chart-fill:hover .chart-tooltip { opacity: 1; }
-  .chart-label { font-size: 11px; color: #64748b; font-weight: 600; }
-
-  /* Lists */
-  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-  .list-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .item-title { font-size: 14px; font-weight: 700; color: #0f172a; }
-  .item-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
-  .item-val { font-size: 14px; font-weight: 700; color: #185FA5; text-align: left; direction: ltr;}
+  .card-section { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 25px; }
+  .section-header { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+  .view-all { font-size: 13px; color: #185FA5; font-weight: 700; text-decoration: none; }
   
-  .badge-urgent { background: #FEF2F2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-
-  /* Skeletons */
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .skeleton { background: #e2e8f0; border-radius: 8px; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-  .sk-text { height: 20px; width: 60%; margin-bottom: 10px; }
-  .sk-title { height: 14px; width: 40%; margin-bottom: 20px; }
-  .sk-chart { height: 100%; width: 100%; border-radius: 4px 4px 0 0; }
+  .recent-deal { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
+  .recent-deal:last-child { border-bottom: none; padding-bottom: 0; }
+  .deal-agent { font-size: 14px; font-weight: 700; color: #0f172a; }
+  .deal-compound { font-size: 12px; color: #64748b; }
+  .deal-value { font-size: 14px; font-weight: 800; color: #10B981; direction: ltr;}
+  
+  .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .badge-blue { background: #EFF6FF; color: #3B82F6; }
 `;
 
-export default function DashboardPage() {
+export default function MainDashboard() {
   const [loading, setLoading] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('Month'); // Default to current month
-  const [deals, setDeals] = useState<any[]>([]);
-  const [installments, setInstallments] = useState<any[]>([]);
-  const TARGET_MONTHLY = 50000000; // 50 Million EGP Target
-
-  const fetchData = async () => {
-    // جلب الصفقات والأقساط
-    const { data: dealsData } = await supabase.from('deals').select('*').order('created_at', { ascending: false });
-    const { data: instData } = await supabase.from('installments').select('*').order('due_date', { ascending: true });
-    
-    setDeals(dealsData || []);
-    setInstallments(instData || []);
-    setLoading(false);
-  };
+  const [profile, setProfile] = useState<{full_name: string, role: string} | null>(null);
+  
+  // الإحصائيات
+  const [kpis, setKpis] = useState({
+    monthlySales: 0,
+    activeInventoryValue: 0,
+    newClients: 0,
+    pendingCommissions: 0
+  });
+  
+  const [recentDeals, setRecentDeals] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchData();
+    async function loadDashboardData() {
+      setLoading(true);
+      
+      // 1. جلب بيانات المستخدم الحالي
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: userProfile } = await supabase.from('user_profiles').select('*').eq('id', user.id).single();
+        if (userProfile) setProfile(userProfile);
+      }
 
-    // 🔴 السحر: تفعيل التحديث الفوري (Realtime Updates)
-    const channel = supabase.channel('dashboard_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => {
-        fetchData(); // تحديث صامت عند حدوث أي تغيير في قاعدة البيانات
-      })
-      .subscribe();
+      // تحديد بداية الشهر الحالي للحسابات
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    return () => { supabase.removeChannel(channel); };
+      // 2. المبيعات هذا الشهر
+      const { data: dealsMonth } = await supabase.from('deals').select('unit_value').gte('created_at', startOfMonth);
+      const monthlySales = dealsMonth?.reduce((sum, d) => sum + Number(d.unit_value || 0), 0) || 0;
+
+      // 3. قيمة المخزون المتاح
+      const { data: inventoryData } = await supabase.from('inventory').select('price').eq('status', 'Available');
+      const activeInventoryValue = inventoryData?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0;
+
+      // 4. العملاء الجدد هذا الشهر
+      const { count: clientsCount } = await supabase.from('clients').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth);
+
+      // 5. العمولات المستحقة (للموظف أو للإدارة حسب الـ RLS)
+      const { data: commsData } = await supabase.from('commissions').select('agent_commission_value').neq('status', 'Paid');
+      const pendingCommissions = commsData?.reduce((sum, c) => sum + Number(c.agent_commission_value || 0), 0) || 0;
+
+      setKpis({ monthlySales, activeInventoryValue, newClients: clientsCount || 0, pendingCommissions });
+
+      // 6. آخر الصفقات المسجلة
+      const { data: latestDeals } = await supabase.from('deals').select('*').order('created_at', { ascending: false }).limit(5);
+      if (latestDeals) setRecentDeals(latestDeals);
+
+      setLoading(false);
+    }
+    loadDashboardData();
   }, []);
 
-  // 1. منطق التصفية الزمنية (Time Filtering Logic)
-  const getFilteredDeals = () => {
-    const now = new Date();
-    return deals.filter(deal => {
-      const dealDate = new Date(deal.created_at);
-      if (timeFilter === 'Month') return dealDate.getMonth() === now.getMonth() && dealDate.getFullYear() === now.getFullYear();
-      if (timeFilter === 'Year') return dealDate.getFullYear() === now.getFullYear();
-      return true; // All Time
-    });
+  const getRoleTitle = (role: string) => {
+    if (role === 'super_admin') return 'المدير العام';
+    if (role === 'sales_manager') return 'مدير المبيعات';
+    if (role === 'accountant') return 'الإدارة المالية';
+    return 'مستشار عقاري';
   };
 
-  const filteredDeals = getFilteredDeals();
-
-  // 2. حساب المؤشرات (KPIs) بناءً على الفلتر
-  const totalSales = filteredDeals.reduce((acc, d) => acc + Number(d.unit_value || 0), 0);
-  const activeDeals = filteredDeals.filter(d => d.status === 'Pending').length;
-  
-  // حساب العمولات (5%)
-  const totalComm = totalSales * 0.05;
-  const collectedComm = filteredDeals
-    .filter(d => d.finance_status === 'Commission Received' || d.finance_status === 'Transferred to Agent')
-    .reduce((acc, d) => acc + (Number(d.unit_value || 0) * 0.05), 0);
-  const pendingComm = totalComm - collectedComm;
-
-  const targetPercentage = Math.min((totalSales / (timeFilter === 'Month' ? TARGET_MONTHLY : TARGET_MONTHLY * 12)) * 100, 100);
-
-  // 3. تجهيز بيانات الرسم البياني (آخر 6 شهور)
-  const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-  const chartData = Array.from({length: 6}).map((_, i) => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - (5 - i));
-    const mDeals = deals.filter(deal => new Date(deal.created_at).getMonth() === d.getMonth() && new Date(deal.created_at).getFullYear() === d.getFullYear());
-    const val = mDeals.reduce((acc, deal) => acc + Number(deal.unit_value || 0), 0);
-    return { name: monthNames[d.getMonth()], value: val };
-  });
-  const maxChartVal = Math.max(...chartData.map(d => d.value), 1000000);
-
-  // 4. الصفقات العاجلة (تنتظر الموافقة أو قسط مستحق قريباً)
-  const actionNeeded = deals.filter(d => d.status === 'Pending').slice(0, 5);
+  if (loading) return <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', background:'#f8fafc', color:'#185FA5', fontWeight:800, fontSize:'20px'}}>جاري تحميل مركز القيادة... 🦅</div>;
 
   return (
     <div className="dashboard-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
       
-      {/* القائمة الجانبية كاملة */}
+      {/* القائمة الجانبية (Sidebar) */}
       <div className="sidebar">
-        <Link href="/dashboard" className="nav-item active" title="لوحة التحكم"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
-        <Link href="/dashboard/clients" className="nav-item" title="العملاء"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
-        <Link href="/dashboard/leads" className="nav-item" title="المبيعات"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
-        <Link href="/dashboard/inventory" className="nav-item" title="المخزون"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></Link>
-        <Link href="/dashboard/commissions" className="nav-item" title="العمولات"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></Link>
+        <Link href="/dashboard" className="nav-item active"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
+        <Link href="/dashboard/clients" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
+        <Link href="/dashboard/leads" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
+        <Link href="/dashboard/inventory" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></Link>
+        <Link href="/dashboard/commissions" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></Link>
         <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-        <Link href="/dashboard/whatsapp" className="nav-item" title="الواتساب"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></Link>
-        <Link href="/dashboard/team" className="nav-item" title="الفريق"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
-        <Link href="/dashboard/reports" className="nav-item" title="التقارير"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></Link>
-        <Link href="/dashboard/settings" className="nav-item" title="الإعدادات"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></Link>
+        <Link href="/dashboard/whatsapp" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></Link>
+        <Link href="/dashboard/team" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
+        <Link href="/dashboard/reports" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></Link>
       </div>
 
       <div className="main-content">
-        <div className="header">
-          <div className="header-title">المركز الرئيسي (Live) 🔴</div>
-          
-          {/* فلتر زمني حقيقي يتفاعل مع البيانات */}
-          <div className="filter-group">
-            <button className={`filter-btn ${timeFilter === 'Month' ? 'active' : ''}`} onClick={() => setTimeFilter('Month')}>هذا الشهر</button>
-            <button className={`filter-btn ${timeFilter === 'Year' ? 'active' : ''}`} onClick={() => setTimeFilter('Year')}>هذا العام</button>
-            <button className={`filter-btn ${timeFilter === 'All Time' ? 'active' : ''}`} onClick={() => setTimeFilter('All Time')}>كل الوقت</button>
+        
+        {/* الترحيب والإجراءات السريعة */}
+        <div className="welcome-section">
+          <div className="welcome-text">
+            <h1>أهلاً بك، {profile?.full_name?.split(' ')[0] || 'يا بطل'} 👋</h1>
+            <p>الصفة التوظيفية: {getRoleTitle(profile?.role || 'agent')} | EHAB & ESLAM TEAM</p>
+          </div>
+          <div className="quick-actions">
+            <Link href="/dashboard/leads" className="btn-quick">+ تسجيل بيعة</Link>
+            <Link href="/dashboard/clients" className="btn-quick">+ إضافة عميل</Link>
           </div>
         </div>
 
-        <div className="content-body">
+        {/* مؤشرات الأداء الحية (KPIs) */}
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-info">
+              <div className="kpi-title">مبيعات الشهر الحالي</div>
+              <div className="kpi-value">{kpis.monthlySales.toLocaleString()} EGP</div>
+            </div>
+            <div className="kpi-icon" style={{background: '#EFF6FF', color: '#3B82F6'}}>📈</div>
+          </div>
           
-          {/* شبكة المؤشرات (KPIs) */}
-          <div className="kpi-grid">
-            {loading ? (
-              // Skeleton Loading State
-              Array.from({length: 4}).map((_, i) => (
-                <div className="kpi-card" key={i}>
-                  <div className="skeleton sk-title"></div>
-                  <div className="skeleton sk-text" style={{height:'30px'}}></div>
-                  <div className="skeleton sk-title" style={{width:'80%', marginTop:'15px'}}></div>
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="kpi-card">
-                  <div className="kpi-title">إجمالي المبيعات الموثقة <svg width="16" height="16" fill="none" stroke="#185FA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-                  <div className="kpi-value text-primary">EGP {totalSales.toLocaleString()}</div>
-                  <div className="kpi-target">
-                    <span className={targetPercentage >= 100 ? 'text-success' : 'text-warning'}>{targetPercentage.toFixed(1)}% من التارجت</span>
-                    <span style={{color: '#64748b'}}>({filteredDeals.length} بيعة)</span>
+          <div className="kpi-card">
+            <div className="kpi-info">
+              <div className="kpi-title">المخزون المتاح للبيع</div>
+              <div className="kpi-value">{kpis.activeInventoryValue.toLocaleString()} EGP</div>
+            </div>
+            <div className="kpi-icon" style={{background: '#ECFDF5', color: '#10B981'}}>🏢</div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-info">
+              <div className="kpi-title">العمولات المستحقة للتحصيل</div>
+              <div className="kpi-value" style={{color: '#F59E0B'}}>{kpis.pendingCommissions.toLocaleString()} EGP</div>
+            </div>
+            <div className="kpi-icon" style={{background: '#FFFBEB', color: '#F59E0B'}}>💰</div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-info">
+              <div className="kpi-title">عملاء جدد هذا الشهر</div>
+              <div className="kpi-value" style={{color: '#8B5CF6'}}>{kpis.newClients} عميل</div>
+            </div>
+            <div className="kpi-icon" style={{background: '#F5F3FF', color: '#8B5CF6'}}>👥</div>
+          </div>
+        </div>
+
+        {/* الأقسام السفلية */}
+        <div className="dashboard-grid">
+          {/* سجل أحدث المبيعات */}
+          <div className="card-section">
+            <div className="section-header">
+              <span>آخر الصفقات المسجلة ⚡</span>
+              <Link href="/dashboard/leads" className="view-all">عرض الكل</Link>
+            </div>
+            <div>
+              {recentDeals.length === 0 ? (
+                <div style={{color: '#64748b', textAlign: 'center', padding: '20px 0'}}>لا توجد مبيعات مسجلة حتى الآن.</div>
+              ) : (
+                recentDeals.map(deal => (
+                  <div key={deal.id} className="recent-deal">
+                    <div>
+                      <div className="deal-agent">{deal.buyer_name}</div>
+                      <div className="deal-compound">{deal.compound} - {deal.developer}</div>
+                    </div>
+                    <div style={{textAlign: 'left'}}>
+                      <div className="deal-value">{Number(deal.unit_value).toLocaleString()} EGP</div>
+                      <span className="badge badge-blue">{deal.stage}</span>
+                    </div>
                   </div>
-                  <div className="progress-bg"><div className="progress-fill" style={{width: `${targetPercentage}%`}}></div></div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-title">الصفقات النشطة / المعلقة <svg width="16" height="16" fill="none" stroke="#f59e0b" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                  <div className="kpi-value" style={{color: '#f59e0b'}}>{activeDeals} صفقات</div>
-                  <div className="kpi-target" style={{color: '#64748b'}}>تنتظر اعتماد الإدارة</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-title">العمولات المحصلة <svg width="16" height="16" fill="none" stroke="#10b981" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                  <div className="kpi-value text-success">EGP {collectedComm.toLocaleString()}</div>
-                  <div className="kpi-target" style={{color: '#64748b'}}>تم تحويلها لحساب الشركة</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-title">العمولات المتوقعة <svg width="16" height="16" fill="none" stroke="#64748b" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-                  <div className="kpi-value" style={{color: '#64748b'}}>EGP {pendingComm.toLocaleString()}</div>
-                  <div className="kpi-target" style={{color: '#64748b'}}>متأخرة عند المطورين</div>
-                </div>
-              </>
-            )}
+                ))
+              )}
+            </div>
           </div>
 
-          <div className="dash-grid">
-            
-            {/* الرسم البياني التفاعلي (بدون مكتبات خارجية لتجنب الأخطاء) */}
-            <div className="section-card">
-              <div className="section-header">أداء المبيعات (آخر 6 شهور)</div>
-              <div className="chart-container">
-                {loading ? (
-                   Array.from({length: 6}).map((_, i) => (
-                    <div className="chart-bar-group" key={i}>
-                      <div className="chart-track"><div className="skeleton sk-chart"></div></div>
-                    </div>
-                  ))
-                ) : (
-                  chartData.map((d, i) => {
-                    const heightPercent = maxChartVal > 0 ? (d.value / maxChartVal) * 100 : 0;
-                    return (
-                      <div className="chart-bar-group" key={i}>
-                        <div className="chart-track">
-                          <div className="chart-fill" style={{ height: `${heightPercent}%` }}>
-                            <div className="chart-tooltip">EGP {d.value.toLocaleString()}</div>
-                          </div>
-                        </div>
-                        <div className="chart-label">{d.name}</div>
-                      </div>
-                    );
-                  })
-                )}
+          {/* لوحة الإعلانات أو المهام */}
+          <div className="card-section" style={{background: '#0f1c2e', color: '#fff', borderColor: '#0f1c2e'}}>
+            <div className="section-header" style={{color: '#fff'}}>إعلانات الإدارة 📢</div>
+            <div style={{background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', marginBottom: '10px'}}>
+              <div style={{fontSize: '13px', color: '#94a3b8', marginBottom: '5px'}}>من: الإدارة العليا</div>
+              <div style={{fontSize: '14px', fontWeight: 700, lineHeight: '1.6'}}>
+                تم إطلاق النظام المؤسسي الجديد! يرجى التأكد من تسجيل جميع العملاء وربط المبيعات بالمخزون العقاري.
               </div>
             </div>
-
-            {/* الصفقات التي تتطلب إجراء (Closing Soon / Pending) */}
-            <div className="section-card">
-              <div className="section-header">مهام عاجلة للمراجعة</div>
-              <div>
-                {loading ? (
-                   Array.from({length: 3}).map((_, i) => (
-                    <div className="list-item" key={i}>
-                      <div style={{width:'100%'}}>
-                        <div className="skeleton sk-title" style={{width:'50%', margin:0}}></div>
-                        <div className="skeleton sk-text" style={{width:'30%', height:'10px', marginTop:'8px'}}></div>
-                      </div>
-                    </div>
-                  ))
-                ) : actionNeeded.length === 0 ? (
-                  <div style={{padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '13px'}}>لا يوجد صفقات معلقة. عمل رائع!</div>
-                ) : (
-                  actionNeeded.map(deal => (
-                    <div className="list-item" key={deal.id}>
-                      <div>
-                        <div className="item-title">{deal.buyer_name}</div>
-                        <div className="item-sub">{deal.compound} - {deal.developer}</div>
-                      </div>
-                      <div style={{textAlign: 'left'}}>
-                        <div className="badge-urgent">تحتاج اعتماد</div>
-                        <Link href={`/dashboard/deals/${deal.id}`} style={{fontSize: '12px', color: '#185FA5', textDecoration: 'none', fontWeight: '700', display: 'block', marginTop: '6px', direction: 'ltr'}}>مراجعة ↗</Link>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
           </div>
         </div>
+
       </div>
     </div>
   );
