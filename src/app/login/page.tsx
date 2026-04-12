@@ -81,7 +81,7 @@ export default function LoginPage() {
       
       <div className="login-card">
         <div className="logo-section">
-          <div className="logo-title">EHAB & ESLAM TEAM</div>
+          <div className="logo-title">FAST INVESTMENT</div>
           <div className="logo-subtitle">ENTERPRISE CRM SYSTEM</div>
         </div>
 
