@@ -1,18 +1,22 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import LiveNotifications from '@/components/LiveNotifications';
-import '../globals.css';
+import '@/app/globals.css';
 
-export default async function RootLayout({
-  children,
-  params: { locale }
-}: {
+// تحديث هيكل البيانات ليتوافق مع Next.js 15 (params أصبحت Promise)
+type Props = {
   children: React.ReactNode;
-  params: { locale: string };
-}) {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function RootLayout({ children, params }: Props) {
+  // 1. يجب انتظار الـ params أولاً قبل استخراج اللغة
+  const { locale } = await params;
+
+  // 2. جلب ملفات الترجمة
   const messages = await getMessages();
   
-  // 🧭 تحديد الاتجاه بناءً على اللغة
+  // 3. تحديد الاتجاه بناءً على اللغة
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (

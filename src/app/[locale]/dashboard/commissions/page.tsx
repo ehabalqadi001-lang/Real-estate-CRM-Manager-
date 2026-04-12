@@ -1,146 +1,138 @@
-"use client";
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { DollarSign, Wallet, Clock, Printer, Zap } from 'lucide-react';
+import CommissionChart from '@/components/CommissionChart';
 
-const CSS_STYLES = `
-  /* ... نفس التنسيقات السابقة مع إضافة التنسيقات الجديدة ... */
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-  .confirm-modal { background: #fff; padding: 25px; border-radius: 12px; width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-  .undo-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f1c2e; color: #fff; padding: 12px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center; z-index: 999; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { bottom: -50px; } to { bottom: 20px; } }
-  
-  @media print {
-    .sidebar, .header, .btn-action, .view-toggle, .filters-row { display: none !important; }
-    .main-content { margin: 0 !important; padding: 0 !important; }
-    .table-container { border: none !important; box-shadow: none !important; }
-    th, td { border: 1px solid #eee !important; }
-  }
-`;
+export default async function CommissionsPage() {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  );
 
-export default function CommissionsPage() {
-  const [commissions, setCommissions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [lastAction, setLastAction] = useState<{id: string, oldStatus: string} | null>(null);
+  // جلب العمولات مع تفاصيل الصفقة المرتبطة بها
+  const { data: commissions } = await supabase
+    .from('commissions')
+    .select(`
+      *,
+      deals (title, client_name)
+    `)
+    .order('created_at', { ascending: false });
 
-  const fetchData = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('commissions').select(`*, deal:deals(*), agent:user_profiles(full_name)`).order('created_at', { ascending: false });
-    if (data) setCommissions(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchData(); }, []);
-
-  // 🛡️ منطق التحديث الآمن مع إمكانية التراجع
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
-    const currentComm = commissions.find(c => c.id === id);
-    setLastAction({ id, oldStatus: currentComm.status });
-    
-    const { error } = await supabase.from('commissions').update({ status: newStatus }).eq('id', id);
-    if (!error) {
-      setConfirmId(null);
-      fetchData();
-      // يختفي إشعار التراجع بعد 10 ثواني
-      setTimeout(() => setLastAction(null), 10000);
-    }
-  };
-
-  const undoAction = async () => {
-    if (!lastAction) return;
-    await supabase.from('commissions').update({ status: lastAction.oldStatus }).eq('id', lastAction.id);
-    setLastAction(null);
-    fetchData();
-  };
+  // حساب الإجماليات
+  const totalEarned = commissions?.reduce((sum, c) => sum + Number(c.total_amount), 0) || 0;
+  const totalCollected = commissions?.reduce((sum, c) => sum + Number(c.collected_amount), 0) || 0;
+  const totalPending = commissions?.reduce((sum, c) => sum + Number(c.pending_amount), 0) || 0;
 
   return (
-    <div className="dashboard-container">
-      <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
       
-      {/* ... Sidebar ... */}
+      {/* رأس الصفحة والإجراءات */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800">العمولات والمطالبات المالية</h1>
+          <p className="text-slate-500 text-sm mt-1">تتبع مستحقاتك، وتوقعات الصرف الشهرية.</p>
+        </div>
+        <div className="flex gap-2">
+          {/* زر طباعة (يستخدم window.print في الكلاينت، سنعطيه كلاس للطباعة) */}
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold transition">
+            <Printer size={16} /> تصدير كشف حساب PDF
+          </button>
+        </div>
+      </div>
 
-      <div className="main-content">
-        <div className="header" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <h1 className="header-title">العمولات والمطالبات المالية</h1>
-          <button 
-            onClick={() => window.print()} 
-            className="btn-action" 
-            style={{background:'#0f1c2e', display:'flex', gap:'8px', alignItems:'center'}}
-          >
-            <span>🖨️</span> تصدير كشف حساب PDF
+      {/* بطاقات الإحصائيات (KPIs) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="bg-blue-50 p-3 rounded-lg text-blue-600"><DollarSign size={24} /></div>
+          <div>
+            <p className="text-sm font-bold text-slate-500">إجمالي مستحق (Earned)</p>
+            <p className="text-2xl font-black text-slate-800">{totalEarned.toLocaleString()} <span className="text-sm font-normal text-slate-400">EGP</span></p>
+          </div>
+        </div>
+        
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="bg-green-50 p-3 rounded-lg text-green-600"><Wallet size={24} /></div>
+          <div>
+            <p className="text-sm font-bold text-slate-500">تم تحصيله (Collected)</p>
+            <p className="text-2xl font-black text-slate-800">{totalCollected.toLocaleString()} <span className="text-sm font-normal text-slate-400">EGP</span></p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="bg-amber-50 p-3 rounded-lg text-amber-600"><Clock size={24} /></div>
+          <div>
+            <p className="text-sm font-bold text-slate-500">متبقي قيد الانتظار (Pending)</p>
+            <p className="text-2xl font-black text-slate-800">{totalPending.toLocaleString()} <span className="text-sm font-normal text-slate-400">EGP</span></p>
+          </div>
+        </div>
+      </div>
+
+      {/* قسم الرسم البياني وجدول التفاصيل */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* الرسم البياني (يأخذ ثلثي الشاشة) */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+          <h3 className="font-bold text-slate-800 mb-2">توقعات الصرف الشهرية</h3>
+          <CommissionChart data={commissions || []} />
+        </div>
+
+        {/* كارت طلب الدفع المبكر (ميزة Nawy) */}
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-xl shadow-md text-white flex flex-col justify-between">
+          <div>
+            <div className="bg-white/20 w-fit p-2 rounded-lg mb-4"><Zap size={24} /></div>
+            <h3 className="font-black text-xl mb-2">طلب الدفع المبكر (Early Pay)</h3>
+            <p className="text-indigo-100 text-sm leading-relaxed">
+              لا تنتظر موعد الاستحقاق! يمكنك الآن طلب صرف جزء من عمولتك المتبقية مقدماً بخصم نسبة إدارية بسيطة (خاضع لموافقة الإدارة).
+            </p>
+          </div>
+          <button className="mt-6 w-full bg-white text-indigo-700 font-black py-3 rounded-lg hover:bg-slate-50 transition shadow-lg">
+            تقديم طلب الآن
           </button>
         </div>
 
-        {/* ... الإحصائيات (مجموع المحصلة والمستحقة) ... */}
+      </div>
 
-        <div className="table-container">
-          <table>
-            <thead>
+      {/* جدول العمولات */}
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100"><h3 className="font-bold text-slate-800">تفاصيل العمولات</h3></div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-right">
+            <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
               <tr>
-                <th>تفاصيل الصفقة</th>
-                <th>المندوب</th>
-                <th>قيمة العمولة</th>
-                <th>الحالة</th>
-                <th className="btn-action">إجراءات</th>
+                <th className="px-6 py-4">الصفقة</th>
+                <th className="px-6 py-4">العمولة الكلية</th>
+                <th className="px-6 py-4">المحصّل</th>
+                <th className="px-6 py-4">تاريخ الاستحقاق</th>
+                <th className="px-6 py-4">الحالة</th>
               </tr>
             </thead>
-            <tbody>
-              {commissions.map(comm => (
-                <tr key={comm.id}>
-                  <td>
-                    <Link href={`/dashboard/leads/${comm.deal_id}`} style={{color:'#185FA5', fontWeight:800, textDecoration:'none'}}>
-                      {comm.deal?.compound} ↗
-                    </Link>
-                    <div style={{fontSize:'12px', color:'#64748b'}}>المطور: {comm.deal?.developer}</div>
-                  </td>
-                  <td>{comm.agent?.full_name}</td>
-                  <td style={{fontWeight:700, direction:'ltr', textAlign:'right'}}>{Number(comm.agent_commission_value).toLocaleString()} EGP</td>
-                  <td>
-                    <span className={`status-badge status-${comm.status.toLowerCase()}`}>
-                      {comm.status === 'Paid' ? '✓ تم التحصيل' : '⏳ قيد الانتظار'}
+            <tbody className="divide-y divide-slate-100">
+              {commissions?.map((comm) => (
+                <tr key={comm.id} className="hover:bg-slate-50 transition">
+                  <td className="px-6 py-4 font-bold text-slate-800">{comm.deals?.title}</td>
+                  <td className="px-6 py-4 text-blue-600 font-bold">{Number(comm.total_amount).toLocaleString()} EGP</td>
+                  <td className="px-6 py-4 text-green-600 font-bold">{Number(comm.collected_amount).toLocaleString()} EGP</td>
+                  <td className="px-6 py-4 text-slate-500">{comm.expected_date || 'غير محدد'}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      comm.status === 'Paid' ? 'bg-green-100 text-green-700' : 
+                      comm.status === 'Partial' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {comm.status}
                     </span>
-                  </td>
-                  <td className="btn-action">
-                    {comm.status !== 'Paid' && (
-                      <button 
-                        onClick={() => setConfirmId(comm.id)} 
-                        className="btn-action"
-                        style={{background:'#10b981', color:'#fff', padding:'5px 10px', borderRadius:'6px', cursor:'pointer'}}
-                      >
-                        تأكيد التحصيل
-                      </button>
-                    )}
                   </td>
                 </tr>
               ))}
+              {(!commissions || commissions.length === 0) && (
+                <tr><td colSpan={5} className="text-center py-10 text-slate-400">لا توجد عمولات مسجلة حتى الآن</td></tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 🛡️ نافذة التأكيد (Safety Modal) */}
-      {confirmId && (
-        <div className="modal-overlay">
-          <div className="confirm-modal">
-            <div style={{fontSize:'40px', marginBottom:'15px'}}>💰</div>
-            <h3>تأكيد استلام العمولة</h3>
-            <p style={{color:'#64748b', margin:'15px 0'}}>هل أنت متأكد من تحصيل هذه العمولة؟ سيتم تحديث السجلات المالية فوراً.</p>
-            <div style={{display:'flex', gap:'10px', justifyContent:'center'}}>
-              <button onClick={() => handleUpdateStatus(confirmId, 'Paid')} style={{background:'#10b981', color:'#fff', border:'none', padding:'10px 25px', borderRadius:'8px', fontWeight:700, cursor:'pointer'}}>نعم، تم التحصيل</button>
-              <button onClick={() => setConfirmId(null)} style={{background:'#f1f5f9', border:'none', padding:'10px 25px', borderRadius:'8px', fontWeight:700, cursor:'pointer'}}>إلغاء</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🔄 إشعار التراجع (Undo Toast) */}
-      {lastAction && (
-        <div className="undo-toast">
-          <span>تم تحديث حالة العمولة بنجاح</span>
-          <button onClick={undoAction} style={{background:'#185FA5', color:'#fff', border:'none', padding:'4px 12px', borderRadius:'4px', cursor:'pointer', fontWeight:700}}>تراجع عن الإجراء</button>
-        </div>
-      )}
     </div>
   );
 }
