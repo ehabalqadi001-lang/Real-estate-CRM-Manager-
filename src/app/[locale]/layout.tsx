@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import LiveNotifications from '@/components/LiveNotifications';
-import '@/app/globals.css';
+import '../globals.css';
 
 export default async function RootLayout({
   children,
