@@ -2,55 +2,57 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { z } from 'zod';
+
+// 🛡️ جدار الحماية (Schema)
+const DealSchema = z.object({
+  client_id: z.string().min(1, "يجب اختيار العميل من القائمة"),
+  buyer_name: z.string().min(2, "اسم العميل غير صالح"),
+  buyer_phone: z.string().min(10, "رقم هاتف العميل غير صالح"),
+  compound: z.string().min(2, "يجب كتابة اسم المشروع/الكومباوند"),
+  developer: z.string().min(2, "يجب تحديد اسم المطور العقاري"),
+  property_type: z.enum(['شقة', 'فيلا', 'تجاري', 'طبي']).catch(() => { throw new Error("نوع الوحدة المختار غير صالح"); }),
+  unit_value: z.number().min(50000, "قيمة الوحدة يجب أن تكون 50,000 جنيه على الأقل"), 
+  amount_paid: z.number().min(0, "المقدم المدفوع لا يمكن أن يكون رقماً سلبياً"),
+  stage: z.enum(['EOI', 'Reservation', 'Contracted', 'Registration', 'Handover']),
+  governorate: z.string().min(2, "يجب تحديد المحافظة"),
+  registration_status: z.string().min(2, "يجب تحديد حالة الشهر العقاري"),
+});
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
   .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; direction: rtl; }
-  
   .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; right: 0; top: 0; bottom: 0; z-index: 50;}
   .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; text-decoration: none; transition: 0.2s; }
   .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
   .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
-  
   .main-content { margin-right: 64px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 64px); }
-  
   .header { padding: 20px 30px; background: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
   .header-title { font-size: 22px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; }
-  
   .action-buttons { display: flex; gap: 10px; }
   .btn-primary { background: #185FA5; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
   .btn-primary:hover { background: #124b82; }
   .btn-export { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
   .btn-export:hover { background: #059669; }
-
   .content-body { padding: 30px; max-width: 1400px; width: 100%; margin: 0 auto; overflow-x: auto;}
-  
-  /* View Toggle */
   .view-toggle { display: flex; background: #e2e8f0; padding: 4px; border-radius: 8px; width: fit-content; margin-bottom: 20px; }
   .toggle-btn { padding: 8px 16px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; transition: 0.2s; display: flex; gap: 6px; align-items: center;}
   .toggle-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-  /* Kanban Board Styles */
   .kanban-board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start; }
   .kanban-col { background: #f1f5f9; border-radius: 12px; width: 300px; min-width: 300px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 75vh; }
   .col-header { padding: 16px; font-weight: 700; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;}
   .col-count { background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
   .col-body { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; min-height: 150px;}
-  
   .kanban-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: grab; transition: 0.2s; border-right: 4px solid #185FA5;}
   .kanban-card:active { cursor: grabbing; opacity: 0.8; transform: scale(0.98); }
   .kanban-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-color: #cbd5e1; }
   .card-title { font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px; }
   .card-sub { font-size: 12px; color: #64748b; margin-bottom: 10px; }
   .card-price { font-weight: 700; color: #10b981; font-size: 14px; direction: ltr; text-align: right;}
-  
-  /* Table Styles */
   .pipeline-table-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
   table { width: 100%; border-collapse: collapse; text-align: right; }
   th { padding: 16px 24px; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
   td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; vertical-align: middle; }
-  
-  /* Modal Styles */
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,28,46,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
   .modal-content { background: #fff; width: 100%; max-width: 700px; border-radius: 16px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; }
   .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #0f172a; display: flex; justify-content: space-between; align-items: center; }
@@ -63,7 +65,6 @@ const CSS_STYLES = `
   .btn-submit { width: 100%; padding: 14px; background: #185FA5; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 `;
 
-// المراحل المصرية المحدثة
 const KANBAN_STAGES = [
   { id: 'EOI', title: 'اهتمام (EOI)', color: '#94a3b8' },
   { id: 'Reservation', title: 'حجز (Reservation)', color: '#f59e0b' },
@@ -103,9 +104,7 @@ export default function SalesPipelinePage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // دالة تصدير البيانات إلى Excel (CSV)
   const exportToExcel = () => {
-    // إضافة علامة BOM ليدعم Excel اللغة العربية
     const BOM = "\uFEFF";
     const headers = ['رقم الصفقة', 'اسم العميل', 'رقم الهاتف', 'المشروع', 'المطور', 'نوع الوحدة', 'المحافظة', 'الشهر العقاري', 'قيمة الوحدة (جنيه)', 'المقدم المدفوع', 'المرحلة', 'الحالة الإدارية', 'تاريخ التسجيل'];
     
@@ -126,14 +125,13 @@ export default function SalesPipelinePage() {
     document.body.removeChild(link);
   };
 
-  // --- دوال الـ Drag & Drop (Kanban) ---
   const handleDragStart = (e: React.DragEvent, dealId: string) => {
     e.dataTransfer.setData('dealId', dealId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault(); // ضروري للسماح بالـ Drop
+    e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
@@ -142,25 +140,26 @@ export default function SalesPipelinePage() {
     const dealId = e.dataTransfer.getData('dealId');
     if (!dealId) return;
 
-    // تحديث الواجهة فوراً (Optimistic Update)
     setDeals(prevDeals => prevDeals.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
-
-    // تحديث قاعدة البيانات
     const { error } = await supabase.from('deals').update({ stage: newStage }).eq('id', dealId);
     if (error) {
       alert("حدث خطأ أثناء نقل الصفقة.");
-      fetchData(); // تراجع في حالة الخطأ
+      fetchData();
     }
   };
-  // ------------------------------------
 
   const handleAddDeal = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
     const selectedClient = clients.find(c => c.id === formData.client_id);
-    if (!selectedClient) { alert("رجاء اختيار عميل"); setIsSubmitting(false); return; }
+    if (!selectedClient) { 
+      alert("❌ رجاء اختيار عميل"); 
+      setIsSubmitting(false); 
+      return; 
+    }
 
-    const payload = {
+    const rawData = {
       client_id: selectedClient.id,
       buyer_name: selectedClient.full_name,
       buyer_phone: selectedClient.phone,
@@ -172,24 +171,46 @@ export default function SalesPipelinePage() {
       stage: formData.stage,
       governorate: formData.governorate,
       registration_status: formData.registration_status,
-      status: 'Pending',
-      finance_status: 'Pending Claim'
     };
 
-    const { error } = await supabase.from('deals').insert([payload]);
-    if (!error) {
-      if (formData.inventory_id) await supabase.from('inventory').update({ status: 'Reserved' }).eq('id', formData.inventory_id);
-      setIsModalOpen(false);
-      fetchData();
+    const validationResult = DealSchema.safeParse(rawData);
+
+    if (!validationResult.success) {
+      // ✅ تم إصلاح خطأ Zod Type بوضع علامة الاستفهامات الآمنة
+      const firstErrorMessage = validationResult.error?.issues[0]?.message || "بيانات غير صالحة";
+      alert("⚠️ خطأ في الإدخال:\n" + firstErrorMessage);
+      setIsSubmitting(false);
+      return; 
     }
+
+    const cleanData = validationResult.data;
+    const payload = { ...cleanData, status: 'Pending', finance_status: 'Pending Claim' };
+
+    const { error } = await supabase.from('deals').insert([payload]);
+    
+    if (!error) {
+      if (formData.inventory_id) {
+        await supabase.from('inventory').update({ status: 'Reserved' }).eq('id', formData.inventory_id);
+      }
+      setIsModalOpen(false);
+      setFormData({
+        inventory_id: '', client_id: '', compound: '', developer: '', property_type: 'شقة', 
+        unit_value: '', amount_paid: '', stage: 'Reservation', governorate: 'القاهرة', registration_status: 'غير مسجل'
+      });
+      fetchData();
+      alert("✅ تم تسجيل البيعة بنجاح!");
+    } else {
+      alert("❌ حدث خطأ في النظام: " + error.message);
+    }
+    
     setIsSubmitting(false);
   };
 
+  // ✅ تم ضبط جميع أقواس الإغلاق (Divs) بشكل مثالي
   return (
     <div className="dashboard-container">
       <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
       
-      {/* Sidebar */}
       <div className="sidebar">
         <Link href="/dashboard" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
         <Link href="/dashboard/clients" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
@@ -214,43 +235,29 @@ export default function SalesPipelinePage() {
         </div>
 
         <div className="content-body">
-          
           <div className="view-toggle">
             <button className={`toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`} onClick={() => setViewMode('kanban')}>
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg> لوحة كانبان
+              لوحة كانبان
             </button>
             <button className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}>
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> عرض الجدول
+              عرض الجدول
             </button>
           </div>
 
           {loading ? (
              <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>جاري تحميل مسار المبيعات...</div>
           ) : viewMode === 'kanban' ? (
-            /* Kanban Board View */
             <div className="kanban-board">
               {KANBAN_STAGES.map(stage => {
                 const stageDeals = deals.filter(d => (d.stage || 'EOI') === stage.id);
                 return (
-                  <div 
-                    key={stage.id} 
-                    className="kanban-col"
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, stage.id)}
-                  >
+                  <div key={stage.id} className="kanban-col" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, stage.id)}>
                     <div className="col-header" style={{borderBottomColor: stage.color}}>
-                      <span>{stage.title}</span>
-                      <span className="col-count">{stageDeals.length}</span>
+                      <span>{stage.title}</span><span className="col-count">{stageDeals.length}</span>
                     </div>
                     <div className="col-body">
                       {stageDeals.map(deal => (
-                        <div 
-                          key={deal.id} 
-                          className="kanban-card"
-                          style={{borderRightColor: stage.color}}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, deal.id)}
-                        >
+                        <div key={deal.id} className="kanban-card" style={{borderRightColor: stage.color}} draggable onDragStart={(e) => handleDragStart(e, deal.id)}>
                           <div className="card-title">{deal.buyer_name}</div>
                           <div className="card-sub">{deal.compound} - {deal.developer}</div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -265,17 +272,11 @@ export default function SalesPipelinePage() {
               })}
             </div>
           ) : (
-            /* Table View */
             <div className="pipeline-table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>معلومات البيعة</th>
-                    <th>العميل</th>
-                    <th>المحافظة / الشهر العقاري</th>
-                    <th>القيمة</th>
-                    <th>المرحلة</th>
-                    <th>إجراء</th>
+                    <th>معلومات البيعة</th><th>العميل</th><th>المحافظة / الشهر العقاري</th><th>القيمة</th><th>المرحلة</th><th>إجراء</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -296,7 +297,6 @@ export default function SalesPipelinePage() {
         </div>
       </div>
 
-      {/* Add Deal Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
