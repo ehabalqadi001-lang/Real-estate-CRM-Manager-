@@ -1,10 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import SalesKanban from '@/components/SalesKanban';
-import { Plus, Filter, Download } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Filter, Download } from 'lucide-react';
+import NewDealButton from './NewDealButton'; // ← 1. استدعاء المكون الجديد
 
-// صفحة Server Component لجلب البيانات بسرعة الصاروخ
 export default async function SalesPage() {
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -13,7 +12,6 @@ export default async function SalesPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   );
 
-  // جلب الصفقات (الـ RLS سيضمن أن كل شخص يرى ما يخصه فقط)
   const { data: deals, error } = await supabase
     .from('deals')
     .select('*')
@@ -22,7 +20,7 @@ export default async function SalesPage() {
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
       
-      {/* Header & Quick Actions */}
+      {/* الهيدر والأزرار */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-2xl font-black text-slate-800">إدارة المبيعات (Pipeline)</h1>
@@ -30,19 +28,20 @@ export default async function SalesPage() {
         </div>
         
         <div className="flex gap-2">
-          <button className="btn-secondary flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold transition">
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold transition">
             <Filter size={16} /> فلاتر متقدمة
           </button>
-          <button className="btn-secondary flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold transition">
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold transition">
             <Download size={16} /> تصدير Excel
           </button>
-          <button className="btn-primary flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition">
-            <Plus size={16} /> صفقة جديدة
-          </button>
+          
+          {/* ← 2. تركيب الزر الذكي الذي سيفتح النافذة */}
+          <NewDealButton /> 
+          
         </div>
       </div>
 
-      {/* Kanban Board Area */}
+      {/* لوحة الكانبان */}
       <div className="mt-4">
         {deals && deals.length > 0 ? (
           <SalesKanban initialDeals={deals} />
