@@ -1,8 +1,8 @@
 import './globals.css'
 import type { Metadata } from 'next'
-
+import NotificationListener from "@/components/NotificationListener";
 export const metadata: Metadata = {
-  title: 'EHAB & ESLAM TEAM | CRM',
+  title: 'FAST INVESTMENT | CRM',
   description: 'Enterprise Real Estate CRM System',
 }
 
@@ -18,7 +18,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body>{children}</body>
+      <body>
+            <NotificationListener />
+            {children}
+          </body>
     </html>
   )
 }
