@@ -21,11 +21,10 @@ export default async function CommissionsPage() {
     .order('created_at', { ascending: false });
 
   // حساب الإجماليات
-  const totalEarned = commissions?.reduce((sum, c) => sum + Number(c.total_amount), 0) || 0;
-  const totalCollected = commissions?.reduce((sum, c) => sum + Number(c.collected_amount), 0) || 0;
-  const totalPending = commissions?.reduce((sum, c) => sum + Number(c.pending_amount), 0) || 0;
-
-  return (
+// ✅ تعديل بسيط لضمان عدم حدوث الانهيار
+const totalEarned = commissions?.reduce((sum, c) => sum + Number(c.total_amount || 0), 0) || 0;
+const totalCollected = commissions?.reduce((sum, c) => sum + Number(c.collected_amount || 0), 0) || 0;
+const totalPending = commissions?.reduce((sum, c) => sum + Number(c.pending_amount || 0), 0) || 0;  return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
       
       {/* رأس الصفحة والإجراءات */}
