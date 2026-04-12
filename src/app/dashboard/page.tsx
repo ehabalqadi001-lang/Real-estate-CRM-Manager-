@@ -11,6 +11,7 @@ export default async function DashboardPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  
   const cookieStore = await cookies();
 
   // 1. إنشاء عميل Supabase بنظام SSR الحديث
