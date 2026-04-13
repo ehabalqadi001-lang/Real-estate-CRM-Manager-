@@ -14,6 +14,7 @@ export default function AddLeadButton() {
     try {
       await addLead(new FormData(e.currentTarget))
       setIsOpen(false)
+      window.location.reload() // تحديث سريع لإظهار العميل الجديد
     } catch (error: any) {
       alert('خطأ أثناء الحفظ: ' + error.message)
     } finally {
@@ -42,9 +43,15 @@ export default function AddLeadButton() {
                 <input name="name" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
               </div>
               
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
-                <input name="phone" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" dir="ltr" placeholder="01X XXXX XXXX" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
+                  <input name="phone" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" dir="ltr" placeholder="01X XXXX XXXX" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">اهتمام العميل</label>
+                  <input name="interest" placeholder="مثال: شقة 3 غرف، تجاري..." className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -68,7 +75,7 @@ export default function AddLeadButton() {
               </div>
 
               <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 disabled:bg-slate-300 transition-colors mt-4">
-                {loading ? 'جاري التسجيل...' : 'حفظ العميل في Fresh Leads'}
+                {loading ? 'جاري التسجيل...' : 'حفظ العميل'}
               </button>
             </form>
           </div>
