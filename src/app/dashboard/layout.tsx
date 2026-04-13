@@ -6,15 +6,15 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    // 1. تثبيت ارتفاع الشاشة بالكامل ومنع التمدد الخارجي
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900" dir="rtl">
+    // حاوية تملأ الشاشة بالكامل وتمنع السكرول المزدوج
+    <div className="flex h-screen w-full overflow-hidden bg-slate-50" dir="rtl">
       
-      {/* 2. استدعاء القائمة الجانبية */}
+      {/* القائمة الجانبية الوحيدة والحصرية */}
       <Sidebar />
 
-      {/* 3. المحتوى الرئيسي: له سكرول منفصل (overflow-y-auto) ومحمي من الجداول العريضة (min-w-0) */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 transition-all duration-300">
-        <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
+      {/* المحتوى الرئيسي (مرن، يتقلص ولا يطغى على القائمة) */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 transition-all duration-300 relative">
+        <div className="p-4 md:p-8 max-w-[1600px] mx-auto pb-24">
           {children}
         </div>
       </main>
