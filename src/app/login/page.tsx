@@ -1,142 +1,153 @@
-"use client";
-import React, { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { z } from 'zod';
+'use client'
 
-// 🛡️ جدار حماية Zod للتحقق من صحة المدخلات
-const LoginSchema = z.object({
-  email: z.string().email("صيغة البريد الإلكتروني غير صحيحة"),
-  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-});
-
-const CSS_STYLES = `
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
-  .login-container { display: flex; min-height: 100vh; background: #f8fafc; direction: rtl; align-items: center; justify-content: center;}
-  
-  .login-card { background: #fff; width: 100%; max-width: 420px; border-radius: 16px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;}
-  
-  .logo-section { text-align: center; margin-bottom: 30px; }
-  .logo-title { font-size: 24px; font-weight: 800; color: #0f1c2e; letter-spacing: -0.5px;}
-  .logo-subtitle { font-size: 13px; color: #64748b; font-weight: 600; margin-top: 4px; letter-spacing: 2px;}
-
-  .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
-  .form-label { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px; }
-  .form-input { padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: #f8fafc; color: #0f172a;}
-  .form-input:focus { border-color: #185FA5; background: #fff; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
-  
-  .btn-submit { width: 100%; padding: 14px; background: #0f1c2e; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;}
-  .btn-submit:hover { background: #185FA5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(24,95,165,0.2);}
-  .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none;}
-
-  .error-message { background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 8px;}
-`;
+import { useState } from 'react'
+import { loginAction, registerAction } from './actions'
+import { AlertTriangle, Briefcase, User, Mail, Lock, Building } from 'lucide-react'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLogin, setIsLogin] = useState(true)
+  const [accountType, setAccountType] = useState('individual') // individual | company
+  const [loading, setLoading] = useState(false)
+  
+  // حالة صائد الأخطاء
+  const [errorState, setErrorState] = useState<{message: string, details: string} | null>(null)
 
-  // استخدام متصل المتصفح الآمن الذي أنشأناه
-  const supabase = createClient();
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg(null);
-
-    // 1. التحقق من صحة المدخلات باستخدام Zod قبل إرهاق السيرفر
-    const validationResult = LoginSchema.safeParse({ email, password });
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrorState(null)
     
-    if (!validationResult.success) {
-      setErrorMsg(validationResult.error?.issues[0]?.message || "بيانات غير صالحة");
-      setLoading(false);
-      return;
-    }
-
-    // 2. إرسال طلب تسجيل الدخول إلى Supabase
-    const { error } = await supabase.auth.signInWithPassword({
-      email: validationResult.data.email,
-      password: validationResult.data.password,
-    });
-
-    if (error) {
-      // ترجمة رسائل الخطأ الشائعة للعربية
-      if (error.message.includes("Invalid login credentials")) {
-        setErrorMsg("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+    const formData = new FormData(e.currentTarget)
+    
+    try {
+      let result;
+      if (isLogin) {
+        result = await loginAction(formData)
       } else {
-        setErrorMsg("حدث خطأ في النظام. الرجاء المحاولة لاحقاً.");
+        result = await registerAction(formData)
       }
-      setLoading(false);
-    } else {
-      // 3. 🟢 تسجيل الدخول ناجح! توجيه المستخدم للوحة التحكم
-      // نستخدم window.location لعمل تحديث كامل ليتمكن الـ Middleware من قراءة الكوكيز الجديدة
-      window.location.href = '/dashboard';
+
+      // إذا رجع بنتيجة (يعني هناك خطأ، لأن النجاح يقوم بعمل Redirect)
+      if (result && !result.success) {
+        setErrorState({ message: result.message, details: result.details })
+      }
+    } catch (err: any) {
+      setErrorState({ message: "خطأ في الاتصال بالخادم", details: err.message })
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="login-container">
-      <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
-      
-      <div className="login-card">
-        <div className="logo-section">
-          <div className="logo-title">FAST INVESTMENT</div>
-          <div className="logo-subtitle">ENTERPRISE CRM SYSTEM</div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="max-w-md w-full">
+        
+        {/* اللوجو */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-black text-slate-900 tracking-wider">FAST INVESTMENT</h1>
+          <p className="text-sm font-bold text-blue-600 tracking-widest uppercase mt-1">Enterprise CRM</p>
         </div>
 
-        {errorMsg && (
-          <div className="error-message">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {errorMsg}
+        {/* صائد الأخطاء القياسي */}
+        {errorState && (
+          <div className="mb-6 bg-white rounded-2xl border-2 border-red-50 p-6 text-center shadow-sm animate-in fade-in slide-in-from-top-4">
+            <div className="bg-red-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500">
+              <AlertTriangle size={24} />
+            </div>
+            <p className="text-red-600 font-bold text-sm mb-2">{errorState.message}</p>
+            <code className="block bg-slate-50 p-2 rounded text-[10px] font-mono text-slate-500" dir="ltr">
+              {errorState.details}
+            </code>
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label className="form-label">البريد الإلكتروني المؤسسي</label>
-            <input 
-              type="email" 
-              className="form-input" 
-              placeholder="name@company.com" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              dir="ltr"
-            />
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+          {/* أزرار التبديل (دخول / تسجيل) */}
+          <div className="flex border-b border-slate-100">
+            <button 
+              type="button"
+              onClick={() => { setIsLogin(true); setErrorState(null); }}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${isLogin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              تسجيل الدخول
+            </button>
+            <button 
+              type="button"
+              onClick={() => { setIsLogin(false); setErrorState(null); }}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              إنشاء حساب جديد
+            </button>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>كلمة المرور</span>
-            </label>
-            <input 
-              type="password" 
-              className="form-input" 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              dir="ltr"
-            />
-          </div>
-
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? (
-              'جاري التحقق من الهوية...'
-            ) : (
-              <>
-                تسجيل الدخول الدخول
-                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-              </>
+          <form onSubmit={handleSubmit} className="p-8 space-y-5">
+            
+            {/* خيارات إنشاء الحساب (فقط في حالة التسجيل) */}
+            {!isLogin && (
+              <div className="space-y-4 mb-6 animate-in fade-in">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider text-center">نوع الحساب المطلوب</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => setAccountType('individual')} className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${accountType === 'individual' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 text-slate-500 hover:border-slate-200'}`}>
+                    <User size={24} />
+                    <span className="text-xs font-bold">وكيل عقاري (فرد)</span>
+                  </button>
+                  <button type="button" onClick={() => setAccountType('company')} className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${accountType === 'company' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 text-slate-500 hover:border-slate-200'}`}>
+                    <Briefcase size={24} />
+                    <span className="text-xs font-bold">شركة وساطة</span>
+                  </button>
+                </div>
+                {/* حقل إرسال نوع الحساب مع الفورم */}
+                <input type="hidden" name="accountType" value={accountType} />
+              </div>
             )}
-          </button>
-        </form>
-        
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '12px', color: '#94a3b8' }}>
-          للحصول على صلاحيات الدخول، يرجى مراجعة إدارة النظام.
+
+            {/* الحقول الإضافية للتسجيل */}
+            {!isLogin && (
+              <div className="space-y-4 animate-in slide-in-from-bottom-2">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل (الرباعي)</label>
+                  <div className="relative">
+                    <User className="absolute right-3 top-3 text-slate-400" size={18} />
+                    <input name="fullName" required className="w-full pr-10 pl-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50 text-sm font-medium" />
+                  </div>
+                </div>
+
+                {accountType === 'company' && (
+                  <div className="animate-in fade-in">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">اسم الشركة (الرسمي)</label>
+                    <div className="relative">
+                      <Building className="absolute right-3 top-3 text-slate-400" size={18} />
+                      <input name="companyName" required className="w-full pr-10 pl-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50 text-sm font-medium" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* الحقول الأساسية (إيميل وباسورد) - تظهر دائماً */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
+                <input name="email" type="email" required className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50 text-sm font-medium text-left" dir="ltr" placeholder="admin@fast-investment.com" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
+                <input name="password" type="password" required className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50 text-sm font-medium text-left" dir="ltr" placeholder="••••••••" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-slate-900/20 disabled:bg-slate-400 mt-2">
+              {loading ? 'جاري المعالجة...' : (isLogin ? 'تسجيل الدخول' : 'تأكيد وإنشاء الحساب')}
+            </button>
+          </form>
+
         </div>
       </div>
     </div>
-  );
+  )
 }
