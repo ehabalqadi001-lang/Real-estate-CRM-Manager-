@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateLeadStatus, addLeadReport } from '@/app/dashboard/leads/actions'
-import { ChevronDown, ChevronUp, CalendarDays, Phone, Target, FileText, Send, Clock } from 'lucide-react'
+import { ChevronDown, ChevronUp, CalendarDays, Phone, Target, FileText, Send, Clock, Bell, AlertCircle } from 'lucide-react'
 
 const STAGES: Record<string, { title: string, color: string }> = {
   'fresh': { title: 'Fresh Leads', color: 'bg-blue-100 text-blue-800 border-blue-200' },
@@ -18,13 +18,14 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
   const [leads, setLeads] = useState(initialLeads || [])
   const [expandedId, setExpandedId] = useState<string | null>(null)
   
-  // حالات نموذج إضافة التقرير
+  // حالات نموذج إضافة تقرير وموعد متابعة
   const [reportFormLeadId, setReportFormLeadId] = useState<string | null>(null)
   const [reportText, setReportText] = useState('')
   const [reportStatus, setReportStatus] = useState('followup')
+  const [followupDate, setFollowupDate] = useState('') // حالة التقويم الذكي
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // تحديث الحالة المباشر من القائمة المنسدلة العادية
+  // 1. تحديث الحالة المباشر من القائمة المنسدلة
   const handleStatusChange = async (leadId: string, newStatus: string) => {
     setLeads(current => current.map(lead => lead.id === leadId ? { ...lead, status: newStatus } : lead))
     try {
@@ -35,19 +36,37 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
     }
   }
 
-  // إرسال تقرير المتابعة الجديد
+  // 2. إرسال تقرير المتابعة الجديد مع التقويم
   const submitReport = async (leadId: string) => {
     if (!reportText.trim()) return alert('يرجى كتابة التقرير أولاً')
     setIsSubmitting(true)
     try {
-      await addLeadReport(leadId, reportText, reportStatus)
+      await addLeadReport(leadId, reportText, reportStatus, followupDate)
       setReportFormLeadId(null)
       setReportText('')
-      window.location.reload() // تحديث لجلب التقرير الجديد من السيرفر
+      setFollowupDate('')
+      window.location.reload()
     } catch (error: any) {
       alert("حدث خطأ: " + error.message)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // 3. نظام التنبيه الذكي للمواعيد (AI Calendar Logic)
+  const getFollowupBadge = (dateString: string | null) => {
+    if (!dateString) return null
+    const date = new Date(dateString)
+    const now = new Date()
+    const isPast = date < now
+    const isToday = date.toDateString() === now.toDateString()
+
+    if (isPast && !isToday) {
+      return <span className="flex items-center gap-1 text-[10px] font-bold bg-red-100 text-red-700 px-2 py-1 rounded-full border border-red-200 animate-pulse"><AlertCircle size={12}/> متابعة فائتة</span>
+    } else if (isToday) {
+      return <span className="flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200"><Bell size={12}/> متابعة اليوم</span>
+    } else {
+      return <span className="flex items-center gap-1 text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full border border-green-200"><CalendarDays size={12}/> مجدولة لاحقاً</span>
     }
   }
 
@@ -56,7 +75,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
       {leads.map((lead) => {
         const currentStage = STAGES[lead.status] || STAGES['fresh']
         const isExpanded = expandedId === lead.id
-        // ترتيب التقارير من الأحدث للأقدم
         const reports = (lead.lead_reports || []).sort((a: any, b: any) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
@@ -64,10 +82,14 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
         return (
           <div key={lead.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
             
-            {/* البطاقة الأساسية */}
+            {/* --- البطاقة الأساسية --- */}
             <div className="p-5">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-slate-900 text-lg truncate pr-1">{lead.name}</h3>
+                <div className="flex flex-col gap-1 pr-1">
+                  <h3 className="font-bold text-slate-900 text-lg truncate">{lead.name}</h3>
+                  {/* عرض تنبيه الـ AI Calendar إن وجد */}
+                  {getFollowupBadge(lead.next_followup_date)}
+                </div>
                 <div className="flex gap-1">
                   {lead.temperature === 'hot' && <span title="ساخن" className="text-xl">🔥</span>}
                   {lead.temperature === 'warm' && <span title="دافئ" className="text-xl">☀️</span>}
@@ -88,7 +110,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
 
               {/* القائمة المنسدلة للحالة السريعة */}
               <div className="mt-4 pt-4 border-t border-slate-100">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">المرحلة الحالية</label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">مرحلة العميل الحالية</label>
                 <select
                   value={lead.status}
                   onChange={(e) => handleStatusChange(lead.id, e.target.value)}
@@ -101,7 +123,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
               </div>
             </div>
 
-            {/* زر الطي والفرد */}
+            {/* --- زر الطي والفرد --- */}
             <button 
               onClick={() => setExpandedId(isExpanded ? null : lead.id)}
               className="w-full bg-slate-50 border-t border-slate-200 p-2 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 flex justify-center items-center gap-1 transition-colors"
@@ -109,10 +131,11 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
               {isExpanded ? <><ChevronUp size={16}/> إخفاء التفاصيل والمتابعات</> : <><ChevronDown size={16}/> عرض التفاصيل والمتابعات ({reports.length})</>}
             </button>
 
-            {/* البطاقة المنسدلة (التفاصيل والتقارير) */}
+            {/* --- البطاقة المنسدلة (التفاصيل، التقويم، التقارير) --- */}
             {isExpanded && (
               <div className="p-5 bg-slate-50 border-t border-slate-200 space-y-4 animate-in slide-in-from-top-2 duration-200">
                 
+                {/* بيانات التواصل */}
                 <div className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Phone size={16} className="text-blue-500" />
@@ -130,30 +153,44 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                     </div>
                     <button 
                       onClick={() => setReportFormLeadId(lead.id)}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded-md transition-colors"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-200"
                     >
-                      + إضافة متابعة
+                      + متابعة جديدة
                     </button>
                   </div>
 
-                  {/* نموذج إضافة تقرير جديد */}
+                  {/* نموذج إضافة التقرير مع AI Calendar */}
                   {reportFormLeadId === lead.id && (
-                    <div className="bg-white border border-blue-200 rounded-xl p-3 mb-3 shadow-sm animate-in fade-in">
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-4 mb-3 shadow-md animate-in fade-in">
                       <textarea 
                         autoFocus
-                        placeholder="اكتب تفاصيل المكالمة أو الاجتماع هنا..."
-                        className="w-full text-sm p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 resize-none"
+                        placeholder="اكتب تفاصيل المكالمة هنا..."
+                        className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 resize-none bg-slate-50"
                         rows={2}
                         value={reportText}
                         onChange={(e) => setReportText(e.target.value)}
                       />
+                      
+                      {/* AI Calendar Input */}
+                      <div className="mb-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                        <label className="flex items-center gap-1 text-xs font-bold text-blue-700 mb-1">
+                          <Clock size={14} /> جدول المتابعة القادمة (اختياري)
+                        </label>
+                        <input 
+                          type="datetime-local" 
+                          className="w-full text-xs border border-blue-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
+                          value={followupDate}
+                          onChange={(e) => setFollowupDate(e.target.value)}
+                        />
+                      </div>
+
                       <div className="flex gap-2">
                         <select 
                           value={reportStatus}
                           onChange={(e) => setReportStatus(e.target.value)}
-                          className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 text-xs font-bold border border-slate-200 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
                         >
-                          <option value="" disabled>حدد نتيجة المتابعة...</option>
+                          <option value="" disabled>نتيجة المتابعة...</option>
                           {Object.entries(STAGES).map(([key, stage]) => (
                             <option key={key} value={key}>{stage.title}</option>
                           ))}
@@ -161,13 +198,13 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                         <button 
                           onClick={() => submitReport(lead.id)}
                           disabled={isSubmitting}
-                          className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 font-bold flex items-center gap-1 transition-colors"
                         >
-                          <Send size={14} />
+                          <Send size={14} /> حفظ
                         </button>
                         <button 
                           onClick={() => setReportFormLeadId(null)}
-                          className="bg-slate-100 text-slate-500 p-2 rounded-lg hover:bg-slate-200"
+                          className="bg-slate-100 text-slate-500 px-3 py-2 rounded-lg hover:bg-slate-200 font-bold transition-colors"
                         >
                           إلغاء
                         </button>
@@ -175,19 +212,21 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                     </div>
                   )}
 
-                  {/* عرض التقارير السابقة */}
+                  {/* سجل التقارير السابقة */}
                   <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                     {reports.length > 0 ? reports.map((report: any) => (
-                      <div key={report.id} className="bg-white border border-slate-200 rounded-lg p-3 text-sm">
-                        <div className="flex justify-between items-start mb-1 text-slate-500 text-xs">
-                          <span className="flex items-center gap-1"><Clock size={12}/> {new Date(report.created_at).toLocaleDateString('ar-EG')}</span>
-                          <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{STAGES[report.status_logged]?.title || report.status_logged}</span>
+                      <div key={report.id} className="bg-white border border-slate-200 rounded-lg p-3 text-sm hover:border-slate-300 transition-colors">
+                        <div className="flex justify-between items-start mb-2 text-slate-500 text-xs">
+                          <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {new Date(report.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                          <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+                            {STAGES[report.status_logged]?.title || report.status_logged}
+                          </span>
                         </div>
-                        <p className="text-slate-800 mt-2">{report.report_text}</p>
+                        <p className="text-slate-800 leading-relaxed font-medium">{report.report_text}</p>
                       </div>
                     )) : (
-                      <div className="text-center text-slate-400 text-xs py-4 border-2 border-dashed border-slate-200 rounded-xl">
-                        لا توجد تقارير متابعة. اضغط على "+ إضافة متابعة" لتسجيل تفاصيل تواصلك مع العميل.
+                      <div className="text-center text-slate-400 text-xs py-6 border-2 border-dashed border-slate-200 rounded-xl bg-white">
+                        لا توجد متابعات سابقة. ابدأ بإضافة تقريرك الأول.
                       </div>
                     )}
                   </div>
@@ -198,6 +237,12 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
           </div>
         )
       })}
+
+      {leads.length === 0 && (
+        <div className="col-span-full py-20 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          لا يوجد عملاء في مسار المبيعات حالياً.
+        </div>
+      )}
     </div>
   )
 }

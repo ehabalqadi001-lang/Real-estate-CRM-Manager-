@@ -44,7 +44,12 @@ export async function addLead(formData: FormData) {
   revalidatePath('/dashboard/leads')
 }
 // دالة إضافة تقرير متابعة وتحديث حالة العميل معاً
-export async function addLeadReport(leadId: string, reportText: string, newStatus: string) {
+export async function addLeadReport(
+  leadId: string, 
+  reportText: string, 
+  newStatus: string, 
+  followupDate?: string // البارامتر الجديد (اختياري)
+) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,7 +57,7 @@ export async function addLeadReport(leadId: string, reportText: string, newStatu
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  // 1. حفظ التقرير
+  // 1. حفظ التقرير في سجل المتابعات
   const { error: reportError } = await supabase.from('lead_reports').insert([{
     lead_id: leadId,
     report_text: reportText,
@@ -60,11 +65,17 @@ export async function addLeadReport(leadId: string, reportText: string, newStatu
   }])
   if (reportError) throw new Error(reportError.message)
 
-  // 2. تحديث حالة العميل
-  const { error: leadError } = await supabase.from('leads').update({
+  // 2. تحديث حالة العميل وموعد المتابعة القادم
+  const updatePayload: any = {
     status: newStatus,
     updated_at: new Date().toISOString()
-  }).eq('id', leadId)
+  }
+  
+  if (followupDate) {
+    updatePayload.next_followup_date = followupDate
+  }
+
+  const { error: leadError } = await supabase.from('leads').update(updatePayload).eq('id', leadId)
   if (leadError) throw new Error(leadError.message)
 
   revalidatePath('/dashboard/leads')
