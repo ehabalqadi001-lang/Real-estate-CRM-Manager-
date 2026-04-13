@@ -1,107 +1,75 @@
 'use client'
 
-import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  LayoutDashboard, 
-  Users, 
-  Briefcase, 
-  Calculator, 
-  TrendingUp, 
-  Settings, 
-  UserCheck, 
-  Building2, 
-  MessageSquare, 
-  FileText, 
-  Users2,
-  PieChart,
-  LogOut
+  LayoutDashboard, Users, Building, Briefcase, 
+  Calculator, UserCheck, Settings, FileText, Banknote, LogOut, UsersRound
 } from 'lucide-react'
 
-const navigation = [
-  { name: 'لوحة التحكم', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'العملاء', href: '/dashboard/clients', icon: Users },
-  { name: 'الصفقات', href: '/dashboard/deals', icon: Briefcase },
-  { name: 'المخزون العقاري', href: '/dashboard/inventory', icon: Building2 },
-  { name: 'العملاء المحتملين (Leads)', href: '/dashboard/leads', icon: UserCheck },
-  { name: 'العمولات', href: '/dashboard/commissions', icon: TrendingUp },
-  { name: 'فريق العمل', href: '/dashboard/team', icon: Users2 },
-  { name: 'المطورين', href: '/dashboard/developers', icon: Building2 },
-  { name: 'التقارير', href: '/dashboard/reports', icon: PieChart },
-  { name: 'حاسبة التمويل', href: '/dashboard/calculator', icon: Calculator },
-  { name: 'واتساب مانيجر', href: '/dashboard/whatsapp', icon: MessageSquare },
-  { name: 'الإعدادات', href: '/dashboard/settings', icon: Settings },
-]
-
-const adminNavigation = [
-  { name: 'إدارة الوكلاء', href: '/admin/agents', icon: UserCheck },
-  { name: 'الفروع', href: '/admin/branches', icon: Building2 },
-  { name: 'إعدادات النظام', href: '/admin/settings', icon: Settings },
+// روابط النظام لسهولة التعديل
+const MENU_ITEMS = [
+  { name: 'لوحة التحكم', icon: LayoutDashboard, href: '/dashboard' },
+  { name: 'العملاء', icon: Users, href: '/dashboard/clients' },
+  { name: 'المخزون العقاري', icon: Building, href: '/dashboard/inventory' },
+  { name: 'العملاء المحتملين (Leads)', icon: UsersRound, href: '/dashboard/leads' },
+  { name: 'الصفقات', icon: Briefcase, href: '/dashboard/deals' },
+  { name: 'العمولات', icon: Banknote, href: '/dashboard/commissions' },
+  { name: 'فريق العمل', icon: UserCheck, href: '/dashboard/team' },
+  { name: 'حاسبة التمويل', icon: Calculator, href: '/dashboard/calculator' },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
 
-  const isActive = (path: string) => pathname === path
-
   return (
-    <div className="flex flex-col h-screen w-64 bg-slate-900 text-white fixed right-0 top-0 border-l border-slate-800">
-      {/* Logo Section */}
-      <div className="p-6 border-b border-slate-800">
-        <h1 className="text-xl font-bold bg-gradient-to-l from-blue-400 to-white bg-clip-text text-transparent">
-          FAST INVESTMENT
-        </h1>
-        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Enterprise CRM</p>
+    <aside className="fixed top-0 right-0 z-[100] h-screen w-64 bg-slate-950 text-slate-300 border-l border-slate-800 hidden lg:flex flex-col shadow-2xl transition-all duration-300">
+      
+      {/* اللوجو */}
+      <div className="h-24 flex items-center justify-center border-b border-slate-800/60 px-6">
+        <Link href="/dashboard" className="flex flex-col items-center hover:scale-105 transition-transform">
+          <span className="text-xl font-black text-white tracking-wider">FAST INVESTMENT</span>
+          <span className="text-[10px] text-blue-500 font-bold mt-1 tracking-widest uppercase">Enterprise CRM</span>
+        </Link>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
-        <div className="pb-4">
-          <p className="px-3 text-xs font-semibold text-slate-500 uppercase mb-2">القائمة الرئيسية</p>
-          {navigation.map((item) => (
+      {/* قائمة الروابط */}
+      <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
+        {MENU_ITEMS.map((item) => {
+          // التأكد من أن الرابط نشط (Active) بطريقة صحيحة
+          const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
+          
+          return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
-                isActive(item.href) 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden ${
+                isActive 
+                  ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20' 
+                  : 'hover:bg-slate-800/50 hover:text-white font-medium'
               }`}
             >
-              <item.icon size={20} className={isActive(item.href) ? 'text-white' : 'group-hover:text-blue-400'} />
-              <span className="text-sm font-medium">{item.name}</span>
+              {/* شريط الإضاءة للرابط النشط */}
+              {isActive && <div className="absolute right-0 top-0 w-1 h-full bg-white rounded-l-full"></div>}
+              
+              <item.icon size={20} className={`${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-400 transition-colors'}`} />
+              <span className="truncate">{item.name}</span>
             </Link>
-          ))}
-        </div>
-
-        {/* Admin Section */}
-        <div className="pt-4 border-t border-slate-800">
-          <p className="px-3 text-xs font-semibold text-slate-500 uppercase mb-2">إدارة المؤسسة</p>
-          {adminNavigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
-                isActive(item.href) 
-                ? 'bg-slate-700 text-white' 
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <item.icon size={18} />
-              <span className="text-sm font-medium">{item.name}</span>
-            </Link>
-          ))}
-        </div>
+          )
+        })}
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-4 border-t border-slate-800">
-        <button className="flex items-center gap-3 w-full px-3 py-2 text-slate-400 hover:bg-red-900/20 hover:text-red-400 rounded-lg transition-colors">
-          <LogOut size={20} />
-          <span className="text-sm font-medium">تسجيل الخروج</span>
+      {/* الإعدادات والخروج (ثابتة بالأسفل) */}
+      <div className="p-4 border-t border-slate-800/60 space-y-2 bg-slate-900/50">
+        <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all text-sm font-medium">
+          <Settings size={18} className="text-slate-400" />
+          <span>إعدادات النظام</span>
+        </Link>
+        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all text-sm font-bold">
+          <LogOut size={18} />
+          <span>تسجيل الخروج</span>
         </button>
       </div>
-    </div>
+    </aside>
   )
 }
