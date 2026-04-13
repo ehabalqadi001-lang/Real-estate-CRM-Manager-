@@ -1,78 +1,79 @@
-"use client";
-import React from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+'use client'
 
-const ADMIN_CSS = `
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
-  .admin-wrapper { display: flex; background: #f1f5f9; min-height: 100vh; direction: rtl; }
-  
-  /* قائمة جانبية إدارية مميزة (Dark Theme) */
-  .admin-sidebar { width: 260px; background: #020617; color: #fff; display: flex; flex-direction: column; position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; border-left: 1px solid #1e293b;}
-  .admin-brand { padding: 25px 20px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #1e293b; color: #e2e8f0; display: flex; align-items: center; gap: 10px;}
-  .admin-brand span { color: #3b82f6; }
-  
-  .admin-nav { display: flex; flex-direction: column; padding: 20px 15px; gap: 8px; flex: 1; }
-  .admin-link { padding: 12px 15px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
-  .admin-link:hover { background: #1e293b; color: #fff; }
-  .admin-link.active { background: #3b82f6; color: #fff; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);}
-  
-  .admin-main { margin-right: 260px; flex: 1; padding: 30px; max-width: 1600px; }
-  
-  .logout-btn { margin-top: auto; padding: 15px; border-top: 1px solid #1e293b; }
-  .btn-exit { width: 100%; padding: 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-  .btn-exit:hover { background: #ef4444; color: #fff; }
-`;
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ShieldCheck, Users, Building, Settings, LayoutDashboard, FileCheck, LogOut, ArrowRight } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
+  const pathname = usePathname()
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
+  // الروابط الإدارية المحدثة بالمسار الصحيح /admin/
+  const ADMIN_MENU = [
+    { name: 'نظرة شاملة', icon: LayoutDashboard, href: '/admin/super-dashboard' },
+    { name: 'طلبات الموافقة', icon: FileCheck, href: '/admin/users/pending' },
+    { name: 'إدارة الشركات', icon: Building, href: '/admin/companies' },
+    { name: 'إدارة المستخدمين', icon: Users, href: '/admin/users' },
+    { name: 'إعدادات المنصة', icon: Settings, href: '/admin/settings' },
+  ]
 
   return (
-    <div className="admin-wrapper">
-      <style dangerouslySetInnerHTML={{ __html: ADMIN_CSS }} />
+    <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 font-sans" dir="rtl">
       
-      <div className="admin-sidebar">
-        <div className="admin-brand">
-          <svg width="24" height="24" fill="none" stroke="#3b82f6" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          إدارة <span>المنظومة</span>
-        </div>
+      {/* القائمة الجانبية الخاصة بالـ Super Admin */}
+      <aside className="w-64 bg-slate-950 text-slate-300 flex-shrink-0 hidden lg:flex flex-col h-full border-l border-slate-800 shadow-2xl z-40">
         
-        <div className="admin-nav">
-          <Link href="/admin" className={`admin-link ${pathname === '/admin' ? 'active' : ''}`}>
-            📊 النظرة العامة
-          </Link>
-          <Link href="/admin/agents" className={`admin-link ${pathname.includes('/admin/agents') ? 'active' : ''}`}>
-            👥 إدارة الموظفين والأدوار
-          </Link>
-          <Link href="/admin/branches" className={`admin-link ${pathname.includes('/admin/branches') ? 'active' : ''}`}>
-            🏢 الفروع والمناطق
-          </Link>
-          <Link href="/admin/commissions" className={`admin-link ${pathname.includes('/admin/commissions') ? 'active' : ''}`}>
-            💰 الخزنة والعمولات
-          </Link>
-          <Link href="/admin/reports" className={`admin-link ${pathname.includes('/admin/reports') ? 'active' : ''}`}>
-            📈 التقارير المؤسسية
-          </Link>
-          <Link href="/admin/settings" className={`admin-link ${pathname.includes('/admin/settings') ? 'active' : ''}`}>
-            ⚙️ إعدادات النظام
-          </Link>
+        <div className="h-24 flex items-center justify-center border-b border-slate-800/80 px-4 bg-slate-900/50">
+          <div className="flex flex-col items-center hover:scale-105 transition-transform cursor-pointer">
+            <span className="text-xl font-black text-white tracking-wider flex items-center gap-2">
+              <ShieldCheck className="text-emerald-500" /> ADMIN PANEL
+            </span>
+            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Super Admin Control</span>
+          </div>
         </div>
 
-        <div className="logout-btn">
-          <button onClick={handleLogout} className="btn-exit">تسجيل الخروج</button>
-        </div>
-      </div>
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar">
+          {ADMIN_MENU.map((item) => {
+            const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-sm font-bold relative overflow-hidden group ${
+                  isActive 
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
+                    : 'hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {isActive && <div className="absolute right-0 top-0 w-1 h-full bg-white rounded-l-full"></div>}
+                <item.icon size={20} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-400 transition-colors'} />
+                <span>{item.name}</span>
+              </Link>
+            )
+          })}
+        </nav>
 
-      <div className="admin-main">
-        {children}
-      </div>
+        {/* قسم العودة للداشبورد العادية (User Dashboard) */}
+        <div className="p-4 border-t border-slate-800/80 bg-slate-900/80 space-y-2">
+          <Link 
+            href="/dashboard" 
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-600/10 text-blue-400 hover:text-blue-300 transition-colors text-sm font-bold border border-blue-900/30"
+          >
+            <ArrowRight size={18} />
+            <span>العودة للـ CRM</span>
+          </Link>
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-bold">
+            <LogOut size={18} />
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* المحتوى الرئيسي للإدارة العليا */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 transition-all duration-300 relative">
+        <div className="p-6 md:p-10 max-w-7xl mx-auto pb-24">
+          {children}
+        </div>
+      </main>
     </div>
-  );
+  )
 }
