@@ -4,14 +4,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // --- الطبقة الأولى: منطق الـ Proxy (الموجود سابقاً) ---
-  // إذا كان الطلب يتوافق مع مسارات الـ Proxy، قم بتنفيذه أولاً
+  // --- 1. طبقة الـ Proxy (الأولوية القصوى) ---
+  // إذا كان الطلب موجهاً لـ Proxy أو API خارجي، يتم تمريره فوراً دون فحص الصلاحيات
   if (pathname.startsWith('/api/proxy')) {
-    // ضع هنا منطق الـ Proxy الخاص بك (مثل التوجيه لـ Server خارجي)
-    // return NextResponse.rewrite(new URL('...', request.url))
+    // يمكنك هنا إضافة أي منطق خاص بـ rewrite إذا كنت تستخدم خادماً خارجياً
+    return NextResponse.next()
   }
 
-  // --- الطبقة الثانية: منطق Supabase والـ RBAC ---
+  // --- 2. تهيئة استجابة Supabase وتحديث الجلسة ---
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -35,32 +35,49 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // جلب بيانات المستخدم وتأمين الصلاحيات
+  // تجديد الجلسة (Session Refresh)
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 1. حماية مسارات الداشبورد
+  // --- 3. حماية مسارات الداشبورد (Authentication) ---
+  // إذا لم يسجل الدخول وحاول دخول أي صفحة إدارية، يتم طرده لصفحة الدخول
   if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (user) {
+    // جلب بيانات الحساب (الحالة والدور) من جدول Profiles
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, status')
       .eq('id', user.id)
       .single()
 
+    const status = profile?.status
     const role = profile?.role
 
-    // 2. حماية مسار الـ Admin (صلاحية Super Admin فقط)
+    // --- 4. حماية "منطقة الانتظار" (Approval System) ---
+    // إذا كان الحساب "قيد الانتظار" (Pending)، يمنع من دخول الداشبورد ويُوجه لصفحة التنبيه
+    if (status === 'pending' && pathname.startsWith('/dashboard')) {
+      return NextResponse.redirect(new URL('/pending-approval', request.url))
+    }
+
+    // إذا كان الحساب "مرفوض" (Rejected)، يتم توجيهه لصفحة الدخول مع رسالة خطأ
+    if (status === 'rejected' && pathname.startsWith('/dashboard')) {
+      return NextResponse.redirect(new URL('/login?error=account_rejected', request.url))
+    }
+
+    // --- 5. نظام الصلاحيات (RBAC Layer) ---
+    // حماية لوحة تحكم المنصة العليا (Super Admin فقط)
     if (pathname.startsWith('/admin') && role !== 'super_admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
-    // 3. حماية الإعدادات وإدارة الفريق (للمديرين فقط)
+    // حماية الصفحات الإدارية للشركات (الإعدادات وإدارة الفريق)
+    // لا يدخلها إلا (Super Admin, Company Admin, Branch Manager)
+    const adminRoles = ['super_admin', 'company_admin', 'branch_manager']
     if (
       (pathname.startsWith('/dashboard/settings') || pathname.startsWith('/dashboard/team')) && 
-      !['super_admin', 'company_admin', 'branch_manager'].includes(role as string)
+      !adminRoles.includes(role as string)
     ) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
@@ -69,6 +86,14 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse
 }
 
+// تحديد المسارات التي يراقبها الـ Middleware
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    /*
+     * مراقبة كافة المسارات ماعدا:
+     * 1. الملفات الثابتة (static files, images, favicon)
+     * 2. صفحات الـ Auth العامة (login, register)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|login|register|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
