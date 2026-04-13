@@ -24,25 +24,25 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  // 1. حماية الداشبورد: منع غير المسجلين
+  // 1. حماية الداشبورد العامة
   if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (user) {
-    // جلب الحالة الفعلية من جدول Profiles (لأن Metadata السيرفر قد لا تحدث فوراً)
     const { data: profile } = await supabase
       .from('profiles')
-      .select('status, role')
+      .select('role, status')
       .eq('id', user.id)
       .single()
 
-    // 2. صمام الأمان: إذا كان الحساب "قيد الانتظار" يحظر دخوله للداشبورد تماماً
-    if (profile?.status === 'pending' && pathname.startsWith('/dashboard')) {
+    // 2. صمام الأمان (منطقة الانتظار)
+    if (profile?.status === 'pending' && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
       return NextResponse.redirect(new URL('/pending-approval', request.url))
     }
 
-    // 3. منع الدخول للأدمن لغير الصلاحيات المخصصة
+    // 3. حماية الإدارة العليا (المسار الجديد /admin/)
+    // إذا حاول أي شخص غير الـ super_admin دخول أي صفحة تبدأ بـ /admin/ سيتم طرده
     if (pathname.startsWith('/admin') && profile?.role !== 'super_admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
