@@ -1,8 +1,13 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Building, Briefcase, Calculator, UserCheck, Settings, Banknote, LogOut, UsersRound } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr' // تم تصحيح الاستدعاء هنا
+import { 
+  LayoutDashboard, Users, Building, Briefcase, Calculator, 
+  UserCheck, Settings, Banknote, LogOut, UsersRound, ShieldAlert, AlertTriangle
+} from 'lucide-react'
 
 const MENU_ITEMS = [
   { name: 'لوحة التحكم', icon: LayoutDashboard, href: '/dashboard' },
@@ -17,12 +22,45 @@ const MENU_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<string | null>(null)
+  
+  // صائد الأخطاء الخاص بالـ Sidebar (Rule 3)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  // جلب رتبة المستخدم لتحديد ما يظهر في القائمة (Security Check)
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError) throw userError
+
+        if (user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+          if (profileError) throw profileError
+          setUserRole(profile?.role || null)
+        }
+      } catch (error: any) {
+        setFetchError("تعذر التحقق من الصلاحيات")
+        console.error("Sidebar Auth Error:", error.message)
+      }
+    }
+    checkRole()
+  }, [])
 
   return (
-    // w-64 تحدد العرض، flex-shrink-0 تمنع الانضغاط، h-full تأخذ الطول بالكامل
     <aside className="w-64 bg-slate-950 text-slate-300 flex-shrink-0 hidden lg:flex flex-col h-full border-l border-slate-800 shadow-2xl relative z-40">
        
-       {/* اللوجو */}
+       {/* اللوجو والبراندينج (Rule 4) */}
        <div className="h-24 flex items-center justify-center border-b border-slate-800/80 px-4">
          <Link href="/dashboard" className="flex flex-col items-center hover:scale-105 transition-transform">
             <span className="text-xl font-black text-white tracking-wider">FAST INVESTMENT</span>
@@ -30,8 +68,27 @@ export default function Sidebar() {
          </Link>
        </div>
 
-       {/* الروابط (مع سكرول داخلي مخفي لو زادت الروابط مستقبلاً) */}
        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
+          
+          {/* صائد الأخطاء المصغر في حالة فشل جلب الرتبة */}
+          {fetchError && (
+            <div className="mb-4 flex items-center gap-2 text-[10px] font-bold text-red-400 bg-red-400/10 p-2.5 rounded-xl border border-red-400/20 animate-pulse">
+              <AlertTriangle size={14} /> {fetchError}
+            </div>
+          )}
+
+          {/* رابط لوحة تحكم المنصة (يظهر فقط لمن يملك صلاحية super_admin) */}
+          {userRole === 'super_admin' && (
+            <Link
+              href="/admin/super-dashboard"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-sm font-black bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 mb-4 hover:bg-emerald-600 hover:text-white group"
+            >
+              <ShieldAlert size={20} className="text-emerald-500 group-hover:text-white transition-colors" />
+              <span>لوحة تحكم المنصة العليا</span>
+            </Link>
+          )}
+
+          {/* الروابط الأساسية للموظفين والشركات */}
           {MENU_ITEMS.map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
             return (
@@ -52,7 +109,7 @@ export default function Sidebar() {
           })}
        </nav>
 
-       {/* الإعدادات وتسجيل الخروج (ثابتة في الأسفل) */}
+       {/* الإعدادات وتسجيل الخروج */}
        <div className="p-4 border-t border-slate-800/80 bg-slate-900/50">
           <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-sm font-medium transition-colors mb-2 text-slate-400 hover:text-white">
             <Settings size={18} />
