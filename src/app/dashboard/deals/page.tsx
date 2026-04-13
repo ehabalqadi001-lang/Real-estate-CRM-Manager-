@@ -1,7 +1,11 @@
+// src/app/dashboard/deals/page.tsx
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import DealsGrid from '../../../components/deals/DealsGrid'
-import AddDealButton from '../../../components/deals/AddDealButton'
+import DealsGrid from '@/components/deals/DealsGrid'
+import AddDealButton from '@/components/deals/AddDealButton'
+
+// 🔴 هذه الإضافة تمنع الـ Caching تماماً وتجبر السيرفر على جلب بيانات جديدة كل مرة
+export const dynamic = 'force-dynamic'
 
 export default async function DealsPage() {
   const cookieStore = await cookies()
@@ -13,18 +17,22 @@ export default async function DealsPage() {
 
   let deals: any[] = []
   let fetchError = null
+  let exactErrorDetails = null // لمعرفة رسالة الخطأ الحقيقية من قاعدة البيانات
 
   try {
-    // جلب الصفقات مع اسم العميل المرتبط بها
     const { data, error } = await supabase
       .from('deals')
       .select('*, clients(name)')
       .order('created_at', { ascending: false })
     
-    if (error) throw error
+    if (error) {
+      exactErrorDetails = error.message
+      throw error
+    }
     deals = data || []
   } catch (e: any) {
     fetchError = "تأكد من إنشاء جدول deals وربطه بجدول clients في Supabase."
+    if (!exactErrorDetails) exactErrorDetails = e.message || "Unknown Error"
   }
 
   return (
@@ -42,7 +50,11 @@ export default async function DealsPage() {
       {fetchError ? (
         <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-10 text-center">
            <p className="text-red-600 font-bold mb-2">تعذر جلب الصفقات</p>
-           <p className="text-sm text-slate-500">{fetchError}</p>
+           <p className="text-sm text-slate-500 mb-4">{fetchError}</p>
+           {/* عرض الكود التقني للخطأ */}
+           <code className="bg-red-50 text-red-800 px-4 py-2 rounded-lg text-xs font-mono inline-block text-left" dir="ltr">
+             Error: {exactErrorDetails}
+           </code>
         </div>
       ) : (
         <DealsGrid initialDeals={deals} />
