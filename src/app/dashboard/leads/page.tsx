@@ -18,9 +18,10 @@ export default async function LeadsPage() {
   let exactErrorDetails = null
 
   try {
+    // التعديل هنا: جلب العملاء مع تقاريرهم (Join)
     const { data, error } = await supabase
       .from('leads')
-      .select('*')
+      .select('*, lead_reports(*)') 
       .order('updated_at', { ascending: false })
     
     if (error) {
