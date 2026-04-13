@@ -48,17 +48,15 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
 
   // 2. توزيع المهام (تحديد الموظف المسؤول)
   const handleAssignMember = async (leadId: string, memberId: string) => {
-    // تحديث الشاشة فوراً
     setLeads(current => current.map(lead => lead.id === leadId ? { ...lead, assigned_to: memberId } : lead))
     try {
       const assignedId = memberId === "" ? null : memberId
       await assignLeadToMember(leadId, assignedId as any)
-    } catch (error) {
-      alert("تعذر تعيين الموظف")
+    } catch (error: any) { // <-- التعديل هنا
+      alert("تعذر تعيين الموظف: " + error.message) // <-- التعديل هنا
       window.location.reload()
     }
   }
-
   // 3. إرسال التقرير وموعد المتابعة الذكي
   const submitReport = async (leadId: string) => {
     if (!reportText.trim()) return alert('يرجى كتابة التقرير أولاً')
