@@ -21,7 +21,7 @@ export default async function InventoryPage() {
   try {
     const { data, error } = await supabase
       .from('inventory')
-      .select('*')
+      .select('*, developers(name)') // <-- التعديل هنا
       .order('created_at', { ascending: false })
     
     if (error) {
