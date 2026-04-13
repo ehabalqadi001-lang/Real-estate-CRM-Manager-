@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateLeadStatus, addLeadReport } from '@/app/dashboard/leads/actions'
-import { ChevronDown, ChevronUp, CalendarDays, Phone, Target, FileText, Send, Clock, Bell, AlertCircle } from 'lucide-react'
+import { getTeamMembers, assignLeadToMember } from '@/app/dashboard/team/actions'
+import { ChevronDown, ChevronUp, CalendarDays, Phone, Target, FileText, Send, Clock, Bell, AlertCircle, UserCheck } from 'lucide-react'
 
+// المراحل وألوانها
 const STAGES: Record<string, { title: string, color: string }> = {
   'fresh': { title: 'Fresh Leads', color: 'bg-blue-100 text-blue-800 border-blue-200' },
   'old': { title: 'Old Leads', color: 'bg-slate-100 text-slate-800 border-slate-200' },
@@ -18,14 +20,22 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
   const [leads, setLeads] = useState(initialLeads || [])
   const [expandedId, setExpandedId] = useState<string | null>(null)
   
-  // حالات نموذج إضافة تقرير وموعد متابعة
+  // حالات التقارير والمواعيد
   const [reportFormLeadId, setReportFormLeadId] = useState<string | null>(null)
   const [reportText, setReportText] = useState('')
   const [reportStatus, setReportStatus] = useState('followup')
-  const [followupDate, setFollowupDate] = useState('') // حالة التقويم الذكي
+  const [followupDate, setFollowupDate] = useState('') 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 1. تحديث الحالة المباشر من القائمة المنسدلة
+  // حالة فريق العمل
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
+
+  // جلب أعضاء الفريق عند فتح الصفحة
+  useEffect(() => {
+    getTeamMembers().then(setTeamMembers).catch(console.error)
+  }, [])
+
+  // 1. تحديث مرحلة العميل
   const handleStatusChange = async (leadId: string, newStatus: string) => {
     setLeads(current => current.map(lead => lead.id === leadId ? { ...lead, status: newStatus } : lead))
     try {
@@ -36,7 +46,20 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
     }
   }
 
-  // 2. إرسال تقرير المتابعة الجديد مع التقويم
+  // 2. توزيع المهام (تحديد الموظف المسؤول)
+  const handleAssignMember = async (leadId: string, memberId: string) => {
+    // تحديث الشاشة فوراً
+    setLeads(current => current.map(lead => lead.id === leadId ? { ...lead, assigned_to: memberId } : lead))
+    try {
+      const assignedId = memberId === "" ? null : memberId
+      await assignLeadToMember(leadId, assignedId as any)
+    } catch (error) {
+      alert("تعذر تعيين الموظف")
+      window.location.reload()
+    }
+  }
+
+  // 3. إرسال التقرير وموعد المتابعة الذكي
   const submitReport = async (leadId: string) => {
     if (!reportText.trim()) return alert('يرجى كتابة التقرير أولاً')
     setIsSubmitting(true)
@@ -53,7 +76,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
     }
   }
 
-  // 3. نظام التنبيه الذكي للمواعيد (AI Calendar Logic)
+  // 4. نظام شارات AI Calendar
   const getFollowupBadge = (dateString: string | null) => {
     if (!dateString) return null
     const date = new Date(dateString)
@@ -87,7 +110,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
               <div className="flex justify-between items-start mb-3">
                 <div className="flex flex-col gap-1 pr-1">
                   <h3 className="font-bold text-slate-900 text-lg truncate">{lead.name}</h3>
-                  {/* عرض تنبيه الـ AI Calendar إن وجد */}
                   {getFollowupBadge(lead.next_followup_date)}
                 </div>
                 <div className="flex gap-1">
@@ -108,18 +130,37 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                 </div>
               </div>
 
-              {/* القائمة المنسدلة للحالة السريعة */}
-              <div className="mt-4 pt-4 border-t border-slate-100">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">مرحلة العميل الحالية</label>
-                <select
-                  value={lead.status}
-                  onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                  className={`w-full px-3 py-2 text-sm font-bold rounded-lg border focus:outline-none appearance-none text-center cursor-pointer ${currentStage.color}`}
-                >
-                  {Object.entries(STAGES).map(([key, stage]) => (
-                    <option key={key} value={key} className="bg-white text-slate-900 font-medium">{stage.title}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
+                {/* 1. القائمة المنسدلة للموظف (Team Assignment) */}
+                <div>
+                  <label className="flex items-center gap-1 text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                    <UserCheck size={12}/> المسؤول
+                  </label>
+                  <select
+                    value={lead.assigned_to || ''}
+                    onChange={(e) => handleAssignMember(lead.id, e.target.value)}
+                    className="w-full px-2 py-2 text-xs font-bold rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-700 cursor-pointer truncate"
+                  >
+                    <option value="">-- غير محدد --</option>
+                    {teamMembers.map(member => (
+                      <option key={member.id} value={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. القائمة المنسدلة للحالة (Pipeline Status) */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">المرحلة الحالية</label>
+                  <select
+                    value={lead.status}
+                    onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                    className={`w-full px-2 py-2 text-xs font-bold rounded-lg border focus:outline-none appearance-none text-center cursor-pointer truncate ${currentStage.color}`}
+                  >
+                    {Object.entries(STAGES).map(([key, stage]) => (
+                      <option key={key} value={key} className="bg-white text-slate-900 font-medium">{stage.title}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -135,7 +176,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
             {isExpanded && (
               <div className="p-5 bg-slate-50 border-t border-slate-200 space-y-4 animate-in slide-in-from-top-2 duration-200">
                 
-                {/* بيانات التواصل */}
                 <div className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Phone size={16} className="text-blue-500" />
@@ -144,7 +184,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                   <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md">{lead.source || 'غير محدد'}</span>
                 </div>
 
-                {/* قسم التقارير والمتابعة */}
+                {/* قسم المتابعات */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
@@ -159,7 +199,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                     </button>
                   </div>
 
-                  {/* نموذج إضافة التقرير مع AI Calendar */}
                   {reportFormLeadId === lead.id && (
                     <div className="bg-white border-2 border-blue-200 rounded-xl p-4 mb-3 shadow-md animate-in fade-in">
                       <textarea 
@@ -171,10 +210,9 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                         onChange={(e) => setReportText(e.target.value)}
                       />
                       
-                      {/* AI Calendar Input */}
                       <div className="mb-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100">
                         <label className="flex items-center gap-1 text-xs font-bold text-blue-700 mb-1">
-                          <Clock size={14} /> جدول المتابعة القادمة (اختياري)
+                          <Clock size={14} /> جدول المتابعة القادمة (AI Calendar)
                         </label>
                         <input 
                           type="datetime-local" 
@@ -212,7 +250,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                     </div>
                   )}
 
-                  {/* سجل التقارير السابقة */}
                   <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                     {reports.length > 0 ? reports.map((report: any) => (
                       <div key={report.id} className="bg-white border border-slate-200 rounded-lg p-3 text-sm hover:border-slate-300 transition-colors">
