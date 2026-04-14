@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
 // 1. جلب جميع العملاء
+// 1. جلب العملاء بذكاء حسب رتبة المستخدم (مدير شركة يرى الكل، وكيل يرى عملاءه فقط)
 export async function getLeads() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -13,10 +14,28 @@ export async function getLeads() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  const { data, error } = await supabase
-    .from('leads')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // معرفة هوية ورتبة المستخدم الحالي
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, account_type, company_id')
+    .eq('id', user.id)
+    .single()
+
+  // بناء استعلام قاعدة البيانات بشكل مرن
+  let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
+
+  if (profile?.account_type === 'company' || profile?.role === 'company_admin') {
+    // إذا كان مدير شركة: اجلب كل العملاء الذين يحملون ختم شركته
+    query = query.eq('company_id', user.id)
+  } else if (profile?.role === 'agent') {
+    // إذا كان وكيل: اجلب فقط العملاء المفوضين إليه شخصياً
+    query = query.eq('user_id', user.id)
+  }
+
+  const { data, error } = await query
 
   if (error) throw new Error(error.message)
   return data || []
