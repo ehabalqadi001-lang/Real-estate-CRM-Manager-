@@ -42,7 +42,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   return { success: true }
 }
 
-// 3. إضافة عميل جديد (لحل خطأ زر الإضافة)
+// 3. إضافة عميل جديد
 export async function addLead(payload: any) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -73,8 +73,13 @@ export async function addLead(payload: any) {
   return { success: true }
 }
 
-// 4. إضافة تقرير/تعليق للعميل (الحل الجذري للخطأ الجديد PipelineBoard)
-export async function addLeadReport(leadId: string, reportData: any) {
+// 4. إضافة تقرير/تعليق للعميل (الحل الجذري: استقبال المتغيرات الأربعة بأمان تام)
+export async function addLeadReport(
+  leadId: string, 
+  reportText: string, 
+  reportStatus?: string, 
+  followupDate?: string
+) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,15 +89,17 @@ export async function addLeadReport(leadId: string, reportData: any) {
 
   const { data: { user } } = await supabase.auth.getUser()
   
-  // استخراج النص بذكاء أياً كانت طريقة إرساله من الواجهة
-  const report_text = typeof reportData === 'string' ? reportData : (reportData?.text || reportData?.report_text || 'تحديث حالة')
+  // دمج البيانات الإضافية بذكاء لتجنب أخطاء قاعدة البيانات إذا كانت الأعمدة غير موجودة
+  let finalReportText = reportText || 'تحديث حالة'
+  if (reportStatus) finalReportText += ` | الحالة: ${reportStatus}`
+  if (followupDate) finalReportText += ` | المتابعة القادمة: ${followupDate}`
 
   const { error } = await supabase
     .from('lead_reports')
     .insert({
       lead_id: leadId,
       user_id: user?.id,
-      report_text: report_text
+      report_text: finalReportText
     })
 
   if (error) throw new Error(error.message)
