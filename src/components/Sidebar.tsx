@@ -1,15 +1,17 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, UserPlus, Briefcase, 
-  MapPin, BarChart3, LogOut 
+  MapPin, BarChart3, LogOut, ShieldCheck, UserCircle, Target
 } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
+import { createBrowserClient } from '@supabase/ssr'
 
-// القائمة الاستراتيجية للمدير
-const menuItems = [
+// 1. القائمة الاستراتيجية للقيادة (المدير)
+const adminMenu = [
   { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
   { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' },
   { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
@@ -17,21 +19,47 @@ const menuItems = [
   { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
 ]
 
+// 2. القائمة التكتيكية (لوكيل المبيعات)
+const agentMenu = [
+  { name: 'مساحة العمل', icon: Target, path: '/dashboard/agent' },
+  { name: 'مسار المبيعات', icon: Briefcase, path: '/dashboard/leads' },
+  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
+]
+
 export default function Sidebar() {
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  // تشغيل جهاز الاستخبارات المصغر لمعرفة رتبة المستخدم فور الدخول
+  useEffect(() => {
+    const fetchRole = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        setUserRole(data?.role || 'agent')
+      }
+    }
+    fetchRole()
+  }, [])
+
+  // اتخاذ قرار عرض الواجهة بناءً على الرتبة
+  const isLeader = userRole === 'company_admin' || userRole === 'admin'
+  const activeMenu = isLeader ? adminMenu : agentMenu
 
   return (
-    <aside className="w-72 bg-[#0A1128] text-white flex flex-col h-screen fixed right-0 top-0 border-l border-slate-800/50 shadow-2xl" dir="rtl">
+    <aside className="w-72 bg-[#0A1128] text-white flex flex-col h-screen fixed right-0 top-0 border-l border-slate-800/50 shadow-2xl z-50" dir="rtl">
       
-      {/* 1. منطقة السيادة العلوية (الشعار + الرادار) */}
+      {/* 1. منطقة السيادة العلوية */}
       <div className="p-6 pb-6 flex flex-col border-b border-slate-800/50">
         <div className="flex justify-between items-center mb-6">
           <div className="flex flex-col">
             <h1 className="text-xl font-black text-blue-500 italic leading-none">FAST</h1>
             <h1 className="text-xl font-black text-white italic leading-none">INVESTMENT</h1>
           </div>
-          
-          {/* تم نقل الجرس إلى هنا (الرادار العلوي) */}
           <div className="bg-slate-900/50 p-0.5 rounded-xl border border-slate-800/50 shadow-inner">
              <NotificationBell />
           </div>
@@ -39,18 +67,23 @@ export default function Sidebar() {
         <p className="text-[9px] font-black text-slate-500 tracking-[0.3em] uppercase opacity-60">Enterprise CRM System</p>
       </div>
 
-      {/* 2. بطاقة هوية الإدارة (EHAB & ESLAM TEAM) */}
+      {/* 2. بطاقة الهوية الديناميكية (تتغير حسب رتبة المستخدم) */}
       <div className="px-6 py-6">
-        <div className="bg-gradient-to-br from-[#101835] to-[#0A1128] rounded-2xl p-4 border border-blue-900/20 flex flex-col items-center text-center shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
-          <span className="text-blue-400 text-[10px] font-black mb-1 uppercase tracking-wider">Management Leader</span>
-          <h2 className="text-sm font-bold text-slate-200 uppercase">القيادة الإدارية</h2>
+        <div className={`bg-gradient-to-br ${isLeader ? 'from-[#101835] to-[#0A1128] border-blue-900/20' : 'from-slate-800 to-slate-900 border-slate-700/50'} rounded-2xl p-4 border flex flex-col items-center text-center shadow-lg relative overflow-hidden group`}>
+          {isLeader && <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>}
+          
+          <span className={`${isLeader ? 'text-blue-400' : 'text-emerald-400'} text-[10px] font-black mb-1 uppercase tracking-wider`}>
+            {isLeader ? 'Management Leader' : 'Sales Agent'}
+          </span>
+          <h2 className="text-sm font-bold text-slate-200 uppercase flex items-center gap-1.5">
+            {isLeader ? <><ShieldCheck size={16} className="text-blue-500"/> القيادة الإدارية</> : <><UserCircle size={16} className="text-emerald-500"/> وكيل مبيعات</>}
+          </h2>
         </div>
       </div>
 
-      {/* 3. أزرار التحكم والعمليات (Navigation) */}
+      {/* 3. القائمة الذكية (Navigation) */}
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
-        {menuItems.map((item) => {
+        {activeMenu.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(item.path + '/')
           const Icon = item.icon
 
@@ -76,7 +109,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* 4. القاعدة السفلية (الخروج فقط) */}
+      {/* 4. زر تسجيل الخروج */}
       <div className="p-6 border-t border-slate-800/50 bg-[#080d1f]">
         <form action="/auth/logout" method="post">
           <button type="submit" className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-500 font-bold transition-all border border-transparent hover:border-red-500/20 group">
