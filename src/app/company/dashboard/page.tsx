@@ -22,12 +22,18 @@ export default async function CompanyDashboardPage() {
     .eq('id', user?.id)
     .single()
 
-  // 2. جلب فريق العمل (الوكلاء) التابعين لهذه الشركة فقط
-  const { data: agents, error: agentsError } = await supabase
+  // 2. جلب فريق العمل (الوكلاء)
+  const { data: agents } = await supabase
     .from('profiles')
     .select('*')
     .eq('company_id', user?.id)
     .order('created_at', { ascending: false })
+
+  // 3. المحرك التحليلي: جلب عملاء الشركة لحساب المبيعات الحية
+  const { data: leads } = await supabase
+    .from('leads')
+    .select('status, expected_value')
+    .eq('company_id', user?.id)
 
   if (profileError) {
     return (
@@ -41,7 +47,13 @@ export default async function CompanyDashboardPage() {
     )
   }
 
+  // العمليات الحسابية للوحة القيادة
   const agentsCount = agents?.length || 0
+  const totalLeads = leads?.length || 0
+  
+  // حساب إجمالي المبيعات المحققة (العملاء في حالة Won)
+  const wonLeads = leads?.filter(lead => lead.status === 'Won') || []
+  const totalWonValue = wonLeads.reduce((sum, lead) => sum + (Number(lead.expected_value) || 0), 0)
 
   return (
     <div className="p-8 space-y-8" dir="rtl">
@@ -60,27 +72,29 @@ export default async function CompanyDashboardPage() {
         </Link>
       </div>
 
-      {/* إحصائيات سريعة للشركة */}
+      {/* إحصائيات سريعة للشركة (الآن أصبحت حية وديناميكية) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-blue-300 transition-colors">
-          <div className="bg-blue-50 p-3 rounded-xl text-blue-600"><Users size={24}/></div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-blue-300 transition-colors group">
+          <div className="bg-blue-50 p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform"><Users size={24}/></div>
           <div>
             <p className="text-xs font-bold text-slate-400">فريق المبيعات (Agents)</p>
-            <h3 className="text-xl font-black text-slate-900">{agentsCount} وكيل</h3>
+            <h3 className="text-xl font-black text-slate-900">{agentsCount} <span className="text-sm text-slate-500">وكيل</span></h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 transition-colors">
-          <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600"><TrendingUp size={24}/></div>
+        
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 transition-colors group">
+          <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform"><TrendingUp size={24}/></div>
           <div>
             <p className="text-xs font-bold text-slate-400">مبيعات الشركة (Won)</p>
-            <h3 className="text-xl font-black text-slate-900">0 ج.م</h3>
+            <h3 className="text-xl font-black text-emerald-600">{totalWonValue.toLocaleString()} <span className="text-sm text-emerald-600/70">ج.م</span></h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-purple-300 transition-colors">
-          <div className="bg-purple-50 p-3 rounded-xl text-purple-600"><Building size={24}/></div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-purple-300 transition-colors group">
+          <div className="bg-purple-50 p-3 rounded-xl text-purple-600 group-hover:scale-110 transition-transform"><Building size={24}/></div>
           <div>
-            <p className="text-xs font-bold text-slate-400">العملاء المحتملين (Leads)</p>
-            <h3 className="text-xl font-black text-slate-900">0 عميل</h3>
+            <p className="text-xs font-bold text-slate-400">إجمالي العملاء (Leads)</p>
+            <h3 className="text-xl font-black text-slate-900">{totalLeads} <span className="text-sm text-slate-500">عميل</span></h3>
           </div>
         </div>
       </div>
