@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
+// 1. جلب أعضاء الفريق التابعين لنفس الشركة
 export async function getTeamMembers() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -11,31 +12,34 @@ export async function getTeamMembers() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
-  const { data } = await supabase.from('team_members').select('*').order('name')
-  return data || []
-}
 
-export async function addTeamMember(formData: FormData) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
 
-  const payload = {
-    name: formData.get('name'),
-    role: formData.get('role'),
-    phone: formData.get('phone'),
-    email: formData.get('email')
-  }
+  // معرفة هل المستخدم الحالي هو شركة أم وكيل
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id, account_type')
+    .eq('id', user.id)
+    .single()
 
-  const { error } = await supabase.from('team_members').insert([payload])
+  // تحديد رقم الشركة المرجعي
+  const targetCompanyId = profile?.account_type === 'company' ? user.id : profile?.company_id
+
+  if (!targetCompanyId) return []
+
+  // جلب كل الموظفين المعتمدين تحت هذه الشركة
+  const { data: members, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, role')
+    .eq('company_id', targetCompanyId)
+    .eq('status', 'approved')
+
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard/team')
+  return members || []
 }
 
-// دالة مخصصة لإسناد عميل لموظف
+// 2. تفويض العميل لوكيل محدد
 export async function assignLeadToMember(leadId: string, memberId: string) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -46,9 +50,11 @@ export async function assignLeadToMember(leadId: string, memberId: string) {
 
   const { error } = await supabase
     .from('leads')
-    .update({ assigned_to: memberId })
+    .update({ user_id: memberId }) // تغيير الموظف المسؤول
     .eq('id', leadId)
 
   if (error) throw new Error(error.message)
+
   revalidatePath('/dashboard/leads')
+  return { success: true }
 }

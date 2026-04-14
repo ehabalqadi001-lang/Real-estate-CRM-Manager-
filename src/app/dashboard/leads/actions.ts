@@ -43,6 +43,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 }
 
 // 3. إضافة عميل جديد
+// استبدل دالة addLead القديمة بهذه الدالة المحدثة
 export async function addLead(payload: any) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -57,6 +58,15 @@ export async function addLead(payload: any) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // جلب ملف المستخدم لمعرفة شركته
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id, account_type')
+    .eq('id', user?.id)
+    .single()
+
+  const targetCompanyId = profile?.account_type === 'company' ? user?.id : profile?.company_id
+
   const { error } = await supabase
     .from('leads')
     .insert({ 
@@ -64,7 +74,8 @@ export async function addLead(payload: any) {
       property_type, 
       expected_value, 
       status: 'Fresh Leads',
-      user_id: user?.id 
+      user_id: user?.id,
+      company_id: targetCompanyId // ختم الشركة لحماية ملكية العميل
     })
 
   if (error) throw new Error(error.message)
@@ -72,7 +83,6 @@ export async function addLead(payload: any) {
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
-
 // 4. إضافة تقرير/تعليق للعميل (الحل الجذري: استقبال المتغيرات الأربعة بأمان تام)
 export async function addLeadReport(
   leadId: string, 
