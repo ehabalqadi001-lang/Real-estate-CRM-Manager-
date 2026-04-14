@@ -1,118 +1,81 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  LayoutDashboard, Users, Building2, Briefcase, 
-  Settings, LogOut, ChevronRight, BarChart3, 
-  MapPin, Rocket, Bell, UserPlus // أضفنا UserPlus هنا
+  LayoutDashboard, UserPlus, Briefcase, 
+  MapPin, BarChart3, LogOut 
 } from 'lucide-react'
+import NotificationBell from '@/components/notifications/NotificationBell'
+
+// القائمة الاستراتيجية للمدير
+const menuItems = [
+  { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
+  { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' },
+  { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
+  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
+  { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
+]
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const supabase = createClient()
-  const [profile, setProfile] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function getProfile() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('full_name, role, company_name')
-          .eq('id', user.id)
-          .single()
-        setProfile(data)
-      }
-      setLoading(false)
-    }
-    getProfile()
-  }, [])
-
-  if (loading) return <div className="w-72 bg-[#050B18] h-full animate-pulse" />
-
-  // 1. تعريف الروابط حسب الرتبة (تطبيق الدستور التقني)
-  const menuConfig: any = {
-    super_admin: [
-      { name: 'لوحة التحكم العليا', icon: LayoutDashboard, path: '/admin/super-dashboard' },
-      { name: 'إدارة الشركات', icon: Building2, path: '/admin/companies' },
-      { name: 'تحليلات النظام', icon: BarChart3, path: '/admin/stats' },
-      { name: 'إعدادات المنصة', icon: Settings, path: '/admin/settings' },
-    ],
-    company_admin: [
-      { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
-      { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' }, // تم تعديل المسار والاسم
-      { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
-      { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
-      { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
-    ],
-    agent: [
-      { name: 'مهامي اليومية', icon: Rocket, path: '/dashboard/leads' },
-      { name: 'عملاء المتابعة', icon: Users, path: '/dashboard/clients' },
-      { name: 'الإشعارات', icon: Bell, path: '/dashboard/notifications' },
-    ]
-  }
-
-  const currentMenu = menuConfig[profile?.role] || menuConfig['agent']
 
   return (
-    <div className="w-72 bg-[#050B18] text-white h-screen flex flex-col border-l border-white/5 shadow-2xl transition-all duration-300" dir="rtl">
+    <aside className="w-72 bg-[#0A1128] text-white flex flex-col h-screen fixed right-0 top-0 border-l border-slate-800/50" dir="rtl">
       
-      {/* هيدر القائمة */}
-      <div className="p-8 border-b border-white/5 text-center">
-        <h1 className="text-xl font-black tracking-tighter text-blue-500 uppercase italic">
-          Fast Investment
-        </h1>
-        <p className="text-[10px] font-bold text-slate-500 mt-1 tracking-widest">ENTERPRISE CRM</p>
+      {/* 1. الشعار (Branding) */}
+      <div className="p-8 pb-6 flex flex-col items-center border-b border-slate-800/50">
+        <h1 className="text-2xl font-black text-blue-500 italic tracking-wider">FAST INVESTMENT</h1>
+        <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] mt-1">ENTERPRISE CRM</p>
       </div>
 
-      {/* معلومات المستخدم */}
+      {/* 2. بطاقة هوية القيادة */}
       <div className="p-6">
-        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-default">
-          <p className="text-[10px] font-black text-blue-400 mb-1 uppercase tracking-widest">
-            {profile?.role === 'super_admin' ? 'الإدارة العليا' : profile?.role === 'company_admin' ? 'مدير شركة' : 'وكيل معتمد'}
-          </p>
-          <h3 className="text-sm font-bold truncate">{profile?.company_name || profile?.full_name}</h3>
+        <div className="bg-[#101835] rounded-xl p-4 border border-slate-800 flex flex-col items-center text-center shadow-inner">
+          <span className="text-blue-400 text-[10px] font-black mb-1">مدير شركة</span>
+          <h2 className="text-md font-bold text-white">إدارة المبيعات المركزية</h2>
         </div>
       </div>
 
-      {/* الروابط الديناميكية */}
-      <nav className="flex-1 px-4 space-y-2">
-        {currentMenu.map((item: any) => {
-          const isActive = pathname === item.path
+      {/* 3. أزرار التحكم (Navigation) */}
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path || pathname.startsWith(item.path + '/')
+          const Icon = item.icon
+
           return (
             <Link 
               key={item.path} 
               href={item.path}
-              className={`flex items-center justify-between p-3.5 rounded-xl transition-all group ${
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold transition-all ${
                 isActive 
-                ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' 
-                : 'hover:bg-white/5 text-slate-400'
+                  ? 'bg-blue-600/10 text-blue-500 border border-blue-500/20 shadow-[inset_0_0_15px_rgba(37,99,235,0.1)]' 
+                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <item.icon size={20} className={isActive ? 'text-blue-500' : 'group-hover:text-white'} />
-                <span className="text-sm font-bold">{item.name}</span>
-              </div>
-              {isActive && <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />}
+              <Icon size={20} className={isActive ? 'text-blue-500' : 'text-slate-500'} />
+              <span className="text-sm">{item.name}</span>
+              {isActive && <span className="mr-auto w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.8)]"></span>}
             </Link>
           )
         })}
       </nav>
 
-      {/* زر الخروج */}
-      <div className="p-6 border-t border-white/5">
-        <button 
-          onClick={() => supabase.auth.signOut()}
-          className="w-full flex items-center gap-3 p-3.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-bold text-sm"
-        >
-          <LogOut size={20} />
-          <span>تسجيل الخروج</span>
-        </button>
+      {/* 4. غرفة العمليات السفلية (الرادار + الخروج) */}
+      <div className="p-6 border-t border-slate-800/50 flex items-center justify-between bg-[#080d1f]">
+        
+        {/* جهاز اللاسلكي (جرس الإشعارات) */}
+        <NotificationBell />
+
+        {/* زر تسجيل الخروج الأمني */}
+        <form action="/auth/logout" method="post">
+          <button type="submit" className="flex items-center gap-2 text-slate-400 hover:text-red-400 font-bold transition-colors group">
+            <span className="text-sm">تسجيل الخروج</span>
+            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+          </button>
+        </form>
+        
       </div>
-    </div>
+    </aside>
   )
 }
