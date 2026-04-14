@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, Users, Building2, Briefcase, 
   Settings, LogOut, ChevronRight, BarChart3, 
-  MapPin, Rocket, Bell
+  MapPin, Rocket, Bell, UserPlus // أضفنا UserPlus هنا
 } from 'lucide-react'
 
 export default function Sidebar() {
@@ -44,7 +44,7 @@ export default function Sidebar() {
     ],
     company_admin: [
       { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
-      { name: 'فريق العمل (وكلاء)', icon: Users, path: '/company/dashboard' }, // نفس الصفحة لأننا دمجنا فيها الرادار
+      { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' }, // تم تعديل المسار والاسم
       { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
       { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
       { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
