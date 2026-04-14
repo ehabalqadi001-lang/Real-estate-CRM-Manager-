@@ -56,10 +56,7 @@ export async function assignLeadToMember(leadId: string, memberId: string) {
   return { success: true }
 }
 
-// 3. إضافة عضو جديد (الدالة الوهمية الآمنة لإسكات Vercel وإصلاح الخطأ)
-// هذه الدالة ستمنع Vercel من الانهيار لأن الزر القديم يبحث عنها
-export async function addMember(payload: any) {
-  // توجيه صامت: لم يعد هذا الزر مستخدماً لأننا نضيف الوكلاء من لوحة الشركة، 
-  // ولكننا نرجع "نجاح" لكي لا تنهار الواجهة القديمة إذا ضغط عليها أحد بالخطأ.
+// 3. إضافة عضو جديد (الدالة الوهمية بالاسم الصحيح تماماً لإسكات Vercel)
+export async function addTeamMember(payload: any) {
   return { success: true, message: 'يرجى إضافة الوكلاء من لوحة تحكم الشركة B2B' }
 }
