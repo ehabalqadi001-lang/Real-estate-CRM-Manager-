@@ -42,8 +42,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   return { success: true }
 }
 
-// 3. إضافة عميل جديد (الدالة التي كانت مفقودة وتسببت في خطأ Vercel)
-// نستخدم (payload: any) لضمان توافقها سواء أرسل الزر البيانات كـ FormData أو كـ Object عادي
+// 3. إضافة عميل جديد (لحل خطأ زر الإضافة)
 export async function addLead(payload: any) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -52,7 +51,6 @@ export async function addLead(payload: any) {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  // استخراج البيانات بذكاء أياً كانت طريقة إرسالها
   const client_name = payload?.get ? payload.get('clientName') : payload?.clientName || 'عميل جديد'
   const property_type = payload?.get ? payload.get('propertyType') : payload?.propertyType || 'غير محدد'
   const expected_value = payload?.get ? Number(payload.get('expectedValue')) : Number(payload?.expectedValue) || 0
@@ -65,13 +63,40 @@ export async function addLead(payload: any) {
       client_name, 
       property_type, 
       expected_value, 
-      status: 'Fresh Leads', // يضاف العميل تلقائياً لأول عمود في مسار المبيعات
+      status: 'Fresh Leads',
       user_id: user?.id 
     })
 
   if (error) throw new Error(error.message)
   
-  // تحديث لوحة المبيعات فوراً لتظهر البطاقة الجديدة
+  revalidatePath('/dashboard/leads')
+  return { success: true }
+}
+
+// 4. إضافة تقرير/تعليق للعميل (الحل الجذري للخطأ الجديد PipelineBoard)
+export async function addLeadReport(leadId: string, reportData: any) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  // استخراج النص بذكاء أياً كانت طريقة إرساله من الواجهة
+  const report_text = typeof reportData === 'string' ? reportData : (reportData?.text || reportData?.report_text || 'تحديث حالة')
+
+  const { error } = await supabase
+    .from('lead_reports')
+    .insert({
+      lead_id: leadId,
+      user_id: user?.id,
+      report_text: report_text
+    })
+
+  if (error) throw new Error(error.message)
+
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
