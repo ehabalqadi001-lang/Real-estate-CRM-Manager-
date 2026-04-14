@@ -27,10 +27,17 @@ export default function LoginPage() {
 
       if (result && !result.success) {
         setErrorState({ message: result.message, details: result.details })
+        setLoading(false) // إيقاف التحميل فقط إذا كان هناك خطأ حقيقي
       }
     } catch (err: any) {
+      // الحل الجذري لمشكلة NEXT_REDIRECT:
+      // إذا كان الخطأ هو عملية توجيه شرعية من Next.js، اتركه يمر ولا تعتبره خطأ
+      if (err.message === 'NEXT_REDIRECT' || err.digest?.startsWith('NEXT_REDIRECT')) {
+        throw err; 
+      }
+      
+      // أما إذا كان خطأ حقيقي في الاتصال، اصطده واعرضه
       setErrorState({ message: "خطأ في الاتصال بالخادم", details: err.message })
-    } finally {
       setLoading(false)
     }
   }
@@ -81,7 +88,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* الحقول الإضافية للتسجيل (الاسم، الهاتف، المنطقة) */}
             {!isLogin && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-bottom-2">
                 <div className="md:col-span-2">
@@ -108,7 +114,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* حقول خاصة بالشركة فقط */}
                 {accountType === 'company' && (
                   <>
                     <div>
@@ -128,12 +133,9 @@ export default function LoginPage() {
                   </>
                 )}
 
-                {/* قسم رفع المستندات (مطلوب للجميع) */}
                 <div className="md:col-span-2 pt-4 border-t border-slate-100">
                   <label className="block text-xs font-bold text-slate-700 mb-3 uppercase text-center">الوثائق المطلوبة للمراجعة</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    {/* بطاقة الهوية (للفرد وللشركة) */}
                     <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-blue-500 transition-colors bg-slate-50">
                       <input type="file" name="idDocument" accept="image/*,.pdf" required className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                       <Upload className="mx-auto text-slate-400 mb-2" size={24} />
@@ -141,7 +143,6 @@ export default function LoginPage() {
                       <p className="text-[10px] text-slate-500 mt-1">(للفرد أو لمسؤول الشركة)</p>
                     </div>
 
-                    {/* السجل التجاري أو البطاقة الضريبية (للشركة فقط) */}
                     {accountType === 'company' && (
                       <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-blue-500 transition-colors bg-slate-50">
                         <input type="file" name="licenseDocument" accept="image/*,.pdf" required className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
@@ -155,7 +156,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* الحقول الأساسية (تظهر دائماً) */}
             <div className="pt-4 border-t border-slate-100 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
@@ -175,7 +175,7 @@ export default function LoginPage() {
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-slate-900/20 disabled:bg-slate-400 mt-4">
-              {loading ? 'جاري المعالجة والرفع...' : (isLogin ? 'تسجيل الدخول' : 'تأكيد وإنشاء الحساب')}
+              {loading ? 'جاري المعالجة...' : (isLogin ? 'تسجيل الدخول' : 'تأكيد وإنشاء الحساب')}
             </button>
           </form>
         </div>
