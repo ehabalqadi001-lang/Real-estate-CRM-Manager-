@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+// الحل الجذري للخط الأحمر: استخدام createBrowserClient
+import { createBrowserClient } from '@supabase/ssr' 
 import { 
   LayoutDashboard, Users, Building, Briefcase, Calculator, 
-  UserCheck, Settings, Banknote, LogOut, UsersRound, ShieldAlert, AlertTriangle, Loader2 
+  UserCheck, Settings, Banknote, LogOut, UsersRound, ShieldAlert, Loader2 
 } from 'lucide-react'
 
 const MENU_ITEMS = [
@@ -25,8 +26,8 @@ export default function Sidebar() {
   const router = useRouter()
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [fetchError, setFetchError] = useState<string | null>(null)
 
+  // تهيئة الاتصال بالسيرفر بشكل صحيح في المتصفح
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -57,14 +58,14 @@ export default function Sidebar() {
           if (isMounted) setUserRole(profile?.role || null)
         }
       } catch (error: any) {
-        if (isMounted) setFetchError("خطأ في جلب الصلاحيات")
+        console.error("Sidebar Role Check Error:", error.message)
       } finally {
         if (isMounted) setIsLoading(false)
       }
     }
     checkRole()
     return () => { isMounted = false }
-  }, [])
+  }, [supabase])
 
   return (
     <aside className="w-64 bg-slate-950 text-slate-300 flex-shrink-0 hidden lg:flex flex-col h-full border-l border-slate-800 shadow-2xl relative z-40" dir="rtl">
@@ -95,7 +96,7 @@ export default function Sidebar() {
             </Link>
           )}
 
-          {/* روابط الداشبورد العادية (مستردة بالكامل) */}
+          {/* روابط الداشبورد العادية */}
           {MENU_ITEMS.map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
             return (
