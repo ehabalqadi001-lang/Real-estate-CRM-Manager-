@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { updateLeadStatus, addLeadReport } from '@/app/dashboard/leads/actions'
 import { getTeamMembers, assignLeadToMember } from '@/app/dashboard/team/actions'
 import { Building2, DollarSign, MessageSquarePlus, Clock, Loader2, UserCheck } from 'lucide-react'
 
-// تعريف هيكل الأعمدة لتطابق الواجهة التي صممناها
 const COLUMNS = [
   { id: 'Fresh Leads', title: 'عملاء جدد', color: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-700' },
   { id: 'Follow Up', title: 'متابعة', color: 'bg-amber-50', borderColor: 'border-amber-200', textColor: 'text-amber-700' },
@@ -20,17 +20,14 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
 
-  // نظام التقارير
   const [reportFormLeadId, setReportFormLeadId] = useState<string | null>(null)
   const [reportText, setReportText] = useState('')
   const [isSubmittingReport, setIsSubmittingReport] = useState(false)
 
-  // 1. جلب فريق العمل فور تحميل اللوحة
   useEffect(() => {
     getTeamMembers().then(data => setTeamMembers(data || []))
   }, [])
 
-  // 2. دوال السحب والإفلات
   const handleDragStart = (e: React.DragEvent, leadId: string) => {
     setDraggedLeadId(leadId)
     e.dataTransfer.effectAllowed = 'move'
@@ -51,7 +48,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
       return
     }
 
-    // تحديث الواجهة فوراً (Optimistic UI)
     setLeads(prev => prev.map(l => l.id === draggedLeadId ? { ...l, status: targetStatus } : l))
     setDraggedLeadId(null)
     setIsUpdating(true)
@@ -60,14 +56,12 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
       await updateLeadStatus(draggedLeadId, targetStatus)
     } catch (error) {
       console.error("Failed to update status:", error)
-      // التراجع في حالة الخطأ
       setLeads(initialLeads)
     } finally {
       setIsUpdating(false)
     }
   }
 
-  // 3. دالة إضافة تقرير
   const handleAddReport = async (leadId: string) => {
     if (!reportText.trim()) return
     setIsSubmittingReport(true)
@@ -75,7 +69,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
       await addLeadReport(leadId, reportText, 'متابعة عادية', '')
       setReportFormLeadId(null)
       setReportText('')
-      // إعادة تحميل صامتة لتحديث البيانات
       window.location.reload()
     } catch (error) {
       console.error("Failed to add report:", error)
@@ -84,13 +77,12 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
     }
   }
 
-  // 4. دالة تفويض العميل
   const handleAssignLead = async (leadId: string, memberId: string) => {
     if (!memberId) return
     setIsUpdating(true)
     try {
       await assignLeadToMember(leadId, memberId)
-      window.location.reload() // تحديث الواجهة لإخفاء العميل إذا لم يعد من صلاحيات المستخدم
+      window.location.reload() 
     } catch (error) {
       console.error("Assignment failed", error)
     } finally {
@@ -110,7 +102,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
           >
-            {/* رأس العمود */}
             <div className={`p-4 rounded-t-2xl border-b flex justify-between items-center ${column.color} ${column.borderColor}`}>
               <h3 className={`font-black ${column.textColor}`}>{column.title}</h3>
               <span className={`text-xs font-bold px-2.5 py-1 bg-white rounded-lg shadow-sm ${column.textColor}`}>
@@ -118,7 +109,6 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
               </span>
             </div>
 
-            {/* منطقة البطاقات */}
             <div className="p-4 flex-1 overflow-y-auto space-y-4 bg-slate-50/50">
               {columnLeads.length === 0 ? (
                 <div className="h-full flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl">
@@ -132,17 +122,22 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                     onDragStart={(e) => handleDragStart(e, lead.id)}
                     className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:border-blue-300 hover:shadow-md transition-all group relative"
                   >
-                    {/* معلومات العميل */}
                     <div className="text-center mb-4">
-                      <h4 className="font-black text-slate-900 text-lg mb-1">{lead.client_name}</h4>
-                      <div className="flex justify-center items-center gap-4 text-xs font-bold text-slate-500">
+                      {/* 🔥 الرابط السحري الذي ينقلك لملف العميل */}
+                      <Link 
+                        href={`/dashboard/leads/${lead.id}`} 
+                        className="font-black text-slate-900 text-lg mb-1 block hover:text-blue-600 hover:underline underline-offset-4 transition-colors"
+                      >
+                        {lead.client_name}
+                      </Link>
+                      
+                      <div className="flex justify-center items-center gap-4 text-xs font-bold text-slate-500 mt-2">
                         <span className="flex items-center gap-1"><Building2 size={12}/> {lead.property_type || 'غير محدد'}</span>
                         <span className="flex items-center gap-1 text-emerald-600"><DollarSign size={12}/> {lead.expected_value?.toLocaleString() || 0} ج.م</span>
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      {/* نظام التفويض (الرادار) */}
                       {teamMembers.length > 0 && (
                         <div className="pt-3 border-t border-slate-100 relative">
                           <UserCheck size={14} className="absolute right-2 top-5 text-slate-400 pointer-events-none" />
@@ -162,13 +157,12 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                         </div>
                       )}
 
-                      {/* زر إضافة تقرير */}
                       {reportFormLeadId !== lead.id ? (
                         <button 
                           onClick={() => setReportFormLeadId(lead.id)}
                           className="w-full flex justify-center items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors"
                         >
-                          <MessageSquarePlus size={14} /> إضافة تقرير متابعة
+                          <MessageSquarePlus size={14} /> إضافة تقرير متابعة سريع
                         </button>
                       ) : (
                         <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
@@ -185,7 +179,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
                               disabled={isSubmittingReport}
                               className="flex-1 bg-blue-600 text-white text-[10px] font-bold py-1.5 rounded-md hover:bg-blue-700 disabled:opacity-50"
                             >
-                              {isSubmittingReport ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'حفظ التقرير'}
+                              {isSubmittingReport ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'حفظ'}
                             </button>
                             <button 
                               onClick={() => { setReportFormLeadId(null); setReportText(''); }}
