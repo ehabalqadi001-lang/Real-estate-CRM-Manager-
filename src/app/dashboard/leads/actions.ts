@@ -33,7 +33,7 @@ export async function getLeads() {
   return data || []
 }
 
-// 2. محرك الإضافة الآمن
+// محرك الإضافة المضاد للرصاص
 export async function addLead(payload: any) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -51,9 +51,12 @@ export async function addLead(payload: any) {
   const property_type = payload?.get ? payload.get('propertyType') : payload?.propertyType
   const expected_value = payload?.get ? Number(payload.get('expectedValue')) : Number(payload?.expectedValue)
 
-  const { data: profile } = await supabase.from('profiles').select('role, account_type, company_id').eq('id', user.id).single()
-  const isCompany = profile?.role === 'company_admin' || profile?.account_type === 'company'
-  const targetCompanyId = isCompany ? user.id : profile?.company_id
+  // جلب الملف الشخصي ببساطة
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
+  
+  // 🔥 الحل السحري الجذري: 
+  // إذا كان حسابه مربوطاً بشركة (وكيل) نستخدم ختم الشركة، وإذا لم يكن (لأنه هو المدير نفسه) نستخدم ختمه الشخصي.
+  const targetCompanyId = profile?.company_id ? profile.company_id : user.id
 
   const { error } = await supabase.from('leads').insert({ 
     client_name: name || 'عميل جديد', 
@@ -66,7 +69,6 @@ export async function addLead(payload: any) {
     company_id: targetCompanyId 
   })
 
-  // إرجاع الخطأ للواجهة لكي نعرف سببه بدقة بدلاً من الانهيار الصامت
   if (error) return { success: false, error: error.message }
   
   revalidatePath('/dashboard/leads')
