@@ -6,19 +6,19 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    // حاوية تملأ الشاشة بالكامل وتمنع السكرول المزدوج
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-slate-50 flex" dir="rtl">
       
-      {/* القائمة الجانبية الوحيدة والحصرية */}
+      {/* 1. القائمة الجانبية (غرفة التحكم المركزية) */}
       <Sidebar />
 
-      {/* المحتوى الرئيسي (مرن، يتقلص ولا يطغى على القائمة) */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 transition-all duration-300 relative">
-        <div className="p-4 md:p-8 max-w-[1600px] mx-auto pb-24">
-          {children}
-        </div>
+      {/* 2. منطقة المحتوى الديناميكي 
+          - أضفنا (mr-72) لكي نترك مساحة 288 بيكسل على اليمين للقائمة الجانبية
+          - أضفنا (w-full) لكي يأخذ باقي مساحة الشاشة بالكامل
+      */}
+      <main className="flex-1 mr-72 w-full min-h-screen transition-all duration-300">
+        {children}
       </main>
-      
+
     </div>
   )
 }
