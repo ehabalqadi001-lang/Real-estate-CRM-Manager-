@@ -9,6 +9,17 @@ import {
   UserCheck, Settings, Banknote, LogOut, UsersRound, ShieldAlert, AlertTriangle, Loader2 
 } from 'lucide-react'
 
+const MENU_ITEMS = [
+  { name: 'لوحة التحكم', icon: LayoutDashboard, href: '/dashboard' },
+  { name: 'العملاء', icon: Users, href: '/dashboard/clients' },
+  { name: 'المخزون العقاري', icon: Building, href: '/dashboard/inventory' },
+  { name: 'العملاء المحتملين (Leads)', icon: UsersRound, href: '/dashboard/leads' },
+  { name: 'الصفقات', icon: Briefcase, href: '/dashboard/deals' },
+  { name: 'العمولات', icon: Banknote, href: '/dashboard/commissions' },
+  { name: 'فريق العمل', icon: UserCheck, href: '/dashboard/team' },
+  { name: 'حاسبة التمويل', icon: Calculator, href: '/dashboard/calculator' },
+]
+
 export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -21,11 +32,9 @@ export default function Sidebar() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  // 1. دالة تسجيل الخروج (المحرك الفعلي)
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut()
-      // مسح الكاش والتوجه لصفحة الدخول
       router.refresh()
       window.location.href = '/login'
     } catch (error) {
@@ -61,13 +70,20 @@ export default function Sidebar() {
     <aside className="w-64 bg-slate-950 text-slate-300 flex-shrink-0 hidden lg:flex flex-col h-full border-l border-slate-800 shadow-2xl relative z-40" dir="rtl">
        
        <div className="h-24 flex items-center justify-center border-b border-slate-800/80 px-4 bg-slate-900/50">
-         <div className="flex flex-col items-center">
+         <Link href="/dashboard" className="flex flex-col items-center hover:scale-105 transition-transform">
             <span className="text-xl font-black text-white tracking-wider">FAST INVESTMENT</span>
             <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Enterprise CRM</span>
-         </div>
+         </Link>
        </div>
 
        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
+          
+          {isLoading && (
+            <div className="mb-4 flex items-center gap-2 justify-center text-xs text-slate-500">
+              <Loader2 size={14} className="animate-spin" /> جاري التحميل...
+            </div>
+          )}
+
           {/* بوابة الإدارة العليا */}
           {userRole === 'super_admin' && !isLoading && (
             <Link
@@ -79,24 +95,32 @@ export default function Sidebar() {
             </Link>
           )}
 
-          {/* روابط الداشبورد العادية */}
-          <Link href="/dashboard" className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium ${pathname === '/dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
-            <LayoutDashboard size={20} />
-            <span>لوحة التحكم الرئيسية</span>
-          </Link>
-          
-          <Link href="/dashboard/clients" className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium ${pathname?.startsWith('/dashboard/clients') ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>
-            <Users size={20} />
-            <span>العملاء</span>
-          </Link>
+          {/* روابط الداشبورد العادية (مستردة بالكامل) */}
+          {MENU_ITEMS.map((item) => {
+            const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-sm font-medium relative overflow-hidden group ${
+                  isActive
+                    ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20'
+                    : 'hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {isActive && <div className="absolute right-0 top-0 w-1 h-full bg-white rounded-l-full"></div>}
+                <item.icon size={20} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'} />
+                <span className="truncate">{item.name}</span>
+              </Link>
+            )
+          })}
        </nav>
 
        <div className="p-4 border-t border-slate-800/80 bg-slate-900/80">
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-sm font-medium transition-colors mb-2 text-slate-400">
+          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-sm font-medium transition-colors mb-2 text-slate-400 hover:text-white">
             <Settings size={18} />
             <span>إعدادات النظام</span>
           </Link>
-          {/* زر تسجيل الخروج مع الدالة الجديدة */}
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-bold"

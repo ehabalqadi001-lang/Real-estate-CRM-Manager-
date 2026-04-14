@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
+// 1. دالة مركزية لإنشاء اتصال آمن مع تثبيت الكوكيز (لمنع دوامة تسجيل الدخول)
 async function getSupabaseClient() {
   const cookieStore = await cookies()
   return createServerClient(
@@ -17,11 +18,11 @@ async function getSupabaseClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              // الصيغة الصحيحة لـ Next.js 15
+              // الصيغة المعتمدة لـ Next.js 15
               cookieStore.set({ name, value, ...options })
             })
           } catch (error) {
-            // تجاهل أخطاء الـ Server Action لأن الـ Proxy سيعالجها
+            // يتم تجاهل الخطأ هنا لأن الـ Proxy سيتولى عملية تحديث الجلسة لاحقاً
           }
         },
       },
@@ -29,6 +30,7 @@ async function getSupabaseClient() {
   )
 }
 
+// 2. دالة تسجيل الدخول (Login)
 export async function loginAction(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -40,13 +42,16 @@ export async function loginAction(formData: FormData) {
     password,
   })
 
+  // صائد الأخطاء لعملية الدخول
   if (error) {
-    return { success: false, message: 'فشل تسجيل الدخول. تأكد من البيانات.', details: error.message }
+    return { success: false, message: 'فشل تسجيل الدخول. يرجى التأكد من صحة البيانات.', details: error.message }
   }
 
-  redirect('/dashboard')
+  // التوجيه الذكي: نوجه المستخدم إلى "الجذر" (/) ونترك الـ Proxy يقرر مساره حسب رتبته
+  redirect('/') 
 }
 
+// 3. دالة إنشاء حساب جديد (Register)
 export async function registerAction(formData: FormData) {
   const supabase = await getSupabaseClient()
 
@@ -59,6 +64,7 @@ export async function registerAction(formData: FormData) {
   const region = formData.get('region') as string
   const commercialRegNo = formData.get('commercialRegNo') as string
 
+  // دالة مساعدة لرفع الوثائق بأمان
   async function uploadSecureDocument(fieldName: string, folder: string) {
     const file = formData.get(fieldName) as File | null
     if (!file || file.size === 0) return null
@@ -74,22 +80,31 @@ export async function registerAction(formData: FormData) {
     const licDocUrl = accountType === 'company' ? await uploadSecureDocument('licenseDocument', 'licenses') : null
 
     const { error } = await supabase.auth.signUp({
-      email, password,
+      email, 
+      password,
       options: {
         data: {
-          full_name: fullName, account_type: accountType, company_name: companyName || null,
-          phone: phone, region: region, commercial_reg_no: commercialRegNo || null,
-          id_document_url: idDocUrl, license_document_url: licDocUrl,
-          status: 'pending', role: accountType === 'company' ? 'company_admin' : 'agent',
+          full_name: fullName, 
+          account_type: accountType, 
+          company_name: companyName || null,
+          phone: phone, 
+          region: region, 
+          commercial_reg_no: commercialRegNo || null,
+          id_document_url: idDocUrl, 
+          license_document_url: licDocUrl,
+          status: 'pending', 
+          role: accountType === 'company' ? 'company_admin' : 'agent',
         }
       }
     })
 
-    if (error) return { success: false, message: 'فشل التسجيل', details: error.message }
+    if (error) return { success: false, message: 'فشل إنشاء الحساب', details: error.message }
   } catch (err: any) {
+    // السماح لعمليات التوجيه الشرعية بالمرور دون اعتبارها أخطاء
     if (err.digest?.startsWith('NEXT_REDIRECT')) throw err;
-    return { success: false, message: 'خطأ غير متوقع', details: err.message }
+    return { success: false, message: 'حدث خطأ غير متوقع أثناء التسجيل', details: err.message }
   }
 
+  // التوجيه إلى منطقة الانتظار لحين موافقة الإدارة العليا
   redirect('/pending-approval')
 }
