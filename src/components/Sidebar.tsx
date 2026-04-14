@@ -1,135 +1,118 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-// الحل الجذري للخط الأحمر: استخدام createBrowserClient
-import { createBrowserClient } from '@supabase/ssr' 
+import { usePathname } from 'next/navigation'
 import { 
-  LayoutDashboard, Users, Building, Briefcase, Calculator, 
-  UserCheck, Settings, Banknote, LogOut, UsersRound, ShieldAlert, Loader2 
+  LayoutDashboard, Users, Building2, Briefcase, 
+  Settings, LogOut, ChevronRight, BarChart3, 
+  MapPin, Rocket, Bell
 } from 'lucide-react'
-
-const MENU_ITEMS = [
-  { name: 'لوحة التحكم', icon: LayoutDashboard, href: '/dashboard' },
-  { name: 'العملاء', icon: Users, href: '/dashboard/clients' },
-  { name: 'المخزون العقاري', icon: Building, href: '/dashboard/inventory' },
-  { name: 'العملاء المحتملين (Leads)', icon: UsersRound, href: '/dashboard/leads' },
-  { name: 'الصفقات', icon: Briefcase, href: '/dashboard/deals' },
-  { name: 'العمولات', icon: Banknote, href: '/dashboard/commissions' },
-  { name: 'فريق العمل', icon: UserCheck, href: '/dashboard/team' },
-  { name: 'حاسبة التمويل', icon: Calculator, href: '/dashboard/calculator' },
-]
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const [userRole, setUserRole] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // تهيئة الاتصال بالسيرفر بشكل صحيح في المتصفح
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      router.refresh()
-      window.location.href = '/login'
-    } catch (error) {
-      console.error("Logout Error:", error)
-    }
-  }
+  const supabase = createClient()
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let isMounted = true
-    const checkRole = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
-
-          if (isMounted) setUserRole(profile?.role || null)
-        }
-      } catch (error: any) {
-        console.error("Sidebar Role Check Error:", error.message)
-      } finally {
-        if (isMounted) setIsLoading(false)
+    async function getProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name, role, company_name')
+          .eq('id', user.id)
+          .single()
+        setProfile(data)
       }
+      setLoading(false)
     }
-    checkRole()
-    return () => { isMounted = false }
-  }, [supabase])
+    getProfile()
+  }, [])
+
+  if (loading) return <div className="w-72 bg-[#050B18] h-full animate-pulse" />
+
+  // 1. تعريف الروابط حسب الرتبة (تطبيق الدستور التقني)
+  const menuConfig: any = {
+    super_admin: [
+      { name: 'لوحة التحكم العليا', icon: LayoutDashboard, path: '/admin/super-dashboard' },
+      { name: 'إدارة الشركات', icon: Building2, path: '/admin/companies' },
+      { name: 'تحليلات النظام', icon: BarChart3, path: '/admin/stats' },
+      { name: 'إعدادات المنصة', icon: Settings, path: '/admin/settings' },
+    ],
+    company_admin: [
+      { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
+      { name: 'فريق العمل (وكلاء)', icon: Users, path: '/company/dashboard' }, // نفس الصفحة لأننا دمجنا فيها الرادار
+      { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
+      { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
+      { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
+    ],
+    agent: [
+      { name: 'مهامي اليومية', icon: Rocket, path: '/dashboard/leads' },
+      { name: 'عملاء المتابعة', icon: Users, path: '/dashboard/clients' },
+      { name: 'الإشعارات', icon: Bell, path: '/dashboard/notifications' },
+    ]
+  }
+
+  const currentMenu = menuConfig[profile?.role] || menuConfig['agent']
 
   return (
-    <aside className="w-64 bg-slate-950 text-slate-300 flex-shrink-0 hidden lg:flex flex-col h-full border-l border-slate-800 shadow-2xl relative z-40" dir="rtl">
-       
-       <div className="h-24 flex items-center justify-center border-b border-slate-800/80 px-4 bg-slate-900/50">
-         <Link href="/dashboard" className="flex flex-col items-center hover:scale-105 transition-transform">
-            <span className="text-xl font-black text-white tracking-wider">FAST INVESTMENT</span>
-            <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Enterprise CRM</span>
-         </Link>
-       </div>
+    <div className="w-72 bg-[#050B18] text-white h-screen flex flex-col border-l border-white/5 shadow-2xl transition-all duration-300" dir="rtl">
+      
+      {/* هيدر القائمة */}
+      <div className="p-8 border-b border-white/5 text-center">
+        <h1 className="text-xl font-black tracking-tighter text-blue-500 uppercase italic">
+          Fast Investment
+        </h1>
+        <p className="text-[10px] font-bold text-slate-500 mt-1 tracking-widest">ENTERPRISE CRM</p>
+      </div>
 
-       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
-          
-          {isLoading && (
-            <div className="mb-4 flex items-center gap-2 justify-center text-xs text-slate-500">
-              <Loader2 size={14} className="animate-spin" /> جاري التحميل...
-            </div>
-          )}
+      {/* معلومات المستخدم */}
+      <div className="p-6">
+        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-default">
+          <p className="text-[10px] font-black text-blue-400 mb-1 uppercase tracking-widest">
+            {profile?.role === 'super_admin' ? 'الإدارة العليا' : profile?.role === 'company_admin' ? 'مدير شركة' : 'وكيل معتمد'}
+          </p>
+          <h3 className="text-sm font-bold truncate">{profile?.company_name || profile?.full_name}</h3>
+        </div>
+      </div>
 
-          {/* بوابة الإدارة العليا */}
-          {userRole === 'super_admin' && !isLoading && (
-            <Link
-              href="/admin/super-dashboard"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-sm font-black bg-emerald-600 text-white shadow-lg shadow-emerald-900/50 mb-6 hover:scale-[1.02]"
+      {/* الروابط الديناميكية */}
+      <nav className="flex-1 px-4 space-y-2">
+        {currentMenu.map((item: any) => {
+          const isActive = pathname === item.path
+          return (
+            <Link 
+              key={item.path} 
+              href={item.path}
+              className={`flex items-center justify-between p-3.5 rounded-xl transition-all group ${
+                isActive 
+                ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' 
+                : 'hover:bg-white/5 text-slate-400'
+              }`}
             >
-              <ShieldAlert size={20} />
-              <span>لوحة تحكم المنصة العليا</span>
+              <div className="flex items-center gap-3">
+                <item.icon size={20} className={isActive ? 'text-blue-500' : 'group-hover:text-white'} />
+                <span className="text-sm font-bold">{item.name}</span>
+              </div>
+              {isActive && <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />}
             </Link>
-          )}
+          )
+        })}
+      </nav>
 
-          {/* روابط الداشبورد العادية */}
-          {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`)
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-sm font-medium relative overflow-hidden group ${
-                  isActive
-                    ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20'
-                    : 'hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                {isActive && <div className="absolute right-0 top-0 w-1 h-full bg-white rounded-l-full"></div>}
-                <item.icon size={20} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'} />
-                <span className="truncate">{item.name}</span>
-              </Link>
-            )
-          })}
-       </nav>
-
-       <div className="p-4 border-t border-slate-800/80 bg-slate-900/80">
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-sm font-medium transition-colors mb-2 text-slate-400 hover:text-white">
-            <Settings size={18} />
-            <span>إعدادات النظام</span>
-          </Link>
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-bold"
-          >
-            <LogOut size={18} />
-            <span>تسجيل الخروج</span>
-          </button>
-       </div>
-    </aside>
+      {/* زر الخروج */}
+      <div className="p-6 border-t border-white/5">
+        <button 
+          onClick={() => supabase.auth.signOut()}
+          className="w-full flex items-center gap-3 p-3.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-bold text-sm"
+        >
+          <LogOut size={20} />
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </div>
   )
 }
