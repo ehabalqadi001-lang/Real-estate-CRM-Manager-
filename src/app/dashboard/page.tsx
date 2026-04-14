@@ -4,6 +4,23 @@ import CRMAnalyticsVisualizer from '@/components/dashboard/CRMAnalyticsVisualize
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardHome() {
+  const { cookies } = await import('next/headers')
+  const { createServerClient } = await import('@supabase/ssr')
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user?.id).single()
+  
+  // سيطبع هذا في الـ Terminal لنعرف الحقيقة!
+  console.log("=== DEBUG INFO ===")
+  console.log("Email:", user?.email)
+  console.log("Profile Role:", profile?.role)
+  console.log("Profile Status:", profile?.status)
+  console.log("==================")
   let stats: any = null
   let fetchError = null
   let exactErrorDetails = null
