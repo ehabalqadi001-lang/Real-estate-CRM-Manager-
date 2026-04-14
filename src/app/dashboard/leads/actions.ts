@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-// 1. جلب العملاء (الرادار الذكي)
+// 1. الرادار الذكي (يجلب العملاء الجدد والقدامى)
 export async function getLeads() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -16,18 +16,14 @@ export async function getLeads() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, account_type, company_id')
-    .eq('id', user.id)
-    .single()
-
+  const { data: profile } = await supabase.from('profiles').select('role, account_type, company_id').eq('id', user.id).single()
   const isCompany = profile?.role === 'company_admin' || profile?.account_type === 'company'
   
   let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
 
   if (isCompany) {
-    query = query.eq('company_id', user.id)
+    // عبقرية التوافق: جلب عملاء الشركة أو العملاء الذين سجلهم المدير قديماً
+    query = query.or(`company_id.eq.${user.id},user_id.eq.${user.id}`)
   } else {
     query = query.eq('user_id', user.id)
   }
@@ -37,7 +33,7 @@ export async function getLeads() {
   return data || []
 }
 
-// 2. إضافة عميل جديد (بختم الشركة)
+// 2. محرك الإضافة الآمن
 export async function addLead(payload: any) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -70,11 +66,12 @@ export async function addLead(payload: any) {
     company_id: targetCompanyId 
   })
 
-  if (error) throw new Error(error.message)
+  // إرجاع الخطأ للواجهة لكي نعرف سببه بدقة بدلاً من الانهيار الصامت
+  if (error) return { success: false, error: error.message }
+  
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
-
 // 3. تحديث حالة العميل
 export async function updateLeadStatus(leadId: string, newStatus: string) {
   const cookieStore = await cookies()

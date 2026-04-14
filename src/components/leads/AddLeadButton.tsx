@@ -14,12 +14,16 @@ export default function AddLeadButton() {
     const formData = new FormData(e.currentTarget)
     
     try {
-      await addLead(formData)
-      setIsOpen(false)
-      window.location.reload() // تحديث الصفحة لظهور العميل فوراً
-    } catch (error) {
-      console.error("Error adding lead:", error)
-      alert("حدث خطأ أثناء الإضافة. يرجى المحاولة مرة أخرى.")
+      const response = await addLead(formData)
+      if (response && !response.success) {
+        // إظهار سبب الخطأ الفعلي من السيرفر
+        alert("رفضت قاعدة البيانات الإضافة بسبب: " + response.error)
+      } else {
+        setIsOpen(false)
+        window.location.reload()
+      }
+    } catch (error: any) {
+      alert("خلل برمجي: " + error.message)
     } finally {
       setIsLoading(false)
     }
