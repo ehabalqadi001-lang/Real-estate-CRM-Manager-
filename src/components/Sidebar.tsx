@@ -6,25 +6,28 @@ import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, UserPlus, Briefcase, 
   MapPin, BarChart3, LogOut, ShieldCheck, 
-  UserCircle, Target, Wallet 
+  UserCircle, Target, Wallet, Calendar, CheckSquare 
 } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr' // <-- هذا هو السطر الذي كان مفقوداً وأحدث الخلل!
 
 // 1. القائمة الاستراتيجية للقيادة (المدير)
 const adminMenu = [
   { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
-  { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' },
-  { name: 'الرقابة المالية', icon: Wallet, path: '/company/financials' },
-  { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
-  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
   { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
+  { name: 'الرقابة المالية', icon: Wallet, path: '/company/financials' },
+  { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' },
+  { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
+  { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
+  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
 ]
 
 // 2. القائمة التكتيكية (لوكيل المبيعات)
 const agentMenu = [
   { name: 'مساحة العمل', icon: Target, path: '/dashboard/agent' },
+  { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
   { name: 'مسار المبيعات', icon: Briefcase, path: '/dashboard/leads' },
+  { name: 'إدارة الصفقات', icon: CheckSquare, path: '/dashboard/deals' },
   { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
 ]
 
@@ -53,7 +56,7 @@ export default function Sidebar() {
   return (
     <aside className="w-72 bg-[#0A1128] text-white flex flex-col h-screen fixed right-0 top-0 border-l border-slate-800/50 shadow-2xl z-50" dir="rtl">
       
-      {/* 1. منطقة السيادة العلوية */}
+      {/* منطقة السيادة العلوية */}
       <div className="p-6 pb-6 flex flex-col border-b border-slate-800/50">
         <div className="flex justify-between items-center mb-6">
           <div className="flex flex-col">
@@ -67,7 +70,7 @@ export default function Sidebar() {
         <p className="text-[9px] font-black text-slate-500 tracking-[0.3em] uppercase opacity-60">Enterprise CRM System</p>
       </div>
 
-      {/* 2. بطاقة الهوية الديناميكية */}
+      {/* بطاقة الهوية الديناميكية */}
       <div className="px-6 py-6">
         <div className={`bg-gradient-to-br ${isLeader ? 'from-[#101835] to-[#0A1128] border-blue-900/20' : 'from-slate-800 to-slate-900 border-slate-700/50'} rounded-2xl p-4 border flex flex-col items-center text-center shadow-lg relative overflow-hidden group`}>
           {isLeader && <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>}
@@ -81,7 +84,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* 3. القائمة الذكية (Navigation) - تم تطبيق التعديل السحري هنا لإخفاء الشريط السخيف */}
+      {/* القائمة الذكية (Navigation) - بشريط تمرير مخفي */}
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {activeMenu.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(item.path + '/')
@@ -109,7 +112,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* 4. القاعدة السفلية */}
+      {/* القاعدة السفلية */}
       <div className="p-6 border-t border-slate-800/50 bg-[#080d1f]">
         <form action="/auth/logout" method="post">
           <button type="submit" className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-500 font-bold transition-all border border-transparent hover:border-red-500/20 group">
