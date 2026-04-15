@@ -1,59 +1,70 @@
-import { Globe, Building2, Users, Wallet } from 'lucide-react'
+import { Globe, Building2, Users, Wallet, ShieldAlert } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SuperDashboard() {
   return (
-    <div className="space-y-8 w-full">
-      {/* الهيدر باللون الكحلي والذهبي */}
-      <div className="flex items-center gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div className="h-16 w-16 rounded-2xl bg-navy text-white flex items-center justify-center shadow-lg">
-          <Globe size={32} className="text-gold" />
+    <div className="w-full min-h-screen p-8">
+      
+      {/* الهيدر الإمبراطوري - Dark Theme */}
+      <div className="relative overflow-hidden flex items-center gap-6 bg-navy-dark p-10 rounded-[2rem] shadow-2xl border border-navy-light mb-10">
+        {/* تأثير إضاءة خلفية (Glow) */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+
+        <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-gold to-gold-dark text-navy-dark flex items-center justify-center shadow-[0_0_40px_rgba(212,165,116,0.3)] z-10">
+          <Globe size={48} strokeWidth={1.5} />
         </div>
-        <div>
-          <h1 className="text-3xl font-black text-navy-dark">لوحة التحكم الإدارية الكبرى</h1>
-          <p className="text-sm font-bold text-slate-500 mt-1">مرحباً بك يا قائد، إليك ملخص أداء المنصة بالكامل</p>
+        <div className="z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <ShieldAlert size={24} className="text-gold animate-pulse" />
+            <h1 className="text-4xl font-black text-white tracking-wide">القيادة العليا <span className="text-gold">(Super Admin)</span></h1>
+          </div>
+          <p className="text-lg font-bold text-slate-300">مركز السيطرة المركزي لشبكة FAST INVESTMENT</p>
         </div>
       </div>
 
-      {/* شبكة الإحصائيات بألوان الدستور التقني */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* شبكة الإحصائيات (Dark Premium Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        {/* بطاقة الكحلي (Navy) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-navy">
-          <div className="flex justify-between items-start">
+        {/* بطاقة الشركات */}
+        <div className="bg-navy p-8 rounded-[2rem] shadow-xl border border-navy-light hover:border-gold/50 transition-all duration-500 group relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 bg-gold/5 w-32 h-32 rounded-full blur-2xl group-hover:bg-gold/20 transition-all duration-500"></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <p className="text-sm font-bold text-slate-500 mb-2">إجمالي الشركات المسجلة</p>
-              <h3 className="text-4xl font-black text-navy-dark">0</h3>
+              <p className="text-sm font-bold text-gold mb-3 uppercase tracking-wider">الشركات المسجلة</p>
+              <h3 className="text-6xl font-black text-white">0</h3>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <Building2 size={24} className="text-navy" />
+            <div className="p-5 bg-navy-dark rounded-2xl border border-navy-light group-hover:border-gold/30 transition-all">
+              <Building2 size={32} className="text-gold" />
             </div>
           </div>
         </div>
 
-        {/* بطاقة الزمردي (Teal) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-teal">
-          <div className="flex justify-between items-start">
+        {/* بطاقة الوكلاء */}
+        <div className="bg-navy p-8 rounded-[2rem] shadow-xl border border-navy-light hover:border-teal/50 transition-all duration-500 group relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 bg-teal/5 w-32 h-32 rounded-full blur-2xl group-hover:bg-teal/20 transition-all duration-500"></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <p className="text-sm font-bold text-slate-500 mb-2">إجمالي الوكلاء</p>
-              <h3 className="text-4xl font-black text-teal">1</h3>
+              <p className="text-sm font-bold text-teal-light mb-3 uppercase tracking-wider">الوكلاء النشطين</p>
+              <h3 className="text-6xl font-black text-white">1</h3>
             </div>
-            <div className="p-3 bg-teal/10 rounded-xl border border-teal/20">
-              <Users size={24} className="text-teal" />
+            <div className="p-5 bg-navy-dark rounded-2xl border border-navy-light group-hover:border-teal/30 transition-all">
+              <Users size={32} className="text-teal-light" />
             </div>
           </div>
         </div>
 
-        {/* بطاقة الذهبي (Gold) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-gold">
-          <div className="flex justify-between items-start">
+        {/* بطاقة المبيعات */}
+        <div className="bg-navy p-8 rounded-[2rem] shadow-xl border border-navy-light hover:border-white/50 transition-all duration-500 group relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 bg-white/5 w-32 h-32 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-500"></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <p className="text-sm font-bold text-slate-500 mb-2">حجم المبيعات</p>
-              <h3 className="text-4xl font-black text-gold">0</h3>
+              <p className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wider">إجمالي التداول (EGP)</p>
+              <h3 className="text-5xl font-black text-white mt-2">0 <span className="text-xl text-slate-400">ج.م</span></h3>
             </div>
-            <div className="p-3 bg-gold/10 rounded-xl border border-gold/20">
-              <Wallet size={24} className="text-gold" />
+            <div className="p-5 bg-navy-dark rounded-2xl border border-navy-light group-hover:border-white/30 transition-all">
+              <Wallet size={32} className="text-white" />
             </div>
           </div>
         </div>
