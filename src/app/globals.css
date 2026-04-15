@@ -1,27 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 1. استدعاء محرك Tailwind الجيل الرابع (v4) */
+@import "tailwindcss";
 
-/* 1. إعدادات الهوية البصرية (Custom Design System) */
-:root {
-  --background: #f8fafc;
-  --foreground: #0a1128;
-  --navy: #1A365D;
-  --gold: #D4A574;
-  --teal: #0D9488;
+/* 2. دستور الهوية البصرية (Design System) */
+@theme {
+  /* لوحة الألوان المؤسسية (Palette) */
+  --color-navy: #1A365D;
+  --color-navy-light: #2B4C7E;
+  --color-navy-dark: #0A1A30;
+  
+  --color-gold: #D4A574;
+  --color-gold-light: #E6C49F;
+  --color-gold-dark: #B08050;
+  
+  --color-teal: #0D9488;
+  --color-teal-light: #14B8A6;
+  --color-teal-dark: #0F766E;
+
+  /* الخطوط المعتمدة (Typography) */
+  --font-cairo: var(--font-cairo), sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
 }
 
-/* 2. تنسيق الواجهة العامة لدعم اللغة العربية (RTL) */
+/* 3. تنسيق الواجهة العامة لدعم اللغة العربية (RTL) */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-cairo), ui-sans-serif, system-ui;
+  background-color: #f8fafc;
+  color: #0a1128;
+  font-family: var(--font-cairo);
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
-/* 3. نظام التمرير الاحترافي (Custom Enterprise Scrollbar) */
+/* 4. نظام التمرير الاحترافي (Custom Scrollbar) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -37,12 +47,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--navy);
+  background: var(--color-navy);
 }
 
-/* 4. مكونات مخصصة (تم تحويلها لـ CSS نقي لمنع أخطاء VS Code) */
-
-/* حاوية الجداول لمنع الكسر في الشاشات الصغيرة */
+/* 5. مكونات مخصصة (Custom Components) */
 .table-container {
   overflow-x: auto;
   width: 100%;
@@ -52,13 +60,11 @@ body {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* تأثير التوهج للعملاء الساخنين (Hot Lead Glow) */
 .hot-lead-glow {
   box-shadow: 0 0 15px rgba(220, 38, 38, 0.15);
   border: 1px solid #fecaca;
 }
 
-/* إخفاء شريط التمرير للقائمة الجانبية مع الحفاظ على الفاعلية */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
