@@ -1,10 +1,8 @@
-// src/app/dashboard/deals/page.tsx
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import DealsGrid from '@/components/deals/DealsGrid'
 import AddDealButton from '@/components/deals/AddDealButton'
+import { Briefcase, DollarSign, Calendar, CheckCircle2 } from 'lucide-react'
 
-// 🔴 هذه الإضافة تمنع الـ Caching تماماً وتجبر السيرفر على جلب بيانات جديدة كل مرة
 export const dynamic = 'force-dynamic'
 
 export default async function DealsPage() {
@@ -15,50 +13,83 @@ export default async function DealsPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let deals: any[] = []
-  let fetchError = null
-  let exactErrorDetails = null // لمعرفة رسالة الخطأ الحقيقية من قاعدة البيانات
+  const { data: { user } } = await supabase.auth.getUser()
 
-  try {
-    const { data, error } = await supabase
-      .from('deals')
-      .select('*, clients(name)')
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      exactErrorDetails = error.message
-      throw error
-    }
-    deals = data || []
-  } catch (e: any) {
-    fetchError = "تأكد من إنشاء جدول deals وربطه بجدول clients في Supabase."
-    if (!exactErrorDetails) exactErrorDetails = e.message || "Unknown Error"
-  }
+  // تحديد هوية الشركة
+  const { data: profile } = await supabase.from('profiles').select('company_id, role').eq('id', user?.id).single()
+  const targetCompanyId = profile?.company_id || user?.id
+
+  // جلب العملاء النشطين (لإغلاق صفقاتهم)
+  const { data: activeLeads } = await supabase.from('leads').select('id, client_name').eq('company_id', targetCompanyId).neq('status', 'Won')
+  
+  // جلب الوكلاء
+  const { data: teamMembers } = await supabase.from('profiles').select('id, full_name').eq('company_id', targetCompanyId).eq('role', 'agent')
+
+  // جلب الصفقات المسجلة
+  const { data: deals } = await supabase.from('deals')
+    .select('*, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)')
+    .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* الهيدر */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+    <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
+      
+      {/* الهيدر العلوي */}
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">إدارة الصفقات (Deals)</h1>
-          <p className="text-sm text-slate-500 mt-1">متابعة المبيعات، العقود، والتحصيلات المالية</p>
+          <h1 className="text-2xl font-black text-slate-900">إدارة الصفقات والعمولات</h1>
+          <p className="text-sm font-bold text-slate-500 mt-1">توثيق العقود ومتابعة المستحقات المالية للوكلاء</p>
         </div>
-        <AddDealButton />
+        <AddDealButton activeLeads={activeLeads || []} teamMembers={teamMembers || []} />
       </div>
 
-      {/* المحتوى */}
-      {fetchError ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-10 text-center">
-           <p className="text-red-600 font-bold mb-2">تعذر جلب الصفقات</p>
-           <p className="text-sm text-slate-500 mb-4">{fetchError}</p>
-           {/* عرض الكود التقني للخطأ */}
-           <code className="bg-red-50 text-red-800 px-4 py-2 rounded-lg text-xs font-mono inline-block text-left" dir="ltr">
-             Error: {exactErrorDetails}
-           </code>
+      {/* الرادار: عرض الصفقات */}
+      {(!deals || deals.length === 0) ? (
+        <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-200 text-center shadow-sm">
+          <Briefcase size={48} className="mx-auto text-slate-300 mb-4" />
+          <h3 className="text-xl font-black text-slate-800 mb-2">لا توجد صفقات موثقة حتى الآن</h3>
+          <p className="text-slate-500 font-medium">اضغط على زر "توثيق صفقة جديدة" لتحويل عميل إلى مشتري فعلي.</p>
         </div>
       ) : (
-        <DealsGrid initialDeals={deals} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {deals.map((deal: any) => (
+            <div key={deal.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group">
+              <div className="p-5 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 mb-1">اسم العميل (المشتري)</p>
+                  <h3 className="font-black text-lg">{deal.leads?.client_name || 'عميل غير معروف'}</h3>
+                </div>
+                <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md">
+                  <CheckCircle2 size={14}/> تم التوقيع
+                </span>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><DollarSign size={12}/> قيمة العقد</p>
+                    <p className="text-lg font-black text-slate-800">{Number(deal.final_price).toLocaleString()} ج.م</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1 justify-end"><Calendar size={12}/> التاريخ</p>
+                    <p className="text-sm font-bold text-slate-700">{new Date(deal.created_at).toLocaleDateString('ar-EG')}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 bg-slate-50 -mx-5 px-5 pb-1">
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs font-bold text-slate-600">الوكيل: <span className="font-black text-blue-600">{deal.profiles?.full_name}</span></p>
+                    <div className="text-left">
+                      <p className="text-[10px] font-bold text-emerald-600">العمولة المستحقة</p>
+                      <p className="text-md font-black text-emerald-600">{Number(deal.commissions?.[0]?.amount || 0).toLocaleString()} ج.م</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
+
     </div>
   )
 }
