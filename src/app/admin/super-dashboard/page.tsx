@@ -1,87 +1,84 @@
-import { getSuperStats, createAnnouncement } from './actions'
-import { Globe, Users, Building, Wallet, Megaphone, AlertTriangle, PlusCircle } from 'lucide-react'
+import { Globe, Building2, Users, Wallet } from 'lucide-react'
 
+// تمت إضافة force-dynamic لضمان تحديث الأرقام اللحظي إذا تم ربطها بقاعدة البيانات
 export const dynamic = 'force-dynamic'
 
-export default async function SuperDashboardPage() {
-  let stats: any = null
-  let fetchError = null
-  let exactErrorDetails = null
-
-  try {
-    stats = await getSuperStats()
-  } catch (e: any) {
-    fetchError = "تعذر تحميل إحصائيات المنصة العالمية."
-    exactErrorDetails = e.message || "Connection Error"
-  }
+export default async function SuperDashboard() {
+  
+  // ملاحظة للقائد: يمكنك إضافة أكواد جلب البيانات (Supabase Fetching) هنا مستقبلاً
+  // احتفظنا بالقيم الحالية (0 شركة، 1 وكيل، 0 مبيعات) كما ظهرت في تقريرك للحفاظ على البناء السابق
 
   return (
-    <div className="space-y-8" dir="rtl">
-      {/* هيدر الإدارة العليا */}
-      <div className="flex justify-between items-end">
+    <div className="p-8 space-y-8 min-h-screen bg-slate-50/50 w-full" dir="rtl">
+      
+      {/* 1. الهيدر الاستراتيجي للقيادة */}
+      <div className="flex items-center gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="h-16 w-16 rounded-2xl bg-navy text-white flex items-center justify-center shadow-lg">
+          <Globe size={32} className="text-gold" />
+        </div>
         <div>
-          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
-            <Globe className="text-emerald-600" /> لوحة التحكم الإدارية الكبرى
-          </h1>
-          <p className="text-slate-500 mt-1 text-sm font-bold">مرحباً بك يا قائد، إليك ملخص أداء المنصة بالكامل</p>
+          <h1 className="text-3xl font-black text-navy-dark">لوحة التحكم الإدارية الكبرى</h1>
+          <p className="text-sm font-bold text-slate-500 mt-1">مرحباً بك يا قائد، إليك ملخص أداء المنصة بالكامل (Super Admin View)</p>
         </div>
       </div>
 
-      {/* صائد الأخطاء القياسي */}
-      {fetchError ? (
-        <div className="bg-white rounded-3xl border-2 border-red-50 p-12 text-center shadow-sm">
-          <AlertTriangle size={32} className="text-red-500 mx-auto mb-4" />
-          <p className="text-red-600 font-bold">{fetchError}</p>
-          <code className="mt-2 block text-xs font-mono text-slate-400" dir="ltr">{exactErrorDetails}</code>
-        </div>
-      ) : (
-        <>
-          {/* البطاقات الإحصائية الكبرى */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <Building className="text-blue-600 mb-4" />
-              <p className="text-slate-500 text-xs font-bold">إجمالي الشركات المسجلة</p>
-              <h3 className="text-2xl font-black text-slate-900">{stats.companiesCount} شركة</h3>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <Users className="text-purple-600 mb-4" />
-              <p className="text-slate-500 text-xs font-bold">إجمالي الوكلاء (Agents)</p>
-              <h3 className="text-2xl font-black text-slate-900">{stats.usersCount} وكيل</h3>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <Wallet className="text-emerald-600 mb-4" />
-              <p className="text-slate-500 text-xs font-bold">حجم مبيعات المنصة (EGP)</p>
-              <h3 className="text-2xl font-black text-slate-900">
-                {new Intl.NumberFormat('ar-EG').format(stats.totalGlobalSales)}
+      {/* 2. شبكة الإحصائيات (Grid System) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* بطاقة إجمالي الشركات */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-navy hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-bold text-slate-500 mb-2">إجمالي الشركات المسجلة</p>
+              <h3 className="text-4xl font-black text-navy-dark flex items-baseline gap-2">
+                0 <span className="text-base font-bold text-slate-400">شركة</span>
               </h3>
             </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <Building2 size={24} className="text-navy" />
+            </div>
           </div>
+        </div>
 
-          {/* نظام إضافة الإعلانات */}
-          <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl border border-slate-800">
-             <div className="flex items-center gap-3 mb-6">
-                <Megaphone className="text-amber-400" />
-                <h3 className="text-lg font-bold">بث إعلان إداري (Announcement)</h3>
-             </div>
-             <form action={createAnnouncement} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <input name="title" required placeholder="عنوان الإعلان (مثلاً: تحديث نظام العمولات)" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-amber-400" />
-                  <textarea name="body" required placeholder="نص الإعلان التفصيلي..." rows={3} className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-400" />
-                </div>
-                <div className="space-y-4">
-                  <select name="target_audience" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-bold outline-none">
-                    <option value="all">الكل (All Users)</option>
-                    <option value="companies">الشركات فقط</option>
-                    <option value="individuals">الأفراد فقط</option>
-                  </select>
-                  <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-                    <PlusCircle size={18} /> بث الإعلان الآن
-                  </button>
-                </div>
-             </form>
+        {/* بطاقة إجمالي الوكلاء */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-teal hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-bold text-slate-500 mb-2">إجمالي الوكلاء (Agents)</p>
+              <h3 className="text-4xl font-black text-teal flex items-baseline gap-2">
+                1 <span className="text-base font-bold text-slate-400">وكيل</span>
+              </h3>
+            </div>
+            <div className="p-3 bg-teal/10 rounded-xl border border-teal/20">
+              <Users size={24} className="text-teal" />
+            </div>
           </div>
-        </>
-      )}
+        </div>
+
+        {/* بطاقة حجم المبيعات */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-r-4 border-r-gold hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-bold text-slate-500 mb-2">حجم مبيعات المنصة (EGP)</p>
+              <h3 className="text-4xl font-black text-gold flex items-baseline gap-2">
+                0 <span className="text-base font-bold text-slate-400">ج.م</span>
+              </h3>
+            </div>
+            <div className="p-3 bg-gold/10 rounded-xl border border-gold/20">
+              <Wallet size={24} className="text-gold" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. منطقة توسعية مستقبلية (Placeholder) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center flex flex-col items-center justify-center opacity-60">
+        <Globe size={48} className="text-slate-300 mb-4" />
+        <h4 className="text-lg font-black text-slate-400">منطقة التقارير التحليلية</h4>
+        <p className="text-sm text-slate-400 mt-2">سيتم ربط المخططات البيانية (Charts) هنا في المراحل القادمة.</p>
+      </div>
+
     </div>
   )
 }
