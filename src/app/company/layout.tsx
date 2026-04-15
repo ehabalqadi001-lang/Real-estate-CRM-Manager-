@@ -6,12 +6,19 @@ export default function CompanyLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* سنستخدم القائمة الجانبية الحالية مؤقتاً حتى نخصص واحدة للشركات لاحقاً */}
+    <div className="min-h-screen bg-slate-50 flex" dir="rtl">
+      
+      {/* 1. القائمة الجانبية (غرفة التحكم المركزية) */}
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+
+      {/* 2. منطقة المحتوى الديناميكي للقيادة
+          - أضفنا (mr-72) لكي نترك مساحة للقائمة الجانبية على اليمين وتمنع التداخل
+          - أضفنا (w-full) لكي يأخذ باقي مساحة الشاشة بالكامل
+      */}
+      <main className="flex-1 mr-72 w-full min-h-screen transition-all duration-300">
         {children}
       </main>
+
     </div>
   )
 }
