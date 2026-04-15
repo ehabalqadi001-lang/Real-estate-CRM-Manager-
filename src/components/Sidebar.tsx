@@ -1,5 +1,5 @@
 'use client'
-
+import ThemeToggle from '@/components/ThemeToggle'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -118,15 +118,19 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* القاعدة السفلية (Logout) */}
-      <div className="p-6 border-t border-white/5 bg-navy-dark">
+{/* القاعدة السفلية (Theme + Logout) */}
+      <div className="p-4 border-t border-white/5 bg-navy-dark space-y-4">
+        {/* مفتاح التبديل بين الأوضاع */}
+        <ThemeToggle />
+
+        {/* زر إغلاق الجلسة */}
         <form action="/auth/logout" method="post">
           <button type="submit" className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 font-bold transition-all border border-transparent hover:border-red-500/20 group">
             <span className="text-sm">إغلاق الجلسة الأمنية</span>
             <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </form>
-      </div>
-    </aside>
+      </div>  
+        </aside>
   )
 }

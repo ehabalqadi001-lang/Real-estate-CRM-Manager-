@@ -1,17 +1,15 @@
 import type { Metadata } from 'next'
 import { Cairo, Inter } from 'next/font/google'
-import './globals.css' // <-- السطر الأهم لضخ التصميم في كل المنصة
-import CommandPalette from '@/components/CommandPalette' // <-- إضافة الاستدعاء
+import './globals.css'
+import CommandPalette from '@/components/CommandPalette'
+import { ThemeProvider } from '@/components/ThemeProvider' // <-- استدعاء المفاعل
 
-
-// تجهيز خط Cairo
 const cairo = Cairo({ 
   subsets: ['arabic', 'latin'], 
   variable: '--font-cairo',
   weight: ['400', '500', '600', '700', '800', '900']
 })
 
-// تجهيز خط Inter
 const inter = Inter({ 
   subsets: ['latin'], 
   variable: '--font-inter',
@@ -29,11 +27,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`}>
-      <body className={`font-cairo bg-slate-50 text-navy-dark antialiased`}>
-        {/* حقن سلاح التنقل الخاطف هنا ليكون متاحاً في كل الصفحات */}
-        <CommandPalette />
-        {children}
+    // إضافة suppressHydrationWarning لمنع أخطاء next-themes التحذيرية
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`} suppressHydrationWarning>
+      {/* دعم الألوان الداكنة في خلفية النظام (Dark Mode background) */}
+      <body className={`font-cairo bg-slate-50 dark:bg-slate-950 text-navy-dark dark:text-slate-100 antialiased transition-colors duration-300`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <CommandPalette />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
