@@ -1,169 +1,69 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* 1. إعدادات الهوية البصرية (Custom Design System) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0a1128;
+  --navy: #1A365D;
+  --gold: #D4A574;
+  --teal: #0D9488;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* 2. تنسيق الواجهة العامة لدعم اللغة العربية (RTL) */
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-/* =========================================
-   Mobile Responsiveness (Phones & Tablets)
-   ========================================= */
-@media (max-width: 768px) {
-  /* تحويل التصميم ليكون عمودياً بدلاً من أفقي */
-  .dashboard-container, 
-  .content-grid, 
-  .settings-layout {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* تحويل القائمة الجانبية لشريط سفلي مثل التطبيقات */
-  .sidebar {
-    width: 100% !important;
-    min-height: auto !important;
-    flex-direction: row !important;
-    justify-content: space-around !important;
-    padding: 10px 5px !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    z-index: 1000 !important;
-    border-top: 1px solid #1e293b;
-  }
-
-  /* توفير مساحة في أسفل الشاشة حتى لا يغطي الشريط على المحتوى */
-  .main, .main-content {
-    margin-bottom: 70px !important;
-    border-radius: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-  }
-
-  /* ترتيب الإحصائيات والجداول لتكون واحدة تلو الأخرى */
-  .kpi-grid, 
-  .summary-strip, 
-  .details-grid, 
-  .reports-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* تظبيط الهيدر ليناسب الشاشات الصغيرة */
-  .header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 15px !important;
-    padding: 15px 20px !important;
-  }
-
-  .topbar {
-    padding: 10px 15px !important;
-  }
-
-  /* جعل الجداول قابلة للتمرير يميناً ويساراً (Scrollable) */
-  .table-wrap, table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  /* تظبيط النوافذ المنبثقة (Modals) لتأخذ عرض الشاشة */
-  .modal {
-    width: 95% !important;
-    max-height: 90vh !important;
-    margin: 10px auto !important;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-}
-/* تعميم الخط العربي الفخم على كل النظام */
-html, body, * {
-  font-family: 'Cairo', system-ui, sans-serif !important;
-}
-
-body {
-  background-color: #f8fafc;
-  margin: 0;
-  padding: 0;
-}
-
-/* السحر الحقيقي: نقل القائمة الجانبية لليمين أوتوماتيكياً في كل الصفحات */
-.sidebar {
-  left: auto !important;
-  right: 0 !important;
-  border-left: 1px solid rgba(255,255,255,0.1);
-}
-
-/* تعديل مساحة المحتوى ليترك مسافة للقائمة من اليمين بدلاً من اليسار */
-.main-content {
-  margin-left: 0 !important;
-  margin-right: 64px !important;
-}
-
-/* ضبط اتجاه الجداول والنصوص */
-table {
-  text-align: right !important;
-}
-
-th, td {
-  text-align: right !important;
-}
-
-/* عكس اتجاه المسافات بين الأيقونات والنصوص في الأزرار */
-.btn-primary svg, .btn-whatsapp svg, .btn-save svg {
-  margin-left: 8px !important;
-  margin-right: 0 !important;
-}
-
-.header-title svg {
-  margin-left: 10px;
-}
-
-/* تحسين شكل القوائم المنسدلة (Select) لتناسب اللغة العربية */
-select {
-  background-position: left 10px center !important;
-  padding-right: 12px !important;
-  padding-left: 30px !important;
-}
-/* إصلاح التداخل في جميع الصفحات (الصورة الثانية) */
-.main-content {
-  margin-left: 0 !important;
-  margin-right: 64px !important;
-  width: calc(100% - 64px) !important; /* يمنع دخول الكلام تحت القائمة */
+  background: var(--background);
+  font-family: var(--font-cairo), ui-sans-serif, system-ui;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* تنسيق قائمة "إدخال يدوي" في الصفقات (الصورة الثالثة) */
-.smart-source select {
-  width: 100% !important;
-  padding: 12px 16px !important;
-  border: 2px dashed #185FA5 !important;
-  border-radius: 8px !important;
-  font-size: 14px !important;
-  background-color: #f8fafc !important;
-  color: #0f1c2e !important;
-  font-weight: 700 !important;
-  cursor: pointer;
-  direction: rtl;
+/* 3. نظام التمرير الاحترافي (Custom Enterprise Scrollbar) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--navy);
+}
+
+/* 4. مكونات مخصصة (تم تحويلها لـ CSS نقي لمنع أخطاء VS Code) */
+
+/* حاوية الجداول لمنع الكسر في الشاشات الصغيرة */
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* تأثير التوهج للعملاء الساخنين (Hot Lead Glow) */
+.hot-lead-glow {
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.15);
+  border: 1px solid #fecaca;
+}
+
+/* إخفاء شريط التمرير للقائمة الجانبية مع الحفاظ على الفاعلية */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
