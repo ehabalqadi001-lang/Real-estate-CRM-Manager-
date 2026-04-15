@@ -50,7 +50,7 @@ body {
   background: var(--color-navy);
 }
 
-/* 5. مكونات مخصصة (Custom Components) */
+/* تنسيق الجداول والبيانات لمنع الكسر على الشاشات الصغيرة */
 .table-container {
   overflow-x: auto;
   width: 100%;

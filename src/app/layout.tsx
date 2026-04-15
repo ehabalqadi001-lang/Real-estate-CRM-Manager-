@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Cairo, Inter } from 'next/font/google'
 import './globals.css' // <-- السطر الأهم لضخ التصميم في كل المنصة
+import CommandPalette from '@/components/CommandPalette' // <-- إضافة الاستدعاء
+
 
 // تجهيز خط Cairo
 const cairo = Cairo({ 
@@ -27,9 +29,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // فرض الـ RTL والخطوط على كل النظام
     <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`}>
       <body className={`font-cairo bg-slate-50 text-navy-dark antialiased`}>
+        {/* حقن سلاح التنقل الخاطف هنا ليكون متاحاً في كل الصفحات */}
+        <CommandPalette />
         {children}
       </body>
     </html>
