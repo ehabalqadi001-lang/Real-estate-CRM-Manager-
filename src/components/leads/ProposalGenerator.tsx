@@ -1,10 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Download, Loader2, CheckCircle } from 'lucide-react'
+import { FileText, Loader2 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 
-export default function ProposalGenerator({ lead, property }: { lead: any, property: any }) {
+interface ProposalLead {
+  client_name: string
+  expected_value: number
+  property_type?: string
+}
+
+interface ProposalProperty {
+  name?: string
+  location?: string
+  type?: string
+}
+
+export default function ProposalGenerator({ lead, property }: { lead: ProposalLead, property: ProposalProperty | null }) {
   const [isGenerating, setIsGenerating] = useState(false)
 
   const generatePDF = async () => {

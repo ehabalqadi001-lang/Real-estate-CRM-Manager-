@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { BarChart3, TrendingUp, Users, Trophy, DollarSign, Target, Activity, Medal } from 'lucide-react'
+import { BarChart3, TrendingUp, Trophy, DollarSign, Target, Activity, Medal } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 

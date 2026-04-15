@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { PlusIcon, X, Loader2, DollarSign, Percent, User, Briefcase } from 'lucide-react'
 import { closeDeal } from '@/app/dashboard/deals/actions'
 
-export default function AddDealButton({ activeLeads, teamMembers }: { activeLeads: any[], teamMembers: any[] }) {
+interface Lead { id: string; client_name: string }
+interface TeamMember { id: string; full_name: string }
+
+export default function AddDealButton({ activeLeads, teamMembers }: { activeLeads: Lead[], teamMembers: TeamMember[] }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -27,8 +30,8 @@ export default function AddDealButton({ activeLeads, teamMembers }: { activeLead
         setIsOpen(false)
         window.location.reload()
       }
-    } catch (error: any) {
-      alert("تعذر حفظ الصفقة: " + error.message)
+    } catch (error: unknown) {
+      alert("تعذر حفظ الصفقة: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setIsLoading(false)
     }

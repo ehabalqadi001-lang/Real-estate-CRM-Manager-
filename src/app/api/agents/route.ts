@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/server-auth';
-import { checkRateLimit } from '@/lib/rate-limit'; // ← 1. استدعاء الـ Rate Limiter
 
 export async function POST(request: Request) {
   // 1. استدعاء الحارس الأمني (يسمح للمديرين فقط)
@@ -40,7 +39,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data }, { status: 201 });
 
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error'
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -19,7 +19,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  await supabase.auth.getUser()
 
   // 1. استخراج فلاتر البحث من الرابط (بطريقة غير متزامنة لـ Next.js 15)
   const params = await searchParams
@@ -43,7 +43,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
   }
 
   // 3. جلب البيانات النهائية بعد تطبيق الفلاتر
-  const { data: leads, error } = await query
+  const { data: leads } = await query
 
   return (
     <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
@@ -88,7 +88,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {leads.map((lead: any) => (
+                {leads.map((lead) => (
                   <tr key={lead.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="p-4 font-black text-slate-900">{lead.client_name}</td>
                     <td className="p-4 text-sm font-bold text-slate-600 font-mono" dir="ltr">{lead.phone || 'غير مسجل'}</td>

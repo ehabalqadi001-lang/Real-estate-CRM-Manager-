@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateCommissionStatus } from '@/app/company/financials/actions'
-import { Check, Loader2, DollarSign, ShieldCheck } from 'lucide-react'
+import { Loader2, DollarSign, ShieldCheck } from 'lucide-react'
 
 export default function CommissionStatusButton({ commissionId, currentStatus }: { commissionId: string, currentStatus: string }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -11,8 +11,8 @@ export default function CommissionStatusButton({ commissionId, currentStatus }: 
     setIsLoading(true)
     try {
       await updateCommissionStatus(commissionId, newStatus)
-    } catch (error: any) {
-      alert("تعذر تحديث الحالة: " + error.message)
+    } catch (error: unknown) {
+      alert("تعذر تحديث الحالة: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setIsLoading(false)
     }

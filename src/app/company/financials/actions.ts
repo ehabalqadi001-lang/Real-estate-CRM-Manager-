@@ -17,7 +17,7 @@ export async function updateCommissionStatus(commissionId: string, newStatus: st
   if (!user) throw new Error("Unauthorized")
 
   // تحديث الحالة وتوثيق وقت الصرف إذا كانت الحالة "تم الدفع"
-  const updateData: any = { status: newStatus }
+  const updateData: Record<string, string> = { status: newStatus }
   if (newStatus === 'paid') {
     updateData.paid_at = new Date().toISOString()
   }

@@ -8,9 +8,9 @@ export default async function SettingsPage() {
 
   try {
     // هنا سيتم مستقبلاً جلب إعدادات النظام من جدول (system_settings) في Supabase
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "تعذر تحميل إعدادات النظام الحالية."
-    exactErrorDetails = e.message
+    exactErrorDetails = e instanceof Error ? e.message : 'Unknown error'
   }
 
   return (
@@ -87,7 +87,7 @@ export default async function SettingsPage() {
               <div className="space-y-6">
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs leading-relaxed text-slate-400">
                   <strong className="text-white block mb-1">صلاحية المدير:</strong>
-                  أنت تمتلك صلاحيات "القائد الإداري" الكاملة. يمكنك تعديل العمولات، حذف الصفقات، وإدارة الفريق بالكامل.
+                  أنت تمتلك صلاحيات &ldquo;القائد الإداري&rdquo; الكاملة. يمكنك تعديل العمولات، حذف الصفقات، وإدارة الفريق بالكامل.
                 </div>
                 <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-all border border-white/10">
                   تغيير كلمة المرور

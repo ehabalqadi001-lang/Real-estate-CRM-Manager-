@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, LayoutDashboard, Users, Building2, Target, Calendar, MapPin } from 'lucide-react'
+import { Search, Users, Building2, Target, Calendar, MapPin } from 'lucide-react'
 
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false)

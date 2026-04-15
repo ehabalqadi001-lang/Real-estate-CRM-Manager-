@@ -20,6 +20,7 @@ export default function NotificationListener() {
       if (user) setUserId(user.id);
     };
     getUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

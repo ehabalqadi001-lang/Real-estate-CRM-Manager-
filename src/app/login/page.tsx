@@ -29,15 +29,16 @@ export default function LoginPage() {
         setErrorState({ message: result.message, details: result.details })
         setLoading(false) // إيقاف التحميل فقط إذا كان هناك خطأ حقيقي
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // الحل الجذري لمشكلة NEXT_REDIRECT:
       // إذا كان الخطأ هو عملية توجيه شرعية من Next.js، اتركه يمر ولا تعتبره خطأ
-      if (err.message === 'NEXT_REDIRECT' || err.digest?.startsWith('NEXT_REDIRECT')) {
-        throw err; 
+      const e = err as { message?: string; digest?: string }
+      if (e.message === 'NEXT_REDIRECT' || e.digest?.startsWith('NEXT_REDIRECT')) {
+        throw err;
       }
-      
+
       // أما إذا كان خطأ حقيقي في الاتصال، اصطده واعرضه
-      setErrorState({ message: "خطأ في الاتصال بالخادم", details: err.message })
+      setErrorState({ message: "خطأ في الاتصال بالخادم", details: e.message || 'خطأ غير معروف' })
       setLoading(false)
     }
   }

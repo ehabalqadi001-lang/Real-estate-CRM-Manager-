@@ -39,26 +39,27 @@ const CSS_STYLES = `
 `;
 
 export default function AdminPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
-    if (!error) setUsers(data || []);
-    setLoading(false);
-  };
-
   useEffect(() => {
+    let mounted = true;
+    async function fetchUsers() {
+      setLoading(true);
+      const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
+      if (mounted && !error) setUsers(data || []);
+      if (mounted) setLoading(false);
+    }
     fetchUsers();
+    return () => { mounted = false; };
   }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {
-    // التأكيد قبل الحظر أو القبول
     if (confirm(`Are you sure you want to mark this account as ${newStatus}?`)) {
       const { error } = await supabase.from('user_profiles').update({ status: newStatus }).eq('id', id);
       if (!error) {
-        fetchUsers(); // تحديث القائمة فوراً
+        // تحديث الواجهة محلياً بدون إعادة جلب
+        setUsers(prev => prev.map(u => u.id === id ? { ...u, status: newStatus } : u));
       }
     }
   };

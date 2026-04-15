@@ -5,7 +5,16 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
 // دالة إغلاق الصفقة وحساب العمولات أوتوماتيكياً
-export async function closeDeal(payload: any) {
+interface DealPayload {
+  leadId: string
+  unitId?: string
+  agentId: string
+  finalPrice: number
+  commissionRate: number
+  discount?: number
+}
+
+export async function closeDeal(payload: DealPayload) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

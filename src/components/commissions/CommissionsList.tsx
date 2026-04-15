@@ -4,7 +4,16 @@ import { useState } from 'react'
 import { payCommission } from '@/app/dashboard/commissions/actions'
 import { CheckCircle, Clock, Building, User, Banknote } from 'lucide-react'
 
-export default function CommissionsList({ commissions }: { commissions: any[] }) {
+interface Commission {
+  id: string
+  amount: number
+  status: string
+  created_at: string
+  team_members?: { name?: string }
+  deals?: { title?: string }
+}
+
+export default function CommissionsList({ commissions }: { commissions: Commission[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
   const handlePay = async (id: string) => {
@@ -13,8 +22,8 @@ export default function CommissionsList({ commissions }: { commissions: any[] })
     try {
       await payCommission(id)
       window.location.reload()
-    } catch (error: any) {
-      alert("خطأ أثناء الصرف: " + error.message)
+    } catch (error: unknown) {
+      alert("خطأ أثناء الصرف: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
       setLoadingId(null)
     }
   }

@@ -34,7 +34,20 @@ export async function getLeads() {
 }
 
 // محرك الإضافة المضاد للرصاص
-export async function addLead(payload: any) {
+interface LeadPayload {
+  clientName?: string
+  name?: string
+  phone?: string
+  email?: string
+  propertyType?: string
+  expectedValue?: number
+}
+
+function isFormData(p: LeadPayload | FormData): p is FormData {
+  return typeof (p as FormData).get === 'function'
+}
+
+export async function addLead(payload: LeadPayload | FormData) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,11 +58,12 @@ export async function addLead(payload: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const name = payload?.get ? (payload.get('clientName') || payload.get('name')) : (payload?.clientName || payload?.name)
-  const phone = payload?.get ? payload.get('phone') : payload?.phone
-  const email = payload?.get ? payload.get('email') : payload?.email
-  const property_type = payload?.get ? payload.get('propertyType') : payload?.propertyType
-  const expected_value = payload?.get ? Number(payload.get('expectedValue')) : Number(payload?.expectedValue)
+  const fd = isFormData(payload)
+  const name = fd ? (payload.get('clientName') || payload.get('name')) as string : (payload.clientName || payload.name)
+  const phone = fd ? payload.get('phone') as string : payload.phone
+  const email = fd ? payload.get('email') as string : payload.email
+  const property_type = fd ? payload.get('propertyType') as string : payload.propertyType
+  const expected_value = fd ? Number(payload.get('expectedValue')) : Number(payload.expectedValue)
 
   // جلب الملف الشخصي ببساطة
   const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
@@ -88,7 +102,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 }
 
 // 4. تقارير المتابعة
-export async function addLeadReport(leadId: string, reportText: string, reportStatus?: string, followupDate?: string) {
+export async function addLeadReport(leadId: string, reportText: string) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

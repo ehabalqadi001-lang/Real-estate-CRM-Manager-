@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -33,24 +33,22 @@ const CSS_STYLES = `
 `;
 
 export default function ReportsPage() {
-  const [deals, setDeals] = useState<any[]>([]);
+  const [deals, setDeals] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     async function fetchReportData() {
-      // 💡 السحر هنا: نطلب الصفقات ونجلب اسم المطور عبر الـ JOIN باستخدام developer_id
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('deals')
-        .select(`
-          *,
-          developer:developers(name)
-        `)
+        .select('*, developer:developers(name)')
         .order('created_at', { ascending: false });
-
+      if (!mounted) return;
       if (data) setDeals(data);
       setLoading(false);
     }
     fetchReportData();
+    return () => { mounted = false; };
   }, []);
 
   if (loading) return <div style={{padding: '50px', textAlign: 'center'}}>جاري تجميع البيانات التحليلية...</div>;
@@ -58,13 +56,14 @@ export default function ReportsPage() {
   // الحسابات المالية (KPIs)
   const totalSales = deals.reduce((sum, deal) => sum + Number(deal.unit_value || 0), 0);
   const totalCollected = deals.reduce((sum, deal) => sum + Number(deal.amount_paid || 0), 0);
-  const closedDealsCount = deals.filter(d => ['Contracted', 'Registration', 'Handover'].includes(d.stage)).length;
+  const closedDealsCount = deals.filter(d => ['Contracted', 'Registration', 'Handover'].includes(String(d.stage ?? ''))).length;
 
   // تحليل أداء المطورين (تجميع المبيعات لكل مطور)
   const devPerformance: Record<string, number> = {};
   deals.forEach(deal => {
     // إذا لم يجد الربط، يضعه تحت "غير محدد" لتعرف أن هناك خطأ في إدخال هذه البيعة
-    const devName = deal.developer?.name || deal.developer || 'غير محدد'; 
+    const dev = deal.developer as { name?: string } | string | null
+    const devName = (typeof dev === 'object' && dev?.name) ? dev.name : (typeof dev === 'string' ? dev : 'غير محدد')
     if (!devPerformance[devName]) devPerformance[devName] = 0;
     devPerformance[devName] += Number(deal.unit_value || 0);
   });
@@ -148,7 +147,7 @@ export default function ReportsPage() {
         {/* تنبيه للنظام */}
         {sortedDevs.some(([name]) => name === 'غير محدد') && (
            <div style={{background: '#FEF2F2', border: '1px solid #FCA5A5', padding: '15px', borderRadius: '8px', color: '#DC2626', fontSize: '13px', fontWeight: 600}}>
-             ⚠️ تنبيه: توجد مبيعات مسجلة تحت بند "غير محدد". يرجى العودة لصفحة المبيعات وتعديل هذه الصفقات لربطها بالمطور الصحيح لضمان دقة حسابات العمولات.
+             ⚠️ تنبيه: توجد مبيعات مسجلة تحت بند &ldquo;غير محدد&rdquo;. يرجى العودة لصفحة المبيعات وتعديل هذه الصفقات لربطها بالمطور الصحيح لضمان دقة حسابات العمولات.
            </div>
         )}
 

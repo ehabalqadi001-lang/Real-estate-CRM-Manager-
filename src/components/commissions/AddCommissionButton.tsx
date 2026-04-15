@@ -4,17 +4,24 @@ import { useState, useEffect } from 'react'
 import { PlusIcon, X, Percent } from 'lucide-react'
 import { addCommission, getActiveDeals, getActiveTeam } from '@/app/dashboard/commissions/actions'
 
+interface Deal { id: string; title: string }
+interface TeamMember { id: string; name: string }
+
 export default function AddCommissionButton() {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [deals, setDeals] = useState<any[]>([])
-  const [team, setTeam] = useState<any[]>([])
+  const [deals, setDeals] = useState<Deal[]>([])
+  const [team, setTeam] = useState<TeamMember[]>([])
 
   useEffect(() => {
-    if (isOpen) {
-      getActiveDeals().then(setDeals)
-      getActiveTeam().then(setTeam)
+    if (!isOpen) return
+    let mounted = true
+    async function load() {
+      const [d, t] = await Promise.all([getActiveDeals(), getActiveTeam()])
+      if (mounted) { setDeals(d); setTeam(t) }
     }
+    load()
+    return () => { mounted = false }
   }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,8 +31,8 @@ export default function AddCommissionButton() {
       await addCommission(new FormData(e.currentTarget))
       setIsOpen(false)
       window.location.reload()
-    } catch (error: any) {
-      alert('خطأ أثناء الحفظ: ' + error.message)
+    } catch (error: unknown) {
+      alert('خطأ أثناء الحفظ: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setLoading(false)
     }

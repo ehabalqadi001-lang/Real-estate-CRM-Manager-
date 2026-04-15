@@ -12,7 +12,7 @@ export default async function SalesPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   );
 
-  const { data: deals, error } = await supabase
+  const { data: deals } = await supabase
     .from('deals')
     .select('*')
     .order('created_at', { ascending: false });
@@ -48,7 +48,7 @@ export default async function SalesPage() {
         ) : (
           <div className="text-center p-20 bg-slate-50 rounded-xl border border-dashed border-slate-300">
             <h3 className="text-lg font-bold text-slate-600">لا توجد صفقات حتى الآن</h3>
-            <p className="text-sm text-slate-400 mt-2">اضغط على "صفقة جديدة" للبدء في ملء مسار المبيعات.</p>
+            <p className="text-sm text-slate-400 mt-2">اضغط على &ldquo;صفقة جديدة&rdquo; للبدء في ملء مسار المبيعات.</p>
           </div>
         )}
       </div>

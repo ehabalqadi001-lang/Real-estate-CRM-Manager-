@@ -39,7 +39,7 @@ export async function addSingleUnit(formData: FormData) {
 }
 
 // 3. إضافة مجمعة من ملف Excel
-export async function addBulkUnits(units: any[], developer_id: string) {
+export async function addBulkUnits(units: Record<string, unknown>[], developer_id: string) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,10 +49,10 @@ export async function addBulkUnits(units: any[], developer_id: string) {
 
   // تجهيز البيانات لتطابق قاعدة البيانات
   const payload = units.map(unit => ({
-    unit_name: unit['اسم الوحدة'] || unit['Unit Name'] || 'وحدة غير مسماة',
-    unit_type: unit['النوع'] || unit['Type'] || 'غير محدد',
-    price: parseFloat(unit['السعر'] || unit['Price']) || 0,
-    status: 'available', // الافتراضي
+    unit_name: String(unit['اسم الوحدة'] || unit['Unit Name'] || 'وحدة غير مسماة'),
+    unit_type: String(unit['النوع'] || unit['Type'] || 'غير محدد'),
+    price: parseFloat(String(unit['السعر'] || unit['Price'] || '0')) || 0,
+    status: 'available',
     developer_id: developer_id
   }))
 

@@ -1,7 +1,6 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
@@ -27,26 +26,24 @@ const CSS_STYLES = `
 export default function ClientProfilePage() {
   const { id } = useParams();
   const router = useRouter();
-  const [client, setClient] = useState<any>(null);
-  const [deals, setDeals] = useState<any[]>([]);
+  const [client, setClient] = useState<Record<string, unknown> | null>(null);
+  const [deals, setDeals] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return
+    let mounted = true
     async function getClientData() {
-      if (!id) return;
-      setLoading(true);
-      
-      // 1. جلب بيانات العميل
-      const { data: clientData } = await supabase.from('clients').select('*').eq('id', id).single();
-      
-      // 2. جلب جميع صفقات هذا العميل
-      const { data: dealsData } = await supabase.from('deals').select('*').eq('client_id', id).order('created_at', { ascending: false });
-
-      setClient(clientData);
-      setDeals(dealsData || []);
-      setLoading(false);
+      setLoading(true)
+      const { data: clientData } = await supabase.from('clients').select('*').eq('id', id).single()
+      const { data: dealsData } = await supabase.from('deals').select('*').eq('client_id', id).order('created_at', { ascending: false })
+      if (!mounted) return
+      setClient(clientData)
+      setDeals(dealsData || [])
+      setLoading(false)
     }
-    getClientData();
+    getClientData()
+    return () => { mounted = false }
   }, [id]);
 
   if (loading) return <div style={{padding: '50px', textAlign: 'center'}}>جاري تحميل ملف العميل...</div>;

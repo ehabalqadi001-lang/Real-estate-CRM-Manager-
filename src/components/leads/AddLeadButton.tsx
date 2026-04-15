@@ -22,8 +22,8 @@ export default function AddLeadButton() {
         setIsOpen(false)
         window.location.reload()
       }
-    } catch (error: any) {
-      alert("خلل برمجي: " + error.message)
+    } catch (error: unknown) {
+      alert("خلل برمجي: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setIsLoading(false)
     }

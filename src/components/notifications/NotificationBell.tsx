@@ -4,13 +4,27 @@ import { useState, useEffect } from 'react'
 import { Bell, CheckCircle2, Circle } from 'lucide-react'
 import { getMyNotifications, markNotificationAsRead } from '@/app/dashboard/notifications/actions'
 
+interface Notification {
+  id: string
+  title: string
+  message: string
+  is_read: boolean
+  link: string | null
+}
+
 export default function NotificationBell() {
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
   // تشغيل الرادار فور تحميل الواجهة
   useEffect(() => {
-    getMyNotifications().then(data => setNotifications(data))
+    let mounted = true
+    async function load() {
+      const data = await getMyNotifications()
+      if (mounted) setNotifications(data)
+    }
+    load()
+    return () => { mounted = false }
   }, [])
 
   // حساب الإشعارات غير المقروءة
@@ -24,7 +38,7 @@ export default function NotificationBell() {
     setIsOpen(false)
     
     if (link) {
-      window.location.href = link // التوجيه الفوري للصندوق الأسود
+      window.location.assign(link) // التوجيه الفوري للصندوق الأسود
     }
   }
 

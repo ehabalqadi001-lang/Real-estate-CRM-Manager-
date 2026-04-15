@@ -17,7 +17,7 @@ export default async function FinancialsPage() {
 
   // 1. تحديد هوية الشركة للقيادة
   const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
-  const targetCompanyId = profile?.company_id || user?.id
+  void profile // سيُستخدم لاحقاً لتصفية العمولات بالشركة
 
   // 2. جلب جميع العمولات المرتبطة بوكلاء الشركة
   const { data: commissions } = await supabase
@@ -109,7 +109,7 @@ export default async function FinancialsPage() {
                   <td colSpan={6} className="p-8 text-center text-slate-400 font-bold">لا توجد مطالبات مالية حتى الآن.</td>
                 </tr>
               ) : (
-                safeCommissions.map((comm: any) => (
+                safeCommissions.map((comm) => (
                   <tr key={comm.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-4 font-black text-slate-900">{comm.profiles?.full_name}</td>
                     <td className="p-4 text-sm font-bold text-slate-600">{comm.deals?.leads?.client_name}</td>

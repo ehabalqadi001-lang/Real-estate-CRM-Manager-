@@ -14,9 +14,9 @@ export default async function CommissionsPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let commissions: any[] = []
+  let commissions: Record<string, unknown>[] = []
   let fetchError = null
-  let exactErrorDetails = null
+  let exactErrorDetails: string | null = null
 
   try {
     const { data, error } = await supabase
@@ -26,9 +26,9 @@ export default async function CommissionsPage() {
       
     if (error) { exactErrorDetails = error.message; throw error; }
     commissions = data || []
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "تعذر جلب السجل المالي والعمولات."
-    exactErrorDetails = exactErrorDetails || e.message
+    exactErrorDetails = exactErrorDetails || (e instanceof Error ? e.message : 'Unknown error')
   }
 
   // حساب الإحصائيات المالية

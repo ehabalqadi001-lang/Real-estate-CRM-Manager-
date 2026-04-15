@@ -65,7 +65,7 @@ export default async function ActivitiesPage() {
             {pendingActivities.length === 0 ? (
               <p className="text-center text-slate-400 font-bold py-8">لا توجد مهام معلقة! عمل رائع.</p>
             ) : (
-              pendingActivities.map((task: any) => (
+              pendingActivities.map((task) => (
                 <div key={task.id} className="p-4 border border-slate-100 rounded-xl hover:border-blue-200 hover:shadow-md transition-all bg-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-1 h-full bg-amber-400"></div>
                   <div className="flex justify-between items-start mb-3">
@@ -104,7 +104,7 @@ export default async function ActivitiesPage() {
             {completedActivities.length === 0 ? (
               <p className="text-center text-slate-400 font-bold py-8">سجل الإنجازات فارغ حتى الآن.</p>
             ) : (
-              completedActivities.map((task: any) => (
+              completedActivities.map((task) => (
                 <div key={task.id} className="p-4 border border-emerald-100 rounded-xl bg-emerald-50/30 flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="bg-white p-2 rounded-lg border border-emerald-100">{getActivityIcon(task.type)}</div>

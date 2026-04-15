@@ -1,7 +1,31 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+
+interface Developer {
+  id: string
+  name: string
+  region: string
+  class_grade: string
+  license_number: string
+  payment_days: number
+  contract_end_date: string | null
+}
+
+interface CommissionRule {
+  id: string
+  developer_id: string
+  percentage: number
+}
+
+interface EnrichedDeveloper extends Developer {
+  dealsCount: number
+  totalVolume: number
+  commission: number
+  contractWarning: boolean
+  daysToExpiry: number | null
+}
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
@@ -61,14 +85,14 @@ const CSS_STYLES = `
 `;
 
 export default function DevelopersPage() {
-  const [developers, setDevelopers] = useState<any[]>([]);
-  const [deals, setDeals] = useState<any[]>([]);
-  const [rules, setRules] = useState<any[]>([]);
+  const [developers, setDevelopers] = useState<Developer[]>([]);
+  const [deals, setDeals] = useState<{ developer: string; unit_value: number }[]>([]);
+  const [rules, setRules] = useState<CommissionRule[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const [selectedDev, setSelectedDev] = useState<any>(null);
+  const [selectedDev, setSelectedDev] = useState<EnrichedDeveloper | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [regionFilter, setRegionFilter] = useState('All');
@@ -82,21 +106,22 @@ export default function DevelopersPage() {
     contract_end_date: '', commission_percentage: 2.5
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     const { data: devData } = await supabase.from('developers').select('*').order('name', { ascending: true });
     const { data: dealsData } = await supabase.from('deals').select('developer, unit_value');
     const { data: rulesData } = await supabase.from('commission_rules').select('*');
-    
     setDevelopers(devData || []);
     setDeals(dealsData || []);
     setRules(rulesData || []);
     setLoading(false);
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    void fetchData(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [fetchData]);
 
-  const handleAddDeveloper = async (e: React.FormEvent) => {
+  const handleAddDeveloper = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { data, error } = await supabase.from('developers').insert([{
       name: formData.name,
@@ -118,7 +143,7 @@ export default function DevelopersPage() {
     }
   };
 
-  const openManageModal = (dev: any) => {
+  const openManageModal = (dev: EnrichedDeveloper) => {
     setSelectedDev(dev);
     const devRule = rules.find(r => r.developer_id === dev.id);
     setManageData({
@@ -128,7 +153,7 @@ export default function DevelopersPage() {
     setIsManageModalOpen(true);
   };
 
-  const handleUpdateDevSettings = async (e: React.FormEvent) => {
+  const handleUpdateDevSettings = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedDev) return;
 
@@ -242,7 +267,7 @@ export default function DevelopersPage() {
                     <span className="dev-info-val" style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                       {dev.contract_end_date ? new Date(dev.contract_end_date).toLocaleDateString('ar-EG') : 'غير محدد'}
                       {dev.contractWarning && <span className="alert-badge">ينتهي قريباً!</span>}
-                      {dev.daysAway < 0 && <span className="alert-badge">منتهي!</span>}
+                      {dev.daysToExpiry !== null && dev.daysToExpiry < 0 && <span className="alert-badge">منتهي!</span>}
                     </span>
                   </div>
 

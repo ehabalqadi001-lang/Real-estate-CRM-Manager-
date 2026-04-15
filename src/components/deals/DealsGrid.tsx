@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, Calendar, DollarSign, User } from 'lucide-react'
+import { Calendar, DollarSign, User } from 'lucide-react'
 
 interface Deal {
   id: string

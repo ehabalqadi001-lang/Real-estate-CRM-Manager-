@@ -16,7 +16,7 @@ export default async function ClientsPage() {
   )
 
   // جلب البيانات مع معالجة الخطأ داخلياً لمنع انهيار الصفحة
-  let clients: any[] = []
+  let clients: { id: string; name: string | null; phone: string | null; status: string | null; created_at: string }[] = []
   let fetchError = null
 
   try {
@@ -30,7 +30,7 @@ export default async function ClientsPage() {
     } else {
       clients = data || []
     }
-  } catch (e) {
+  } catch {
     fetchError = "تعذر الاتصال بخادم قاعدة البيانات"
   }
 
@@ -53,7 +53,7 @@ export default async function ClientsPage() {
               <p className="font-bold">تنبيه بالنظام:</p>
               <p className="text-sm">{fetchError}</p>
             </div>
-            <p className="text-slate-500 text-xs">تأكد من وجود جدول 'clients' في Supabase وتعطيل الـ RLS</p>
+            <p className="text-slate-500 text-xs">تأكد من وجود جدول &apos;clients&apos; في Supabase وتعطيل الـ RLS</p>
           </div>
         ) : (
           <ClientsTable initialData={clients} />

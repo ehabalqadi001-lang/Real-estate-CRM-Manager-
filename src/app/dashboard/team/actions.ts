@@ -4,8 +4,19 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-// 1. الدالة المستردة: إضافة وكيل جديد للفريق (لحل مشكلة Vercel Build)
-export async function addTeamMember(payload: any) {
+interface TeamMemberPayload {
+  email?: string
+  password?: string
+  fullName?: string
+  phone?: string
+}
+
+function isFormData(p: TeamMemberPayload | FormData): p is FormData {
+  return typeof (p as FormData).get === 'function'
+}
+
+// 1. الدالة المستردة: إضافة وكيل جديد للفريق
+export async function addTeamMember(payload: TeamMemberPayload | FormData) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,10 +27,13 @@ export async function addTeamMember(payload: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const email = payload?.get ? payload.get('email') : payload?.email
-  const password = payload?.get ? payload.get('password') : payload?.password || '123456' // رقم سري افتراضي
-  const fullName = payload?.get ? payload.get('fullName') : payload?.fullName
-  const phone = payload?.get ? payload.get('phone') : payload?.phone
+  const fd = isFormData(payload)
+  const email = fd ? payload.get('email') as string : payload.email
+  const password = (fd ? payload.get('password') as string : payload.password) || '123456'
+  const fullName = fd ? payload.get('fullName') as string : payload.fullName
+  const phone = fd ? payload.get('phone') as string : payload.phone
+
+  if (!email) return { success: false, error: 'البريد الإلكتروني مطلوب' }
 
   // تحديد ختم الشركة التابع لها المدير
   const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()

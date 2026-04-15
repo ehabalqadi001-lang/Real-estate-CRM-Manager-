@@ -1,7 +1,6 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const CSS_STYLES = `
@@ -53,44 +52,40 @@ export default function DealDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   
-  const [deal, setDeal] = useState<any>(null);
-  const [installments, setInstallments] = useState<any[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
+  const [deal, setDeal] = useState<Record<string, unknown> | null>(null);
+  const [installments, setInstallments] = useState<Record<string, unknown>[]>([]);
+  const [activities, setActivities] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
 
-  const fetchDealData = async () => {
-    setLoading(true);
-    
-    // 1. جلب بيانات الصفقة + العميل + المطور (حل مشكلة عدم ظهور المطور)
-    const { data: dealData } = await supabase
-      .from('deals')
-      .select('*, client:clients(full_name, phone, national_id), developer:developers(name)')
-      .eq('id', id)
-      .single();
-
-    // 2. جلب الأقساط (إن وجدت، أو سننشئها لاحقاً في قسم التمويل)
-    const { data: instData } = await supabase
-      .from('installments')
-      .select('*')
-      .eq('deal_id', id)
-      .order('due_date', { ascending: true });
-
-    // 3. جلب سجل النشاطات
-    const { data: actData } = await supabase
-      .from('deal_activities')
-      .select('*, user:user_profiles(full_name)')
-      .eq('deal_id', id)
-      .order('created_at', { ascending: false });
-
-    setDeal(dealData);
-    setInstallments(instData || []);
-    setActivities(actData || []);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    if (id) fetchDealData();
+    if (!id) return
+    let mounted = true
+    async function fetchDealData() {
+      setLoading(true)
+      const { data: dealData } = await supabase
+        .from('deals')
+        .select('*, client:clients(full_name, phone, national_id), developer:developers(name)')
+        .eq('id', id)
+        .single()
+      const { data: instData } = await supabase
+        .from('installments')
+        .select('*')
+        .eq('deal_id', id)
+        .order('due_date', { ascending: true })
+      const { data: actData } = await supabase
+        .from('deal_activities')
+        .select('*, user:user_profiles(full_name)')
+        .eq('deal_id', id)
+        .order('created_at', { ascending: false })
+      if (!mounted) return
+      setDeal(dealData)
+      setInstallments(instData || [])
+      setActivities(actData || [])
+      setLoading(false)
+    }
+    fetchDealData()
+    return () => { mounted = false }
   }, [id]);
 
   // إضافة ملاحظة جديدة في السجل

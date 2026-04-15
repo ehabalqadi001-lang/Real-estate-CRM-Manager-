@@ -1,8 +1,13 @@
 'use client'
 
-import { Users, Building, Target } from 'lucide-react'
+import { Users, Building } from 'lucide-react'
 
-export default function CRMAnalyticsVisualizer({ stats }: { stats: any }) {
+interface AnalyticsStats {
+  leadStats: { total: number; fresh: number; followup: number; meeting: number }
+  invStats: { available: number; sold: number }
+}
+
+export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStats | null }) {
   if (!stats) return null;
 
   const { leadStats, invStats } = stats;

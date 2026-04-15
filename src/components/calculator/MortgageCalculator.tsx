@@ -42,7 +42,7 @@ export default function MortgageCalculator() {
     const schedule: PaymentRow[] = []
     const periodRate = (interestRate / 100) / frequency
     
-    let currentDate = new Date()
+    const currentDate = new Date()
 
     for (let i = 1; i <= totalPeriods; i++) {
       let interestForPeriod = 0

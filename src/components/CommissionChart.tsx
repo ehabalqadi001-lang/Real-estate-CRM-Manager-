@@ -1,8 +1,7 @@
 "use client";
-import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-export default function CommissionChart({ data }: { data: any[] }) {
+export default function CommissionChart({ data: _data }: { data: Record<string, unknown>[] }) {
   // معالجة البيانات لتجميعها حسب الأشهر (توضيحي)
   const chartData = [
     { name: 'يناير', earned: 40000, collected: 24000 },

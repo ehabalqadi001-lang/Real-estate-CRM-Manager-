@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { supabase } from '@/lib/supabase';
-import { Building2, User, DollarSign, Clock } from 'lucide-react';
+import { Building2, User, DollarSign } from 'lucide-react';
 
 // تعريف المراحل المتاحة
 const COLUMNS = [
@@ -13,7 +13,16 @@ const COLUMNS = [
   { id: 'Registered', title: 'شهر عقاري (Registered)', color: 'border-purple-300 bg-purple-50' }
 ];
 
-export default function SalesKanban({ initialDeals }: { initialDeals: any[] }) {
+interface KanbanDeal {
+  id: string
+  title: string
+  status: string
+  client_name: string
+  developer_name: string
+  amount: number
+}
+
+export default function SalesKanban({ initialDeals }: { initialDeals: KanbanDeal[] }) {
   const [deals, setDeals] = useState(initialDeals);
 
   // دالة تُنفذ عند إفلات الكارت

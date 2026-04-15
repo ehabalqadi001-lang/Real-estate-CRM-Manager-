@@ -14,9 +14,16 @@ export default function AddUnitButton() {
   const [excelFile, setExcelFile] = useState<File | null>(null)
 
   useEffect(() => {
-    if (isOpen) {
-      getDevelopersList().then(setDevelopers).catch(console.error)
+    if (!isOpen) return
+    let mounted = true
+    async function load() {
+      try {
+        const data = await getDevelopersList()
+        if (mounted) setDevelopers(data)
+      } catch { /* silently ignore */ }
     }
+    load()
+    return () => { mounted = false }
   }, [isOpen])
 
   // معالجة الإضافة اليدوية
@@ -26,8 +33,8 @@ export default function AddUnitButton() {
     try {
       await addSingleUnit(new FormData(e.currentTarget))
       setIsOpen(false)
-    } catch (error: any) {
-      alert('خطأ: ' + error.message)
+    } catch (error: unknown) {
+      alert('خطأ: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setLoading(false)
     }
@@ -50,8 +57,8 @@ export default function AddUnitButton() {
         await addBulkUnits(jsonData, selectedDeveloper)
         setIsOpen(false)
         alert(`تمت إضافة ${jsonData.length} وحدة بنجاح!`)
-      } catch (error: any) {
-        alert('حدث خطأ أثناء معالجة الملف: ' + error.message)
+      } catch (error: unknown) {
+        alert('حدث خطأ أثناء معالجة الملف: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
       } finally {
         setLoading(false)
       }

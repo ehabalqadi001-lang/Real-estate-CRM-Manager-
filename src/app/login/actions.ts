@@ -21,7 +21,7 @@ async function getSupabaseClient() {
               // الصيغة المعتمدة لـ Next.js 15
               cookieStore.set({ name, value, ...options })
             })
-          } catch (error) {
+          } catch {
             // يتم تجاهل الخطأ هنا لأن الـ Proxy سيتولى عملية تحديث الجلسة لاحقاً
           }
         },
@@ -99,10 +99,10 @@ export async function registerAction(formData: FormData) {
     })
 
     if (error) return { success: false, message: 'فشل إنشاء الحساب', details: error.message }
-  } catch (err: any) {
+  } catch (err: unknown) {
     // السماح لعمليات التوجيه الشرعية بالمرور دون اعتبارها أخطاء
-    if (err.digest?.startsWith('NEXT_REDIRECT')) throw err;
-    return { success: false, message: 'حدث خطأ غير متوقع أثناء التسجيل', details: err.message }
+    if (err instanceof Error && (err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err;
+    return { success: false, message: 'حدث خطأ غير متوقع أثناء التسجيل', details: err instanceof Error ? err.message : 'خطأ غير معروف' }
   }
 
   // التوجيه إلى منطقة الانتظار لحين موافقة الإدارة العليا

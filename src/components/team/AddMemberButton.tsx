@@ -15,8 +15,8 @@ export default function AddMemberButton() {
       await addTeamMember(new FormData(e.currentTarget))
       setIsOpen(false)
       window.location.reload()
-    } catch (error: any) {
-      alert('خطأ أثناء حفظ بيانات الموظف: ' + error.message)
+    } catch (error: unknown) {
+      alert('خطأ أثناء حفظ بيانات الموظف: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setLoading(false)
     }

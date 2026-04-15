@@ -14,24 +14,24 @@ export default async function InventoryPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let inventory: any[] = []
+  let inventory: Record<string, unknown>[] = []
   let fetchError = null
-  let exactErrorDetails = null // كود كشف الأخطاء المعتمد
+  let exactErrorDetails: string | null = null
 
   try {
     const { data, error } = await supabase
       .from('inventory')
-      .select('*, developers(name)') // <-- التعديل هنا
+      .select('*, developers(name)')
       .order('created_at', { ascending: false })
-    
+
     if (error) {
       exactErrorDetails = error.message
       throw error
     }
     inventory = data || []
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "تعذر جلب بيانات المخزون العقاري. تأكد من إعداد قاعدة البيانات."
-    if (!exactErrorDetails) exactErrorDetails = e.message || "Unknown Network/DB Error"
+    if (!exactErrorDetails) exactErrorDetails = e instanceof Error ? e.message : "Unknown Network/DB Error"
   }
 
   return (

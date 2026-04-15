@@ -15,7 +15,7 @@ export default function AddClientButton() {
     try {
       await addClient(formData)
       setIsOpen(false)
-    } catch (error) {
+    } catch {
       alert('حدث خطأ أثناء الإضافة')
     } finally {
       setLoading(false)

@@ -19,7 +19,7 @@ export default function TeamList({ members }: { members: TeamMember[] }) {
           <User size={32} className="text-slate-400" />
         </div>
         <h3 className="text-lg font-bold text-slate-800 mb-1">لم يتم إضافة أي موظف بعد</h3>
-        <p className="text-sm">اضغط على زر "إضافة عضو للفريق" للبدء في بناء فريق المبيعات الخاص بك وتوزيع المهام عليهم.</p>
+        <p className="text-sm">اضغط على زر &ldquo;إضافة عضو للفريق&rdquo; للبدء في بناء فريق المبيعات الخاص بك وتوزيع المهام عليهم.</p>
       </div>
     )
   }

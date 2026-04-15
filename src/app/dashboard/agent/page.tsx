@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { Target, Clock, Trophy, ArrowLeft, Phone } from 'lucide-react'
+import { ArrowLeft, Phone } from 'lucide-react'
 import LeadScoreBadge from '@/components/leads/LeadScoreBadge' // <-- استدعاء المؤشر الذكي
 
 export const dynamic = 'force-dynamic'

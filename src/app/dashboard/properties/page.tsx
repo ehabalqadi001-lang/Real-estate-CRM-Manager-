@@ -28,7 +28,7 @@ export default async function PropertiesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property: any) => (
+          {properties.map((property) => (
             <div key={property.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all overflow-hidden group">
               {/* رأس البطاقة */}
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">

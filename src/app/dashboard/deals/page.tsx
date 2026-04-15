@@ -47,11 +47,11 @@ export default async function DealsPage() {
         <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-200 text-center shadow-sm">
           <Briefcase size={48} className="mx-auto text-slate-300 mb-4" />
           <h3 className="text-xl font-black text-slate-800 mb-2">لا توجد صفقات موثقة حتى الآن</h3>
-          <p className="text-slate-500 font-medium">اضغط على زر "توثيق صفقة جديدة" لتحويل عميل إلى مشتري فعلي.</p>
+          <p className="text-slate-500 font-medium">اضغط على زر &ldquo;توثيق صفقة جديدة&rdquo; لتحويل عميل إلى مشتري فعلي.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {deals.map((deal: any) => (
+          {deals.map((deal) => (
             <div key={deal.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group">
               <div className="p-5 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-start">
                 <div>

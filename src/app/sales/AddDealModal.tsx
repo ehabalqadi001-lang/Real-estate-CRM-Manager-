@@ -1,8 +1,10 @@
 "use client";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export default function AddDealModal({ isOpen, onClose, onRefresh }: any) {
+interface AddDealModalProps { isOpen: boolean; onClose: () => void; onRefresh: () => void }
+
+export default function AddDealModal({ isOpen, onClose, onRefresh }: AddDealModalProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',

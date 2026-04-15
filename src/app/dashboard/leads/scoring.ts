@@ -27,7 +27,7 @@ export async function recalculateLeadScore(leadId: string) {
 
   // --- ب. نقاط التفاعل (Engagement Activity) ---
   const safeActivities = activities || []
-  safeActivities.forEach((act: any) => {
+  safeActivities.forEach((act: { type: string; outcome?: string }) => {
     if (act.type === 'whatsapp') score += 5
     if (act.type === 'call' && act.outcome === 'completed') score += 10
     if (act.type === 'visit' && act.outcome === 'completed') score += 25 // الزيارة الميدانية تعني جدية عالية

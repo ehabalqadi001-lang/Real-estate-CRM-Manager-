@@ -34,8 +34,20 @@ export async function getProperties() {
   return data || []
 }
 
+interface PropertyPayload {
+  propertyName?: string
+  location?: string
+  propertyType?: string
+  price?: number
+  commissionRate?: number
+}
+
+function isFormData(p: PropertyPayload | FormData): p is FormData {
+  return typeof (p as FormData).get === 'function'
+}
+
 // 2. إضافة عقار جديد لترسانة الشركة
-export async function addProperty(payload: any) {
+export async function addProperty(payload: PropertyPayload | FormData) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,12 +58,12 @@ export async function addProperty(payload: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  // استخراج البيانات بذكاء
-  const property_name = payload?.get ? payload.get('propertyName') : payload?.propertyName
-  const location = payload?.get ? payload.get('location') : payload?.location
-  const property_type = payload?.get ? payload.get('propertyType') : payload?.propertyType
-  const price = payload?.get ? Number(payload.get('price')) : Number(payload?.price)
-  const commission_rate = payload?.get ? Number(payload.get('commissionRate')) : Number(payload?.commissionRate)
+  const fd = isFormData(payload)
+  const property_name = fd ? payload.get('propertyName') as string : payload.propertyName
+  const location = fd ? payload.get('location') as string : payload.location
+  const property_type = fd ? payload.get('propertyType') as string : payload.propertyType
+  const price = fd ? Number(payload.get('price')) : Number(payload.price)
+  const commission_rate = fd ? Number(payload.get('commissionRate')) : Number(payload.commissionRate)
 
   const { data: profile } = await supabase.from('profiles').select('role, account_type, company_id').eq('id', user.id).single()
   const isCompany = profile?.role === 'company_admin' || profile?.account_type === 'company'

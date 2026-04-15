@@ -31,6 +31,7 @@ export default function MFAPage() {
 
   useEffect(() => {
     checkMFAStatus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkMFAStatus = async () => {
@@ -62,13 +63,13 @@ export default function MFAPage() {
   };
 
   const setupMFA = async () => {
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+    const { data: enrollData, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
     if (error) {
       setError(error.message);
       return;
     }
-    setFactorId(data.id);
-    setQrCode(data.totp.qr_code); // رمز الـ QR بصيغة SVG
+    setFactorId(enrollData.id);
+    setQrCode(enrollData.totp.qr_code); // رمز الـ QR بصيغة SVG
   };
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -82,7 +83,7 @@ export default function MFAPage() {
       if (challengeError) throw challengeError;
 
       // 2. التحقق من الكود المدخل
-      const { data, error: verifyError } = await supabase.auth.mfa.verify({
+      const { error: verifyError } = await supabase.auth.mfa.verify({
         factorId,
         challengeId: challenge.id,
         code: verifyCode
@@ -92,7 +93,7 @@ export default function MFAPage() {
       alert("✅ تمت المصادقة بنجاح!");
       router.push('/dashboard'); // التوجيه بعد النجاح
 
-    } catch (err: any) {
+    } catch {
       setError("❌ الكود غير صحيح أو منتهي الصلاحية.");
     } finally {
       setLoading(false);

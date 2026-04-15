@@ -54,12 +54,12 @@ export default function RegisterPage() {
   });
 
   // بيانات الملفات (Files)
-  const [files, setFiles] = useState<any>({
+  const [files, setFiles] = useState<{ commercial: File[]; tax: File[]; vat: File | null; idFront: File | null; idBack: File | null }>({
     commercial: [], tax: [], vat: null, idFront: null, idBack: null
   });
 
-  const handleFileChange = (e: any, type: string, maxFiles: number = 1) => {
-    const selectedFiles = Array.from(e.target.files);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string, maxFiles: number = 1) => {
+    const selectedFiles = Array.from(e.target.files ?? []);
     if (selectedFiles.length > maxFiles) {
       alert(`الحد الأقصى للملفات هنا هو ${maxFiles}`);
       return;
@@ -72,7 +72,7 @@ export default function RegisterPage() {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('documents')
       .upload(filePath, file);
 
@@ -82,7 +82,7 @@ export default function RegisterPage() {
     return publicUrlData.publicUrl;
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
@@ -100,7 +100,13 @@ export default function RegisterPage() {
       if (!userId) throw new Error("فشل في إنشاء الحساب، الرجاء المحاولة لاحقاً.");
 
       // 2. رفع الملفات إلى المخزن (Storage)
-      let uploadedData: any = {
+      const uploadedData: {
+        commercial_register_images: string[]
+        tax_card_images: string[]
+        vat_image: string | null
+        id_front_image: string | null
+        id_back_image: string | null
+      } = {
         commercial_register_images: [],
         tax_card_images: [],
         vat_image: null,
@@ -150,8 +156,8 @@ export default function RegisterPage() {
 
       setMessage({ type: 'success', text: 'تم استلام طلب التسجيل بنجاح! حسابك الآن قيد المراجعة من الإدارة وسيتم تفعيله قريباً.' });
       
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'حدث خطأ غير معروف' });
     } finally {
       setLoading(false);
     }

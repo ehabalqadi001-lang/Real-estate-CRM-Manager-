@@ -10,7 +10,7 @@ export async function requireAuth(allowedRoles?: string[]) {
     {
       cookies: {
         getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) { /* يتم تجاهلها في مسارات الـ API */ },
+        setAll() { /* يتم تجاهلها في مسارات الـ API */ },
       },
     }
   );

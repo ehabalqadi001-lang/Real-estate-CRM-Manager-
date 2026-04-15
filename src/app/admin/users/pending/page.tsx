@@ -3,16 +3,29 @@ import { AlertTriangle, CheckCircle, XCircle, FileText, User, Building, Phone, M
 
 export const dynamic = 'force-dynamic'
 
+interface PendingUser {
+  id: string
+  full_name: string
+  account_type: string
+  phone?: string
+  region?: string
+  company_name?: string
+  commercial_reg_no?: string
+  id_document_url?: string
+  license_document_url?: string
+  created_at: string
+}
+
 export default async function PendingUsersPage() {
-  let pendingUsers: any[] = []
+  let pendingUsers: PendingUser[] = []
   let fetchError = null
   let exactErrorDetails = null
 
   try {
     pendingUsers = await getPendingUsers()
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "حدث خطأ أثناء جلب قائمة الحسابات المعلقة من قاعدة البيانات."
-    exactErrorDetails = e.message || "Database connection error"
+    exactErrorDetails = e instanceof Error ? e.message : "Database connection error"
   }
 
   // دوال الـ Server Actions المباشرة للأزرار

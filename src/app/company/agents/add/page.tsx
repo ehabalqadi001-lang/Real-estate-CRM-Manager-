@@ -22,8 +22,8 @@ export default function AddAgentPage() {
         setErrorState({ message: result.message, details: result.details })
         setLoading(false)
       }
-    } catch (err: any) {
-      if (err.message === 'NEXT_REDIRECT') throw err; // السماح للتوجيه بالمرور
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err; // السماح للتوجيه بالمرور
       setErrorState({ message: 'حدث خطأ غير متوقع أثناء إضافة الوكيل' })
       setLoading(false)
     }

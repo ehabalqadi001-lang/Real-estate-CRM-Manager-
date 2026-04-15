@@ -15,7 +15,7 @@ export default function DashboardError({ error, reset }: { error: Error & { dige
         </div>
         <h2 style={{ marginBottom: '12px', fontSize: '20px', fontWeight: '600' }}>Something went wrong!</h2>
         <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
-          We encountered an unexpected network or database error. Don't worry, your data is safe.
+          We encountered an unexpected network or database error. Don&apos;t worry, your data is safe.
         </p>
         <button 
           onClick={() => reset()} 

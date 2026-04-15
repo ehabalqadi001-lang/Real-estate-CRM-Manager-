@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -48,22 +48,32 @@ const CSS_STYLES = `
   .status-failed { background: #FEF2F2; color: #DC2626; }
 `;
 
+interface WhatsAppLog {
+  id: string
+  sent_at: string
+  client_phone: string
+  message_body: string
+  status: string
+}
+
 export default function WhatsAppHub() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<WhatsAppLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     async function fetchLogs() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('whatsapp_logs')
         .select('*')
         .order('sent_at', { ascending: false })
         .limit(10);
-      
+      if (!mounted) return;
       if (data) setLogs(data);
       setLoading(false);
     }
     fetchLogs();
+    return () => { mounted = false; };
   }, []);
 
   // دالة لتلوين المتغيرات داخل النص لتمييزها
@@ -116,7 +126,7 @@ export default function WhatsAppHub() {
                   <span style={{fontSize:'12px', fontWeight:700}}>مفعل</span>
                 </label>
               </div>
-              <div className="card-desc">تُرسل فور تحويل حالة الصفقة إلى "حجز".</div>
+              <div className="card-desc">تُرسل فور تحويل حالة الصفقة إلى &ldquo;حجز&rdquo;.</div>
               <div className="template-box">
                 {formatTemplate(`أهلاً بك أستاذ [اسم_العميل] ✨\n\nنهنئك! تم تأكيد حجز وحدتك بنجاح في مشروع [اسم_الكومباوند] مع المطور [اسم_المطور].\n\nإجمالي القيمة: [قيمة_الوحدة] جنيه.\nالمقدم المدفوع: [المقدم_المدفوع] جنيه.\n\nيسعدنا انضمامك لعائلة EHAB & ESLAM TEAM.`)}
               </div>
@@ -161,7 +171,7 @@ export default function WhatsAppHub() {
                   <span style={{fontSize:'12px', fontWeight:700}}>مفعل</span>
                 </label>
               </div>
-              <div className="card-desc">تُرسل عند تحويل مرحلة الصفقة إلى "تسليم".</div>
+              <div className="card-desc">تُرسل عند تحويل مرحلة الصفقة إلى &ldquo;تسليم&rdquo;.</div>
               <div className="template-box">
                 {formatTemplate(`ألف مبروك أستاذ [اسم_العميل]! 🎉🔑\n\nيُسعدنا في EHAB & ESLAM TEAM تهنئتكم بوصول وحدتكم في [اسم_الكومباوند] لمرحلة التسليم النهائي.\n\nنتمنى لكم أوقاتاً سعيدة في عقاركم الجديد، ونتشرف دائماً بخدمتكم في استثماراتكم القادمة.`)}
               </div>

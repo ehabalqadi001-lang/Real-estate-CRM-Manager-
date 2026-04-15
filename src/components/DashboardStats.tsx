@@ -1,6 +1,13 @@
 import { DollarSign, Briefcase, TrendingUp, CheckCircle } from 'lucide-react';
 
-export default function DashboardStats({ stats }: any) {
+interface StatsProps {
+  totalSales: number
+  totalCommissions: number
+  activeDeals: number
+  closedDeals: number
+}
+
+export default function DashboardStats({ stats }: { stats: StatsProps }) {
   const items = [
     { label: 'إجمالي المبيعات', value: stats.totalSales, icon: <DollarSign />, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'العمولات المتوقعة', value: stats.totalCommissions, icon: <TrendingUp />, color: 'text-green-600', bg: 'bg-green-50' },

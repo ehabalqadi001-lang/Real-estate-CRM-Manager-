@@ -11,8 +11,8 @@ export default function ActivityDoneButton({ activityId }: { activityId: string 
     setIsLoading(true)
     try {
       await markActivityAsDone(activityId)
-    } catch (error: any) {
-      alert("حدث خطأ: " + error.message)
+    } catch (error: unknown) {
+      alert("حدث خطأ: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
     } finally {
       setIsLoading(false)
     }

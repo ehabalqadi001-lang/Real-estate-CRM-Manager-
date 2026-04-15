@@ -11,9 +11,9 @@ export default async function CalculatorPage() {
     // في الحاسبة نحن لا نحتاج لجلب بيانات من قاعدة البيانات حالياً
     // ولكننا نضع الـ try/catch للحفاظ على معيارية الهيكل (Standard Architecture)
     // لتسهيل ربطها مستقبلاً بإعدادات النظام (مثل نسبة الفائدة الافتراضية)
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "حدث خطأ غير متوقع أثناء تحميل محرك الحاسبة."
-    exactErrorDetails = e.message || "Unknown System Error"
+    exactErrorDetails = e instanceof Error ? e.message : "Unknown System Error"
   }
 
   return (

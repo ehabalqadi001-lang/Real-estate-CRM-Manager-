@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { updateLeadStatus, addLeadReport } from '@/app/dashboard/leads/actions'
 import { getTeamMembers, assignLeadToMember } from '@/app/dashboard/team/actions'
-import { Building2, DollarSign, MessageSquarePlus, Clock, Loader2, UserCheck } from 'lucide-react'
+import { Building2, DollarSign, MessageSquarePlus, Loader2, UserCheck } from 'lucide-react'
 
 const COLUMNS = [
   { id: 'Fresh Leads', title: 'عملاء جدد', color: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-700' },
@@ -14,9 +14,23 @@ const COLUMNS = [
   { id: 'Lost', title: 'مرفوض (Lost)', color: 'bg-red-50', borderColor: 'border-red-200', textColor: 'text-red-700' }
 ]
 
-export default function PipelineBoard({ initialLeads }: { initialLeads: any[] }) {
+interface PipelineLead {
+  id: string
+  client_name: string
+  status: string
+  property_type?: string
+  expected_value?: number
+  user_id?: string
+}
+
+interface TeamMember {
+  id: string
+  full_name: string
+}
+
+export default function PipelineBoard({ initialLeads }: { initialLeads: PipelineLead[] }) {
   const [leads, setLeads] = useState(initialLeads)
-  const [teamMembers, setTeamMembers] = useState<any[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -25,7 +39,13 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: any[] })
   const [isSubmittingReport, setIsSubmittingReport] = useState(false)
 
   useEffect(() => {
-    getTeamMembers().then(data => setTeamMembers(data || []))
+    let mounted = true
+    async function load() {
+      const data = await getTeamMembers()
+      if (mounted) setTeamMembers((data as TeamMember[]) || [])
+    }
+    load()
+    return () => { mounted = false }
   }, [])
 
   const handleDragStart = (e: React.DragEvent, leadId: string) => {

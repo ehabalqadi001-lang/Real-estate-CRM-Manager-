@@ -13,17 +13,17 @@ export default async function TeamPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let members: any[] = []
+  let members: Record<string, unknown>[] = []
   let fetchError = null
-  let exactErrorDetails = null
+  let exactErrorDetails: string | null = null
 
   try {
     const { data, error } = await supabase.from('team_members').select('*').order('created_at')
     if (error) { exactErrorDetails = error.message; throw error; }
     members = data || []
-  } catch (e: any) {
+  } catch (e: unknown) {
     fetchError = "تعذر جلب بيانات فريق العمل.";
-    exactErrorDetails = exactErrorDetails || e.message;
+    exactErrorDetails = exactErrorDetails || (e instanceof Error ? e.message : 'Unknown error');
   }
 
   return (

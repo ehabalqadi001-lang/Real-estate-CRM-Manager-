@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
-import { Cairo, Inter } from 'next/font/google'
+import { Cairo, Inter, Geist } from 'next/font/google'
 import './globals.css'
 import CommandPalette from '@/components/CommandPalette'
-import { ThemeProvider } from '@/components/ThemeProvider' // <-- استدعاء المفاعل
+import { ThemeProvider } from '@/components/ThemeProvider'
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const cairo = Cairo({ 
   subsets: ['arabic', 'latin'], 
@@ -28,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     // إضافة suppressHydrationWarning لمنع أخطاء next-themes التحذيرية
-    <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={cn(cairo.variable, inter.variable, "font-sans", geist.variable)} suppressHydrationWarning>
       {/* دعم الألوان الداكنة في خلفية النظام (Dark Mode background) */}
       <body className={`font-cairo bg-slate-50 dark:bg-slate-950 text-navy-dark dark:text-slate-100 antialiased transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
