@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 import { Cairo, Inter } from 'next/font/google'
-import './globals.css'
+import './globals.css' // <-- السطر الأهم لضخ التصميم في كل المنصة
 
-// تحميل الخطوط وتحسينها (Optimized Loading)
+// تجهيز خط Cairo
 const cairo = Cairo({ 
   subsets: ['arabic', 'latin'], 
   variable: '--font-cairo',
-  weight: ['400', '500', '600', '700', '800', '900'] // أوزان الخطوط للتحكم الدقيق
+  weight: ['400', '500', '600', '700', '800', '900']
 })
 
+// تجهيز خط Inter
 const inter = Inter({ 
   subsets: ['latin'], 
   variable: '--font-inter',
@@ -17,7 +18,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'FAST INVESTMENT | Enterprise CRM',
-  description: 'النظام الإداري المتقدم لشركة فاست إنفستمنت - إدارة EHAB & ESLAM TEAM',
+  description: 'نظام إدارة علاقات العملاء للإدارة العليا',
 }
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // ضبط الاتجاه الافتراضي للواجهة ليكون من اليمين لليسار
+    // فرض الـ RTL والخطوط على كل النظام
     <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`}>
       <body className={`font-cairo bg-slate-50 text-navy-dark antialiased`}>
         {children}

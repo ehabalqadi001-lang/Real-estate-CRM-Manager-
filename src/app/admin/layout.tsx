@@ -1,5 +1,3 @@
-// حقن إجباري ومباشر لملف التنسيقات (هذا هو الحل الجذري لانقطاع التصميم)
-import '../globals.css' 
 import Sidebar from '@/components/Sidebar'
 
 export default function AdminLayout({
@@ -8,18 +6,16 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-slate-50 flex w-full font-cairo" dir="rtl">
-      
-      {/* 1. القائمة الجانبية */}
+    <div className="flex min-h-screen w-full">
+      {/* القائمة الجانبية تعمل كـ Component مستقل */}
       <Sidebar />
 
-      {/* 2. المحتوى الرئيسي */}
+      {/* منطقة المحتوى تترك مسافة 72 (288px) للقائمة الجانبية من اليمين (mr-72) */}
       <main className="flex-1 mr-72 w-full transition-all duration-300">
         <div className="p-6 md:p-10 w-full max-w-7xl mx-auto">
           {children}
         </div>
       </main>
-
     </div>
   )
 }
