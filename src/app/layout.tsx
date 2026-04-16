@@ -5,6 +5,7 @@ import CommandPalette from '@/components/CommandPalette'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import Providers from '@/components/Providers'
 import PWAInstaller from '@/components/PWAInstaller'
+import NotificationListener from '@/components/NotificationListener'
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -43,6 +44,7 @@ export default function RootLayout({
           <Providers>
             <CommandPalette />
             <PWAInstaller />
+            <NotificationListener />
             {children}
           </Providers>
         </ThemeProvider>
