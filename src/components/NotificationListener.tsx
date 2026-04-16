@@ -1,69 +1,62 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import { useNotificationStore, AppNotification } from '@/store/notificationStore'
 
 export default function NotificationListener() {
-  const supabase = createClient();
-  const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient()
+  const [userId, setUserId] = useState<string | null>(null)
+  const addNotification = useNotificationStore((s) => s.addNotification)
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
-    // 1. طلب تصريح الإشعارات من المتصفح (عند فتح النظام لأول مرة)
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
-      }
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      void Notification.requestPermission()
+    }
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setUserId(user.id)
+    }
+    void getUser()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!userId) return
+    if (channelRef.current) {
+      void supabase.removeChannel(channelRef.current)
     }
 
-    // 2. جلب هوية المستخدم الحالي
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setUserId(user.id);
-    };
-    getUser();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    // 3. فتح قناة اتصال حية (Realtime Channel) مع قاعدة البيانات
     const channel = supabase
-      .channel('realtime-notifications')
+      .channel(`notifications:${userId}`)
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`, // استقبل الإشعارات المخصصة لي فقط!
-        },
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => {
-          const newNotification = payload.new;
-
-          // 4. إطلاق إشعار ويندوز/ماك بصوت عند وصول إشعار جديد
+          const raw = payload.new as { id: string; title: string; message: string; type?: string; created_at: string }
+          const n: AppNotification = {
+            id: raw.id,
+            title: raw.title ?? 'إشعار جديد',
+            message: raw.message ?? '',
+            type: (raw.type as AppNotification['type']) ?? 'info',
+            read: false,
+            created_at: raw.created_at ?? new Date().toISOString(),
+          }
+          addNotification(n)
           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-            const notification = new Notification('EHAB & ESLAM TEAM 🏢', {
-              body: newNotification.title + '\n' + newNotification.message,
-              icon: '/favicon.ico', // يمكنك وضع مسار لوجو شركتك هنا
-              dir: 'rtl',
-            });
-
-            // عند الضغط على الإشعار، يفتح نافذة النظام
-            notification.onclick = () => {
-              window.focus();
-              notification.close();
-            };
+            const desk = new Notification(n.title, { body: n.message, icon: '/favicon.ico', dir: 'rtl' })
+            desk.onclick = () => { window.focus(); desk.close() }
           }
         }
       )
-      .subscribe();
+      .subscribe()
 
-    // إغلاق القناة عند تسجيل الخروج أو إغلاق المتصفح
+    channelRef.current = channel
     return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId, supabase]);
+      if (channelRef.current) void supabase.removeChannel(channelRef.current)
+    }
+  }, [userId, supabase, addNotification])
 
-  // هذا المكون يعمل كـ "رادار" مخفي، لا يعرض أي شيء على الشاشة مباشرة
-  return null; 
+  return null
 }

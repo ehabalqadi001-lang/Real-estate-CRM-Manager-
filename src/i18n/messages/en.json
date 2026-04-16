@@ -1,0 +1,73 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "confirm": "Confirm",
+    "close": "Close",
+    "noData": "No data available"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "deals": "Deals",
+    "clients": "Investors",
+    "inventory": "Inventory",
+    "developers": "Developers",
+    "reports": "Reports",
+    "team": "Team",
+    "commissions": "Commissions",
+    "settings": "Settings",
+    "audit": "Audit Trail",
+    "whatsapp": "WhatsApp"
+  },
+  "leads": {
+    "title": "Leads",
+    "addNew": "Add New Lead",
+    "clientName": "Client Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "propertyType": "Property Type",
+    "expectedValue": "Expected Value",
+    "status": "Status",
+    "statuses": {
+      "fresh": "Fresh Lead",
+      "followup": "Follow Up",
+      "meeting": "Meeting",
+      "contracted": "Contracted",
+      "lost": "Lost"
+    }
+  },
+  "deals": {
+    "title": "Deals",
+    "addNew": "Add Deal",
+    "dealTitle": "Deal Title",
+    "amount": "Amount",
+    "stage": "Stage",
+    "stages": {
+      "negotiation": "Negotiation",
+      "contracted": "Contracted",
+      "registration": "Registration",
+      "handover": "Handover"
+    }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "addUnit": "Add Unit",
+    "unitName": "Unit Name",
+    "area": "Area (sqm)",
+    "price": "Price",
+    "status": "Status",
+    "statuses": {
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold"
+    }
+  }
+}

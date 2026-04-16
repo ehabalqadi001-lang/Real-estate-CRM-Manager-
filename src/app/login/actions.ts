@@ -37,18 +37,26 @@ export async function loginAction(formData: FormData) {
 
   const supabase = await getSupabaseClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password })
 
   // صائد الأخطاء لعملية الدخول
   if (error) {
     return { success: false, message: 'فشل تسجيل الدخول. يرجى التأكد من صحة البيانات.', details: error.message }
   }
 
+  // Fetch role and set cookie so middleware can do RBAC without extra DB calls
+  if (authData.user) {
+    const { data: profile } = await supabase
+      .from('profiles').select('role').eq('id', authData.user.id).single()
+    const cookieStore = await cookies()
+    cookieStore.set('user_role', profile?.role ?? 'agent', {
+      path: '/', httpOnly: true, sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+  }
+
   // التوجيه الذكي: نوجه المستخدم إلى "الجذر" (/) ونترك الـ Proxy يقرر مساره حسب رتبته
-  redirect('/') 
+  redirect('/')
 }
 
 // 3. دالة إنشاء حساب جديد (Register)

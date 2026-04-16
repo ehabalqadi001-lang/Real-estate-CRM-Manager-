@@ -35,6 +35,39 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark mode base overrides */
+.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+.dark .bg-white        { background-color: #1e293b !important; }
+.dark .bg-slate-50     { background-color: #1e293b !important; }
+.dark .bg-slate-100    { background-color: #293548 !important; }
+.dark .border-slate-100,
+.dark .border-slate-200 { border-color: #334155 !important; }
+.dark .text-slate-900  { color: #f1f5f9 !important; }
+.dark .text-slate-800  { color: #e2e8f0 !important; }
+.dark .text-slate-700  { color: #cbd5e1 !important; }
+.dark .text-slate-600  { color: #94a3b8 !important; }
+.dark .text-slate-500  { color: #64748b !important; }
+.dark .shadow-sm       { box-shadow: 0 1px 3px rgba(0,0,0,.4) !important; }
+.dark .shadow-md       { box-shadow: 0 4px 12px rgba(0,0,0,.5) !important; }
+
+/* Cards in dark mode */
+.dark [class*="rounded-2xl"],
+.dark [class*="rounded-xl"] {
+  --tw-ring-shadow: none;
+}
+
+/* Scrollbar dark */
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 /* 4. نظام التمرير الاحترافي (Custom Scrollbar) */
 ::-webkit-scrollbar {
   width: 6px;

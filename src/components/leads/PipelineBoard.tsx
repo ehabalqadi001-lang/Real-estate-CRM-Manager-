@@ -86,7 +86,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
     if (!reportText.trim()) return
     setIsSubmittingReport(true)
     try {
-      await addLeadReport(leadId, reportText, 'متابعة عادية', '')
+      await addLeadReport(leadId, reportText)
       setReportFormLeadId(null)
       setReportText('')
       window.location.reload()

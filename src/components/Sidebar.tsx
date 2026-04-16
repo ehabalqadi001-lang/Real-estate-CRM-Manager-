@@ -1,12 +1,14 @@
 'use client'
 import ThemeToggle from '@/components/ThemeToggle'
+import LanguageToggle from '@/components/LanguageToggle'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  LayoutDashboard, UserPlus, Briefcase, 
-  MapPin, BarChart3, LogOut, ShieldCheck, 
-  UserCircle, Target, Wallet, Calendar, CheckSquare, ShieldAlert
+  LayoutDashboard, UserPlus, Briefcase,
+  MapPin, BarChart3, LogOut, ShieldCheck,
+  UserCircle, Target, Wallet, Calendar, CheckSquare, ShieldAlert, ClipboardList, TrendingUp, Users, GitCompare, Kanban,
+  CalendarClock, BarChart2, Flag
 } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { createBrowserClient } from '@supabase/ssr'
@@ -21,6 +23,14 @@ const adminMenu = [
   { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
   { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
   { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
+  { name: 'التنبؤ بالمبيعات', icon: TrendingUp, path: '/dashboard/forecasting' },
+  { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
+  { name: 'أداء الفريق', icon: Users, path: '/dashboard/performance' },
+  { name: 'مقارنة الوحدات', icon: GitCompare, path: '/dashboard/compare' },
+  { name: 'سجل العمليات', icon: ClipboardList, path: '/dashboard/audit' },
+  { name: 'الأهداف والإنجازات', icon: Flag, path: '/dashboard/targets' },
+  { name: 'جدول الأقساط', icon: CalendarClock, path: '/dashboard/schedule' },
+  { name: 'التحليلات المتقدمة', icon: BarChart2, path: '/dashboard/analytics' },
 ]
 
 // 2. القائمة التكتيكية (لوكيل المبيعات)
@@ -29,6 +39,7 @@ const agentMenu = [
   { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
   { name: 'مسار المبيعات', icon: Briefcase, path: '/dashboard/leads' },
   { name: 'إدارة الصفقات', icon: CheckSquare, path: '/dashboard/deals' },
+  { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
   { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
 ]
 
@@ -120,8 +131,11 @@ export default function Sidebar() {
 
 {/* القاعدة السفلية (Theme + Logout) */}
       <div className="p-4 border-t border-white/5 bg-navy-dark space-y-4">
-        {/* مفتاح التبديل بين الأوضاع */}
-        <ThemeToggle />
+        {/* مفاتيح التبديل */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <LanguageToggle />
+        </div>
 
         {/* زر إغلاق الجلسة */}
         <form action="/auth/logout" method="post">

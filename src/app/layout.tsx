@@ -3,6 +3,8 @@ import { Cairo, Inter, Geist } from 'next/font/google'
 import './globals.css'
 import CommandPalette from '@/components/CommandPalette'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import Providers from '@/components/Providers'
+import PWAInstaller from '@/components/PWAInstaller'
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -22,6 +24,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'FAST INVESTMENT | Enterprise CRM',
   description: 'نظام إدارة علاقات العملاء للإدارة العليا',
+  manifest: '/manifest.json',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Fast CRM' },
+  other: { 'mobile-web-app-capable': 'yes' },
 }
 
 export default function RootLayout({
@@ -35,8 +40,11 @@ export default function RootLayout({
       {/* دعم الألوان الداكنة في خلفية النظام (Dark Mode background) */}
       <body className={`font-cairo bg-slate-50 dark:bg-slate-950 text-navy-dark dark:text-slate-100 antialiased transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <CommandPalette />
-          {children}
+          <Providers>
+            <CommandPalette />
+            <PWAInstaller />
+            {children}
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

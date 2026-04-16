@@ -1,9 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { AlertTriangle, Users, Building, TrendingUp, UserPlus, Phone, ShieldCheck, Clock } from 'lucide-react'
+import { AlertTriangle, Users, TrendingUp, UserPlus, Phone, ShieldCheck, Clock, DollarSign, Target, BarChart2, Activity, FileDown } from 'lucide-react'
 import Link from 'next/link'
+import ExecutiveMiniChart from './ExecutiveMiniChart'
 
 export const dynamic = 'force-dynamic'
+
+interface AgentRow { id: string; full_name: string | null; phone: string | null; status: string | null }
 
 export default async function CompanyDashboardPage() {
   const cookieStore = await cookies()
@@ -14,25 +17,24 @@ export default async function CompanyDashboardPage() {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // 1. جلب بيانات الشركة
+
   const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id)
-    .single()
+    .from('profiles').select('*').eq('id', user?.id).single()
 
-  // 2. جلب فريق العمل (الوكلاء)
   const { data: agents } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('company_id', user?.id)
-    .order('created_at', { ascending: false })
+    .from('profiles').select('id, full_name, phone, status')
+    .eq('company_id', user?.id).order('created_at', { ascending: false })
 
-  // 3. المحرك التحليلي: جلب عملاء الشركة لحساب المبيعات الحية
   const { data: leads } = await supabase
-    .from('leads')
-    .select('status, expected_value')
+    .from('leads').select('status, expected_value, created_at')
+    .eq('company_id', user?.id)
+
+  const { data: deals } = await supabase
+    .from('deals').select('unit_value, stage, created_at')
+    .eq('company_id', user?.id)
+
+  const { data: commissions } = await supabase
+    .from('commissions').select('amount, status')
     .eq('company_id', user?.id)
 
   if (profileError) {
@@ -47,108 +49,164 @@ export default async function CompanyDashboardPage() {
     )
   }
 
-  // العمليات الحسابية للوحة القيادة
-  const agentsCount = agents?.length || 0
-  const totalLeads = leads?.length || 0
-  
-  // حساب إجمالي المبيعات المحققة (العملاء في حالة Won)
-  const wonLeads = leads?.filter(lead => lead.status === 'Won') || []
-  const totalWonValue = wonLeads.reduce((sum, lead) => sum + (Number(lead.expected_value) || 0), 0)
+  // ─── حسابات KPI ──────────────────────────────────────────
+  const agentsCount     = agents?.length ?? 0
+  const activeAgents    = agents?.filter(a => a.status === 'approved').length ?? 0
+  const totalLeads      = leads?.length ?? 0
+  const freshLeads      = leads?.filter(l => l.status === 'Fresh Leads').length ?? 0
+  const wonLeads        = leads?.filter(l => l.status === 'Won') ?? []
+  const _totalWonValue  = wonLeads.reduce((s, l) => s + Number(l.expected_value ?? 0), 0)
+
+  const contractedDeals = deals?.filter(d => ['Contracted','Registration','Handover'].includes(d.stage ?? '')) ?? []
+  const totalRevenue    = contractedDeals.reduce((s, d) => s + Number(d.unit_value ?? 0), 0)
+  const totalDeals      = deals?.length ?? 0
+
+  const pendingComm     = commissions?.filter(c => c.status === 'pending').reduce((s, c) => s + Number(c.amount ?? 0), 0) ?? 0
+  const paidComm        = commissions?.filter(c => c.status === 'paid').reduce((s, c) => s + Number(c.amount ?? 0), 0) ?? 0
+
+  const convRate        = totalLeads > 0 ? ((contractedDeals.length / totalLeads) * 100).toFixed(1) : '0.0'
+
+  // بيانات الرسم البياني — آخر 6 أشهر
+  const now = new Date()
+  const monthlyRevenue = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now)
+    d.setMonth(d.getMonth() - (5 - i))
+    const label = d.toLocaleDateString('ar-EG', { month: 'short' })
+    const rev = (deals ?? [])
+      .filter(deal => {
+        const dd = new Date(deal.created_at)
+        return dd.getMonth() === d.getMonth() && dd.getFullYear() === d.getFullYear()
+      })
+      .reduce((s, deal) => s + Number(deal.unit_value ?? 0), 0)
+    return { month: label, revenue: rev }
+  })
+
+  const kpis = [
+    { label: 'إجمالي الإيراد', value: `${(totalRevenue / 1_000_000).toFixed(1)}M`, sub: 'ج.م', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+    { label: 'العملاء المحتملون', value: totalLeads, sub: `${freshLeads} جديد`, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
+    { label: 'الصفقات المبرمة', value: contractedDeals.length, sub: `من ${totalDeals} إجمالي`, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
+    { label: 'معدل التحويل', value: `${convRate}%`, sub: 'عميل → صفقة', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
+    { label: 'فريق المبيعات', value: agentsCount, sub: `${activeAgents} نشط`, icon: Activity, color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-200' },
+    { label: 'عمولات معلقة', value: `${(pendingComm / 1_000).toFixed(0)}K`, sub: `${(paidComm / 1_000).toFixed(0)}K مدفوع`, icon: BarChart2, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200' },
+  ]
 
   return (
-    <div className="p-8 space-y-8" dir="rtl">
-      
-      {/* هيدر ترحيبي */}
-      <div className="flex justify-between items-end bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
+
+      {/* Header */}
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">مرحباً، {profile?.company_name || profile?.full_name}</h1>
-          <p className="text-sm font-bold text-slate-500 mt-1">لوحة تحكم إدارة وكلاء البيع والمبيعات</p>
+          <h1 className="text-2xl font-black text-slate-900">
+            مرحباً، {profile?.company_name ?? profile?.full_name ?? 'المدير'}
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">لوحة القيادة التنفيذية — نظرة شاملة على أداء الشركة</p>
         </div>
-        <Link 
-          href="/company/agents/add" 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20"
-        >
-          <UserPlus size={18} /> إضافة وكيل جديد
-        </Link>
-      </div>
-
-      {/* إحصائيات سريعة للشركة (الآن أصبحت حية وديناميكية) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-blue-300 transition-colors group">
-          <div className="bg-blue-50 p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform"><Users size={24}/></div>
-          <div>
-            <p className="text-xs font-bold text-slate-400">فريق المبيعات (Agents)</p>
-            <h3 className="text-xl font-black text-slate-900">{agentsCount} <span className="text-sm text-slate-500">وكيل</span></h3>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 transition-colors group">
-          <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform"><TrendingUp size={24}/></div>
-          <div>
-            <p className="text-xs font-bold text-slate-400">مبيعات الشركة (Won)</p>
-            <h3 className="text-xl font-black text-emerald-600">{totalWonValue.toLocaleString()} <span className="text-sm text-emerald-600/70">ج.م</span></h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-purple-300 transition-colors group">
-          <div className="bg-purple-50 p-3 rounded-xl text-purple-600 group-hover:scale-110 transition-transform"><Building size={24}/></div>
-          <div>
-            <p className="text-xs font-bold text-slate-400">إجمالي العملاء (Leads)</p>
-            <h3 className="text-xl font-black text-slate-900">{totalLeads} <span className="text-sm text-slate-500">عميل</span></h3>
-          </div>
+        <div className="flex gap-3">
+          <Link href="/dashboard/forecasting" className="border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm">
+            <TrendingUp size={16} /> التنبؤ
+          </Link>
+          <a href={`/api/reports/monthly-pdf?month=${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`}
+            target="_blank" rel="noopener noreferrer"
+            className="border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm">
+            <FileDown size={16} /> تقرير الشهر
+          </a>
+          <Link href="/company/agents/add" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20 text-sm">
+            <UserPlus size={16} /> إضافة وكيل
+          </Link>
         </div>
       </div>
 
-      {/* الرادار الحي: قائمة الوكلاء */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
-            <Users size={20} className="text-blue-600" />
-            فريق العمل الحالي
-          </h3>
-        </div>
-
-        <div className="p-6">
-          {agentsCount === 0 ? (
-            <div className="text-center py-12">
-              <Users size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-700 mb-2">لا يوجد وكلاء بيع مسجلين حتى الآن</h3>
-              <p className="text-sm text-slate-500 mb-6">قم بإنشاء حسابات لفريق المبيعات الخاص بك لتبدأ متابعة أدائهم</p>
-              <Link href="/company/agents/add" className="text-blue-600 font-bold hover:underline flex items-center justify-center gap-1">
-                إضافة أول وكيل <UserPlus size={16} />
-              </Link>
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {kpis.map(kpi => (
+          <div key={kpi.label} className={`bg-white rounded-2xl p-5 shadow-sm border ${kpi.border} hover:shadow-md transition-shadow`}>
+            <div className="flex justify-between items-start mb-3">
+              <div className={`${kpi.bg} ${kpi.color} w-10 h-10 rounded-xl flex items-center justify-center`}>
+                <kpi.icon size={20} />
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {agents?.map((agent) => (
-                <div key={agent.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-black text-xl shadow-inner">
-                      {agent.full_name?.charAt(0) || 'و'}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-md">{agent.full_name}</h4>
-                      <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
-                        <Phone size={12}/> {agent.phone || 'لم يتم إضافة رقم'}
-                      </p>
-                    </div>
+            <div className="text-2xl font-black text-slate-900">{kpi.value}</div>
+            <div className="text-xs font-semibold text-slate-500 mt-0.5">{kpi.sub}</div>
+            <div className="text-xs text-slate-400 mt-1">{kpi.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Revenue Chart + Agents */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ExecutiveMiniChart data={monthlyRevenue} />
+        </div>
+
+        {/* Quick Links */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-2">
+          <h3 className="font-bold text-slate-800 mb-3">وصول سريع</h3>
+          {[
+            { label: 'إدارة العملاء', href: '/dashboard/leads', color: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
+            { label: 'الصفقات', href: '/dashboard/deals', color: 'bg-purple-50 text-purple-700 hover:bg-purple-100' },
+            { label: 'المخزون العقاري', href: '/dashboard/inventory', color: 'bg-teal-50 text-teal-700 hover:bg-teal-100' },
+            { label: 'أداء الفريق', href: '/dashboard/performance', color: 'bg-orange-50 text-orange-700 hover:bg-orange-100' },
+            { label: 'العمولات', href: '/dashboard/commissions', color: 'bg-rose-50 text-rose-700 hover:bg-rose-100' },
+            { label: 'المطورون', href: '/dashboard/developers', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+            { label: 'التقارير', href: '/dashboard/reports', color: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' },
+            { label: 'سجل العمليات', href: '/dashboard/audit', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+          ].map(l => (
+            <Link key={l.href} href={l.href}
+              className={`${l.color} flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold transition-colors`}>
+              {l.label}
+              <span className="opacity-50">←</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Agents Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+          <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+            <Users size={20} className="text-blue-600" /> فريق المبيعات
+          </h3>
+          <Link href="/dashboard/performance" className="text-sm text-blue-600 font-bold hover:underline">
+            عرض التحليل الكامل ←
+          </Link>
+        </div>
+
+        {agentsCount === 0 ? (
+          <div className="text-center py-12 text-slate-400">
+            <Users size={40} className="mx-auto mb-3 opacity-30" />
+            <p className="font-semibold">لا يوجد وكلاء مسجلون</p>
+            <Link href="/company/agents/add" className="mt-3 inline-flex items-center gap-1 text-blue-600 font-bold hover:underline text-sm">
+              إضافة أول وكيل <UserPlus size={14} />
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {(agents as AgentRow[]).map(agent => (
+              <div key={agent.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-black text-base shadow-inner">
+                    {agent.full_name?.charAt(0) ?? 'و'}
                   </div>
                   <div>
-                    {agent.status === 'approved' ? (
-                      <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black rounded-lg flex items-center gap-1">
-                        <ShieldCheck size={14}/> نشط
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-black rounded-lg flex items-center gap-1">
-                        <Clock size={14}/> معلق
-                      </span>
-                    )}
+                    <div className="font-bold text-slate-800 text-sm">{agent.full_name ?? 'وكيل'}</div>
+                    <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Phone size={10} /> {agent.phone ?? 'بدون رقم'}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                {agent.status === 'approved' ? (
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full flex items-center gap-1">
+                    <ShieldCheck size={12} /> نشط
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-black rounded-full flex items-center gap-1">
+                    <Clock size={12} /> معلق
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>

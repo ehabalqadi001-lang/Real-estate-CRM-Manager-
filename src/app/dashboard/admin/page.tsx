@@ -38,8 +38,19 @@ const CSS_STYLES = `
   .user-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
 `;
 
+interface AdminUser {
+  id: string
+  first_name?: string
+  last_name?: string
+  email?: string
+  phone?: string
+  company_name?: string
+  account_type?: string
+  status?: string
+}
+
 export default function AdminPage() {
-  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

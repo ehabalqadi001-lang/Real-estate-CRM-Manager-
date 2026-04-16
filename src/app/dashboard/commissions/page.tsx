@@ -14,7 +14,8 @@ export default async function CommissionsPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let commissions: Record<string, unknown>[] = []
+  interface Commission { id: string; amount: number; status: string; created_at: string; team_members?: { name?: string }; deals?: { title?: string } }
+  let commissions: Commission[] = []
   let fetchError = null
   let exactErrorDetails: string | null = null
 

@@ -27,7 +27,7 @@ export default function AddUnitButton() {
   }, [isOpen])
 
   // معالجة الإضافة اليدوية
-  const handleSingleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSingleSubmit = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault()
     setLoading(true)
     try {
@@ -41,7 +41,7 @@ export default function AddUnitButton() {
   }
 
   // معالجة رفع وتفكيك ملف الإكسيل
-  const handleBulkSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleBulkSubmit = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault()
     if (!excelFile || !selectedDeveloper) return alert('يرجى اختيار المطور وملف الإكسيل')
     
@@ -54,7 +54,7 @@ export default function AddUnitButton() {
         const sheetName = workbook.SheetNames[0]
         const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
         
-        await addBulkUnits(jsonData, selectedDeveloper)
+        await addBulkUnits(jsonData as Record<string, unknown>[], selectedDeveloper)
         setIsOpen(false)
         alert(`تمت إضافة ${jsonData.length} وحدة بنجاح!`)
       } catch (error: unknown) {

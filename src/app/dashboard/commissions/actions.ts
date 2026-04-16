@@ -3,6 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { sendCommissionPaidEmail } from '@/lib/email'
 
 // 1. جلب العمولات للصفحة الرئيسية
 export async function getCommissions() {
@@ -28,10 +29,34 @@ export async function payCommission(commissionId: string) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
+
+  // Fetch commission details for email
+  const { data: commission } = await supabase
+    .from('commissions')
+    .select('amount, commission_type, team_members(name, email), deals(title)')
+    .eq('id', commissionId)
+    .single()
+
   const { error } = await supabase.from('commissions')
     .update({ status: 'paid', paid_at: new Date().toISOString() })
     .eq('id', commissionId)
   if (error) throw new Error(error.message)
+
+  // Send email notification to the beneficiary
+  if (commission) {
+    const member = commission.team_members as { name?: string; email?: string } | null
+    const deal = commission.deals as { title?: string } | null
+    if (member?.email) {
+      await sendCommissionPaidEmail({
+        to: member.email,
+        recipientName: member.name ?? 'المستفيد',
+        amount: Number(commission.amount ?? 0),
+        dealTitle: deal?.title ?? 'صفقة',
+        commissionType: commission.commission_type ?? 'agent',
+      })
+    }
+  }
+
   revalidatePath('/dashboard/commissions')
 }
 
@@ -43,11 +68,16 @@ export async function addCommission(formData: FormData) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
+  const dealValueRaw = formData.get('deal_value')
+  const percentageRaw = formData.get('percentage')
   const payload = {
     deal_id: formData.get('deal_id'),
     member_id: formData.get('member_id') || null,
     amount: parseFloat(formData.get('amount') as string) || 0,
-    status: formData.get('status') || 'pending'
+    status: formData.get('status') || 'pending',
+    commission_type: formData.get('commission_type') || 'agent',
+    deal_value: dealValueRaw ? parseFloat(dealValueRaw as string) : null,
+    percentage: percentageRaw ? parseFloat(percentageRaw as string) : null,
   }
   const { error } = await supabase.from('commissions').insert([payload])
   if (error) throw new Error(error.message)
@@ -62,7 +92,7 @@ export async function getActiveDeals() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
-  const { data } = await supabase.from('deals').select('id, title').neq('status', 'lost')
+  const { data } = await supabase.from('deals').select('id, title, unit_value').neq('status', 'lost')
   return data || []
 }
 

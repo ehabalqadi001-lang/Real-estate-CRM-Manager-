@@ -14,7 +14,8 @@ export default async function InventoryPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let inventory: Record<string, unknown>[] = []
+  interface Unit { id: string; unit_name: string; project_name: string; unit_type: string; price: number; status: string }
+  let inventory: Unit[] = []
   let fetchError = null
   let exactErrorDetails: string | null = null
 

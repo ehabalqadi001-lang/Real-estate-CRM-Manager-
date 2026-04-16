@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import AIAssistantChat from '@/components/whatsapp/AIAssistantChat';
 
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
@@ -214,6 +215,14 @@ export default function WhatsAppHub() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* المساعد الذكي */}
+          <div style={{marginTop: '30px'}}>
+            <h2 style={{fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '16px'}}>
+              🤖 المساعد الذكي — تجربة محادثة مع عميل
+            </h2>
+            <AIAssistantChat />
           </div>
 
         </div>

@@ -18,8 +18,8 @@ export default function AddDealButton({ activeLeads, teamMembers }: { activeLead
     
     try {
       const payload = {
-        leadId: formData.get('leadId'),
-        agentId: formData.get('agentId'),
+        leadId: (formData.get('leadId') ?? '') as string,
+        agentId: (formData.get('agentId') ?? '') as string,
         finalPrice: Number(formData.get('finalPrice')),
         commissionRate: Number(formData.get('commissionRate')),
         discount: 0

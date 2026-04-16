@@ -13,7 +13,8 @@ export default async function TeamPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  let members: Record<string, unknown>[] = []
+  interface TeamMember { id: string; name: string; role: string; phone: string | null; email: string | null; created_at: string }
+  let members: TeamMember[] = []
   let fetchError = null
   let exactErrorDetails: string | null = null
 

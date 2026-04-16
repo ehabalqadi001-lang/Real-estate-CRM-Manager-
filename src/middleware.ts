@@ -2,32 +2,40 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Ratelimit } from '@upstash/ratelimit'
 import { redis } from '@/lib/redis'
+import { createServerClient } from '@supabase/ssr'
 
-// 1. إعداد الدرع: 10 طلبات كحد أقصى كل 10 ثوانٍ
+// ─── Rate limiter ──────────────────────────────────────────────
 const ratelimit = new Ratelimit({
-  redis: redis,
+  redis,
   limiter: Ratelimit.slidingWindow(10, '10 s'),
   analytics: true,
 })
 
-export async function middleware(request: NextRequest) {
-  // حماية مسارات الدخول والـ API فقط لعدم إبطاء باقي المنصة
-  if (request.nextUrl.pathname.startsWith('/auth') || request.nextUrl.pathname.startsWith('/api')) {
-    
-    // التقاط الـ IP بأمان (بنية Next.js 15 القياسية)
-    // نعتمد هنا على الهيدر مباشرة بعد إزالة request.ip من النظام
-    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
-    
-    // الفحص عبر رادار Upstash
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip)
+// ─── Route permissions ────────────────────────────────────────
+// Routes that require authentication (redirect to /login if not signed in)
+const PROTECTED_PREFIXES = ['/dashboard', '/company', '/admin', '/portal']
 
+// Routes only accessible to company/admin roles
+const COMPANY_ONLY_PREFIXES = ['/company', '/admin']
+
+// Public routes — always allowed
+const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth', '/portal', '/api/set-locale']
+
+function isPublic(path: string) {
+  return PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/') || path.startsWith('/api/'))
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const response = NextResponse.next()
+
+  // ── 1. Rate limiting on auth + api routes ─────────────────
+  if (pathname.startsWith('/auth') || pathname.startsWith('/api')) {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip)
     if (!success) {
-      // رسالة السجل بالإنجليزية لمنع أعطال محرر الأكواد
-      console.warn('[Security Radar] Rate limit exceeded. Blocked IP:', ip)
-      
-      // الضربة المرتدة للمخترق
       return new NextResponse(
-        JSON.stringify({ error: 'تم تجاوز الحد الأقصى للطلبات. حقل القوة مفعل، يرجى الانتظار.' }),
+        JSON.stringify({ error: 'تم تجاوز الحد الأقصى للطلبات. يرجى الانتظار.' }),
         {
           status: 429,
           headers: {
@@ -41,13 +49,56 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  // ── 2. Skip RBAC for public paths ─────────────────────────
+  if (isPublic(pathname)) return response
+
+  // ── 3. Check if route needs protection ────────────────────
+  const needsAuth = PROTECTED_PREFIXES.some(p => pathname.startsWith(p))
+  if (!needsAuth) return response
+
+  // ── 4. Build Supabase client from cookies ─────────────────
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // ── 5. Not authenticated → redirect to login ──────────────
+  if (!user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // ── 6. Role-based guard for /company/* and /admin/* ───────
+  const needsCompanyRole = COMPANY_ONLY_PREFIXES.some(p => pathname.startsWith(p))
+  if (needsCompanyRole) {
+    // Read role from cookie (set at login) — avoids extra DB call per request
+    const roleCookie = request.cookies.get('user_role')?.value
+    const role = roleCookie ?? 'agent'
+
+    if (role === 'agent') {
+      // Agents get redirected to their own dashboard
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
+  return response
 }
 
-// 2. تفعيل الدرع على هذه المسارات
 export const config = {
   matcher: [
-    '/auth/:path*',
-    '/api/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

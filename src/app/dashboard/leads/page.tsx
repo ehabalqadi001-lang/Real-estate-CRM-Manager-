@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Users, Briefcase, Plus, ArrowLeft } from 'lucide-react'
 import LeadFilters from '@/components/leads/LeadFilters'
+import BulkImportButton from '@/components/leads/BulkImportButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,9 +60,12 @@ export default async function LeadsPage({ searchParams }: PageProps) {
             <p className="text-sm font-bold text-slate-500 mt-1">البحث والفلترة والمتابعة الشاملة</p>
           </div>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md">
-          <Plus size={18} /> إضافة عميل جديد
-        </button>
+        <div className="flex items-center gap-3">
+          <BulkImportButton />
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md">
+            <Plus size={18} /> إضافة عميل جديد
+          </button>
+        </div>
       </div>
 
       {/* محرك البحث والفلاتر (تمت زراعته هنا) */}

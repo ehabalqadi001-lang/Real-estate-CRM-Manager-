@@ -1,0 +1,73 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "تمت العملية بنجاح",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "noData": "لا توجد بيانات"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "leads": "العملاء المحتملون",
+    "deals": "الصفقات",
+    "clients": "المستثمرون",
+    "inventory": "المخزون العقاري",
+    "developers": "المطورون",
+    "reports": "التقارير",
+    "team": "الفريق",
+    "commissions": "العمولات",
+    "settings": "الإعدادات",
+    "audit": "سجل العمليات",
+    "whatsapp": "واتساب"
+  },
+  "leads": {
+    "title": "العملاء المحتملون",
+    "addNew": "إضافة عميل جديد",
+    "clientName": "اسم العميل",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "propertyType": "نوع العقار",
+    "expectedValue": "القيمة المتوقعة",
+    "status": "الحالة",
+    "statuses": {
+      "fresh": "عميل جديد",
+      "followup": "متابعة",
+      "meeting": "اجتماع",
+      "contracted": "تعاقد",
+      "lost": "خسارة"
+    }
+  },
+  "deals": {
+    "title": "الصفقات",
+    "addNew": "إضافة صفقة",
+    "dealTitle": "عنوان الصفقة",
+    "amount": "المبلغ",
+    "stage": "المرحلة",
+    "stages": {
+      "negotiation": "تفاوض",
+      "contracted": "تعاقد",
+      "registration": "تسجيل",
+      "handover": "تسليم"
+    }
+  },
+  "inventory": {
+    "title": "المخزون العقاري",
+    "addUnit": "إضافة وحدة",
+    "unitName": "اسم الوحدة",
+    "area": "المساحة",
+    "price": "السعر",
+    "status": "الحالة",
+    "statuses": {
+      "available": "متاحة",
+      "reserved": "محجوزة",
+      "sold": "مباعة"
+    }
+  }
+}
