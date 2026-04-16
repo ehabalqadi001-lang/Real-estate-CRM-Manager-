@@ -2,8 +2,11 @@
 
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.EMAIL_FROM ?? 'CRM <noreply@fasteam.co>'
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!)
+}
 
 // ─── Templates ────────────────────────────────────────────────
 
@@ -101,7 +104,7 @@ export async function sendDealStageChangedEmail(params: {
   if (!process.env.RESEND_API_KEY) return // silently skip if not configured
   const dealUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/dashboard/deals/${params.dealId}`
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM,
       to: params.to,
       subject: `صفقة محدّثة: ${params.dealTitle} → ${params.newStage}`,
@@ -121,7 +124,7 @@ export async function sendCommissionPaidEmail(params: {
 }) {
   if (!process.env.RESEND_API_KEY) return
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM,
       to: params.to,
       subject: `تم صرف عمولتك — ${params.dealTitle}`,
@@ -140,7 +143,7 @@ export async function sendWelcomeEmail(params: {
   if (!process.env.RESEND_API_KEY) return
   const loginUrl = params.loginUrl ?? `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/login`
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM,
       to: params.to,
       subject: 'مرحباً بك في FAST INVESTMENT CRM',
