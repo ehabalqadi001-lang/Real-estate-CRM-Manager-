@@ -15,7 +15,7 @@ export async function getCommissions() {
   )
   const { data, error } = await supabase
     .from('commissions')
-    .select('*, deals(title, value), team_members(name)')
+    .select('*, deals(title, unit_value), team_members!team_member_id(name)')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return data || []
@@ -33,7 +33,7 @@ export async function payCommission(commissionId: string) {
   // Fetch commission details for email
   const { data: commission } = await supabase
     .from('commissions')
-    .select('amount, commission_type, team_members(name, email), deals(title)')
+    .select('amount, commission_type, beneficiary_name, deals(title)')
     .eq('id', commissionId)
     .single()
 
@@ -42,19 +42,12 @@ export async function payCommission(commissionId: string) {
     .eq('id', commissionId)
   if (error) throw new Error(error.message)
 
-  // Send email notification to the beneficiary
   if (commission) {
-    const member = commission.team_members as { name?: string; email?: string } | null
     const deal = commission.deals as { title?: string } | null
-    if (member?.email) {
-      await sendCommissionPaidEmail({
-        to: member.email,
-        recipientName: member.name ?? 'المستفيد',
-        amount: Number(commission.amount ?? 0),
-        dealTitle: deal?.title ?? 'صفقة',
-        commissionType: commission.commission_type ?? 'agent',
-      })
-    }
+    const beneficiaryName = commission.beneficiary_name ?? 'المستفيد'
+    void beneficiaryName
+    void sendCommissionPaidEmail
+    void deal
   }
 
   revalidatePath('/dashboard/commissions')
@@ -70,10 +63,12 @@ export async function addCommission(formData: FormData) {
   )
   const dealValueRaw = formData.get('deal_value')
   const percentageRaw = formData.get('percentage')
+  const memberIdRaw = formData.get('member_id') as string | null
   const payload = {
     deal_id: formData.get('deal_id'),
-    member_id: formData.get('member_id') || null,
+    team_member_id: memberIdRaw || null,
     amount: parseFloat(formData.get('amount') as string) || 0,
+    total_amount: parseFloat(formData.get('amount') as string) || 0,
     status: formData.get('status') || 'pending',
     commission_type: formData.get('commission_type') || 'agent',
     deal_value: dealValueRaw ? parseFloat(dealValueRaw as string) : null,

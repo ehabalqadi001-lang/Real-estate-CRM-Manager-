@@ -40,7 +40,7 @@ export default async function CommissionsPage() {
   try {
     const { data, error } = await supabase
       .from('commissions')
-      .select('*, deals(title, value), team_members(name)')
+      .select('*, deals(title, unit_value), team_members!team_member_id(name)')
       .order('created_at', { ascending: false })
 
     if (error) { exactErrorDetails = error.message; throw error }

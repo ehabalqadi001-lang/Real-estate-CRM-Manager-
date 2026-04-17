@@ -1,150 +1,295 @@
 'use client'
-import ThemeToggle from '@/components/ThemeToggle'
-import LanguageToggle from '@/components/LanguageToggle'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, UserPlus, Briefcase,
-  MapPin, BarChart3, LogOut, ShieldCheck,
-  UserCircle, Target, Wallet, Calendar, CheckSquare, ShieldAlert, ClipboardList, TrendingUp, Users, GitCompare, Kanban,
-  CalendarClock, BarChart2, Flag
+import {
+  LayoutDashboard, Users, Briefcase, Building2, Wallet,
+  BarChart3, TrendingUp, ClipboardList, Settings, LogOut,
+  ChevronDown, Kanban, Target, MapPin, UserPlus,
+  ShieldCheck, Star, Home, Calculator, FileText, Bell, X, Menu
 } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { createBrowserClient } from '@supabase/ssr'
 
-// 1. القائمة الاستراتيجية للقيادة (المدير / القيادة العليا)
-const adminMenu = [
-  { name: 'القيادة العليا', icon: ShieldAlert, path: '/admin/super-dashboard' },
-  { name: 'لوحة تحكم الشركة', icon: LayoutDashboard, path: '/company/dashboard' },
-  { name: 'إحصائيات المبيعات', icon: BarChart3, path: '/company/reports' },
-  { name: 'الرقابة المالية', icon: Wallet, path: '/company/financials' },
-  { name: 'إضافة وكيل جديد', icon: UserPlus, path: '/company/agents/add' },
-  { name: 'إدارة العملاء', icon: Briefcase, path: '/dashboard/leads' },
-  { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
-  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
-  { name: 'التنبؤ بالمبيعات', icon: TrendingUp, path: '/dashboard/forecasting' },
-  { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
-  { name: 'أداء الفريق', icon: Users, path: '/dashboard/performance' },
-  { name: 'مقارنة الوحدات', icon: GitCompare, path: '/dashboard/compare' },
-  { name: 'سجل العمليات', icon: ClipboardList, path: '/dashboard/audit' },
-  { name: 'الأهداف والإنجازات', icon: Flag, path: '/dashboard/targets' },
-  { name: 'جدول الأقساط', icon: CalendarClock, path: '/dashboard/schedule' },
-  { name: 'التحليلات المتقدمة', icon: BarChart2, path: '/dashboard/analytics' },
+interface NavItem {
+  name: string
+  icon: React.ElementType
+  path: string
+  badge?: string
+}
+
+interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+const adminGroups: NavGroup[] = [
+  {
+    label: 'الرئيسية',
+    items: [
+      { name: 'لوحة القيادة', icon: LayoutDashboard, path: '/company/dashboard' },
+      { name: 'الإدارة العليا', icon: ShieldCheck, path: '/admin/super-dashboard' },
+    ],
+  },
+  {
+    label: 'المبيعات والعملاء',
+    items: [
+      { name: 'العملاء المحتملون', icon: Users, path: '/dashboard/leads' },
+      { name: 'الصفقات', icon: Briefcase, path: '/dashboard/deals' },
+      { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
+      { name: 'إدارة الوسطاء', icon: Star, path: '/dashboard/brokers' },
+    ],
+  },
+  {
+    label: 'العقارات',
+    items: [
+      { name: 'المشاريع والوحدات', icon: Building2, path: '/dashboard/inventory' },
+      { name: 'المطورون', icon: Home, path: '/dashboard/developers' },
+      { name: 'مقارنة الوحدات', icon: MapPin, path: '/dashboard/compare' },
+    ],
+  },
+  {
+    label: 'المالية والتقارير',
+    items: [
+      { name: 'العمولات', icon: Wallet, path: '/dashboard/commissions' },
+      { name: 'الأهداف', icon: Target, path: '/dashboard/targets' },
+      { name: 'التنبؤ بالمبيعات', icon: TrendingUp, path: '/dashboard/forecasting' },
+      { name: 'التقارير والتحليلات', icon: BarChart3, path: '/dashboard/analytics' },
+      { name: 'الحاسبة المالية', icon: Calculator, path: '/dashboard/calculator' },
+    ],
+  },
+  {
+    label: 'الإدارة',
+    items: [
+      { name: 'أداء الفريق', icon: BarChart3, path: '/dashboard/performance' },
+      { name: 'العقود', icon: FileText, path: '/dashboard/contracts' },
+      { name: 'الإشعارات', icon: Bell, path: '/dashboard/notifications' },
+      { name: 'سجل العمليات', icon: ClipboardList, path: '/dashboard/audit' },
+      { name: 'إضافة وكيل', icon: UserPlus, path: '/company/agents/add' },
+    ],
+  },
 ]
 
-// 2. القائمة التكتيكية (لوكيل المبيعات)
-const agentMenu = [
-  { name: 'مساحة العمل', icon: Target, path: '/dashboard/agent' },
-  { name: 'مهامي اليومية', icon: Calendar, path: '/dashboard/activities' },
-  { name: 'مسار المبيعات', icon: Briefcase, path: '/dashboard/leads' },
-  { name: 'إدارة الصفقات', icon: CheckSquare, path: '/dashboard/deals' },
-  { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
-  { name: 'المخزون العقاري', icon: MapPin, path: '/dashboard/properties' },
+const agentGroups: NavGroup[] = [
+  {
+    label: 'الرئيسية',
+    items: [
+      { name: 'مساحة عملي', icon: LayoutDashboard, path: '/dashboard/agent' },
+    ],
+  },
+  {
+    label: 'المبيعات',
+    items: [
+      { name: 'العملاء المحتملون', icon: Users, path: '/dashboard/leads' },
+      { name: 'الصفقات', icon: Briefcase, path: '/dashboard/deals' },
+      { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
+    ],
+  },
+  {
+    label: 'العقارات',
+    items: [
+      { name: 'المشاريع والوحدات', icon: Building2, path: '/dashboard/inventory' },
+    ],
+  },
+  {
+    label: 'أدائي',
+    items: [
+      { name: 'عمولاتي', icon: Wallet, path: '/dashboard/commissions' },
+      { name: 'إشعاراتي', icon: Bell, path: '/dashboard/notifications' },
+    ],
+  },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string>('')
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    const fetchRole = async () => {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        // جلب الرتبة من قاعدة البيانات
-        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-        setUserRole(data?.role || 'agent')
-      }
-    }
-    fetchRole()
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase.from('profiles').select('role, full_name').eq('id', user.id).single()
+        .then(({ data }) => {
+          setUserRole(data?.role || 'agent')
+          setUserName(data?.full_name || user.email?.split('@')[0] || 'مستخدم')
+        })
+    })
   }, [])
 
-  // التعرف على رتبة القيادة (شاملة القيادة العليا والمدراء)
-  const isLeader = ['company_admin', 'admin', 'super_admin'].includes(userRole || '')
-  const activeMenu = isLeader ? adminMenu : agentMenu
+  const isLeader = ['company_admin', 'admin', 'super_admin', 'Admin'].includes(userRole || '')
+  const groups = isLeader ? adminGroups : agentGroups
 
-  return (
-    <aside className="w-72 bg-navy-dark text-white flex flex-col h-screen fixed right-0 top-0 border-l border-white/5 shadow-2xl z-50" dir="rtl">
-      
-      {/* منطقة السيادة العلوية (الشعار) */}
-      <div className="p-6 pb-6 flex flex-col border-b border-white/5">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex flex-col">
-            <h1 className="text-xl font-black text-gold italic leading-none">FAST</h1>
-            <h1 className="text-xl font-black text-white italic leading-none">INVESTMENT</h1>
+  const initials = userName
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'U'
+
+  const SidebarContent = () => (
+    <aside
+      className={`bg-[#0f1117] text-white flex flex-col h-screen border-l border-white/[0.06] transition-all duration-300 ${
+        collapsed ? 'w-[70px]' : 'w-[260px]'
+      }`}
+      dir="rtl"
+    >
+      {/* Logo area */}
+      <div className="flex items-center justify-between px-4 h-[60px] border-b border-white/[0.06] shrink-0">
+        {!collapsed && (
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-900/30">
+              <Building2 size={14} className="text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-white leading-none">FAST CRM</p>
+              <p className="text-[9px] text-white/30 leading-none mt-0.5">Real Estate Platform</p>
+            </div>
           </div>
-          <div className="bg-navy p-0.5 rounded-xl border border-white/10 shadow-inner">
-             <NotificationBell />
-          </div>
+        )}
+        <div className="flex items-center gap-1.5">
+          {!collapsed && <NotificationBell />}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors hidden lg:flex"
+          >
+            <Menu size={15} />
+          </button>
         </div>
-        <p className="text-[9px] font-black text-slate-400 tracking-[0.3em] uppercase opacity-60">Enterprise CRM System</p>
       </div>
 
-      {/* بطاقة الهوية الديناميكية (Dynamic ID Badge) */}
-      <div className="px-6 py-6">
-        <div className={`bg-gradient-to-br ${isLeader ? 'from-navy to-navy-dark border-gold/30' : 'from-slate-800 to-slate-900 border-teal/30'} rounded-2xl p-4 border flex flex-col items-center text-center shadow-lg relative overflow-hidden group`}>
-          {isLeader && <div className="absolute top-0 left-0 w-full h-1 bg-gold shadow-[0_0_10px_rgba(212,165,116,0.5)]"></div>}
-          {!isLeader && <div className="absolute top-0 left-0 w-full h-1 bg-teal shadow-[0_0_10px_rgba(13,148,136,0.5)]"></div>}
-          
-          <span className={`${isLeader ? 'text-gold' : 'text-teal'} text-[10px] font-black mb-1 uppercase tracking-wider`}>
-            {isLeader ? 'Management Leader' : 'Sales Agent'}
-          </span>
-          <h2 className="text-sm font-bold text-slate-200 uppercase flex items-center gap-1.5">
-            {isLeader ? <><ShieldCheck size={16} className="text-gold"/> القيادة الإدارية</> : <><UserCircle size={16} className="text-teal"/> وكيل مبيعات</>}
-          </h2>
+      {/* User profile card */}
+      {!collapsed && (
+        <div className="mx-3 mt-3 mb-1 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-black text-white shrink-0 shadow">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white/90 truncate">{userName}</p>
+              <p className="text-[10px] text-white/30">
+                {isLeader ? 'مدير النظام' : 'وكيل مبيعات'}
+              </p>
+            </div>
+            {isLeader && (
+              <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded-md font-bold shrink-0">
+                Admin
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* القائمة الذكية (Navigation) - باستخدام كلاس no-scrollbar المعتمد */}
-      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto no-scrollbar">
-        {activeMenu.map((item) => {
-          const isActive = pathname === item.path || pathname.startsWith(item.path + '/')
-          const Icon = item.icon
-
-          return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all duration-300 group ${
-                isActive 
-                  ? isLeader 
-                    ? 'bg-gold/10 text-gold border border-gold/20 shadow-[inset_0_0_20px_rgba(212,165,116,0.05)]' 
-                    : 'bg-teal/10 text-teal border border-teal/20 shadow-[inset_0_0_20px_rgba(13,148,136,0.05)]'
-                  : 'text-slate-400 hover:bg-navy hover:text-white'
-              }`}
-            >
-              <Icon size={18} className={`${isActive ? (isLeader ? 'text-gold' : 'text-teal') : 'text-slate-500 group-hover:text-white'} transition-colors`} />
-              <span className="text-sm">{item.name}</span>
-              {isActive && (
-                <div className="mr-auto">
-                  <div className={`w-1 h-4 rounded-full ${isLeader ? 'bg-gold shadow-[0_0_10px_rgba(212,165,116,0.8)]' : 'bg-teal shadow-[0_0_10px_rgba(13,148,136,0.8)]'}`}></div>
-                </div>
-              )}
-            </Link>
-          )
-        })}
+      {/* Navigation groups */}
+      <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-4 no-scrollbar">
+        {groups.map((group) => (
+          <div key={group.label}>
+            {!collapsed && (
+              <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.12em] px-3 mb-1.5">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive = pathname === item.path || pathname.startsWith(item.path + '/')
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    onClick={() => setMobileOpen(false)}
+                    title={collapsed ? item.name : undefined}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group relative ${
+                      isActive
+                        ? 'bg-blue-600/15 text-blue-400'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'
+                    } ${collapsed ? 'justify-center' : ''}`}
+                  >
+                    {isActive && (
+                      <span className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-l-full" />
+                    )}
+                    <Icon
+                      size={16}
+                      className={`shrink-0 transition-colors ${
+                        isActive ? 'text-blue-400' : 'text-white/40 group-hover:text-white/70'
+                      }`}
+                    />
+                    {!collapsed && (
+                      <span className="text-[13px] font-semibold truncate">{item.name}</span>
+                    )}
+                    {!collapsed && item.badge && (
+                      <span className="mr-auto text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded-md font-bold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-{/* القاعدة السفلية (Theme + Logout) */}
-      <div className="p-4 border-t border-white/5 bg-navy-dark space-y-4">
-        {/* مفاتيح التبديل */}
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <LanguageToggle />
-        </div>
-
-        {/* زر إغلاق الجلسة */}
+      {/* Footer */}
+      <div className="px-2 pb-3 space-y-0.5 border-t border-white/[0.06] pt-2 shrink-0">
+        <Link
+          href="/dashboard/settings"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-all group"
+        >
+          <Settings size={16} className="shrink-0" />
+          {!collapsed && <span className="text-[13px] font-semibold">الإعدادات</span>}
+        </Link>
         <form action="/auth/logout" method="post">
-          <button type="submit" className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 font-bold transition-all border border-transparent hover:border-red-500/20 group">
-            <span className="text-sm">إغلاق الجلسة الأمنية</span>
-            <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+          <button
+            type="submit"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all group ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <LogOut size={16} className="shrink-0" />
+            {!collapsed && <span className="text-[13px] font-semibold">تسجيل الخروج</span>}
           </button>
         </form>
-      </div>  
-        </aside>
+      </div>
+    </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex h-screen sticky top-0">
+        <SidebarContent />
+      </div>
+
+      {/* Mobile toggle button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-[#0f1117] rounded-xl border border-white/10 text-white shadow-lg"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <div className="relative flex h-screen">
+            <SidebarContent />
+          </div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="absolute top-4 left-4 z-50 text-white/50 hover:text-white p-1"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
+    </>
   )
 }
