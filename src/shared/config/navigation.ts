@@ -33,10 +33,10 @@ export interface NavigationGroup {
 
 export const dashboardNavigation: NavigationGroup[] = [
   {
-    title: 'مركز التشغيل',
+    title: 'مركز القيادة',
     items: [
-      { title: 'لوحة القيادة', href: '/dashboard', permission: 'dashboard.view.own', icon: LayoutDashboard },
-      { title: 'التقارير', href: '/dashboard/reports', permission: 'report.view.own', icon: BarChart3 },
+      { title: 'اللوحة التنفيذية', href: '/dashboard', permission: 'dashboard.view.own', icon: LayoutDashboard },
+      { title: 'التحليلات والتقارير', href: '/dashboard/reports', permission: 'report.view.own', icon: BarChart3 },
       { title: 'الإشعارات', href: '/dashboard/notifications', permission: 'notification.view.own', icon: Bell },
     ],
   },
@@ -50,14 +50,14 @@ export const dashboardNavigation: NavigationGroup[] = [
     ],
   },
   {
-    title: 'الوسطاء والشركات',
+    title: 'الشركاء والفريق',
     items: [
       { title: 'إدارة الوسطاء', href: '/dashboard/brokers', permission: 'broker.view.company', icon: ShieldCheck },
       { title: 'الفريق', href: '/dashboard/team', permission: 'team.view', icon: ClipboardCheck },
     ],
   },
   {
-    title: 'المخزون العقاري',
+    title: 'المخزون والسوق',
     items: [
       { title: 'المطورون', href: '/dashboard/developers', permission: 'developer.view', icon: Landmark },
       { title: 'المشاريع', href: '/dashboard/projects', permission: 'project.view', icon: Building2 },
@@ -77,10 +77,10 @@ export const dashboardNavigation: NavigationGroup[] = [
   {
     title: 'الإدارة والحوكمة',
     items: [
-      { title: 'الدعم', href: '/dashboard/support', permission: 'support.view', icon: Ticket },
-      { title: 'الإدارة', href: '/admin/super-dashboard', permission: 'admin.view', icon: Settings },
+      { title: 'خدمة العملاء', href: '/admin/customer-service', permission: 'support.view', icon: Ticket },
+      { title: 'اعتماد الإعلانات', href: '/admin/ad-approvals', permission: 'admin.view', icon: ShieldCheck },
+      { title: 'إدارة النظام', href: '/admin/super-dashboard', permission: 'admin.view', icon: Settings },
       { title: 'سجل العمليات', href: '/dashboard/audit', permission: 'audit.view.company', icon: ClipboardCheck },
     ],
   },
 ]
-

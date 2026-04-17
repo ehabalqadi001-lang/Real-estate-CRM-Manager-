@@ -4,7 +4,7 @@ type RawAd = {
   id: string
   title: string
   description: string | null
-  price: number | string
+  price: number | string | null
   currency: string | null
   property_type: string | null
   location: string | null
@@ -37,7 +37,7 @@ export function mapAdToMarketplaceProperty(ad: RawAd): MarketplaceProperty {
     id: ad.id,
     title: ad.title,
     description: ad.description ?? '',
-    price: Number(ad.price),
+    price: Number(ad.price ?? 0),
     currency: 'EGP',
     listingKind: ad.property_type?.includes('primary') ? 'primary' : 'resale',
     propertyType: normalizePropertyType(ad.property_type),

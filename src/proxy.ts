@@ -37,7 +37,14 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (pathname === '/' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    const role = String(profile?.role ?? '')
+    return NextResponse.redirect(new URL(role === 'CLIENT' || role === 'client' ? '/marketplace/profile' : '/dashboard', request.url))
   }
 
   if (isProtected(pathname) && !user) {
@@ -47,7 +54,14 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && isPublic(pathname) && pathname !== '/') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    const role = String(profile?.role ?? '')
+    return NextResponse.redirect(new URL(role === 'CLIENT' || role === 'client' ? '/marketplace/profile' : '/dashboard', request.url))
   }
 
   if (user && ADMIN_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
@@ -71,4 +85,3 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'],
 }
-

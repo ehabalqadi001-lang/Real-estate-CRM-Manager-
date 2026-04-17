@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, LogOut } from 'lucide-react'
+import { Building2, Crown, LogOut } from 'lucide-react'
 import { dashboardNavigation } from '@/shared/config/navigation'
 import type { AppProfile } from '@/shared/auth/types'
 import { hasPermission } from '@/shared/rbac/permissions'
@@ -28,68 +28,92 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     .toUpperCase()
 
   return (
-    <aside className="hidden lg:flex h-screen w-[280px] shrink-0 flex-col border-l border-slate-200 bg-[#071426] text-white" dir="rtl">
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500">
-            <Building2 size={18} />
+    <aside className="hidden h-screen w-[292px] shrink-0 p-4 lg:block" dir="rtl">
+      <div className="fi-glass flex h-full flex-col overflow-hidden rounded-lg">
+        <div className="border-b border-[var(--fi-line)] p-4">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <span className="flex size-11 items-center justify-center rounded-lg border border-[var(--fi-line)] bg-[rgba(201,168,76,0.14)] text-[var(--fi-gold)]">
+              <Building2 className="size-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-black tracking-wide text-white">FAST INVESTMENT</span>
+              <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">Enterprise CRM</span>
+            </span>
+          </Link>
+        </div>
+
+        <div className="mx-4 mt-4 rounded-lg border border-[var(--fi-line)] bg-white/[0.04] p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-gold)] text-xs font-black text-[var(--fi-navy)]">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black text-white">{profile.full_name ?? profile.email}</p>
+              <p className="mt-0.5 truncate text-[11px] font-bold text-[var(--fi-muted)]">{labelRole(profile.role)}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-black leading-none">FAST CRM</p>
-            <p className="mt-1 text-[11px] text-white/45">Enterprise Operating System</p>
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-[11px] font-bold text-[var(--fi-gold)]">
+            <Crown className="size-3.5" />
+            Enterprise Workspace
           </div>
         </div>
-      </div>
 
-      <div className="mx-3 mt-3 rounded-lg border border-white/10 bg-white/[0.04] p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-xs font-black">
-            {initials}
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <div className="space-y-5">
+            {visibleGroups.map((group) => (
+              <section key={group.title}>
+                <p className="mb-2 px-2 text-[11px] font-black text-white/35">{group.title}</p>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const Icon = item.icon
+                    const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
+                          active
+                            ? 'border border-[var(--fi-line)] bg-[rgba(201,168,76,0.16)] text-[var(--fi-gold)]'
+                            : 'text-white/62 hover:bg-white/[0.06] hover:text-white'
+                        }`}
+                      >
+                        <Icon className="size-4" />
+                        <span className="truncate">{item.title}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold">{profile.full_name ?? profile.email}</p>
-            <p className="mt-0.5 text-[11px] text-white/45">{profile.role}</p>
-          </div>
-        </div>
-      </div>
+        </nav>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-5">
-          {visibleGroups.map((group) => (
-            <section key={group.title}>
-              <p className="mb-2 px-2 text-[11px] font-bold text-white/35">{group.title}</p>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon
-                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                        active ? 'bg-emerald-500/15 text-emerald-300' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <Icon size={17} />
-                      <span className="truncate">{item.title}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </section>
-          ))}
+        <div className="border-t border-[var(--fi-line)] p-3">
+          <form action="/auth/logout" method="post">
+            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-white/55 transition hover:bg-red-500/10 hover:text-red-300">
+              <LogOut className="size-4" />
+              تسجيل الخروج
+            </button>
+          </form>
         </div>
-      </nav>
-
-      <div className="border-t border-white/10 p-3">
-        <form action="/auth/logout" method="post">
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/55 transition hover:bg-red-500/10 hover:text-red-300">
-            <LogOut size={17} />
-            تسجيل الخروج
-          </button>
-        </form>
       </div>
     </aside>
   )
 }
 
+function labelRole(role: string) {
+  const labels: Record<string, string> = {
+    super_admin: 'مدير النظام',
+    platform_admin: 'مدير المنصة',
+    company_owner: 'مالك شركة',
+    company_admin: 'مدير شركة',
+    admin: 'مدير',
+    company: 'شركة',
+    broker: 'وسيط عقاري',
+    agent: 'وسيط عقاري',
+    customer_support: 'خدمة العملاء',
+    finance_officer: 'المالية',
+  }
+
+  return labels[role] ?? role
+}

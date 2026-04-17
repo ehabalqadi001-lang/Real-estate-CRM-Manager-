@@ -1,100 +1,103 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Users, Building2, Target, Calendar, MapPin } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { BarChart3, Building2, Calendar, MapPin, Search, Target, Users } from 'lucide-react'
+
+const commands = [
+  { name: 'اللوحة التنفيذية', path: '/dashboard', icon: BarChart3 },
+  { name: 'اعتماد الإعلانات', path: '/admin/ad-approvals', icon: Building2 },
+  { name: 'مسار المبيعات', path: '/dashboard/deals/kanban', icon: Target },
+  { name: 'العملاء المحتملون', path: '/dashboard/leads', icon: Users },
+  { name: 'المخزون العقاري', path: '/dashboard/inventory/units', icon: MapPin },
+  { name: 'مهام اليوم', path: '/dashboard/activities', icon: Calendar },
+]
 
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
 
-  // الاستماع للأوامر من لوحة المفاتيح (Ctrl+K أو Cmd+K)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault()
         setIsOpen((open) => !open)
       }
-      if (e.key === 'Escape') {
-        setIsOpen(false)
-      }
+      if (event.key === 'Escape') setIsOpen(false)
     }
+
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  if (!isOpen) return null
+  const filteredCommands = commands.filter((cmd) => cmd.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
-  // قائمة المهام السريعة
-  const commands = [
-    { name: 'القيادة العليا', path: '/admin/super-dashboard', icon: Building2 },
-    { name: 'مساحة العمل (الوكيل)', path: '/dashboard/agent', icon: Target },
-    { name: 'مسار المبيعات والعملاء', path: '/dashboard/leads', icon: Users },
-    { name: 'المخزون العقاري', path: '/dashboard/properties', icon: MapPin },
-    { name: 'مهامي اليومية', path: '/dashboard/activities', icon: Calendar },
-  ]
-
-  // فلترة النتائج بناءً على البحث
-  const filteredCommands = commands.filter(cmd => 
-    cmd.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const handleSelect = (path: string) => {
+  function handleSelect(path: string) {
     setIsOpen(false)
     setSearchQuery('')
     router.push(path)
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-navy-dark/60 backdrop-blur-sm" dir="rtl">
-      <div 
-        className="fixed inset-0" 
-        onClick={() => setIsOpen(false)}
-      ></div>
-      
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
-        
-        {/* شريط البحث المركزي */}
-        <div className="flex items-center px-4 py-4 border-b border-slate-100">
-          <Search size={24} className="text-slate-400 ml-3" />
-          <input
-            type="text"
-            className="flex-1 bg-transparent text-lg text-navy-dark placeholder-slate-400 focus:outline-none font-bold"
-            placeholder="ابحث عن مسار، عميل، أو أمر (Ctrl + K)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
-          <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">ESC للإغلاق</span>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 px-4 pt-[14vh] backdrop-blur-sm"
+          dir="rtl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <button className="absolute inset-0" aria-label="إغلاق" onClick={() => setIsOpen(false)} />
+          <motion.div
+            className="fi-glass relative w-full max-w-2xl overflow-hidden rounded-lg"
+            initial={{ y: 18, scale: 0.98, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 12, scale: 0.98, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="flex items-center border-b border-[var(--fi-line)] px-4 py-4">
+              <Search className="ml-3 size-6 text-[var(--fi-gold)]" />
+              <input
+                type="text"
+                className="flex-1 bg-transparent text-lg font-bold text-white placeholder:text-white/35 focus:outline-none"
+                placeholder="ابحث عن مسار، عميل، وحدة، أو أمر..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                autoFocus
+              />
+              <span className="rounded-md border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-white/45">ESC</span>
+            </div>
 
-        {/* قائمة النتائج السريعة */}
-        <div className="max-h-96 overflow-y-auto p-2 no-scrollbar">
-          {filteredCommands.length > 0 ? (
-            <div className="space-y-1">
-              <p className="px-4 py-2 text-xs font-bold text-slate-400 uppercase">اقتراحات سريعة</p>
-              {filteredCommands.map((cmd) => {
-                const Icon = cmd.icon
-                return (
-                  <button
-                    key={cmd.path}
-                    onClick={() => handleSelect(cmd.path)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-navy-dark transition-colors group text-right"
-                  >
-                    <Icon size={18} className="text-slate-400 group-hover:text-gold transition-colors" />
-                    <span className="font-bold">{cmd.name}</span>
-                  </button>
-                )
-              })}
+            <div className="max-h-96 overflow-y-auto p-2">
+              {filteredCommands.length > 0 ? (
+                <div className="space-y-1">
+                  <p className="px-4 py-2 text-xs font-black text-[var(--fi-muted)]">اقتراحات سريعة</p>
+                  {filteredCommands.map((cmd) => {
+                    const Icon = cmd.icon
+                    return (
+                      <button
+                        key={cmd.path}
+                        onClick={() => handleSelect(cmd.path)}
+                        className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-right text-sm font-bold text-white/70 transition hover:bg-white/[0.06] hover:text-white"
+                      >
+                        <Icon className="size-4 text-[var(--fi-gold)]" />
+                        <span>{cmd.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="px-4 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
+                  لا توجد نتائج مطابقة.
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="px-4 py-10 text-center text-slate-500 font-bold">
-              لم يتم العثور على نتائج متطابقة.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

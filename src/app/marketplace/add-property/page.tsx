@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
+import { Coins, ShieldCheck, Sparkles } from 'lucide-react'
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader'
 import ListingForm from '@/components/marketplace/listing-form/ListingForm'
 import { createServerClient } from '@/lib/supabase/server'
 import { marketplacePackages } from '@/domains/marketplace/sample-data'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
-import { Coins, ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,12 +28,9 @@ export default async function AddPropertyPage({
   const currentUser: MarketplaceUser = {
     id: user.id,
     email: user.email ?? null,
-    name: profileResult.data?.full_name ?? user.email ?? 'مستخدم',
-    role: profileResult.data?.role ?? null,
+    name: profileResult.data?.full_name ?? user.email ?? 'عميل',
+    role: profileResult.data?.role ?? 'CLIENT',
   }
-
-  const projects = projectsResult.data ?? []
-  const developers = developersResult.data ?? []
 
   return (
     <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="rtl">
@@ -42,19 +39,19 @@ export default async function AddPropertyPage({
         <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_360px]">
           <section>
             <p className="text-sm font-black text-[#0F8F83]">إضافة وحدة عقارية</p>
-            <h1 className="mt-2 text-4xl font-black">أرسل إعلانك للمراجعة</h1>
+            <h1 className="mt-2 text-4xl font-black">محرك إدراج وحدات FAST INVESTMENT</h1>
             <p className="mt-3 max-w-3xl text-base font-semibold leading-8 text-[#64748B]">
-              كل إعلان جديد يدخل بحالة <strong>قيد المراجعة</strong> ولا يظهر في السوق إلا بعد موافقة الفريق. أرقام الهاتف لا تُعرض للمشترين، والتواصل يتم عبر المحادثة الداخلية فقط.
+              أضف بيانات وحدتك في نموذج متعدد الخطوات. كل إعلان يدخل حالة المراجعة أولا، ولا تظهر أرقام الهاتف للعامة؛ التواصل يتم عبر محادثة داخل النظام لحماية العميل والمشتري.
             </p>
           </section>
           <aside className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
             <p className="flex items-center gap-2 text-sm font-black text-[#17375E]">
               <Coins className="size-4 text-[#C9964A]" />
-              محفظة النقاط
+              محفظة الإعلانات
             </p>
             <p className="mt-3 text-3xl font-black">إعلان مجاني واحد</p>
             <p className="mt-2 text-sm font-semibold leading-6 text-[#64748B]">
-              بعد الإعلان المجاني، يتم خصم نقاط من الرصيد حسب الباقة المختارة.
+              بعد الإعلان المجاني، يمكن ترقية الظهور أو إضافة إعلانات عبر الباقات المتاحة.
             </p>
           </aside>
         </div>
@@ -73,11 +70,11 @@ export default async function AddPropertyPage({
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <ListingForm
             userId={user.id}
-            projects={projects}
-            developers={developers}
+            projects={projectsResult.data ?? []}
+            developers={developersResult.data ?? []}
           />
 
-          <aside className="space-y-4 lg:pt-0">
+          <aside className="space-y-4">
             <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
               <p className="flex items-center gap-2 text-sm font-black text-[#0F8F83]">
                 <ShieldCheck className="size-4" />
@@ -86,9 +83,19 @@ export default async function AddPropertyPage({
               <ul className="mt-3 space-y-2 text-sm font-semibold leading-6 text-[#64748B]">
                 <li>لا يتم عرض رقم الهاتف في صفحة الإعلان.</li>
                 <li>لا يظهر الإعلان قبل موافقة فريق المراجعة.</li>
-                <li>كل محادثة مرتبطة بإعلان محدد داخل النظام.</li>
-                <li>الملفات والمستندات محمية ولا تُشارك علناً.</li>
+                <li>الصور العامة منفصلة عن المستندات الخاصة.</li>
+                <li>المستندات الهندسية والعقود محفوظة في مسارات خاصة.</li>
               </ul>
+            </div>
+
+            <div className="rounded-lg border border-[#C9964A]/30 bg-[#FFF8EC] p-4">
+              <p className="flex items-center gap-2 text-sm font-black text-[#C9964A]">
+                <Sparkles className="size-4" />
+                Gemini Marketing
+              </p>
+              <p className="mt-2 text-xs font-semibold leading-5 text-[#64748B]">
+                زر إنشاء المحتوى يعمل بعد تعبئة تفاصيل الوحدة، ويولد وصفا عربيا قابلا للتعديل قبل الإرسال.
+              </p>
             </div>
 
             <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
@@ -103,13 +110,6 @@ export default async function AddPropertyPage({
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="rounded-lg border border-[#C9964A]/30 bg-[#FFF8EC] p-4">
-              <p className="text-sm font-black text-[#C9964A]">ملاحظة حول الذكاء الاصطناعي</p>
-              <p className="mt-2 text-xs font-semibold leading-5 text-[#64748B]">
-                زر "إنشاء محتوى تسويقي بـ Gemini" يعمل في الخطوة الثانية بعد تعبئة تفاصيل الوحدة. الوصف يُنشأ بناءً على البيانات المدخلة ويمكنك تعديله.
-              </p>
             </div>
           </aside>
         </div>

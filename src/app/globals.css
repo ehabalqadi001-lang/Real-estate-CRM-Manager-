@@ -5,6 +5,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root {
+  --fi-navy: #0A0E1A;
+  --fi-navy-2: #10182A;
+  --fi-navy-3: #172033;
+  --fi-gold: #C9A84C;
+  --fi-gold-2: #E5C96A;
+  --fi-ink: #F8FAFC;
+  --fi-muted: #9AA4B2;
+  --fi-line: rgba(201, 168, 76, 0.22);
+  --fi-glass: rgba(10, 14, 26, 0.76);
+  --fi-card: rgba(16, 24, 42, 0.82);
+  --fi-success: #18B26B;
+  --fi-danger: #D94A4A;
+  --fi-warning: #E5B454;
+  --fi-info: #5CA7FF;
+  --fi-space-1: 4px;
+  --fi-space-2: 8px;
+  --fi-space-3: 12px;
+  --fi-space-4: 16px;
+  --fi-space-5: 20px;
+  --fi-space-6: 24px;
+  --fi-space-8: 32px;
+  --fi-space-10: 40px;
+  --fi-radius: 8px;
+  --fi-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
 /* 2. دستور الهوية البصرية (Design System) */
 @theme {
   /* لوحة الألوان المؤسسية (Palette) */
@@ -15,6 +42,12 @@
   --color-gold: #D4A574;
   --color-gold-light: #E6C49F;
   --color-gold-dark: #B08050;
+  --color-fi-navy: #0A0E1A;
+  --color-fi-navy-2: #10182A;
+  --color-fi-navy-3: #172033;
+  --color-fi-gold: #C9A84C;
+  --color-fi-gold-2: #E5C96A;
+  --color-fi-muted: #9AA4B2;
 
   --color-teal: #0D9488;
   --color-teal-light: #14B8A6;
@@ -38,12 +71,61 @@
 
 /* 3. تنسيق الواجهة العامة لدعم اللغة العربية (RTL) */
 body {
-  background-color: #f8fafc;
-  color: #0a1128;
+  background-color: var(--fi-navy);
+  color: var(--fi-ink);
   font-family: var(--font-cairo);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.fi-shell-bg {
+  background:
+    radial-gradient(circle at 78% 8%, rgba(201, 168, 76, 0.18), transparent 34%),
+    radial-gradient(circle at 8% 72%, rgba(92, 167, 255, 0.12), transparent 28%),
+    linear-gradient(145deg, #0A0E1A 0%, #10182A 52%, #080B12 100%);
+}
+
+.fi-glass {
+  background: var(--fi-glass);
+  border: 1px solid var(--fi-line);
+  box-shadow: var(--fi-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.fi-card {
+  background: var(--fi-card);
+  border: 1px solid var(--fi-line);
+  border-radius: var(--fi-radius);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
+}
+
+.fi-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--fi-space-4);
+}
+
+.fi-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.fi-gold-text {
+  color: var(--fi-gold);
+}
+
+.fi-focus {
+  outline: none;
+}
+
+.fi-focus:focus-visible {
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.24);
+}
+
+@media (max-width: 1024px) {
+  .fi-bento-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Dark mode base overrides */

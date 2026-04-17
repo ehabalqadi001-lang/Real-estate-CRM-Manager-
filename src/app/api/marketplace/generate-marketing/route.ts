@@ -2,68 +2,79 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 import { createRawClient } from '@/lib/supabase/server'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
-
 export async function POST(req: NextRequest) {
   const supabase = await createRawClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: 'GEMINI_API_KEY غير مضبوط على الخادم' }, { status: 500 })
+  }
+
   const body = await req.json()
-
-  const {
-    title,
-    unit_type,
-    area_sqm,
-    rooms,
-    bathrooms,
-    finishing,
-    is_furnished,
-    features,
-    pricing_strategy,
-    total_cash_price,
-    down_payment,
-    installment_amount,
-    area_location,
-    project_name,
-    developer_name,
-    is_rented,
-    rental_value,
-    internal_area_sqm,
-    external_area_sqm,
-    special_notes,
-  } = body
-
-  const prompt = `أنت خبير تسويق عقاري محترف. اكتب محتوى تسويقياً احترافياً باللغة العربية لإعلان عقاري بناءً على المعلومات التالية:
-
-العنوان: ${title ?? 'وحدة سكنية'}
-النوع: ${unit_type ?? 'سكني'}
-الموقع: ${area_location ?? 'غير محدد'}
-المشروع: ${project_name ?? 'غير محدد'}
-المطور: ${developer_name ?? 'غير محدد'}
-المساحة الإجمالية: ${area_sqm ? area_sqm + ' م²' : 'غير محدد'}
-${unit_type === 'تجاري' ? `المساحة الداخلية: ${internal_area_sqm ?? '-'} م²\nالمساحة الخارجية: ${external_area_sqm ?? '-'} م²` : ''}
-عدد الغرف: ${rooms ?? 'غير محدد'}
-عدد الحمامات: ${bathrooms ?? 'غير محدد'}
-التشطيب: ${finishing ?? 'غير محدد'}
-مفروشة: ${is_furnished ? 'نعم' : 'لا'}
-المميزات: ${features === 'ROOF' ? 'روف' : features === 'GARDEN' ? 'جاردن' : 'لا يوجد'}
-الحالة الإيجارية: ${is_rented ? `مؤجرة بقيمة ${rental_value ?? '-'} ج.م` : 'شاغرة'}
-استراتيجية التسعير: ${pricing_strategy ?? 'غير محدد'}
-السعر الإجمالي كاش: ${total_cash_price ? Number(total_cash_price).toLocaleString('ar-EG') + ' ج.م' : 'غير محدد'}
-${down_payment ? `المقدم: ${Number(down_payment).toLocaleString('ar-EG')} ج.م` : ''}
-${installment_amount ? `القسط: ${Number(installment_amount).toLocaleString('ar-EG')} ج.م` : ''}
-ملاحظات خاصة: ${special_notes ?? 'لا يوجد'}
-
-اكتب وصفاً تسويقياً جذاباً من 3 إلى 5 فقرات قصيرة يبرز مميزات الوحدة ويحفّز المشتري على التواصل. لا تستخدم هاشتاقات أو رموز تعبيرية. اجعل الأسلوب راقياً ومقنعاً.`
+  const prompt = buildPrompt(body)
 
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     const result = await model.generateContent(prompt)
-    const text = result.response.text()
-    return NextResponse.json({ description: text })
+    const description = result.response.text().trim()
+    return NextResponse.json({ description })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'فشل الاتصال بـ Gemini'
+    const message = err instanceof Error ? err.message : 'فشل الاتصال بخدمة Gemini'
     return NextResponse.json({ error: message }, { status: 500 })
   }
+}
+
+function buildPrompt(data: Record<string, unknown>) {
+  const unitType = text(data.unit_type, 'سكني')
+  const isCommercial = unitType === 'تجاري'
+  const isRented = Boolean(data.is_rented)
+  const isFurnished = Boolean(data.is_furnished)
+  const features = text(data.features, 'NONE')
+
+  return `
+أنت خبير تسويق عقاري في السوق المصري وتكتب لصالح FAST INVESTMENT.
+اكتب وصفا تسويقيا احترافيا باللغة العربية الفصحى السهلة لإعلان وحدة عقارية.
+
+قواعد الكتابة:
+- 3 إلى 5 فقرات قصيرة.
+- لا تستخدم هاشتاجات أو رموز تعبيرية.
+- لا تذكر رقم هاتف.
+- لا تخترع معلومات غير موجودة.
+- اجعل النبرة راقية وواضحة ومقنعة.
+
+بيانات الوحدة:
+العنوان: ${text(data.title, 'وحدة عقارية مميزة')}
+نوع الوحدة: ${unitType}
+الموقع: ${text(data.area_location, 'غير محدد')}
+المشروع: ${text(data.project_name, 'غير محدد')}
+المطور: ${text(data.developer_name, 'غير محدد')}
+المساحة الإجمالية: ${text(data.area_sqm, 'غير محدد')} م²
+${isCommercial ? `المساحة الداخلية: ${text(data.internal_area_sqm, 'غير محدد')} م²
+المساحة الخارجية: ${text(data.external_area_sqm, 'غير محدد')} م²` : ''}
+عدد الغرف: ${text(data.rooms, 'غير محدد')}
+عدد الحمامات: ${text(data.bathrooms, 'غير محدد')}
+التشطيب: ${text(data.finishing, 'غير محدد')}
+مفروشة: ${isFurnished ? 'نعم' : 'لا'}
+المميزات: ${features === 'ROOF' ? 'روف' : features === 'GARDEN' ? 'جاردن' : 'لا يوجد'}
+الحالة الإيجارية: ${isRented ? `مؤجرة بقيمة ${text(data.rental_value, 'غير محدد')} ج.م` : 'شاغرة'}
+طريقة البيع: ${text(data.pricing_strategy, 'غير محدد')}
+السعر الكاش: ${formatMoney(data.total_cash_price)}
+المقدم: ${formatMoney(data.down_payment)}
+القسط: ${formatMoney(data.installment_amount)}
+تفاصيل مميزة: ${text(data.special_notes, 'لا يوجد')}
+`.trim()
+}
+
+function text(value: unknown, fallback: string) {
+  if (value == null) return fallback
+  const stringValue = String(value).trim()
+  return stringValue || fallback
+}
+
+function formatMoney(value: unknown) {
+  const amount = Number(value)
+  if (!Number.isFinite(amount) || amount <= 0) return 'غير محدد'
+  return `${amount.toLocaleString('ar-EG')} ج.م`
 }
