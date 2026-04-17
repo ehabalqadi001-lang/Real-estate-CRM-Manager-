@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import AddDealButton from '@/components/deals/AddDealButton'
-import { Briefcase, DollarSign, Calendar, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Briefcase, DollarSign, Calendar, CheckCircle2, ChevronLeft, ChevronRight, Kanban } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +53,13 @@ export default async function DealsPage({ searchParams }: PageProps) {
           <h1 className="text-2xl font-black text-slate-900">إدارة الصفقات والعمولات</h1>
           <p className="text-sm font-bold text-slate-500 mt-1">توثيق العقود ومتابعة المستحقات المالية للوكلاء</p>
         </div>
-        <AddDealButton activeLeads={activeLeads || []} teamMembers={teamMembers || []} />
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/deals/kanban"
+            className="flex items-center gap-2 border border-slate-200 text-slate-600 px-3 py-2 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">
+            <Kanban size={15} /> عرض Kanban
+          </Link>
+          <AddDealButton activeLeads={activeLeads || []} teamMembers={teamMembers || []} />
+        </div>
       </div>
 
       {/* الرادار: عرض الصفقات */}

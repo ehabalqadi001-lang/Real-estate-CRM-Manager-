@@ -15,9 +15,14 @@ export default async function DealsKanbanPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const targetCompanyId = profile?.company_id || user?.id
+
   const { data: deals } = await supabase
     .from('deals')
     .select('id, title, stage, unit_value, buyer_name, compound')
+    .eq('company_id', targetCompanyId)
     .order('created_at', { ascending: false })
 
   return (

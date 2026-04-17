@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import {
   DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors,
+  useDroppable,
   type DragStartEvent, type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
@@ -80,9 +81,10 @@ function DragCard({ deal }: { deal: Deal }) {
 
 // ── Column ───────────────────────────────────────────────────
 function Column({ stage, deals }: { stage: typeof STAGES[0]; deals: Deal[] }) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage.key })
   const total = deals.reduce((s, d) => s + Number(d.unit_value ?? 0), 0)
   return (
-    <div className={`flex flex-col rounded-2xl border ${stage.color} min-w-[200px] flex-shrink-0`}>
+    <div className={`flex flex-col rounded-2xl border ${stage.color} min-w-[200px] flex-shrink-0 transition-colors ${isOver ? 'ring-2 ring-blue-400 ring-offset-1' : ''}`}>
       <div className={`${stage.header} rounded-t-2xl px-3 py-2.5`}>
         <div className="flex justify-between items-center">
           <span className="font-black text-sm">{stage.label}</span>
@@ -95,7 +97,7 @@ function Column({ stage, deals }: { stage: typeof STAGES[0]; deals: Deal[] }) {
         )}
       </div>
       <SortableContext items={deals.map(d => d.id)} strategy={verticalListSortingStrategy}>
-        <div className="p-2 space-y-2 flex-1 min-h-[80px]">
+        <div ref={setNodeRef} className="p-2 space-y-2 flex-1 min-h-[80px]">
           {deals.map(deal => <DealCard key={deal.id} deal={deal} />)}
         </div>
       </SortableContext>
