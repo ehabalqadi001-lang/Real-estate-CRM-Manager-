@@ -38,20 +38,25 @@ const adminGroups: NavGroup[] = [
       { name: 'الصفقات', icon: Briefcase, path: '/dashboard/deals' },
       { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
       { name: 'إدارة الوسطاء', icon: Star, path: '/dashboard/brokers' },
+      { name: 'إعادة البيع', icon: Home, path: '/dashboard/resale' },
     ],
   },
   {
     label: 'العقارات',
     items: [
+      { name: 'هيكل المشاريع', icon: Building2, path: '/dashboard/projects' },
       { name: 'المشاريع والوحدات', icon: Building2, path: '/dashboard/inventory' },
       { name: 'المطورون', icon: Home, path: '/dashboard/developers' },
       { name: 'مقارنة الوحدات', icon: MapPin, path: '/dashboard/compare' },
+      { name: 'مطابقة المشترين', icon: Target, path: '/dashboard/matching' },
+      { name: 'خريطة العقارات', icon: MapPin, path: '/dashboard/map' },
     ],
   },
   {
     label: 'المالية والتقارير',
     items: [
       { name: 'العمولات', icon: Wallet, path: '/dashboard/commissions' },
+      { name: 'قواعد العمولات', icon: Settings, path: '/dashboard/commissions/rules' },
       { name: 'الأهداف', icon: Target, path: '/dashboard/targets' },
       { name: 'التنبؤ بالمبيعات', icon: TrendingUp, path: '/dashboard/forecasting' },
       { name: 'التقارير والتحليلات', icon: BarChart3, path: '/dashboard/analytics' },

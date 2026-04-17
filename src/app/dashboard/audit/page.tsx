@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { formatDistanceToNow } from 'date-fns'
 import { ar } from 'date-fns/locale'
+import { requireAdmin } from '@/lib/require-role'
 
 interface AuditLog {
   id: string
@@ -35,6 +36,7 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
 }
 
 export default async function AuditPage() {
+  await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

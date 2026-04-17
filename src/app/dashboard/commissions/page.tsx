@@ -1,8 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 import CommissionsList from '@/components/commissions/CommissionsList'
 import AddCommissionButton from '@/components/commissions/AddCommissionButton'
-import { Wallet, CheckCircle, Clock, Users, Building2, Briefcase, HardHat } from 'lucide-react'
+import { Wallet, CheckCircle, Clock, Users, Building2, Briefcase, HardHat, Settings2 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,7 +76,13 @@ export default async function CommissionsPage() {
           </h1>
           <p className="text-sm text-slate-500 mt-1">تتبع مستحقات فريق المبيعات والتحصيلات حسب النوع</p>
         </div>
-        <AddCommissionButton />
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/commissions/rules"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            <Settings2 size={15} /> قواعد العمولات
+          </Link>
+          <AddCommissionButton />
+        </div>
       </div>
 
       {fetchError ? (

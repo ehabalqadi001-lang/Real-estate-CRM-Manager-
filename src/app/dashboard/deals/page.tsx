@@ -1,17 +1,29 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 import AddDealButton from '@/components/deals/AddDealButton'
-import { Briefcase, DollarSign, Calendar, CheckCircle2 } from 'lucide-react'
+import { Briefcase, DollarSign, Calendar, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DealsPage() {
+const PAGE_SIZE = 30
+
+interface PageProps {
+  searchParams: Promise<{ page?: string }>
+}
+
+export default async function DealsPage({ searchParams }: PageProps) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
+
+  const params = await searchParams
+  const page = Math.max(1, parseInt(params?.page || '1', 10))
+  const from = (page - 1) * PAGE_SIZE
+  const to   = from + PAGE_SIZE - 1
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -26,9 +38,10 @@ export default async function DealsPage() {
   const { data: teamMembers } = await supabase.from('profiles').select('id, full_name').eq('company_id', targetCompanyId).eq('role', 'agent')
 
   // جلب الصفقات المسجلة
-  const { data: deals } = await supabase.from('deals')
-    .select('*, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)')
+  const { data: deals, count: totalDealsCount } = await supabase.from('deals')
+    .select('*, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   return (
     <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
@@ -87,6 +100,32 @@ export default async function DealsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {(totalDealsCount ?? 0) > PAGE_SIZE && (
+        <div className="flex items-center justify-between bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm">
+          <span className="text-xs text-slate-400 font-medium">
+            {from + 1}–{Math.min(to + 1, totalDealsCount ?? 0)} من {totalDealsCount} صفقة
+          </span>
+          <div className="flex items-center gap-2">
+            {page > 1 && (
+              <Link href={`?page=${page - 1}`}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                <ChevronRight size={13} /> السابق
+              </Link>
+            )}
+            <span className="text-xs font-bold text-slate-500 px-2">
+              {page} / {Math.ceil((totalDealsCount ?? 0) / PAGE_SIZE)}
+            </span>
+            {page < Math.ceil((totalDealsCount ?? 0) / PAGE_SIZE) && (
+              <Link href={`?page=${page + 1}`}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#00C27C] text-white hover:bg-[#009F64] transition-colors">
+                التالي <ChevronLeft size={13} />
+              </Link>
+            )}
+          </div>
         </div>
       )}
 

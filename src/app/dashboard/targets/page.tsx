@@ -3,10 +3,12 @@ import { cookies } from 'next/headers'
 import { Target, TrendingUp, Users } from 'lucide-react'
 import { getTargets, setTarget } from './actions'
 import TargetsClient from './TargetsClient'
+import { requireAdmin } from '@/lib/require-role'
 
 export const dynamic = 'force-dynamic'
 
 export default async function TargetsPage() {
+  await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

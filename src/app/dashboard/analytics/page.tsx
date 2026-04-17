@@ -2,10 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { BarChart2 } from 'lucide-react'
 import AnalyticsCharts from './AnalyticsCharts'
+import { requireAdmin } from '@/lib/require-role'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AnalyticsPage() {
+  await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

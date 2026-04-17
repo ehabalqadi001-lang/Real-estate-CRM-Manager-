@@ -2,10 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { User, Phone, Mail, Building2, DollarSign, Clock, ArrowRight, Activity, AlertTriangle } from 'lucide-react'
+import AddActivityButton from '@/components/leads/AddActivityButton'
+import ActivityTimeline from '@/components/leads/ActivityTimeline'
 
 export const dynamic = 'force-dynamic'
 
-// 1. تعريف الهيكل المعماري الصارم للمتغيرات (Next.js 15 Standard)
 interface PageProps {
   params: Promise<{ id: string }>
 }
@@ -28,11 +29,18 @@ export default async function LeadProfilePage({ params }: PageProps) {
     .eq('id', leadId)
     .single()
 
-  const { data: reports } = await supabase
-    .from('lead_reports')
-    .select('*, profiles(full_name)')
-    .eq('lead_id', leadId)
-    .order('created_at', { ascending: false })
+  const [{ data: reports }, { data: activities }] = await Promise.all([
+    supabase
+      .from('lead_reports')
+      .select('*, profiles(full_name)')
+      .eq('lead_id', leadId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('lead_activities')
+      .select('*, profiles(full_name)')
+      .eq('lead_id', leadId)
+      .order('created_at', { ascending: false }),
+  ])
 
   // 4. درع الأخطاء الفولاذي (في حالة الرفض الأمني أو حذف العميل)
   if (leadError || !lead) {
@@ -130,6 +138,18 @@ export default async function LeadProfilePage({ params }: PageProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* سجل الأنشطة */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center justify-between mb-5 border-b border-slate-100 pb-4">
+          <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+            <Activity className="text-[#00C27C]" size={20} />
+            سجل الأنشطة
+          </h3>
+          <AddActivityButton leadId={leadId} />
+        </div>
+        <ActivityTimeline activities={activities ?? []} />
       </div>
 
       {/* الجدول الزمني للمفاوضات (Timeline) */}

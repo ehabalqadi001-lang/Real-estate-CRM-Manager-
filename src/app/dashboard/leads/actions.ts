@@ -101,7 +101,31 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   return { success: true }
 }
 
-// 4. تقارير المتابعة
+// 4. سجل الأنشطة
+export async function addLeadActivity(formData: FormData) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const durationRaw = formData.get('duration_min') as string
+  const { error } = await supabase.from('lead_activities').insert({
+    lead_id:      formData.get('lead_id') as string,
+    user_id:      user.id,
+    type:         formData.get('type') as string,
+    outcome:      (formData.get('outcome') as string) || null,
+    note:         (formData.get('note') as string) || null,
+    duration_min: durationRaw ? parseInt(durationRaw) : null,
+  })
+  if (error) throw new Error(error.message)
+  const leadId = formData.get('lead_id') as string
+  revalidatePath(`/dashboard/leads/${leadId}`)
+}
+
+// 5. تقارير المتابعة
 export async function addLeadReport(leadId: string, reportText: string) {
   const cookieStore = await cookies()
   const supabase = createServerClient(

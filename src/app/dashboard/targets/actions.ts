@@ -37,31 +37,45 @@ export async function getTargets(month: string) {
 
   if (!targets) return []
 
-  // Enrich with actuals from deals/leads this month
+  // Batch fetch actuals — 2 queries total instead of 2N
   const startDate = `${month}-01`
   const [year, mon] = month.split('-').map(Number)
   const endDate = new Date(year, mon, 0).toISOString().split('T')[0]
+  const agentIds = targets.map(t => t.agent_id)
 
-  return Promise.all(targets.map(async (t) => {
-    const { data: deals } = await supabase
+  const [{ data: monthDeals }, { data: monthLeads }] = await Promise.all([
+    supabase
       .from('deals')
-      .select('unit_value, stage')
-      .eq('agent_id', t.agent_id)
+      .select('agent_id, unit_value, stage')
+      .in('agent_id', agentIds)
       .gte('created_at', startDate)
-      .lte('created_at', endDate)
-
-    const { count: leadsCount } = await supabase
+      .lte('created_at', endDate),
+    supabase
       .from('leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('agent_id', t.agent_id)
+      .select('agent_id')
+      .in('agent_id', agentIds)
       .gte('created_at', startDate)
-      .lte('created_at', endDate)
+      .lte('created_at', endDate),
+  ])
 
-    const contractedDeals = (deals ?? []).filter(d =>
-      ['Contracted', 'Registration', 'Handover'].includes(d.stage ?? '')
-    )
+  const CONTRACTED = new Set(['Contracted', 'Registration', 'Handover'])
+
+  const dealsMap = (monthDeals ?? []).reduce<Record<string, { revenue: number; count: number }>>((acc, d) => {
+    if (!d.agent_id || !CONTRACTED.has(d.stage ?? '')) return acc
+    if (!acc[d.agent_id]) acc[d.agent_id] = { revenue: 0, count: 0 }
+    acc[d.agent_id].revenue += Number(d.unit_value ?? 0)
+    acc[d.agent_id].count += 1
+    return acc
+  }, {})
+
+  const leadsMap = (monthLeads ?? []).reduce<Record<string, number>>((acc, l) => {
+    if (l.agent_id) acc[l.agent_id] = (acc[l.agent_id] ?? 0) + 1
+    return acc
+  }, {})
+
+  return targets.map(t => {
     const profile = t.profiles as { full_name?: string } | null
-
+    const { revenue = 0, count = 0 } = dealsMap[t.agent_id] ?? {}
     return {
       id: t.id,
       agent_id: t.agent_id,
@@ -70,11 +84,11 @@ export async function getTargets(month: string) {
       revenue_target: Number(t.revenue_target ?? 0),
       deals_target: Number(t.deals_target ?? 0),
       leads_target: Number(t.leads_target ?? 0),
-      revenue_actual: contractedDeals.reduce((s, d) => s + Number(d.unit_value ?? 0), 0),
-      deals_actual: contractedDeals.length,
-      leads_actual: leadsCount ?? 0,
+      revenue_actual: revenue,
+      deals_actual: count,
+      leads_actual: leadsMap[t.agent_id] ?? 0,
     } satisfies AgentTarget
-  }))
+  })
 }
 
 export async function setTarget(formData: FormData) {

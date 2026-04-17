@@ -7,8 +7,10 @@ import BulkImportButton from '@/components/leads/BulkImportButton'
 
 export const dynamic = 'force-dynamic'
 
+const PAGE_SIZE = 50
+
 interface PageProps {
-  searchParams: Promise<{ query?: string; status?: string }>
+  searchParams: Promise<{ query?: string; status?: string; page?: string }>
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -40,11 +42,15 @@ export default async function LeadsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const searchQuery = params?.query || ''
   const statusFilter = params?.status || ''
+  const page = Math.max(1, parseInt(params?.page || '1', 10))
+  const from = (page - 1) * PAGE_SIZE
+  const to   = from + PAGE_SIZE - 1
 
   let query = supabase
     .from('leads')
-    .select('id, client_name, full_name, phone, status, expected_value, created_at, temperature, source')
+    .select('id, client_name, full_name, phone, status, expected_value, created_at, temperature, source', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   if (searchQuery) {
     query = query.or(`client_name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`)
@@ -53,13 +59,18 @@ export default async function LeadsPage({ searchParams }: PageProps) {
     query = query.eq('status', statusFilter)
   }
 
-  const { data: leads } = await query
+  const { data: leads, count: totalCount } = await query
+  const totalPages = Math.ceil((totalCount ?? 0) / PAGE_SIZE)
 
-  // KPI counts
-  const total      = leads?.length ?? 0
-  const fresh      = leads?.filter(l => ['Fresh Leads','fresh'].includes(l.status ?? '')).length ?? 0
-  const contracted = leads?.filter(l => l.status === 'Contracted').length ?? 0
-  const totalValue = leads?.reduce((s, l) => s + Number(l.expected_value || 0), 0) ?? 0
+  // KPI counts — query full dataset (no pagination filter)
+  const { data: kpiData } = await supabase
+    .from('leads')
+    .select('status, expected_value')
+
+  const total      = totalCount ?? 0
+  const fresh      = kpiData?.filter(l => ['Fresh Leads','fresh'].includes(l.status ?? '')).length ?? 0
+  const contracted = kpiData?.filter(l => l.status === 'Contracted').length ?? 0
+  const totalValue = kpiData?.reduce((s, l) => s + Number(l.expected_value || 0), 0) ?? 0
 
   const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 
@@ -187,8 +198,33 @@ export default async function LeadsPage({ searchParams }: PageProps) {
         )}
 
         {leads && leads.length > 0 && (
-          <div className="px-4 py-3 border-t border-slate-50 text-xs text-slate-400 font-medium bg-slate-50/50">
-            إجمالي {leads.length} نتيجة
+          <div className="px-4 py-3 border-t border-slate-50 bg-slate-50/50 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium">
+              {from + 1}–{Math.min(to + 1, total)} من {total} نتيجة
+            </span>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                {page > 1 && (
+                  <Link
+                    href={`?query=${searchQuery}&status=${statusFilter}&page=${page - 1}`}
+                    className="px-3 py-1 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    السابق
+                  </Link>
+                )}
+                <span className="px-3 py-1 text-xs font-bold text-slate-500">
+                  {page} / {totalPages}
+                </span>
+                {page < totalPages && (
+                  <Link
+                    href={`?query=${searchQuery}&status=${statusFilter}&page=${page + 1}`}
+                    className="px-3 py-1 rounded-lg text-xs font-bold bg-[#00C27C] text-white hover:bg-[#009F64] transition-colors"
+                  >
+                    التالي
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

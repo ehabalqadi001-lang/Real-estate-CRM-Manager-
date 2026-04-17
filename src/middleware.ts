@@ -84,12 +84,17 @@ export async function middleware(request: NextRequest) {
   // ── 6. Role-based guard for /company/* and /admin/* ───────
   const needsCompanyRole = COMPANY_ONLY_PREFIXES.some(p => pathname.startsWith(p))
   if (needsCompanyRole) {
-    // Read role from cookie (set at login) — avoids extra DB call per request
-    const roleCookie = request.cookies.get('user_role')?.value
-    const role = roleCookie ?? 'agent'
+    // DB-verify role — cookie cannot be trusted (can be spoofed)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
 
-    if (role === 'agent') {
-      // Agents get redirected to their own dashboard
+    const role = profile?.role ?? 'agent'
+    const adminRoles = ['admin', 'Admin', 'company_admin', 'company', 'super_admin', 'Super_Admin']
+
+    if (!adminRoles.includes(role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }

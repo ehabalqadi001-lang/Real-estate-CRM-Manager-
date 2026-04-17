@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Users, TrendingUp, DollarSign, Target } from 'lucide-react'
+import { requireAdmin } from '@/lib/require-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,8 @@ interface AgentStats {
 }
 
 export default async function PerformancePage() {
+  await requireAdmin()
+
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,38 +24,45 @@ export default async function PerformancePage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  // جلب بيانات الوكلاء مع إحصائياتهم
+  // جلب بيانات الوكلاء مع إحصائياتهم — single batch query replaces N+1 loop
   const { data: agents } = await supabase
     .from('profiles')
     .select('id, full_name')
     .eq('role', 'agent')
 
-  const agentStats: AgentStats[] = []
+  // Batch fetch — 2 queries total instead of 2N
+  const agentIds = (agents ?? []).map(a => a.id)
 
-  for (const agent of agents ?? []) {
-    const { count: leadsCount } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', agent.id)
+  const [{ data: allLeads }, { data: allDeals }] = await Promise.all([
+    supabase.from('leads').select('user_id').in('user_id', agentIds),
+    supabase.from('deals').select('user_id, unit_value').in('user_id', agentIds),
+  ])
 
-    const { data: deals } = await supabase
-      .from('deals')
-      .select('unit_value')
-      .eq('user_id', agent.id)
+  const leadsMap = (allLeads ?? []).reduce<Record<string, number>>((acc, l) => {
+    if (l.user_id) acc[l.user_id] = (acc[l.user_id] ?? 0) + 1
+    return acc
+  }, {})
 
-    const leads = leadsCount ?? 0
-    const dealCount = deals?.length ?? 0
-    const revenue = deals?.reduce((s, d) => s + Number(d.unit_value ?? 0), 0) ?? 0
+  const dealsMap = (allDeals ?? []).reduce<Record<string, { count: number; revenue: number }>>((acc, d) => {
+    if (!d.user_id) return acc
+    if (!acc[d.user_id]) acc[d.user_id] = { count: 0, revenue: 0 }
+    acc[d.user_id].count += 1
+    acc[d.user_id].revenue += Number(d.unit_value ?? 0)
+    return acc
+  }, {})
 
-    agentStats.push({
+  const agentStats: AgentStats[] = (agents ?? []).map(agent => {
+    const leads = leadsMap[agent.id] ?? 0
+    const { count: dealCount = 0, revenue = 0 } = dealsMap[agent.id] ?? {}
+    return {
       id: agent.id,
       full_name: agent.full_name ?? 'وكيل',
       leads,
       deals: dealCount,
       revenue,
       conversion: leads > 0 ? Math.round((dealCount / leads) * 100) : 0,
-    })
-  }
+    }
+  })
 
   // ترتيب حسب الإيراد
   agentStats.sort((a, b) => b.revenue - a.revenue)

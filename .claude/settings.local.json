@@ -14,7 +14,14 @@
       "Bash(sed -i \"s/activeProject === p ? 'bg-blue-600 text-white'/activeProject === p ? 'bg-[#00C27C] text-white'/g\" src/components/inventory/InventoryHeatMap.tsx)",
       "Bash(sed -i 's/w-full bg-blue-600 hover:bg-blue-700 text-white p-3\\\\.5 rounded-xl font-black transition-all flex justify-center items-center gap-2/w-full bg-[#00C27C] hover:bg-[#009F64] text-white p-3.5 rounded-xl font-black transition-all flex justify-center items-center gap-2/g' src/components/leads/AddLeadButton.tsx src/components/properties/AddPropertyButton.tsx)",
       "Bash(sed -i \"s/flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2\\\\.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2/flex-1 bg-[#00C27C] hover:bg-[#009F64] text-white py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2/g\" src/components/leads/BulkImportButton.tsx)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(npm list *)",
+      "Bash(npm install *)"
     ]
   }
 }
