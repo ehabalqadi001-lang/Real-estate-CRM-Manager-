@@ -6,11 +6,17 @@ import { Label } from '@/components/ui/label'
 import { createServerClient } from '@/lib/supabase/server'
 import { marketplacePackages } from '@/domains/marketplace/sample-data'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
+import { submitPropertyAction } from './actions'
 import { Camera, Coins, FileCheck2, ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AddPropertyPage() {
+export default async function AddPropertyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string; error?: string }>
+}) {
+  const feedback = await searchParams
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -54,7 +60,17 @@ export default async function AddPropertyPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          <form className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <form action={submitPropertyAction} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+            {feedback.submitted && (
+              <div className="mb-4 rounded-lg border border-[#0F8F83]/25 bg-[#EEF6F5] p-3 text-sm font-black text-[#0F8F83]">
+                تم إرسال الإعلان للمراجعة. لن يظهر في السوق قبل الموافقة اليدوية.
+              </div>
+            )}
+            {feedback.error && (
+              <div className="mb-4 rounded-lg border border-[#B54747]/25 bg-[#B54747]/10 p-3 text-sm font-black text-[#B54747]">
+                {decodeURIComponent(feedback.error)}
+              </div>
+            )}
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="عنوان الإعلان" name="title" placeholder="مثال: شقة متشطبة في التجمع الخامس" />
               <Field label="نوع العقار" name="property_type" placeholder="شقة، فيلا، تاون هاوس" />
@@ -84,7 +100,7 @@ export default async function AddPropertyPage() {
             </div>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <Button type="button" className="bg-[#17375E] text-white hover:bg-[#102033]">
+              <Button type="submit" className="bg-[#17375E] text-white hover:bg-[#102033]">
                 <FileCheck2 className="ms-1 size-4" />
                 إرسال للمراجعة
               </Button>
