@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Users, Plus, Phone, Calendar, TrendingUp, Target, Flame, ArrowUpRight } from 'lucide-react'
 import LeadFilters from '@/components/leads/LeadFilters'
 import BulkImportButton from '@/components/leads/BulkImportButton'
+import RescoreButton from './RescoreButton'
 import { getLeadList } from '@/domains/leads/queries'
 import { scoreColor, scoreLabel } from './score-utils'
 
@@ -66,6 +67,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
           </div>
         </div>
         <div className="flex items-center gap-2.5">
+          <RescoreButton />
           <BulkImportButton />
           <Link href="/dashboard/leads/new"
             className="bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm transition-all shadow-lg shadow-[#00C27C]/20">

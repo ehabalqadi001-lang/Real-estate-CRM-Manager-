@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Users, TrendingUp, DollarSign, Target } from 'lucide-react'
 import { requireAdmin } from '@/lib/require-role'
+import PerformanceChart from './PerformanceChart'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,6 +104,9 @@ export default async function PerformancePage() {
           </div>
         ))}
       </div>
+
+      {/* Charts */}
+      <PerformanceChart agents={agentStats} />
 
       {/* جدول المقارنة */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, MapPin, Home, TrendingUp } from 'lucide-react'
 import { getProject } from '@/domains/inventory/projects'
+import AddUnitButton from './AddUnitButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,7 +98,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
       {/* Units grid */}
       <div>
-        <h2 className="font-black text-slate-800 mb-3">الوحدات ({units.length})</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-black text-slate-800">الوحدات ({units.length})</h2>
+          <AddUnitButton projectId={project.id} />
+        </div>
         {units.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
             <Home size={36} className="mx-auto text-slate-200 mb-3" />

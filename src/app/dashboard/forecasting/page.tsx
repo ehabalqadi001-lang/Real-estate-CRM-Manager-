@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import { getSalesForecast } from './actions'
 import ForecastChart from './ForecastChart'
-import { TrendingUp, DollarSign, Target, BarChart2 } from 'lucide-react'
+import { TrendingUp, DollarSign, Target, BarChart2, PlusCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,17 +63,37 @@ export default async function ForecastingPage() {
         ))}
       </div>
 
-      {/* Chart */}
-      <ForecastChart monthlyData={data.monthlyData} forecast={data.forecast} />
-
-      {/* AI Insights */}
-      <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-          <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">تحليل الذكاء الاصطناعي</span>
+      {/* Chart or empty state */}
+      {data.totalRevenueLTM === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-slate-200 shadow-sm">
+          <BarChart2 size={48} className="mx-auto text-slate-200 mb-4" />
+          <h3 className="text-xl font-black text-slate-800 mb-2">لا توجد بيانات مبيعات بعد</h3>
+          <p className="text-slate-500 text-sm mb-6">ابدأ بتسجيل الصفقات لتظهر هنا توقعات المبيعات والتحليلات.</p>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard/deals"
+              className="flex items-center gap-2 bg-[#00C27C] hover:bg-[#009F64] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-[#00C27C]/20">
+              <PlusCircle size={16} /> تسجيل صفقة
+            </Link>
+            <Link href="/dashboard/leads"
+              className="flex items-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
+              إدارة العملاء
+            </Link>
+          </div>
         </div>
-        <p className="text-slate-200 leading-relaxed text-sm">{data.aiInsights}</p>
-      </div>
+      ) : (
+        <ForecastChart monthlyData={data.monthlyData} forecast={data.forecast} />
+      )}
+
+      {/* AI Insights — only when there is data */}
+      {data.totalRevenueLTM > 0 && (
+        <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+            <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">تحليل الذكاء الاصطناعي</span>
+          </div>
+          <p className="text-slate-200 leading-relaxed text-sm">{data.aiInsights}</p>
+        </div>
+      )}
     </div>
   )
 }

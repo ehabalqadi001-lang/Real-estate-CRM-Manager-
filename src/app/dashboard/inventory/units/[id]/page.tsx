@@ -122,10 +122,10 @@ export default async function UnitDetailPage({ params }: PageProps) {
                 )}
               </div>
             ) : (
-              <div className="h-48 bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center gap-2">
+              <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center gap-2">
                 <ImageOff className="w-10 h-10 text-gray-300" />
                 <span className="text-xs text-gray-400">لا توجد صور مرفوعة</span>
-                <div className="absolute top-3 end-3 mt-2">
+                <div className="absolute top-3 end-3">
                   <span className={`text-sm font-bold px-3 py-1 rounded-full border ${cfg.color}`}>
                     {cfg.label}
                   </span>
