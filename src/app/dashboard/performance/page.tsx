@@ -35,7 +35,7 @@ export default async function PerformancePage() {
 
   const [{ data: allLeads }, { data: allDeals }] = await Promise.all([
     supabase.from('leads').select('user_id').in('user_id', agentIds),
-    supabase.from('deals').select('user_id, unit_value').in('user_id', agentIds),
+    supabase.from('deals').select('agent_id, unit_value, amount, value').in('agent_id', agentIds),
   ])
 
   const leadsMap = (allLeads ?? []).reduce<Record<string, number>>((acc, l) => {
@@ -44,16 +44,16 @@ export default async function PerformancePage() {
   }, {})
 
   const dealsMap = (allDeals ?? []).reduce<Record<string, { count: number; revenue: number }>>((acc, d) => {
-    if (!d.user_id) return acc
-    if (!acc[d.user_id]) acc[d.user_id] = { count: 0, revenue: 0 }
-    acc[d.user_id].count += 1
-    acc[d.user_id].revenue += Number(d.unit_value ?? 0)
+    if (!d.agent_id) return acc
+    if (!acc[d.agent_id]) acc[d.agent_id] = { count: 0, revenue: 0 }
+    acc[d.agent_id].count += 1
+    acc[d.agent_id].revenue += Number(d.unit_value ?? d.amount ?? d.value ?? 0)
     return acc
   }, {})
 
   const agentStats: AgentStats[] = (agents ?? []).map(agent => {
     const leads = leadsMap[agent.id] ?? 0
-    const { count: dealCount = 0, revenue = 0 } = dealsMap[agent.id] ?? {}
+    const { count: dealCount = 0, revenue = 0 } = dealsMap[agent.id] ?? {} as { count: number; revenue: number }
     return {
       id: agent.id,
       full_name: agent.full_name ?? 'وكيل',
