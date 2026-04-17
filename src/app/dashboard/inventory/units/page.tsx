@@ -62,7 +62,7 @@ export default async function UnitsPage({ searchParams }: PageProps) {
             ))}
           </select>
           <button type="submit" className="text-sm font-bold border border-slate-200 rounded-xl px-3 py-2 text-slate-600 hover:bg-slate-50">
-            ØªØµÙÙŠØ©
+            تصفية
           </button>
         </form>
       </div>
