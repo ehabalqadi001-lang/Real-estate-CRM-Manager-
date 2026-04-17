@@ -37,7 +37,7 @@ export default function TopAgentsLeaderboard({ agents }: Props) {
           {sorted.map((agent, i) => (
             <div key={agent.id} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${i === 0 ? 'bg-amber-50 border border-amber-100' : 'hover:bg-slate-50'}`}>
               <div className="text-lg shrink-0 w-6 text-center">{medals[i] ?? `#${i + 1}`}</div>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#00C27C] to-[#009F64] text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
                 {agent.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -47,7 +47,7 @@ export default function TopAgentsLeaderboard({ agents }: Props) {
                   <span className="text-[10px] text-slate-500">{agent.leads} عميل</span>
                 </div>
                 <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all"
+                  <div className="h-full bg-gradient-to-r from-[#00C27C] to-[#009F64] rounded-full transition-all"
                     style={{ width: `${(agent.revenue / maxRev) * 100}%` }} />
                 </div>
               </div>

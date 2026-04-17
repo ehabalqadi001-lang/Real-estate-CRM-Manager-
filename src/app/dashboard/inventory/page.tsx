@@ -71,7 +71,7 @@ export default async function InventoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-            <Building2 className="text-blue-600" size={24} /> المشاريع والوحدات العقارية
+            <Building2 className="text-[#00C27C]" size={24} /> المشاريع والوحدات العقارية
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {projects.length} مشروع · {inventory.length} وحدة إجمالية
@@ -97,7 +97,7 @@ export default async function InventoryPage() {
               { label: 'محجوزة',       value: reserved,  icon: Clock,       color: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-100' },
               { label: 'مباعة',        value: sold,      icon: XCircle,     color: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-100' },
               { label: 'نسبة البيع',   value: `${soldRate}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-              { label: 'قيمة المتاح', value: fmt(totalVal), icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', wide: true },
+              { label: 'قيمة المتاح', value: fmt(totalVal), icon: DollarSign, color: 'text-[#00C27C]', bg: 'bg-[#00C27C]/10', border: 'border-[#00C27C]/20', wide: true },
               { label: 'متوسط السعر', value: fmt(avgPrice), icon: DollarSign, color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-100', wide: true },
             ].map(kpi => (
               <div key={kpi.label} className={`bg-white p-4 rounded-2xl shadow-sm border ${kpi.border} flex items-center gap-3 ${('wide' in kpi && kpi.wide) ? 'xl:col-span-1' : ''}`}>

@@ -6,7 +6,7 @@ interface Props {
   data: { stage: string; count: number; value: number }[]
 }
 
-const COLORS = ['#6366f1', '#3b82f6', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444']
+const COLORS = ['#00C27C', '#009F64', '#0ea5e9', '#6366f1', '#f59e0b', '#ef4444']
 
 export default function PipelineFunnel({ data }: Props) {
   const maxCount = Math.max(...data.map(d => d.count), 1)

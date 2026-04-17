@@ -3,7 +3,18 @@
     "allow": [
       "mcp__supabase__apply_migration",
       "mcp__supabase__execute_sql",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "WebFetch(domain:partners.nawy.com)",
+      "Bash(npx next *)",
+      "Bash(sed -i 's/Building2 className=\"text-blue-600\" size={24}/Building2 className=\"text-[#00C27C]\" size={24}/g' src/app/dashboard/inventory/page.tsx)",
+      "Bash(sed -i 's/color: .text-blue-600., bg: .bg-blue-50., border: .border-blue-100., wide: true },/color: '\"'\"'text-[#00C27C]'\"'\"', bg: '\"'\"'bg-[#00C27C]\\\\/10'\"'\"', border: '\"'\"'border-[#00C27C]\\\\/20'\"'\"', wide: true },/g' src/app/dashboard/inventory/page.tsx)",
+      "Bash(sed -i 's/bg-blue-600 hover:bg-blue-700 text-white px-4 py-2\\\\.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900\\\\/20/bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#00C27C]\\\\/20/g' src/app/dashboard/brokers/AddBrokerButton.tsx)",
+      "Bash(sed -i 's/w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-50/w-full bg-[#00C27C] hover:bg-[#009F64] text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-50/g' src/app/dashboard/brokers/AddBrokerButton.tsx)",
+      "Bash(sed -i \"s/statusFilter === s ? 'bg-blue-600 text-white'/statusFilter === s ? 'bg-[#00C27C] text-white'/g\" src/app/dashboard/brokers/BrokersList.tsx)",
+      "Bash(sed -i \"s/activeProject === p ? 'bg-blue-600 text-white'/activeProject === p ? 'bg-[#00C27C] text-white'/g\" src/components/inventory/InventoryHeatMap.tsx)",
+      "Bash(sed -i 's/w-full bg-blue-600 hover:bg-blue-700 text-white p-3\\\\.5 rounded-xl font-black transition-all flex justify-center items-center gap-2/w-full bg-[#00C27C] hover:bg-[#009F64] text-white p-3.5 rounded-xl font-black transition-all flex justify-center items-center gap-2/g' src/components/leads/AddLeadButton.tsx src/components/properties/AddPropertyButton.tsx)",
+      "Bash(sed -i \"s/flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2\\\\.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2/flex-1 bg-[#00C27C] hover:bg-[#009F64] text-white py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2/g\" src/components/leads/BulkImportButton.tsx)",
+      "Bash(git add *)"
     ]
   }
 }

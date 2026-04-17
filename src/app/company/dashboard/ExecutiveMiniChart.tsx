@@ -18,8 +18,8 @@ export default function ExecutiveMiniChart({ data }: Props) {
           <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="execGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="5%" stopColor="#00C27C" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#00C27C" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -29,8 +29,8 @@ export default function ExecutiveMiniChart({ data }: Props) {
             <Tooltip
               formatter={(value) => { const num = Number(value); return [`${(num / 1_000_000).toFixed(2)}M ج.م`, 'الإيراد'] }}
             />
-            <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2}
-              fill="url(#execGrad)" dot={{ r: 3, fill: '#3b82f6' }} />
+            <Area type="monotone" dataKey="revenue" stroke="#00C27C" strokeWidth={2}
+              fill="url(#execGrad)" dot={{ r: 3, fill: '#00C27C' }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

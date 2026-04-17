@@ -245,7 +245,7 @@ export default function BulkImportButton() {
                 </button>
                 {parsed.length > 0 && !result && (
                   <button onClick={handleImport} disabled={loading}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                    className="flex-1 bg-[#00C27C] hover:bg-[#009F64] text-white py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                     {loading ? 'جاري الاستيراد...' : <><Upload size={15} /> استيراد {parsed.length} سجل</>}
                   </button>
                 )}

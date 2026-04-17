@@ -80,7 +80,7 @@ export default function BrokersList({ brokers }: Props) {
             {['all', 'active', 'inactive'].map(s => (
               <button key={s} onClick={() => setStatus(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                  statusFilter === s ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  statusFilter === s ? 'bg-[#00C27C] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}>
                 {s === 'all' ? 'الحالة' : s === 'active' ? 'نشط' : 'غير نشط'}
               </button>

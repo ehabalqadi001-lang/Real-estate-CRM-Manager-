@@ -69,7 +69,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+          <div className="w-10 h-10 bg-[#00C27C] rounded-xl flex items-center justify-center shadow-lg shadow-[#00C27C]/20">
             <Users size={18} className="text-white" />
           </div>
           <div>
@@ -80,7 +80,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2.5">
           <BulkImportButton />
           <Link href="/dashboard/leads/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm transition-all shadow-lg shadow-blue-900/20">
+            className="bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm transition-all shadow-lg shadow-[#00C27C]/20">
             <Plus size={15} /> إضافة عميل
           </Link>
         </div>
@@ -137,7 +137,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                     <tr key={lead.id} className="hover:bg-slate-50/60 transition-colors group">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00C27C] to-[#009F64] text-white flex items-center justify-center font-black text-sm shrink-0">
                             {name.charAt(0)}
                           </div>
                           <span className="font-semibold text-slate-900 text-sm">{name}</span>
@@ -174,7 +174,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                       </td>
                       <td className="px-4 py-3">
                         <Link href={`/dashboard/leads/${lead.id}`}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00C27C] hover:text-[#009F64] bg-[#00C27C]/10 hover:bg-[#00C27C]/20 px-2.5 py-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                           فتح <ArrowUpRight size={11} />
                         </Link>
                       </td>

@@ -85,7 +85,7 @@ export default function AddLeadButton() {
               </div>
 
               <div className="pt-4 border-t border-slate-100">
-                <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-black transition-all flex justify-center items-center gap-2">
+                <button type="submit" disabled={isLoading} className="w-full bg-[#00C27C] hover:bg-[#009F64] text-white p-3.5 rounded-xl font-black transition-all flex justify-center items-center gap-2">
                   {isLoading ? <><Loader2 size={18} className="animate-spin"/> جاري الحفظ...</> : 'تأكيد وإضافة العميل'}
                 </button>
               </div>

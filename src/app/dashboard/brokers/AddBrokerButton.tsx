@@ -54,7 +54,7 @@ export default function AddBrokerButton() {
   return (
     <>
       <button onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/20">
+        className="flex items-center gap-2 bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#00C27C]/20">
         <Plus size={16} /> إضافة وسيط
       </button>
 
@@ -136,7 +136,7 @@ export default function AddBrokerButton() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
+                className="w-full bg-[#00C27C] hover:bg-[#009F64] text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
                 {loading ? 'جاري الحفظ...' : 'إضافة الوسيط'}
               </button>
             </form>
