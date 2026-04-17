@@ -32,6 +32,10 @@ export async function getSalesForecast(): Promise<ForecastResult> {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const targetCompanyId = profile?.company_id || user?.id
+
   // جلب بيانات الصفقات والعملاء آخر 12 شهر
   const now = new Date()
   const twelveMonthsAgo = new Date(now)
@@ -40,12 +44,14 @@ export async function getSalesForecast(): Promise<ForecastResult> {
   const { data: deals } = await supabase
     .from('deals')
     .select('unit_value, created_at, stage')
+    .eq('company_id', targetCompanyId)
     .gte('created_at', twelveMonthsAgo.toISOString())
     .order('created_at', { ascending: true })
 
   const { data: leads } = await supabase
     .from('leads')
     .select('created_at')
+    .eq('company_id', targetCompanyId)
     .gte('created_at', twelveMonthsAgo.toISOString())
 
   // تجميع البيانات شهرياً

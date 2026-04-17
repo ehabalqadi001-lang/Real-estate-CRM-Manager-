@@ -24,18 +24,23 @@ export default async function PerformancePage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const targetCompanyId = profile?.company_id || user?.id
+
   // جلب بيانات الوكلاء مع إحصائياتهم — single batch query replaces N+1 loop
   const { data: agents } = await supabase
     .from('profiles')
     .select('id, full_name')
     .eq('role', 'agent')
+    .eq('company_id', targetCompanyId)
 
   // Batch fetch — 2 queries total instead of 2N
   const agentIds = (agents ?? []).map(a => a.id)
 
   const [{ data: allLeads }, { data: allDeals }] = await Promise.all([
-    supabase.from('leads').select('user_id').in('user_id', agentIds),
-    supabase.from('deals').select('agent_id, unit_value, amount, value').in('agent_id', agentIds),
+    supabase.from('leads').select('user_id').eq('company_id', targetCompanyId).in('user_id', agentIds),
+    supabase.from('deals').select('agent_id, unit_value, amount, value').eq('company_id', targetCompanyId).in('agent_id', agentIds),
   ])
 
   const leadsMap = (allLeads ?? []).reduce<Record<string, number>>((acc, l) => {

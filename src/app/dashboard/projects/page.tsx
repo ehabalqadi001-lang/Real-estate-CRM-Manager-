@@ -14,10 +14,15 @@ export default async function ProjectsPage() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const targetCompanyId = profile?.company_id || user?.id
+
   // Group inventory by project_name (works even before projects table is migrated)
   const { data: units } = await supabase
     .from('inventory')
     .select('id, project_name, unit_type, status, price, floor, area, unit_name')
+    .eq('company_id', targetCompanyId)
     .order('project_name')
 
   // Build project summaries from flat inventory
