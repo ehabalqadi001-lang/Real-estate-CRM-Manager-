@@ -37,9 +37,10 @@ export default async function DealsPage({ searchParams }: PageProps) {
   // جلب الوكلاء
   const { data: teamMembers } = await supabase.from('profiles').select('id, full_name').eq('company_id', targetCompanyId).eq('role', 'agent')
 
-  // جلب الصفقات المسجلة
+  // جلب الصفقات المسجلة (مفلترة بالشركة)
   const { data: deals, count: totalDealsCount } = await supabase.from('deals')
     .select('*, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' })
+    .eq('company_id', targetCompanyId)
     .order('created_at', { ascending: false })
     .range(from, to)
 

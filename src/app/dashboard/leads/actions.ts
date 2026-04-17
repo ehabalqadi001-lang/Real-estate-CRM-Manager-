@@ -3,6 +3,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { notifyLeadAssigned, notifyLeadStatusChanged, notifyAdmins } from '@/lib/notify'
+import { recalculateLeadScore } from './scoring'
 
 // 1. الرادار الذكي (يجلب العملاء الجدد والقدامى)
 export async function getLeads() {
@@ -72,22 +74,31 @@ export async function addLead(payload: LeadPayload | FormData) {
   // إذا كان حسابه مربوطاً بشركة (وكيل) نستخدم ختم الشركة، وإذا لم يكن (لأنه هو المدير نفسه) نستخدم ختمه الشخصي.
   const targetCompanyId = profile?.company_id ? profile.company_id : user.id
 
-  const { error } = await supabase.from('leads').insert({ 
-    client_name: name || 'عميل جديد', 
+  const leadName = name || 'عميل جديد'
+  const { data: inserted, error } = await supabase.from('leads').insert({
+    client_name: leadName,
     phone: phone || null,
     email: email || null,
-    property_type: property_type || 'غير محدد', 
-    expected_value: expected_value || 0, 
+    property_type: property_type || 'غير محدد',
+    expected_value: expected_value || 0,
     status: 'Fresh Leads',
     user_id: user.id,
-    company_id: targetCompanyId 
-  })
+    company_id: targetCompanyId,
+  }).select('id').single()
 
   if (error) return { success: false, error: error.message }
-  
+
+  // Notify admins about new lead
+  void notifyAdmins(
+    'عميل محتمل جديد',
+    `${leadName} — أضافه ${user.email}`,
+    inserted?.id ? `/dashboard/leads/${inserted.id}` : '/dashboard/leads'
+  )
+
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
+
 // 3. تحديث حالة العميل
 export async function updateLeadStatus(leadId: string, newStatus: string) {
   const cookieStore = await cookies()
@@ -95,8 +106,33 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
+  // Fetch lead to get name + assigned agent before update
+  const { data: lead } = await supabase.from('leads').select('client_name, full_name, user_id, assigned_to').eq('id', leadId).single()
   const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', leadId)
   if (error) throw new Error(error.message)
+
+  const leadName = lead?.full_name || lead?.client_name || 'عميل'
+  const agentId  = lead?.assigned_to || lead?.user_id
+  if (agentId) {
+    void notifyLeadStatusChanged(agentId, leadName, newStatus, leadId)
+  }
+
+  revalidatePath('/dashboard/leads')
+  return { success: true }
+}
+
+// Assign lead to agent
+export async function assignLead(leadId: string, agentId: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { data: lead } = await supabase.from('leads').select('client_name, full_name').eq('id', leadId).single()
+  const { error } = await supabase.from('leads').update({ assigned_to: agentId }).eq('id', leadId)
+  if (error) throw new Error(error.message)
+
+  void notifyLeadAssigned(agentId, lead?.full_name || lead?.client_name || 'عميل', leadId)
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
@@ -122,6 +158,23 @@ export async function addLeadActivity(formData: FormData) {
   })
   if (error) throw new Error(error.message)
   const leadId = formData.get('lead_id') as string
+  void recalculateLeadScore(leadId)
+  revalidatePath(`/dashboard/leads/${leadId}`)
+}
+
+// WhatsApp send log
+export async function logWhatsAppSend(leadId: string, phone: string, message: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  await supabase.from('whatsapp_logs').insert({
+    lead_id:      leadId,
+    client_phone: phone,
+    message_body: message,
+    status:       'sent',
+  })
   revalidatePath(`/dashboard/leads/${leadId}`)
 }
 

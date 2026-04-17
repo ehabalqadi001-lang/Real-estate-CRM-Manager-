@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { User, Phone, Mail, Building2, DollarSign, Clock, ArrowRight, Activity, AlertTriangle } from 'lucide-react'
 import AddActivityButton from '@/components/leads/AddActivityButton'
 import ActivityTimeline from '@/components/leads/ActivityTimeline'
+import SendWhatsAppButton from '@/components/leads/SendWhatsAppButton'
+import { scoreColor, scoreLabel } from '../score-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,10 +92,15 @@ export default async function LeadProfilePage({ params }: PageProps) {
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
               <span className="px-3 py-1 bg-white/10 text-blue-300 text-xs font-black rounded-lg border border-white/20 backdrop-blur-sm">
                 حالة العميل: {lead.status}
               </span>
+              {lead.score != null && lead.score > 0 && (
+                <span className={`px-3 py-1 text-xs font-black rounded-lg border ${scoreColor(lead.score)}`}>
+                  {lead.score} نقطة · {scoreLabel(lead.score)}
+                </span>
+              )}
             </div>
             <h1 className="text-3xl font-black">{lead.client_name}</h1>
           </div>
@@ -105,10 +112,17 @@ export default async function LeadProfilePage({ params }: PageProps) {
             <h3 className="text-sm font-black text-slate-800 border-b border-slate-200 pb-2 mb-4">بيانات التواصل</h3>
             <div className="flex items-center gap-4 text-slate-700">
               <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 text-blue-600"><Phone size={18}/></div>
-              <div>
+              <div className="flex-1">
                 <p className="text-[10px] font-bold text-slate-400">رقم الهاتف الأساسي</p>
                 <p className="font-bold text-md" dir="ltr">{lead.phone || 'غير مسجل'}</p>
               </div>
+              {lead.phone && (
+                <SendWhatsAppButton
+                  leadId={leadId}
+                  phone={lead.phone}
+                  leadName={lead.client_name || lead.full_name || 'عميل'}
+                />
+              )}
             </div>
             <div className="flex items-center gap-4 text-slate-700">
               <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 text-blue-600"><Mail size={18}/></div>

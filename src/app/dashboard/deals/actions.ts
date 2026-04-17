@@ -3,6 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { notifyDealClosed, notifyAdmins } from '@/lib/notify'
 
 // دالة إغلاق الصفقة وحساب العمولات أوتوماتيكياً
 interface DealPayload {
@@ -25,14 +26,18 @@ export async function closeDeal(payload: DealPayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
+  const companyId = profile?.company_id || user.id
+
   // 1. تسجيل الصفقة في جدول الصفقات
   const { data: deal, error: dealError } = await supabase.from('deals').insert({
-    lead_id: payload.leadId,
-    unit_id: payload.unitId,
-    agent_id: payload.agentId,
+    lead_id:    payload.leadId,
+    unit_id:    payload.unitId,
+    agent_id:   payload.agentId,
+    company_id: companyId,
     final_price: payload.finalPrice,
-    discount: payload.discount || 0,
-    stage: 'contract_signed'
+    discount:   payload.discount || 0,
+    stage:      'contract_signed'
   }).select().single()
 
   if (dealError) throw new Error(dealError.message)
@@ -49,7 +54,12 @@ export async function closeDeal(payload: DealPayload) {
   })
 
   // 3. تحديث حالة العميل إلى "تم البيع" (Won)
+  const { data: lead } = await supabase.from('leads').select('client_name, full_name').eq('id', payload.leadId).single()
   await supabase.from('leads').update({ status: 'Won' }).eq('id', payload.leadId)
+
+  const clientName = lead?.full_name || lead?.client_name || 'عميل'
+  void notifyDealClosed(payload.agentId, clientName, payload.finalPrice, deal.id)
+  void notifyAdmins('صفقة جديدة مغلقة', `${clientName} · ${payload.finalPrice.toLocaleString()} ج.م`, '/dashboard/deals')
 
   revalidatePath('/dashboard/leads')
   revalidatePath('/company/dashboard')

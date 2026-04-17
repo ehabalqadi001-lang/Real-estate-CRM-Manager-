@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Users, Plus, Phone, Calendar, TrendingUp, Target, Flame, ArrowUpRight } from 'lucide-react'
 import LeadFilters from '@/components/leads/LeadFilters'
 import BulkImportButton from '@/components/leads/BulkImportButton'
+import { scoreColor, scoreLabel } from './score-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +49,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
 
   let query = supabase
     .from('leads')
-    .select('id, client_name, full_name, phone, status, expected_value, created_at, temperature, source', { count: 'exact' })
+    .select('id, client_name, full_name, phone, status, expected_value, created_at, temperature, source, score', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to)
 
@@ -133,7 +134,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
             <table className="w-full text-right">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  {['العميل', 'الهاتف', 'الحالة', 'الحرارة', 'القيمة المتوقعة', 'التاريخ', ''].map(h => (
+                  {['العميل', 'الهاتف', 'الحالة', 'الحرارة', 'النقاط', 'القيمة المتوقعة', 'التاريخ', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-xs font-bold text-slate-500 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -169,6 +170,15 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                       </td>
                       <td className="px-4 py-3">
                         <TempIcon size={14} className={temp.color} />
+                      </td>
+                      <td className="px-4 py-3">
+                        {lead.score != null && lead.score > 0 ? (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${scoreColor(lead.score)}`}>
+                            {lead.score} · {scoreLabel(lead.score)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-bold text-emerald-600">
