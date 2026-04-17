@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Legacy page pending migration into domains/payouts with typed DTOs. */
 import Link from 'next/link'
-import { DollarSign, CheckCircle, Clock, AlertCircle, Plus, ArrowUpRight, Banknote } from 'lucide-react'
+import { DollarSign, CheckCircle, Clock, AlertCircle, ArrowUpRight, Banknote } from 'lucide-react'
 import { getPayouts, getCommissionStats } from '@/domains/commissions/actions'
 import CreatePayoutButton from './CreatePayoutButton'
 import ApprovePayoutButton from './ApprovePayoutButton'

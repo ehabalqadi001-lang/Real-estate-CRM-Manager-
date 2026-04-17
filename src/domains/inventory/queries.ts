@@ -3,6 +3,7 @@ import 'server-only'
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import type { DeveloperOption, InventoryOverview, InventoryUnitCard } from './types'
+import { getUnits } from './units'
 
 type RawInventoryRow = Record<string, unknown> & {
   id?: string
@@ -108,5 +109,19 @@ export async function getInventoryOverview(): Promise<InventoryOverview> {
       error: 'تعذر جلب بيانات المخزون العقاري.',
       errorDetails: error instanceof Error ? error.message : 'Unknown error',
     }
+  }
+}
+
+export async function getInventoryStats() {
+  const { units } = await getUnits({ pageSize: 10_000 })
+
+  return {
+    total: units.length,
+    available: units.filter((unit) => unit.status === 'available').length,
+    reserved: units.filter((unit) => unit.status === 'reserved').length,
+    sold: units.filter((unit) => unit.status === 'sold').length,
+    totalValue: units
+      .filter((unit) => unit.status === 'available')
+      .reduce((sum, unit) => sum + Number(unit.price ?? 0), 0),
   }
 }

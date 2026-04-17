@@ -21,7 +21,9 @@
       "Bash(git merge *)",
       "Bash(git stash *)",
       "Bash(npm list *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "mcp__supabase__list_projects"
     ]
   }
 }

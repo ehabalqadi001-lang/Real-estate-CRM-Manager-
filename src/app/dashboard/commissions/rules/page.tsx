@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { requireAdmin } from '@/lib/require-role'
-import { Percent, Plus, CheckCircle, XCircle } from 'lucide-react'
+import { Percent, CheckCircle, XCircle } from 'lucide-react'
 import AddRuleButton from './AddRuleButton'
 import ToggleRuleButton from './ToggleRuleButton'
 

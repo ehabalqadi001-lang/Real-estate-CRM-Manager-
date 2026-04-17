@@ -1,8 +1,6 @@
 // Commission Calculation Engine
 // Evaluates applicable rules and computes agent + company commission
 
-import type { Deal } from '@/lib/types/db'
-
 export interface CommissionBreakdown {
   agentAmount:    number
   companyAmount:  number

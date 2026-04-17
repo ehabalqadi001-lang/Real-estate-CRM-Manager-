@@ -19,11 +19,7 @@ export default function NotificationListener() {
   const dealsChannelRef  = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const leadsChannelRef  = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
-  // Request desktop permission once
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      void Notification.requestPermission()
-    }
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) setUserId(user.id)

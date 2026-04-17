@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- Legacy page pending migration into domains/inventory with generated DB types. */
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Building2, ArrowRight, MapPin, Home, TrendingUp } from 'lucide-react'
-import { getProject } from '@/domains/inventory/actions'
+import { ArrowRight, MapPin, Home, TrendingUp } from 'lucide-react'
+import { getProject } from '@/domains/inventory/projects'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,10 +29,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const { project, units } = await getProject(id)
   if (!project) notFound()
 
-  const available = units.filter((u: any) => u.status === 'available').length
-  const reserved  = units.filter((u: any) => u.status === 'reserved').length
-  const sold      = units.filter((u: any) => u.status === 'sold').length
-  const totalValue = units.filter((u: any) => u.status === 'available').reduce((s: number, u: any) => s + Number(u.price ?? 0), 0)
+  const available = units.filter((u) => u.status === 'available').length
+  const reserved  = units.filter((u) => u.status === 'reserved').length
+  const sold      = units.filter((u) => u.status === 'sold').length
+  const totalValue = units.filter((u) => u.status === 'available').reduce((s, u) => s + Number(u.price ?? 0), 0)
 
   return (
     <div className="p-6 space-y-5 max-w-4xl" dir="rtl">
@@ -46,13 +45,13 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-black text-slate-900">{project.name}</h1>
-            {(project as any).developers && (
-              <p className="text-sm text-blue-600 mt-1">{(project as any).developers.name}</p>
+            {project.developers && (
+              <p className="text-sm text-blue-600 mt-1">{project.developers.name}</p>
             )}
-            {(project as any).location && (
+            {project.location && (
               <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
                 <MapPin size={12} />
-                {(project as any).location}
+                {project.location}
               </div>
             )}
           </div>
@@ -64,8 +63,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        {(project as any).description && (
-          <p className="text-sm text-slate-600 mt-4 leading-relaxed">{(project as any).description}</p>
+        {project.description && (
+          <p className="text-sm text-slate-600 mt-4 leading-relaxed">{project.description}</p>
         )}
       </div>
 
@@ -106,15 +105,15 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {units.map((unit: any) => {
-              const cfg = STATUS_CFG[unit.status] ?? STATUS_CFG.available
+            {units.map((unit) => {
+              const cfg = STATUS_CFG[unit.status ?? 'available'] ?? STATUS_CFG.available
               return (
                 <Link key={unit.id} href={`/dashboard/inventory/units/${unit.id}`}
                   className="bg-white rounded-xl border border-slate-100 p-4 hover:shadow-md hover:border-slate-200 transition-all group">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-bold text-slate-900 text-sm">{unit.unit_number ?? 'وحدة'}</p>
-                      <p className="text-xs text-slate-400">{TYPE_LABELS[unit.unit_type ?? ''] ?? unit.unit_type}</p>
+                      <p className="text-xs text-slate-400">{TYPE_LABELS[unit.unit_type ?? ''] ?? unit.unit_type ?? 'غير محدد'}</p>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cfg.color}`}>
                       {cfg.label}

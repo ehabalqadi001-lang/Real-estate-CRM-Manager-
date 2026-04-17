@@ -1,8 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { Home, Plus, CheckCircle, Clock, XCircle, TrendingUp, Eye } from 'lucide-react'
+import { Home, Eye } from 'lucide-react'
 import AddResaleButton from './AddResaleButton'
-import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 

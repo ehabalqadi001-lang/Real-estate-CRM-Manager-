@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- Legacy page pending migration into domains/inventory with generated DB types. */
 import Link from 'next/link'
-import { Building2, Filter, ArrowUpRight } from 'lucide-react'
-import { getUnits, getProjects } from '@/domains/inventory/actions'
+import { Building2, ArrowUpRight } from 'lucide-react'
+import { getProjects } from '@/domains/inventory/projects'
+import { getUnits } from '@/domains/inventory/units'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,15 +50,10 @@ export default async function UnitsPage({ searchParams }: PageProps) {
             <p className="text-xs text-slate-400">{total} وحدة</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <form className="flex items-center gap-2">
           <select
+            name="project"
             defaultValue={params.project ?? ''}
-            onChange={e => {
-              const url = new URL(window.location.href)
-              if (e.target.value) url.searchParams.set('project', e.target.value)
-              else url.searchParams.delete('project')
-              window.location.href = url.toString()
-            }}
             className="text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none"
           >
             <option value="">كل المشاريع</option>
@@ -66,7 +61,10 @@ export default async function UnitsPage({ searchParams }: PageProps) {
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-        </div>
+          <button type="submit" className="text-sm font-bold border border-slate-200 rounded-xl px-3 py-2 text-slate-600 hover:bg-slate-50">
+            ØªØµÙÙŠØ©
+          </button>
+        </form>
       </div>
 
       {/* Status tabs */}
@@ -93,8 +91,8 @@ export default async function UnitsPage({ searchParams }: PageProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {units.map((unit: any) => {
-            const cfg = STATUS_CFG[unit.status] ?? STATUS_CFG.available
+          {units.map((unit) => {
+            const cfg = STATUS_CFG[unit.status ?? 'available'] ?? STATUS_CFG.available
             return (
               <Link key={unit.id} href={`/dashboard/inventory/units/${unit.id}`}
                 className="bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md hover:border-slate-200 transition-all group">
@@ -111,7 +109,7 @@ export default async function UnitsPage({ searchParams }: PageProps) {
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3">
                   {unit.unit_type && (
                     <span className="bg-slate-50 rounded-lg px-2 py-1 font-medium">
-                      {TYPE_LABELS[unit.unit_type] ?? unit.unit_type}
+                      {TYPE_LABELS[unit.unit_type ?? ''] ?? unit.unit_type}
                     </span>
                   )}
                   {unit.bedrooms && (

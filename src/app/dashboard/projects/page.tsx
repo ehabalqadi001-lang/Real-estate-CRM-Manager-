@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { Building2, CheckCircle, Clock, XCircle, TrendingUp, Plus } from 'lucide-react'
+import { Building2, CheckCircle, Clock, XCircle, TrendingUp } from 'lucide-react'
 import AddProjectButton from './AddProjectButton'
 
 export const dynamic = 'force-dynamic'

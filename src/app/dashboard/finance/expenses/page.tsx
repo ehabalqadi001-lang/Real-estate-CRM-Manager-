@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Legacy page pending migration into domains/finance with typed DTOs. */
-import { Receipt, Plus, CheckCircle, Clock } from 'lucide-react'
+import { Receipt, CheckCircle, Clock } from 'lucide-react'
 import { getExpenses } from '@/domains/finance/actions'
 import AddExpenseButton from './AddExpenseButton'
 import ApproveExpenseButton from './ApproveExpenseButton'

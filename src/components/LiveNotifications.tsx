@@ -8,12 +8,6 @@ export default function LiveNotifications() {
 
   useEffect(() => {
     // 1. طلب الإذن من المستخدم لإرسال إشعارات (تظهر نافذة Allow/Block في المتصفح)
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-      }
-    }
-
     // دالة إطلاق الإشعار المدمج في نظام التشغيل (ويندوز، ماك، أندرويد)
     const triggerSystemNotification = (title: string, body: string) => {
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {

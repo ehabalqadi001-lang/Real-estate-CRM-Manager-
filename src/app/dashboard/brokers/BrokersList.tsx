@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Mail, Star, TrendingUp, Award, CheckCircle, XCircle, Search } from 'lucide-react'
+import { Phone, Mail, Star, CheckCircle, XCircle, Search } from 'lucide-react'
 
 interface Broker {
   id: string

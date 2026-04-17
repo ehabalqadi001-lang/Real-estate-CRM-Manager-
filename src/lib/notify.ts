@@ -53,7 +53,7 @@ export async function notifyDealClosed(agentId: string, clientName: string, deal
     title:   `تهانينا! تم إغلاق صفقة`,
     message: `العميل: ${clientName} · القيمة: ${fmt} ج.م`,
     type:    'success',
-    link:    `/dashboard/deals`,
+    link:    `/dashboard/deals/${dealId}`,
   })
 }
 

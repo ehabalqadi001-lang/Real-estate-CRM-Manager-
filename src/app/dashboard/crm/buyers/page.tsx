@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Legacy page pending migration into domains/buyers with typed DTOs. */
 import Link from 'next/link'
-import { Users, Search, Star, Phone, DollarSign, MapPin, ArrowUpRight } from 'lucide-react'
+import { Users, Search, DollarSign, MapPin, ArrowUpRight } from 'lucide-react'
 import { getBuyers } from '@/domains/crm/actions'
 import { scoreColor, scoreLabel } from '@/app/dashboard/leads/score-utils'
 
