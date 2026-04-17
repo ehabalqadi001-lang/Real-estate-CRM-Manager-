@@ -19,12 +19,12 @@ export default async function AgentDashboard() {
   // جلب بيانات الوكيل
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user?.id).single()
   
-  // جلب عملاء الوكيل
-  const { data: leads } = await supabase.from('leads').select('*').eq('agent_id', user?.id)
+  // جلب عملاء الوكيل - leads uses assigned_to column
+  const { data: leads } = await supabase.from('leads').select('*').or(`assigned_to.eq.${user?.id},user_id.eq.${user?.id}`)
   const safeLeads = leads || []
-  
-  const newLeads = safeLeads.filter(l => l.status === 'new' || !l.status)
-  const wonLeads = safeLeads.filter(l => l.status === 'Won')
+
+  const newLeads = safeLeads.filter(l => ['new','Fresh Leads','fresh'].includes(l.status ?? ''))
+  const wonLeads = safeLeads.filter(l => l.status === 'Won' || l.status === 'Contracted')
   const totalWonValue = wonLeads.reduce((sum, l) => sum + (Number(l.expected_value) || 0), 0)
 
   return (

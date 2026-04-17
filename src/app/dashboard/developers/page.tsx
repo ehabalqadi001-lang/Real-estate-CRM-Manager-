@@ -1,329 +1,294 @@
-"use client";
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+"use client"
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Building2, Plus, Search, Settings, AlertTriangle, X, TrendingUp, MapPin } from 'lucide-react'
 
 interface Developer {
-  id: string
-  name: string
-  region: string
-  class_grade: string
-  license_number: string
-  payment_days: number
-  contract_end_date: string | null
+  id: string; name: string; region: string; class_grade: string
+  license_number: string; payment_days: number; contract_end_date: string | null
 }
-
-interface CommissionRule {
-  id: string
-  developer_id: string
-  percentage: number
-}
-
+interface CommissionRule { id: string; developer_id: string; percentage: number }
 interface EnrichedDeveloper extends Developer {
-  dealsCount: number
-  totalVolume: number
-  commission: number
-  contractWarning: boolean
-  daysToExpiry: number | null
+  dealsCount: number; totalVolume: number; commission: number
+  contractWarning: boolean; daysToExpiry: number | null
 }
 
-const CSS_STYLES = `
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
-  .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; direction: rtl; }
-  .sidebar { width: 64px; background: #0f1c2e; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; position: fixed; right: 0; top: 0; bottom: 0; z-index: 50;}
-  .nav-item { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); cursor: pointer; text-decoration: none; transition: 0.2s; }
-  .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .nav-item.active { background: rgba(24,95,165,0.4); color: #fff; border: 1px solid #185FA5; }
-  .main-content { margin-right: 64px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 64px); }
-  .header { padding: 20px 30px; background: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
-  .header-title { font-size: 22px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; }
-  .btn-primary { background: #185FA5; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-  .btn-primary:hover { background: #124b82; }
-  .content-body { padding: 30px; max-width: 1200px; width: 100%; margin: 0 auto; }
-  
-  .toolbar { display: flex; gap: 15px; margin-bottom: 25px; }
-  .search-input { flex: 1; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; }
-  .filter-select { padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; min-width: 150px; }
-
-  .dev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-  .dev-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: 0.2s; position: relative; overflow: hidden;}
-  .dev-card:hover { border-color: #185FA5; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-  
-  .dev-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;}
-  .dev-name { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-  .dev-region { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 4px;}
-  
-  .class-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;}
-  .class-a { background: #ECFDF5; color: #10b981; border: 1px solid #A7F3D0; }
-  .class-b { background: #EFF6FF; color: #3b82f6; border: 1px solid #BFDBFE; }
-  .class-c { background: #F8FAFC; color: #64748b; border: 1px solid #E2E8F0; }
-
-  .dev-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 8px;}
-  .stat-box { display: flex; flex-direction: column; }
-  .stat-label { font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
-  .stat-val { font-size: 15px; font-weight: 700; color: #0f172a; direction: ltr; text-align: right;}
-  
-  .dev-info-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: #475569; align-items: center;}
-  .dev-info-val { font-weight: 600; color: #0f172a; }
-  
-  .alert-badge { background: #FEF2F2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; border: 1px solid #FCA5A5;}
-
-  .btn-secondary { width: 100%; padding: 10px; background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 15px;}
-  .btn-secondary:hover { background: #e2e8f0; }
-
-  /* Modal Styles */
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,28,46,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
-  .modal-content { background: #fff; width: 100%; max-width: 600px; border-radius: 16px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; direction: rtl; }
-  .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #0f172a; display: flex; justify-content: space-between; align-items: center; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-  .form-group { display: flex; flex-direction: column; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-label { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
-  .form-input, .form-select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; background: #fff;}
-  .form-input:focus, .form-select:focus { border-color: #185FA5; }
-  .btn-submit { width: 100%; padding: 14px; background: #185FA5; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-`;
+const GRADE_STYLE: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  A: { label: 'Class A', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+  B: { label: 'Class B', color: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-200' },
+  C: { label: 'Class C', color: 'text-slate-600',   bg: 'bg-slate-100',  border: 'border-slate-200' },
+}
 
 export default function DevelopersPage() {
-  const [developers, setDevelopers] = useState<Developer[]>([]);
-  const [deals, setDeals] = useState<{ developer: string; unit_value: number }[]>([]);
-  const [rules, setRules] = useState<CommissionRule[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const [selectedDev, setSelectedDev] = useState<EnrichedDeveloper | null>(null);
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [regionFilter, setRegionFilter] = useState('All');
-  
-  const [formData, setFormData] = useState({
-    name: '', region: 'القاهرة الجديدة', class_grade: 'B', license_number: '', payment_days: 60, contract_end_date: ''
-  });
-
-  // نموذج قواعد العمولة والعقد
-  const [manageData, setManageData] = useState({
-    contract_end_date: '', commission_percentage: 2.5
-  });
+  const [developers, setDevelopers] = useState<Developer[]>([])
+  const [deals, setDeals] = useState<{ developer: string; unit_value: number }[]>([])
+  const [rules, setRules] = useState<CommissionRule[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isManageOpen, setIsManageOpen] = useState(false)
+  const [selectedDev, setSelectedDev] = useState<EnrichedDeveloper | null>(null)
+  const [search, setSearch] = useState('')
+  const [regionFilter, setRegionFilter] = useState('All')
+  const [form, setForm] = useState({ name: '', region: 'القاهرة الجديدة', class_grade: 'B', license_number: '', payment_days: 60, contract_end_date: '' })
+  const [manageData, setManageData] = useState({ contract_end_date: '', commission_percentage: 2.5 })
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    const { data: devData } = await supabase.from('developers').select('*').order('name', { ascending: true });
-    const { data: dealsData } = await supabase.from('deals').select('developer, unit_value');
-    const { data: rulesData } = await supabase.from('commission_rules').select('*');
-    setDevelopers(devData || []);
-    setDeals(dealsData || []);
-    setRules(rulesData || []);
-    setLoading(false);
-  }, []);
+    setLoading(true)
+    const [{ data: devData }, { data: dealsData }, { data: rulesData }] = await Promise.all([
+      supabase.from('developers').select('*').order('name', { ascending: true }),
+      supabase.from('deals').select('developer_name, unit_value, amount'),
+      supabase.from('commission_rules').select('*'),
+    ])
+    setDevelopers(devData || [])
+    setDeals((dealsData || []).map(d => ({ developer: d.developer_name ?? '', unit_value: Number(d.unit_value ?? d.amount ?? 0) })))
+    setRules(rulesData || [])
+    setLoading(false)
+  }, [])
 
-  useEffect(() => {
-    void fetchData(); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [fetchData]);
+  useEffect(() => { void fetchData() }, [fetchData])
 
   const handleAddDeveloper = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
     const { data, error } = await supabase.from('developers').insert([{
-      name: formData.name,
-      region: formData.region,
-      class_grade: formData.class_grade,
-      license_number: formData.license_number || 'غير مسجل',
-      payment_days: Number(formData.payment_days),
-      contract_end_date: formData.contract_end_date || null
-    }]).select();
-    
+      name: form.name, region: form.region, class_grade: form.class_grade,
+      license_number: form.license_number || 'غير مسجل',
+      payment_days: Number(form.payment_days),
+      contract_end_date: form.contract_end_date || null
+    }]).select()
     if (!error && data) {
-      // إنشاء قاعدة عمولة افتراضية للمطور الجديد
-      await supabase.from('commission_rules').insert([{
-        developer_id: data[0].id, property_type: 'All', percentage: 2.5
-      }]);
-      setIsAddModalOpen(false);
-      setFormData({ name: '', region: 'القاهرة الجديدة', class_grade: 'B', license_number: '', payment_days: 60, contract_end_date: '' });
-      fetchData();
+      await supabase.from('commission_rules').insert([{ developer_id: data[0].id, sale_type: 'All', commission_pct: 2.5, payout_days: 60 }])
+      setIsAddOpen(false)
+      setForm({ name: '', region: 'القاهرة الجديدة', class_grade: 'B', license_number: '', payment_days: 60, contract_end_date: '' })
+      void fetchData()
     }
-  };
+  }
 
-  const openManageModal = (dev: EnrichedDeveloper) => {
-    setSelectedDev(dev);
-    const devRule = rules.find(r => r.developer_id === dev.id);
-    setManageData({
-      contract_end_date: dev.contract_end_date || '',
-      commission_percentage: devRule ? devRule.percentage : 2.5
-    });
-    setIsManageModalOpen(true);
-  };
+  const openManage = (dev: EnrichedDeveloper) => {
+    setSelectedDev(dev)
+    const rule = rules.find(r => r.developer_id === dev.id)
+    setManageData({ contract_end_date: dev.contract_end_date || '', commission_percentage: rule ? rule.percentage : 2.5 })
+    setIsManageOpen(true)
+  }
 
-  const handleUpdateDevSettings = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedDev) return;
-
-    // تحديث تاريخ العقد
-    await supabase.from('developers').update({ contract_end_date: manageData.contract_end_date || null }).eq('id', selectedDev.id);
-
-    // تحديث أو إدخال نسبة العمولة
-    const existingRule = rules.find(r => r.developer_id === selectedDev.id);
+  const handleUpdateSettings = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!selectedDev) return
+    await supabase.from('developers').update({ contract_end_date: manageData.contract_end_date || null }).eq('id', selectedDev.id)
+    const existingRule = rules.find(r => r.developer_id === selectedDev.id)
     if (existingRule) {
-      await supabase.from('commission_rules').update({ percentage: Number(manageData.commission_percentage) }).eq('id', existingRule.id);
+      await supabase.from('commission_rules').update({ commission_pct: Number(manageData.commission_percentage) }).eq('id', existingRule.id)
     } else {
-      await supabase.from('commission_rules').insert([{ developer_id: selectedDev.id, property_type: 'All', percentage: Number(manageData.commission_percentage) }]);
+      await supabase.from('commission_rules').insert([{ developer_id: selectedDev.id, sale_type: 'All', commission_pct: Number(manageData.commission_percentage), payout_days: 60 }])
     }
+    setIsManageOpen(false)
+    void fetchData()
+  }
 
-    setIsManageModalOpen(false);
-    fetchData();
-    alert('تم تحديث العقد وقواعد العمولة بنجاح!');
-  };
-
-  // دمج البيانات وحساب التنبيهات
-  const enrichedDevelopers = developers.map(dev => {
-    const devDeals = deals.filter(d => d.developer === dev.name);
-    const totalVolume = devDeals.reduce((sum, d) => sum + Number(d.unit_value || 0), 0);
-    const devRule = rules.find(r => r.developer_id === dev.id);
-    
-    // حساب تنبيه انتهاء العقد
-    let contractWarning = false;
-    let daysToExpiry = null;
+  const enriched: EnrichedDeveloper[] = developers.map(dev => {
+    const devDeals = deals.filter(d => d.developer === dev.name)
+    const totalVolume = devDeals.reduce((s, d) => s + Number(d.unit_value || 0), 0)
+    const rule = rules.find(r => r.developer_id === dev.id)
+    let contractWarning = false, daysToExpiry: number | null = null
     if (dev.contract_end_date) {
-      const expiry = new Date(dev.contract_end_date).getTime();
-      const now = new Date().getTime();
-      daysToExpiry = Math.ceil((expiry - now) / (1000 * 3600 * 24));
-      if (daysToExpiry <= 30) contractWarning = true;
+      daysToExpiry = Math.ceil((new Date(dev.contract_end_date).getTime() - Date.now()) / 86400000)
+      contractWarning = daysToExpiry <= 30
     }
+    return { ...dev, dealsCount: devDeals.length, totalVolume, commission: rule ? rule.percentage : 2.5, contractWarning, daysToExpiry }
+  })
 
-    return { ...dev, dealsCount: devDeals.length, totalVolume, commission: devRule ? devRule.percentage : 2.5, contractWarning, daysToExpiry };
-  });
-
-  const filteredDevelopers = enrichedDevelopers.filter(d => {
-    const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRegion = regionFilter === 'All' || d.region === regionFilter;
-    return matchesSearch && matchesRegion;
-  });
+  const filtered = enriched.filter(d =>
+    d.name.toLowerCase().includes(search.toLowerCase()) &&
+    (regionFilter === 'All' || d.region === regionFilter)
+  )
 
   return (
-    <div className="dashboard-container">
-      <style dangerouslySetInnerHTML={{ __html: CSS_STYLES }} />
-      
-      {/* Sidebar */}
-      <div className="sidebar">
-        <Link href="/dashboard" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></Link>
-        <Link href="/dashboard/clients" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></Link>
-        <Link href="/dashboard/leads" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></Link>
-        <Link href="/dashboard/inventory" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></Link>
-        <Link href="/dashboard/commissions" className="nav-item"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></Link>
-        <div style={{ width: '28px', height: '1px', background: 'rgba(255,255,255,0.12)', margin: '4px 0' }}></div>
-        <Link href="/dashboard/developers" className="nav-item active"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></Link>
+    <div className="p-6 space-y-6" dir="rtl">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+            <Building2 size={18} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-slate-900">سجل المطورين العقاريين</h1>
+            <p className="text-xs text-slate-400">{developers.length} مطور مسجل</p>
+          </div>
+        </div>
+        <button onClick={() => setIsAddOpen(true)}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/20">
+          <Plus size={15} /> إضافة مطور جديد
+        </button>
       </div>
 
-      <div className="main-content">
-        <div className="header">
-          <div className="header-title">سجل المطورين (Developer Profiles)</div>
-          <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>إضافة مطور جديد</button>
+      {/* Toolbar */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input type="text" placeholder="ابحث باسم المطور..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
+        <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)}
+          className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="All">جميع المناطق</option>
+          {['القاهرة الجديدة','العاصمة الإدارية','الساحل الشمالي','متعدد المناطق'].map(r => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
 
-        <div className="content-body">
-          <div className="toolbar">
-            <input type="text" className="search-input" placeholder="ابحث باسم المطور..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            <select className="filter-select" value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}>
-              <option value="All">جميع المناطق</option>
-              <option value="القاهرة الجديدة">القاهرة الجديدة</option>
-              <option value="العاصمة الإدارية">العاصمة الإدارية</option>
-              <option value="الساحل الشمالي">الساحل الشمالي</option>
-              <option value="متعدد المناطق">متعدد المناطق</option>
-            </select>
-          </div>
-
-          {loading ? (
-             <div style={{ textAlign: 'center', padding: '50px' }}>جاري التحميل...</div>
-          ) : (
-            <div className="dev-grid">
-              {filteredDevelopers.map((dev) => (
-                <div className="dev-card" key={dev.id}>
-                  <div className="dev-header">
+      {/* Grid */}
+      {loading ? (
+        <div className="text-center py-16 text-slate-400 font-bold">جاري التحميل...</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
+          <Building2 size={40} className="mx-auto text-slate-200 mb-3" />
+          <p className="text-slate-500 font-bold">لا يوجد مطورون مسجلون</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {filtered.map(dev => {
+            const grade = GRADE_STYLE[dev.class_grade] ?? GRADE_STYLE.C
+            return (
+              <div key={dev.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                {dev.contractWarning && <div className="h-1 bg-red-500" />}
+                {!dev.contractWarning && <div className="h-1 bg-blue-500" />}
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <div className="dev-name">{dev.name}</div>
-                      <div className="dev-region">{dev.region}</div>
+                      <h3 className="font-bold text-slate-900 text-base">{dev.name}</h3>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
+                        <MapPin size={11} /> {dev.region}
+                      </div>
                     </div>
-                    <div className={`class-badge ${dev.class_grade === 'A' ? 'class-a' : dev.class_grade === 'B' ? 'class-b' : 'class-c'}`}>
-                      Class {dev.class_grade}
-                    </div>
-                  </div>
-
-                  <div className="dev-stats">
-                    <div className="stat-box">
-                      <div className="stat-label">حجم المبيعات (Volume)</div>
-                      <div className="stat-val" style={{color: '#185FA5'}}>{dev.totalVolume.toLocaleString('ar-EG')}</div>
-                    </div>
-                    <div className="stat-box">
-                      <div className="stat-label">نسبة العمولة الحالية</div>
-                      <div className="stat-val" style={{color: '#10b981'}}>{dev.commission}%</div>
-                    </div>
-                  </div>
-
-                  <div className="dev-info-row">
-                    <span>رقم الترخيص:</span>
-                    <span className="dev-info-val">{dev.license_number}</span>
-                  </div>
-                  <div className="dev-info-row">
-                    <span>انتهاء التعاقد:</span>
-                    <span className="dev-info-val" style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                      {dev.contract_end_date ? new Date(dev.contract_end_date).toLocaleDateString('ar-EG') : 'غير محدد'}
-                      {dev.contractWarning && <span className="alert-badge">ينتهي قريباً!</span>}
-                      {dev.daysToExpiry !== null && dev.daysToExpiry < 0 && <span className="alert-badge">منتهي!</span>}
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${grade.bg} ${grade.color} ${grade.border}`}>
+                      {grade.label}
                     </span>
                   </div>
 
-                  <button className="btn-secondary" onClick={() => openManageModal(dev)}>
-                    إعدادات العقد والعمولة ⚙️
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-slate-400 mb-0.5">حجم المبيعات</p>
+                      <p className="text-sm font-black text-blue-600">{(dev.totalVolume / 1_000_000).toFixed(1)}M</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-slate-400 mb-0.5">العمولة</p>
+                      <p className="text-sm font-black text-emerald-600">{dev.commission}%</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">رقم الترخيص</span>
+                      <span className="font-semibold text-slate-700">{dev.license_number}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">انتهاء التعاقد</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-slate-700">
+                          {dev.contract_end_date ? new Date(dev.contract_end_date).toLocaleDateString('ar-EG') : 'غير محدد'}
+                        </span>
+                        {dev.contractWarning && (
+                          <span className="flex items-center gap-0.5 text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full border border-red-100 font-bold">
+                            <AlertTriangle size={9} /> تنبيه
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button onClick={() => openManage(dev)}
+                    className="w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition-colors">
+                    <Settings size={13} /> إعدادات العقد والعمولة
                   </button>
                 </div>
-              ))}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {isAddOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" dir="rtl">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2"><Building2 size={16} className="text-blue-600" /> إضافة مطور عقاري</h3>
+              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-700"><X size={18} /></button>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* 1. Modal إضافة مطور */}
-      {isAddModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><span>إضافة مطور عقاري</span><button className="close-btn" onClick={() => setIsAddModalOpen(false)}>✕</button></div>
-            <form onSubmit={handleAddDeveloper}>
-              <div className="form-group full"><label className="form-label">الاسم *</label><input required className="form-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-              <div className="form-grid">
-                <div className="form-group"><label className="form-label">المنطقة</label><select className="form-select" value={formData.region} onChange={e => setFormData({...formData, region: e.target.value})}><option value="القاهرة الجديدة">القاهرة الجديدة</option><option value="العاصمة الإدارية">العاصمة الإدارية</option><option value="الساحل الشمالي">الساحل الشمالي</option><option value="متعدد المناطق">متعدد المناطق</option></select></div>
-                <div className="form-group"><label className="form-label">تصنيف (A/B/C)</label><select className="form-select" value={formData.class_grade} onChange={e => setFormData({...formData, class_grade: e.target.value})}><option value="A">Class A</option><option value="B">Class B</option><option value="C">Class C</option></select></div>
-                <div className="form-group"><label className="form-label">الترخيص</label><input className="form-input" value={formData.license_number} onChange={e => setFormData({...formData, license_number: e.target.value})} /></div>
-                <div className="form-group"><label className="form-label">دورة الصرف (أيام)</label><input type="number" className="form-input" value={formData.payment_days} onChange={e => setFormData({...formData, payment_days: Number(e.target.value)})} /></div>
-                <div className="form-group full"><label className="form-label">تاريخ انتهاء التعاقد المبرم (اختياري)</label><input type="date" className="form-input" value={formData.contract_end_date} onChange={e => setFormData({...formData, contract_end_date: e.target.value})} /></div>
+            <form onSubmit={handleAddDeveloper} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">الاسم *</label>
+                <input required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
               </div>
-              <button type="submit" className="btn-submit">حفظ المطور</button>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">المنطقة</label>
+                  <select value={form.region} onChange={e => setForm({...form, region: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    {['القاهرة الجديدة','العاصمة الإدارية','الساحل الشمالي','متعدد المناطق'].map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">التصنيف</label>
+                  <select value={form.class_grade} onChange={e => setForm({...form, class_grade: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    {['A','B','C'].map(g => <option key={g} value={g}>Class {g}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">رقم الترخيص</label>
+                  <input type="text" value={form.license_number} onChange={e => setForm({...form, license_number: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">دورة الصرف (أيام)</label>
+                  <input type="number" value={form.payment_days} onChange={e => setForm({...form, payment_days: Number(e.target.value)})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">تاريخ انتهاء التعاقد (اختياري)</label>
+                <input type="date" value={form.contract_end_date} onChange={e => setForm({...form, contract_end_date: e.target.value})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors">حفظ المطور</button>
             </form>
           </div>
         </div>
       )}
 
-      {/* 2. Modal إدارة العقد والعمولة (الجديد) */}
-      {isManageModalOpen && selectedDev && (
-        <div className="modal-overlay" onClick={() => setIsManageModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><span>تحديث إعدادات: {selectedDev.name}</span><button className="close-btn" onClick={() => setIsManageModalOpen(false)}>✕</button></div>
-            <form onSubmit={handleUpdateDevSettings}>
-              <div className="form-grid">
-                <div className="form-group full">
-                  <label className="form-label" style={{color: '#185FA5'}}>نسبة العمولة المتفق عليها (%) *</label>
-                  <input required type="number" step="0.1" min="0" className="form-input" style={{border: '2px solid #185FA5'}} value={manageData.commission_percentage} onChange={e => setManageData({...manageData, commission_percentage: Number(e.target.value)})} />
-                  <p style={{fontSize: '11px', color: '#64748b', marginTop: '4px'}}>سيتم استخدام هذه النسبة لحساب المطالبات المالية القادمة.</p>
-                </div>
-                <div className="form-group full">
-                  <label className="form-label" style={{color: '#DC2626'}}>تاريخ انتهاء عقد التعاون (للتنبيهات)</label>
-                  <input type="date" className="form-input" style={{border: '1px solid #DC2626'}} value={manageData.contract_end_date} onChange={e => setManageData({...manageData, contract_end_date: e.target.value})} />
-                </div>
+      {/* Manage Modal */}
+      {isManageOpen && selectedDev && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" dir="rtl">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2"><Settings size={16} className="text-blue-600" /> {selectedDev.name}</h3>
+              <button onClick={() => setIsManageOpen(false)} className="text-slate-400 hover:text-slate-700"><X size={18} /></button>
+            </div>
+            <form onSubmit={handleUpdateSettings} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-blue-700 mb-1.5">نسبة العمولة المتفق عليها (%) *</label>
+                <input required type="number" step="0.1" min="0" value={manageData.commission_percentage}
+                  onChange={e => setManageData({...manageData, commission_percentage: Number(e.target.value)})}
+                  className="w-full bg-blue-50 border-2 border-blue-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <p className="text-[10px] text-slate-400 mt-1">تُستخدم لحساب المطالبات المالية القادمة</p>
               </div>
-              <button type="submit" className="btn-submit">حفظ التحديثات</button>
+              <div>
+                <label className="block text-xs font-bold text-red-600 mb-1.5">تاريخ انتهاء عقد التعاون</label>
+                <input type="date" value={manageData.contract_end_date}
+                  onChange={e => setManageData({...manageData, contract_end_date: e.target.value})}
+                  className="w-full bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-300" />
+              </div>
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                <TrendingUp size={15} /> حفظ التحديثات
+              </button>
             </form>
           </div>
         </div>
       )}
-
     </div>
-  );
+  )
 }

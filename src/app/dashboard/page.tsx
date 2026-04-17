@@ -12,23 +12,22 @@ export default async function DashboardRoot() {
     { cookies: { getAll() { return cookieStore.getAll() } } }
   )
 
-  // 1. التحقق من الهوية الأمنية
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // 2. جلب رتبة المستخدم (المدير أو الوكيل)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, account_type')
     .eq('id', user.id)
     .single()
 
-  // 3. التوجيه التكتيكي الصارم
-  if (profile?.role === 'company_admin' || profile?.role === 'admin') {
-    // القيادة الإدارية تتجه لغرفة التحكم العليا
+  const role = profile?.role ?? 'agent'
+
+  if (role === 'super_admin' || role === 'Super_Admin') {
+    redirect('/admin/super-dashboard')
+  } else if (['company_admin', 'admin', 'Admin', 'company'].includes(role) || profile?.account_type === 'company') {
     redirect('/company/dashboard')
   } else {
-    // الوكلاء يتجهون لغرفة العمليات الفردية
     redirect('/dashboard/agent')
   }
 }

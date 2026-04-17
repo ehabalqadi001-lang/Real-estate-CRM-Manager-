@@ -29,7 +29,6 @@ const adminGroups: NavGroup[] = [
     label: 'الرئيسية',
     items: [
       { name: 'لوحة القيادة', icon: LayoutDashboard, path: '/company/dashboard' },
-      { name: 'الإدارة العليا', icon: ShieldCheck, path: '/admin/super-dashboard' },
     ],
   },
   {
@@ -123,8 +122,19 @@ export default function Sidebar() {
     })
   }, [])
 
-  const isLeader = ['company_admin', 'admin', 'super_admin', 'Admin'].includes(userRole || '')
-  const groups = isLeader ? adminGroups : agentGroups
+  const isSuperAdmin = ['super_admin', 'Super_Admin'].includes(userRole || '')
+  const isLeader = isSuperAdmin || ['company_admin', 'admin', 'Admin', 'company'].includes(userRole || '')
+
+  // Super admins see the full admin menu plus a super-admin section
+  const superAdminGroup: NavGroup = {
+    label: 'الإدارة العليا',
+    items: [{ name: 'لوحة الإدارة العليا', icon: ShieldCheck, path: '/admin/super-dashboard' }],
+  }
+  const groups = isSuperAdmin
+    ? [superAdminGroup, ...adminGroups]
+    : isLeader
+    ? adminGroups
+    : agentGroups
 
   const initials = userName
     .split(' ')
