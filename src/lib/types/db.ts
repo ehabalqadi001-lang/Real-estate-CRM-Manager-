@@ -133,6 +133,7 @@ export interface Project {
   id: string
   name: string
   developer_id: string | null
+  developer_name: string | null
   company_id: string | null
   location: string | null
   city: string | null
@@ -147,6 +148,14 @@ export interface Project {
   description: string | null
   amenities: string[] | null
   commission_pct: number | null
+  down_payment_pct: number | null
+  payment_years: number | null
+  min_area: number | null
+  max_area: number | null
+  area_type: string | null
+  tags: string[] | null
+  is_featured: boolean | null
+  slug: string | null
   lat: number | null
   lng: number | null
   cover_image: string | null
@@ -168,6 +177,20 @@ export interface Unit {
   price: number | null
   status: UnitStatus | null
   finishing: string | null
+  finishing_type: string | null
+  orientation: string | null
+  delivery_date: string | null
+  description: string | null
+  reception_count: number | null
+  has_garden: boolean | null
+  garden_area: number | null
+  has_roof: boolean | null
+  roof_area: number | null
+  payment_plan: Json | null
+  maintenance_pct: number | null
+  view_type: string | null
+  notes: string | null
+  tags: string[] | null
   view: string | null
   features: string[] | null
   images: string[] | null

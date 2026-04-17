@@ -9,3 +9,6 @@ export function createBrowserSupabaseClient() {
   )
 }
 
+// Alias
+export { createBrowserSupabaseClient as createClient }
+

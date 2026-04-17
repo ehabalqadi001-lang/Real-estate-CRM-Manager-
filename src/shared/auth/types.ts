@@ -1,25 +1,64 @@
 import type { User } from '@supabase/supabase-js'
 
+// ─── أدوار النظام الكاملة ────────────────────────────────────────────
+// الأدوار الحديثة (v2) — تتطابق مع قاعدة البيانات
 export type AppRole =
+  // إدارة المنصة
   | 'super_admin'
   | 'platform_admin'
+  // إدارة الشركة
   | 'company_owner'
   | 'company_admin'
   | 'sales_director'
   | 'team_leader'
+  // الوسطاء والمبيعات
   | 'broker'
   | 'freelancer'
   | 'buyer_manager'
   | 'seller_resale_manager'
+  // الدعم والتشغيل
   | 'finance_officer'
   | 'hr_officer'
   | 'customer_support'
   | 'developer_relations_manager'
-  | 'admin'
-  | 'company'
-  | 'agent'
+  // أدوار قديمة للتوافق مع الكود الموجود
+  | 'admin'    // = company_admin (legacy)
+  | 'company'  // = company_owner (legacy)
+  | 'agent'    // = broker (legacy)
   | 'viewer'
 
+// مجموعات الأدوار للتحقق السريع
+export const MANAGER_ROLES: AppRole[] = [
+  'super_admin', 'platform_admin', 'company_owner', 'company_admin',
+  'sales_director', 'admin', 'company',
+]
+
+export const BROKER_ROLES: AppRole[] = [
+  'broker', 'freelancer', 'agent',
+]
+
+export const FINANCE_ROLES: AppRole[] = [
+  'finance_officer', 'company_owner', 'company_admin', 'super_admin', 'admin', 'company',
+]
+
+export const INVENTORY_WRITE_ROLES: AppRole[] = [
+  'super_admin', 'platform_admin', 'company_owner', 'company_admin',
+  'sales_director', 'admin', 'company',
+]
+
+export function isManagerRole(role: AppRole | string | null | undefined): boolean {
+  return MANAGER_ROLES.includes(role as AppRole)
+}
+
+export function isBrokerRole(role: AppRole | string | null | undefined): boolean {
+  return BROKER_ROLES.includes(role as AppRole)
+}
+
+export function isSuperAdmin(role: AppRole | string | null | undefined): boolean {
+  return role === 'super_admin' || role === 'platform_admin'
+}
+
+// ─── Profile ────────────────────────────────────────────────────────
 export interface AppProfile {
   id: string
   company_id: string | null
@@ -31,8 +70,8 @@ export interface AppProfile {
   is_active?: boolean | null
 }
 
+// ─── Session ────────────────────────────────────────────────────────
 export interface AppSession {
   user: User
   profile: AppProfile
 }
-

@@ -58,6 +58,12 @@ export async function getProfile() {
   return data
 }
 
+// Roles whose own profile.id acts as the company_id when company_id is null
+const SELF_AS_COMPANY_ROLES = new Set([
+  'company_owner', 'company_admin', 'company',
+  'admin', 'Admin', 'super_admin', 'platform_admin',
+])
+
 export async function getCompanyId(): Promise<string | null> {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -68,6 +74,7 @@ export async function getCompanyId(): Promise<string | null> {
     .eq('id', user.id)
     .single()
   if (!data) return null
-  const OWNER_ROLES = ['company_admin', 'company', 'admin', 'Admin', 'super_admin']
-  return data.company_id ?? (OWNER_ROLES.includes(data.role ?? '') ? user.id : null)
+  if (data.company_id) return data.company_id
+  if (SELF_AS_COMPANY_ROLES.has(data.role ?? '')) return user.id
+  return null
 }

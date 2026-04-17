@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createClient } from '@/shared/supabase/browser'
 
 interface AuthUser {
   id: string
@@ -10,9 +11,15 @@ interface AuthUser {
 interface AuthStore {
   user: AuthUser | null
   setUser: (user: AuthUser | null) => void
+  logout: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
+  logout: async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    set({ user: null })
+  },
 }))
