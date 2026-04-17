@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import InventoryGrid from '@/components/inventory/InventoryGrid'
 import InventoryHeatMap from '@/components/inventory/InventoryHeatMap'
 import AddUnitButton from '@/components/inventory/AddUnitButton'
-import { CheckCircle, Clock, XCircle } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, Building2, TrendingUp, DollarSign } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +15,8 @@ interface Unit {
   price: number
   status: string
   floor?: number
+  area?: number
+  developer?: string
 }
 
 export default async function InventoryPage() {
@@ -36,7 +38,15 @@ export default async function InventoryPage() {
       .order('created_at', { ascending: false })
 
     if (error) { exactErrorDetails = error.message; throw error }
-    inventory = data || []
+    inventory = (data || []).map(u => ({
+      ...u,
+      // Normalize status to lowercase for consistency
+      status: (u.status ?? 'available').toLowerCase(),
+      // Ensure mapped column names are populated
+      unit_name:    u.unit_name    ?? u.unit_number ?? u.compound ?? 'وحدة',
+      project_name: u.project_name ?? u.compound    ?? 'مشروع',
+      unit_type:    u.unit_type    ?? u.property_type ?? 'شقة',
+    }))
   } catch (e: unknown) {
     fetchError = 'تعذر جلب بيانات المخزون العقاري.'
     if (!exactErrorDetails) exactErrorDetails = e instanceof Error ? e.message : 'Unknown error'
@@ -46,17 +56,26 @@ export default async function InventoryPage() {
   const reserved  = inventory.filter(u => u.status === 'reserved').length
   const sold      = inventory.filter(u => u.status === 'sold').length
   const totalVal  = inventory.filter(u => u.status === 'available').reduce((s, u) => s + Number(u.price || 0), 0)
+  const avgPrice  = available > 0 ? totalVal / available : 0
+  const soldRate  = inventory.length > 0 ? ((sold / inventory.length) * 100).toFixed(0) : '0'
 
   const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
 
+  // Unique projects
+  const projects = Array.from(new Set(inventory.map(u => u.project_name).filter(Boolean)))
+
   return (
-    <div className="space-y-6 p-6" dir="rtl">
+    <div className="p-6 space-y-6" dir="rtl">
 
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">المخزون العقاري</h1>
-          <p className="text-sm text-slate-500 mt-1">إدارة الوحدات، المشاريع، والأسعار المتاحة للبيع</p>
+          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <Building2 className="text-blue-600" size={24} /> المشاريع والوحدات العقارية
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            {projects.length} مشروع · {inventory.length} وحدة إجمالية
+          </p>
         </div>
         <AddUnitButton />
       </div>
@@ -71,44 +90,26 @@ export default async function InventoryPage() {
         </div>
       ) : (
         <>
-          {/* KPI summary */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex items-center gap-4">
-              <div className="bg-emerald-50 w-11 h-11 rounded-xl flex items-center justify-center shrink-0">
-                <CheckCircle size={22} className="text-emerald-600" />
+          {/* KPI row */}
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            {[
+              { label: 'متاحة',        value: available, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+              { label: 'محجوزة',       value: reserved,  icon: Clock,       color: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-100' },
+              { label: 'مباعة',        value: sold,      icon: XCircle,     color: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-100' },
+              { label: 'نسبة البيع',   value: `${soldRate}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+              { label: 'قيمة المتاح', value: fmt(totalVal), icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', wide: true },
+              { label: 'متوسط السعر', value: fmt(avgPrice), icon: DollarSign, color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-100', wide: true },
+            ].map(kpi => (
+              <div key={kpi.label} className={`bg-white p-4 rounded-2xl shadow-sm border ${kpi.border} flex items-center gap-3 ${('wide' in kpi && kpi.wide) ? 'xl:col-span-1' : ''}`}>
+                <div className={`${kpi.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}>
+                  <kpi.icon size={18} className={kpi.color} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">{kpi.label}</p>
+                  <p className="text-base font-black text-slate-900 leading-tight">{kpi.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500">متاحة</p>
-                <p className="text-2xl font-black text-slate-900">{available}</p>
-              </div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-amber-100 flex items-center gap-4">
-              <div className="bg-amber-50 w-11 h-11 rounded-xl flex items-center justify-center shrink-0">
-                <Clock size={22} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500">محجوزة</p>
-                <p className="text-2xl font-black text-slate-900">{reserved}</p>
-              </div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-red-100 flex items-center gap-4">
-              <div className="bg-red-50 w-11 h-11 rounded-xl flex items-center justify-center shrink-0">
-                <XCircle size={22} className="text-red-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500">مباعة</p>
-                <p className="text-2xl font-black text-slate-900">{sold}</p>
-              </div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-blue-100 flex items-center gap-4">
-              <div className="bg-blue-50 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-xs font-black text-blue-600">
-                ج.م
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500">قيمة المتاح</p>
-                <p className="text-lg font-black text-slate-900">{fmt(totalVal)}</p>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Heat map */}

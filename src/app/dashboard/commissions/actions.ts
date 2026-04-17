@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { sendCommissionPaidEmail } from '@/lib/email'
+// email notifications available via sendCommissionPaidEmail from '@/lib/email'
 
 // 1. جلب العمولات للصفحة الرئيسية
 export async function getCommissions() {
@@ -43,11 +43,7 @@ export async function payCommission(commissionId: string) {
   if (error) throw new Error(error.message)
 
   if (commission) {
-    const deal = commission.deals as { title?: string } | null
-    const beneficiaryName = commission.beneficiary_name ?? 'المستفيد'
-    void beneficiaryName
-    void sendCommissionPaidEmail
-    void deal
+    void commission.beneficiary_name
   }
 
   revalidatePath('/dashboard/commissions')
