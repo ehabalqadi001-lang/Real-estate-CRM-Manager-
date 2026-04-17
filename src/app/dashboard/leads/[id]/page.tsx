@@ -5,6 +5,7 @@ import { User, Phone, Mail, Building2, DollarSign, Clock, ArrowRight, Activity, 
 import AddActivityButton from '@/components/leads/AddActivityButton'
 import ActivityTimeline from '@/components/leads/ActivityTimeline'
 import SendWhatsAppButton from '@/components/leads/SendWhatsAppButton'
+import UpdateLeadPanel from './UpdateLeadPanel'
 import { scoreColor, scoreLabel } from '../score-utils'
 
 export const dynamic = 'force-dynamic'
@@ -151,6 +152,12 @@ export default async function LeadProfilePage({ params }: PageProps) {
               </div>
             </div>
           </div>
+          <UpdateLeadPanel
+            leadId={leadId}
+            currentStatus={lead.status}
+            currentTemp={lead.temperature}
+            currentValue={lead.expected_value ? Number(lead.expected_value) : null}
+          />
         </div>
       </div>
 

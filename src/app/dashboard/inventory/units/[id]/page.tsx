@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { getUnit } from '@/domains/inventory/units'
 import { createServerClient } from '@/lib/supabase/server'
+import ReserveButton from './ReserveButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -266,13 +267,16 @@ export default async function UnitDetailPage({ params }: PageProps) {
                   <CheckCircle size={15} />
                   إنشاء صفقة
                 </Link>
-                <button
-                  className="flex items-center justify-center gap-2 w-full border border-amber-300 text-amber-700 dark:text-amber-400 dark:border-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium py-2.5 rounded-xl text-sm transition-colors"
-                >
-                  <Clock size={15} />
-                  حجز مؤقت (٤٨ ساعة)
-                </button>
+                <ReserveButton unitId={id} />
               </>
+            )}
+            {unit.status === 'reserved' && (
+              <ReserveButton
+                unitId={id}
+                isReserved
+                reservedFor={reservation?.client_name}
+                expiresAt={reservation?.expires_at}
+              />
             )}
 
             <Link

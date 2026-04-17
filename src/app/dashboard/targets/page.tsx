@@ -19,9 +19,13 @@ export default async function TargetsPage() {
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const companyId = profile?.company_id ?? user?.id
+
   const [targets, { data: agents }] = await Promise.all([
     getTargets(currentMonth),
-    supabase.from('profiles').select('id, full_name').eq('role', 'agent').order('full_name'),
+    supabase.from('profiles').select('id, full_name').eq('role', 'agent').eq('company_id', companyId).order('full_name'),
   ])
 
   const totalRevTarget = targets.reduce((s, t) => s + t.revenue_target, 0)

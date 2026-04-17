@@ -29,32 +29,44 @@ export async function getTargets(month: string) {
   const cookieStore = await cookies()
   const supabase = getSupabase(cookieStore)
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user?.id).single()
+  const companyId = profile?.company_id ?? user?.id
+
   const [year, mon] = month.split('-').map(Number)
 
   const { data: targets } = await supabase
     .from('targets')
-    .select('*, profiles(full_name)')
+    .select('*, profiles(full_name, company_id)')
     .eq('period_year', year)
     .eq('period_month', mon)
     .order('created_at', { ascending: false })
 
-  if (!targets) return []
+  // Filter to only targets belonging to agents in this company
+  const companyTargets = (targets ?? []).filter(t => {
+    const p = t.profiles as { full_name?: string; company_id?: string } | null
+    return p?.company_id === companyId || t.agent_id === user?.id
+  })
+
+  if (!companyTargets.length) return []
 
   // Batch fetch actuals
   const startDate = `${month}-01`
   const endDate = new Date(year, mon, 0).toISOString().split('T')[0]
-  const agentIds = targets.map(t => t.agent_id)
+  const agentIds = companyTargets.map(t => t.agent_id)
 
   const [{ data: monthDeals }, { data: monthLeads }] = await Promise.all([
     supabase
       .from('deals')
       .select('agent_id, unit_value, amount, value, stage')
+      .eq('company_id', companyId)
       .in('agent_id', agentIds)
       .gte('created_at', startDate)
       .lte('created_at', endDate),
     supabase
       .from('leads')
       .select('user_id')
+      .eq('company_id', companyId)
       .in('user_id', agentIds)
       .gte('created_at', startDate)
       .lte('created_at', endDate),
@@ -75,8 +87,8 @@ export async function getTargets(month: string) {
     return acc
   }, {})
 
-  return targets.map(t => {
-    const profile = t.profiles as { full_name?: string } | null
+  return companyTargets.map(t => {
+    const profile = t.profiles as { full_name?: string; company_id?: string } | null
     const { revenue = 0, count = 0 } = dealsMap[t.agent_id] ?? {}
     return {
       id: t.id,
