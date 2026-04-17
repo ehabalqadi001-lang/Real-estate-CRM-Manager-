@@ -1,269 +1,182 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
+import { useRouter } from 'next/navigation'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  Heart,
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Phone,
-  MessageCircle,
-  Eye,
-  Star
-} from 'lucide-react'
-import { useAuthStore } from '@/store/authStore'
+import { Card, CardContent } from '@/components/ui/card'
+import type { MarketplaceProperty, MarketplaceUser } from '@/domains/marketplace/types'
+import { Bath, BedDouble, Eye, Heart, LockKeyhole, MapPin, MessageCircle, ShieldCheck, Sparkles, Square } from 'lucide-react'
 
-// Mock data - will be replaced with real data from Supabase
-const mockProperties = [
-  {
-    id: '1',
-    title: 'شقة فاخرة في التجمع الخامس',
-    price: 2500000,
-    location: 'التجمع الخامس، القاهرة الجديدة',
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 150,
-    images: ['/api/placeholder/400/300'],
-    type: 'apartment',
-    featured: true,
-    seller: {
-      name: 'أحمد محمد',
-      avatar: '',
-      rating: 4.8,
-      verified: true
-    },
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    title: 'فيلا مستقلة في الشروق',
-    price: 4500000,
-    location: 'مدينة الشروق، القاهرة',
-    bedrooms: 4,
-    bathrooms: 3,
-    area: 300,
-    images: ['/api/placeholder/400/300'],
-    type: 'villa',
-    featured: false,
-    seller: {
-      name: 'فاطمة أحمد',
-      avatar: '',
-      rating: 4.9,
-      verified: true
-    },
-    createdAt: '2024-01-14'
-  },
-  // Add more mock properties...
-]
-
-interface Property {
-  id: string
-  title: string
-  price: number
-  location: string
-  bedrooms: number
-  bathrooms: number
-  area: number
-  images: string[]
-  type: string
-  featured: boolean
-  seller: {
-    name: string
-    avatar: string
-    rating: number
-    verified: boolean
-  }
-  createdAt: string
-}
-
-export default function PropertyGrid() {
-  const { user } = useAuthStore()
-  const [properties] = useState<Property[]>(mockProperties)
+export default function PropertyGrid({
+  properties,
+  user,
+}: {
+  properties: MarketplaceProperty[]
+  user: MarketplaceUser | null
+}) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
-  // TODO: Replace with real Supabase query
-  useEffect(() => {
-    // fetchProperties()
-  }, [])
+  const sortedProperties = useMemo(
+    () => [...properties].sort((a, b) => Number(b.featured) - Number(a.featured)),
+    [properties]
+  )
 
-  const toggleFavorite = (propertyId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev)
-      if (newFavorites.has(propertyId)) {
-        newFavorites.delete(propertyId)
-      } else {
-        newFavorites.add(propertyId)
-      }
-      return newFavorites
+  const toggleFavorite = (id: string) => {
+    setFavorites((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
     })
   }
 
-  const formatPrice = (price: number) => {
-    if (price >= 1000000) {
-      return `${(price / 1000000).toFixed(1)}M ج.م`
-    }
-    return `${(price / 1000).toFixed(0)}K ج.م`
-  }
-
-  const getPropertyTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      apartment: 'شقة',
-      villa: 'فيلا',
-      townhouse: 'تاون هاوس',
-      penthouse: 'بنتهاوس',
-      studio: 'استوديو',
-      duplex: 'دوبلكس',
-      office: 'مكتب',
-      shop: 'محل',
-      warehouse: 'مستودع'
-    }
-    return types[type] || type
+  if (!sortedProperties.length) {
+    return (
+      <div className="rounded-lg border border-dashed border-[#DDE6E4] bg-white p-10 text-center">
+        <p className="text-xl font-black text-[#102033]">لا توجد عقارات مطابقة الآن</p>
+        <p className="mt-2 text-sm font-semibold text-[#64748B]">جرّب تغيير الفلاتر أو أضف عقارك ليظهر بعد موافقة الفريق.</p>
+      </div>
+    )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {properties.map((property) => (
-        <Card key={property.id} className="group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="relative">
-            {/* Property Image */}
-            <div className="aspect-[4/3] overflow-hidden">
-              <Image
-                src={property.images[0]}
-                alt={property.title}
-                width={400}
-                height={300}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-
-            {/* Badges */}
-            <div className="absolute top-3 right-3 flex flex-col gap-2">
-              {property.featured && (
-                <Badge className="bg-gold text-navy font-semibold">
-                  مميز
-                </Badge>
-              )}
-              <Badge variant="secondary" className="bg-white/90 text-slate-700">
-                {getPropertyTypeLabel(property.type)}
-              </Badge>
-            </div>
-
-            {/* Favorite Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-3 left-3 h-8 w-8 rounded-full bg-white/80 hover:bg-white text-slate-600 hover:text-red-500"
-              onClick={() => toggleFavorite(property.id)}
-            >
-              <Heart
-                className={`h-4 w-4 ${favorites.has(property.id) ? 'fill-red-500 text-red-500' : ''}`}
-              />
-            </Button>
-          </div>
-
-          <CardContent className="p-4">
-            {/* Price */}
-            <div className="mb-3">
-              <span className="text-2xl font-bold text-navy dark:text-white">
-                {formatPrice(property.price)}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h3 className="font-semibold text-lg text-slate-900 dark:text-white mb-2 line-clamp-2">
-              {property.title}
-            </h3>
-
-            {/* Location */}
-            <div className="flex items-center text-slate-600 dark:text-slate-300 mb-3">
-              <MapPin className="h-4 w-4 ml-1 flex-shrink-0" />
-              <span className="text-sm line-clamp-1">{property.location}</span>
-            </div>
-
-            {/* Property Details */}
-            <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300 mb-4">
-              <div className="flex items-center">
-                <Bed className="h-4 w-4 ml-1" />
-                <span>{property.bedrooms}</span>
-              </div>
-              <div className="flex items-center">
-                <Bath className="h-4 w-4 ml-1" />
-                <span>{property.bathrooms}</span>
-              </div>
-              <div className="flex items-center">
-                <Square className="h-4 w-4 ml-1" />
-                <span>{property.area} م²</span>
-              </div>
-            </div>
-
-            {/* Seller Info */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={property.seller.avatar} alt={property.seller.name} />
-                  <AvatarFallback>
-                    {property.seller.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">
-                    {property.seller.name}
-                  </p>
-                  <div className="flex items-center">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 ml-1" />
-                    <span className="text-xs text-slate-600 dark:text-slate-300">
-                      {property.seller.rating}
-                    </span>
-                    {property.seller.verified && (
-                      <Badge variant="secondary" className="text-xs ml-2 bg-green-100 text-green-800">
-                        موثق
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-slate-300 hover:border-navy hover:text-navy"
-              >
-                <Eye className="h-4 w-4 ml-2" />
-                عرض التفاصيل
-              </Button>
-
-              {user ? (
-                <Button
-                  size="sm"
-                  className="flex-1 bg-navy hover:bg-navy-light text-white"
-                >
-                  <MessageCircle className="h-4 w-4 ml-2" />
-                  تواصل
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-slate-300 text-slate-600"
-                  disabled
-                >
-                  <Phone className="h-4 w-4 ml-2" />
-                  تسجيل للتواصل
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {sortedProperties.map((property) => (
+        <PropertyCard
+          key={property.id}
+          property={property}
+          user={user}
+          favorite={favorites.has(property.id)}
+          onToggleFavorite={() => toggleFavorite(property.id)}
+        />
       ))}
     </div>
   )
+}
+
+function PropertyCard({
+  property,
+  user,
+  favorite,
+  onToggleFavorite,
+}: {
+  property: MarketplaceProperty
+  user: MarketplaceUser | null
+  favorite: boolean
+  onToggleFavorite: () => void
+}) {
+  const router = useRouter()
+
+  return (
+    <Card className={`rounded-lg border bg-white py-0 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${property.featured ? 'border-[#C9964A]/70' : 'border-[#DDE6E4]'}`}>
+      <div className="relative">
+        <Image
+          src={property.imageUrl}
+          alt={property.title}
+          width={900}
+          height={563}
+          className="aspect-[16/10] w-full object-cover"
+        />
+        <div className="absolute right-3 top-3 flex flex-wrap gap-2">
+          {property.featured && (
+            <Badge className="bg-[#C9964A] text-white">
+              <Sparkles className="ms-1 size-3" />
+              مميز
+            </Badge>
+          )}
+          <Badge className="bg-white/92 text-[#17375E]">{property.listingKind === 'primary' ? 'Primary' : 'Resale'}</Badge>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="حفظ العقار"
+          onClick={onToggleFavorite}
+          className="absolute left-3 top-3 bg-white/88 text-[#17375E] hover:bg-white"
+        >
+          <Heart className={`size-4 ${favorite ? 'fill-[#B54747] text-[#B54747]' : ''}`} />
+        </Button>
+      </div>
+
+      <CardContent className="space-y-4 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-2xl font-black tabular-nums text-[#17375E]">{formatPrice(property.price)}</p>
+            <h3 className="mt-2 line-clamp-2 text-lg font-black leading-7 text-[#102033]">{property.title}</h3>
+          </div>
+          {property.urgent && <Badge className="bg-[#B54747]/10 text-[#B54747]">سريع</Badge>}
+        </div>
+
+        <p className="line-clamp-2 text-sm font-semibold leading-6 text-[#64748B]">{property.description}</p>
+
+        <div className="flex items-center gap-2 text-sm font-bold text-[#4B6175]">
+          <MapPin className="size-4 text-[#0F8F83]" />
+          <span className="line-clamp-1">{property.location}</span>
+        </div>
+
+        <div className="grid grid-cols-3 rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] text-center text-sm font-black text-[#102033]">
+          <Fact icon={<BedDouble className="size-4" />} value={property.bedrooms ? `${property.bedrooms}` : '-'} label="غرف" />
+          <Fact icon={<Bath className="size-4" />} value={property.bathrooms ? `${property.bathrooms}` : '-'} label="حمام" />
+          <Fact icon={<Square className="size-4" />} value={`${property.areaSqm}`} label="م²" />
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-[#DDE6E4] pt-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <Avatar className="size-9 border border-[#DDE6E4]">
+              <AvatarFallback className="bg-[#EEF6F5] text-sm font-black text-[#0F8F83]">
+                {property.seller.name.slice(0, 1)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black text-[#102033]">{property.seller.name}</p>
+              <p className="flex items-center gap-1 text-xs font-bold text-[#64748B]">
+                {property.seller.verified && <ShieldCheck className="size-3 text-[#0F8F83]" />}
+                {property.seller.verified ? 'موثق' : 'معلن'}
+                <span>·</span>
+                {property.seller.rating.toLocaleString('ar-EG')}
+              </p>
+            </div>
+          </div>
+          <p className="flex items-center gap-1 text-xs font-bold text-[#64748B]">
+            <Eye className="size-3" />
+            {property.viewsCount.toLocaleString('ar-EG')}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" className="border-[#DDE6E4]" onClick={() => router.push(`/marketplace/${property.id}`)}>
+            <Eye className="ms-1 size-4" />
+            التفاصيل
+          </Button>
+          <Button
+            className="bg-[#0F8F83] text-white hover:bg-[#0B6F66]"
+            onClick={() => router.push(user ? `/marketplace/chat?ad=${property.id}` : '/login')}
+          >
+            {user ? <MessageCircle className="ms-1 size-4" /> : <LockKeyhole className="ms-1 size-4" />}
+            {user ? 'محادثة' : 'دخول للتواصل'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function Fact({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
+  return (
+    <div className="flex items-center justify-center gap-1 border-l border-[#DDE6E4] px-2 py-3 last:border-l-0">
+      <span className="text-[#0F8F83]">{icon}</span>
+      <span>{value}</span>
+      <span className="text-xs text-[#64748B]">{label}</span>
+    </div>
+  )
+}
+
+function formatPrice(price: number) {
+  if (price >= 1_000_000) {
+    return `${(price / 1_000_000).toLocaleString('ar-EG', { maximumFractionDigits: 1 })} مليون ج.م`
+  }
+  return `${price.toLocaleString('ar-EG')} ج.م`
 }

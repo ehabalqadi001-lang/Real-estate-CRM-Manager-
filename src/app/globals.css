@@ -20,6 +20,17 @@
   --color-teal-light: #14B8A6;
   --color-teal-dark: #0F766E;
 
+  --color-market-ink: #102033;
+  --color-market-navy: #17375E;
+  --color-market-teal: #0F8F83;
+  --color-market-gold: #C9964A;
+  --color-market-sand: #F5EFE4;
+  --color-market-mist: #EEF6F5;
+  --color-market-rose: #B54747;
+  --color-market-slate: #64748B;
+  --color-market-line: #DDE6E4;
+  --color-market-paper: #FBFCFA;
+
   /* الخطوط المعتمدة (Typography) */
   --font-cairo: var(--font-cairo), sans-serif;
   --font-inter: var(--font-inter), sans-serif;

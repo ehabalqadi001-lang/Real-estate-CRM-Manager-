@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,142 +13,104 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store/authStore'
-import { Building2, Plus, User, LogOut, Settings } from 'lucide-react'
+import type { MarketplaceUser } from '@/domains/marketplace/types'
+import { Building2, LayoutDashboard, LogIn, LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from 'lucide-react'
 
-export default function MarketplaceHeader() {
-  const { user, logout } = useAuthStore()
+export default function MarketplaceHeader({ user }: { user: MarketplaceUser | null }) {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { logout } = useAuthStore()
 
   const handleLogout = async () => {
-    setIsLoading(true)
-    try {
-      await logout()
-      router.push('/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    await logout()
+    router.refresh()
+    router.push('/marketplace')
   }
 
   return (
-    <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-            <Building2 className="h-8 w-8 text-navy" />
-            <span className="text-xl font-bold text-navy dark:text-white">
-              Fast Investment
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-[#DDE6E4] bg-white/92 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        <Link href="/marketplace" className="flex min-w-0 items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-lg bg-[#17375E] text-white">
+            <Building2 className="size-5" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-base font-black text-[#102033]">EHAB & ESLAM TEAM</span>
+            <span className="block truncate text-xs font-bold text-[#64748B]">Fast Investment Marketplace</span>
+          </span>
+        </Link>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
-            <Link
-              href="/marketplace"
-              className="text-slate-600 hover:text-navy dark:text-slate-300 dark:hover:text-white transition-colors"
-            >
-              السوق
-            </Link>
-            <Link
-              href="/developers"
-              className="text-slate-600 hover:text-navy dark:text-slate-300 dark:hover:text-white transition-colors"
-            >
-              المطورون
-            </Link>
-            <Link
-              href="/about"
-              className="text-slate-600 hover:text-navy dark:text-slate-300 dark:hover:text-white transition-colors"
-            >
-              عن المنصة
-            </Link>
-          </nav>
+        <nav className="hidden items-center gap-6 text-sm font-bold text-[#4B6175] md:flex">
+          <Link href="/marketplace" className="text-[#17375E]">السوق</Link>
+          <Link href="/marketplace#developers" className="transition hover:text-[#17375E]">المطورون</Link>
+          <Link href="/marketplace/add-property" className="transition hover:text-[#17375E]">أضف عقارك</Link>
+        </nav>
 
-          {/* Auth Section */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {user ? (
-              <>
-                {/* Add Property Button */}
-                <Button
-                  onClick={() => router.push('/marketplace/add-property')}
-                  className="bg-navy hover:bg-navy-light text-white"
-                >
-                  <Plus className="h-4 w-4 ml-2" />
-                  إضافة عقار
-                </Button>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Button
+                onClick={() => router.push('/marketplace/add-property')}
+                className="hidden bg-[#17375E] text-white hover:bg-[#102033] sm:inline-flex"
+              >
+                <Plus className="ms-1 size-4" />
+                أضف عقار
+              </Button>
 
-                {/* User Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="relative h-10 w-10 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        {user.email?.charAt(0)?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end">
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.email ?? 'المستخدم'}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </p>
-                        {user.role && (
-                          <Badge variant="secondary" className="w-fit text-xs">
-                            {user.role}
-                          </Badge>
-                        )}
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push('/profile')}>
-                      <User className="ml-2 h-4 w-4" />
-                      <span>الملف الشخصي</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                      <Building2 className="ml-2 h-4 w-4" />
-                      <span>لوحة التحكم</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/settings')}>
-                      <Settings className="ml-2 h-4 w-4" />
-                      <span>الإعدادات</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      disabled={isLoading}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <LogOut className="ml-2 h-4 w-4" />
-                      <span>{isLoading ? 'جاري الخروج...' : 'تسجيل الخروج'}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push('/login')}
-                  className="text-navy hover:text-navy-light hover:bg-navy/10"
-                >
-                  تسجيل الدخول
-                </Button>
-                <Button
-                  onClick={() => router.push('/register')}
-                  className="bg-navy hover:bg-navy-light text-white"
-                >
-                  إنشاء حساب
-                </Button>
-              </div>
-            )}
-          </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-[#0F8F83]/30">
+                  <Avatar className="size-10 border border-[#DDE6E4]">
+                    <AvatarFallback className="bg-[#EEF6F5] text-sm font-black text-[#17375E]">
+                      {user.name.slice(0, 1)}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>
+                    <div className="space-y-2">
+                      <p className="font-black">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      {user.role && (
+                        <Badge className="bg-[#EEF6F5] text-[#0F8F83]">
+                          <ShieldCheck className="me-1 size-3" />
+                          {user.role}
+                        </Badge>
+                      )}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/marketplace/add-property')}>
+                    <Plus className="ms-2 size-4" />
+                    إضافة عقار
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/marketplace/chat')}>
+                    <MessageCircle className="ms-2 size-4" />
+                    محادثاتي
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                    <LayoutDashboard className="ms-2 size-4" />
+                    لوحة التحكم
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-[#B54747]" onClick={handleLogout}>
+                    <LogOut className="ms-2 size-4" />
+                    تسجيل الخروج
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => router.push('/login')} className="text-[#17375E]">
+                <LogIn className="ms-1 size-4" />
+                دخول
+              </Button>
+              <Button onClick={() => router.push('/register')} className="bg-[#17375E] text-white hover:bg-[#102033]">
+                <UserRound className="ms-1 size-4" />
+                حساب جديد
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
