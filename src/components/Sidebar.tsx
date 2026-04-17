@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable react-hooks/static-components -- Legacy sidebar kept temporarily for compatibility during app-shell migration. */
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -37,6 +38,7 @@ const adminGroups: NavGroup[] = [
       { name: 'العملاء المحتملون', icon: Users, path: '/dashboard/leads' },
       { name: 'الصفقات', icon: Briefcase, path: '/dashboard/deals' },
       { name: 'Kanban الصفقات', icon: Kanban, path: '/dashboard/deals/kanban' },
+      { name: 'المشترون المؤهلون', icon: Users, path: '/dashboard/crm/buyers' },
       { name: 'إدارة الوسطاء', icon: Star, path: '/dashboard/brokers' },
       { name: 'إعادة البيع', icon: Home, path: '/dashboard/resale' },
     ],
@@ -46,6 +48,7 @@ const adminGroups: NavGroup[] = [
     items: [
       { name: 'هيكل المشاريع', icon: Building2, path: '/dashboard/projects' },
       { name: 'المشاريع والوحدات', icon: Building2, path: '/dashboard/inventory' },
+      { name: 'الوحدات', icon: Home, path: '/dashboard/inventory/units' },
       { name: 'المطورون', icon: Home, path: '/dashboard/developers' },
       { name: 'مقارنة الوحدات', icon: MapPin, path: '/dashboard/compare' },
       { name: 'مطابقة المشترين', icon: Target, path: '/dashboard/matching' },
@@ -55,7 +58,10 @@ const adminGroups: NavGroup[] = [
   {
     label: 'المالية والتقارير',
     items: [
+      { name: 'المركز المالي', icon: TrendingUp, path: '/dashboard/finance' },
+      { name: 'المصروفات', icon: Calculator, path: '/dashboard/finance/expenses' },
       { name: 'العمولات', icon: Wallet, path: '/dashboard/commissions' },
+      { name: 'دفعات الصرف', icon: Wallet, path: '/dashboard/commissions/payouts' },
       { name: 'قواعد العمولات', icon: Settings, path: '/dashboard/commissions/rules' },
       { name: 'الأهداف', icon: Target, path: '/dashboard/targets' },
       { name: 'التنبؤ بالمبيعات', icon: TrendingUp, path: '/dashboard/forecasting' },

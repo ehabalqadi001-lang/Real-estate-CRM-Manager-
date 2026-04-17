@@ -1,12 +1,12 @@
-import Sidebar from '@/components/Sidebar'
+import { requireSession } from '@/shared/auth/session'
+import { DashboardShell } from '@/shared/components/app-shell/DashboardShell'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await requireSession()
+
   return (
-    <div className="flex min-h-screen bg-[#F4F6F9]" dir="rtl">
-      <Sidebar />
-      <main className="flex-1 min-h-screen overflow-x-hidden">
-        {children}
-      </main>
-    </div>
+    <DashboardShell profile={session.profile}>
+      {children}
+    </DashboardShell>
   )
 }

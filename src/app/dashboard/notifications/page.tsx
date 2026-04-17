@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable react-hooks/set-state-in-effect -- Legacy client-loaded notifications page; will move to server query + realtime island. */
 
 import { useState, useEffect, useCallback } from 'react'
 import { Bell, CheckCheck, Circle, CheckCircle2, Info, CheckCircle, AlertTriangle, XCircle, Trash2, ExternalLink } from 'lucide-react'

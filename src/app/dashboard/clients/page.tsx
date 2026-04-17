@@ -1,42 +1,12 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import ClientsTable from '../../../components/clients/ClientsTable'
+import { getClientList } from '@/domains/clients/queries'
 import AddClientButton from '../../../components/clients/AddClientButton'
+import ClientsTable from '../../../components/clients/ClientsTable'
 
 export default async function ClientsPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-      },
-    }
-  )
-
-  // جلب البيانات مع معالجة الخطأ داخلياً لمنع انهيار الصفحة
-  let clients: { id: string; name: string | null; phone: string | null; status: string | null; created_at: string }[] = []
-  let fetchError = null
-
-  try {
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      fetchError = error.message
-    } else {
-      clients = data || []
-    }
-  } catch {
-    fetchError = "تعذر الاتصال بخادم قاعدة البيانات"
-  }
+  const { clients, error: fetchError } = await getClientList()
 
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
-      {/* Header Section */}
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 font-arabic">إدارة العملاء</h1>
@@ -45,7 +15,6 @@ export default async function ClientsPage() {
         <AddClientButton />
       </div>
 
-      {/* Main Content Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {fetchError ? (
           <div className="p-20 text-center">
@@ -53,7 +22,7 @@ export default async function ClientsPage() {
               <p className="font-bold">تنبيه بالنظام:</p>
               <p className="text-sm">{fetchError}</p>
             </div>
-            <p className="text-slate-500 text-xs">تأكد من وجود جدول &apos;clients&apos; في Supabase وتعطيل الـ RLS</p>
+            <p className="text-slate-500 text-xs">تأكد من وجود جدول العملاء وتفعيل سياسات RLS المناسبة في Supabase</p>
           </div>
         ) : (
           <ClientsTable initialData={clients} />

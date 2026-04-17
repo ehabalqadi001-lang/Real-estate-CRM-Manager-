@@ -1,9 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Users, Plus, Phone, Calendar, TrendingUp, Target, Flame, ArrowUpRight } from 'lucide-react'
 import LeadFilters from '@/components/leads/LeadFilters'
 import BulkImportButton from '@/components/leads/BulkImportButton'
+import { getLeadList } from '@/domains/leads/queries'
 import { scoreColor, scoreLabel } from './score-utils'
 
 export const dynamic = 'force-dynamic'
@@ -33,45 +32,22 @@ const TEMP_CONFIG: Record<string, { icon: typeof Flame; color: string }> = {
 }
 
 export default async function LeadsPage({ searchParams }: PageProps) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
-
   const params = await searchParams
   const searchQuery = params?.query || ''
   const statusFilter = params?.status || ''
   const page = Math.max(1, parseInt(params?.page || '1', 10))
-  const from = (page - 1) * PAGE_SIZE
-  const to   = from + PAGE_SIZE - 1
-
-  let query = supabase
-    .from('leads')
-    .select('id, client_name, full_name, phone, status, expected_value, created_at, temperature, source, score', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(from, to)
-
-  if (searchQuery) {
-    query = query.or(`client_name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`)
-  }
-  if (statusFilter) {
-    query = query.eq('status', statusFilter)
-  }
-
-  const { data: leads, count: totalCount } = await query
-  const totalPages = Math.ceil((totalCount ?? 0) / PAGE_SIZE)
+  const { leads, totalPages, from, to, kpis } = await getLeadList({
+    query: searchQuery,
+    status: statusFilter,
+    page,
+    pageSize: PAGE_SIZE,
+  })
 
   // KPI counts — query full dataset (no pagination filter)
-  const { data: kpiData } = await supabase
-    .from('leads')
-    .select('status, expected_value')
-
-  const total      = totalCount ?? 0
-  const fresh      = kpiData?.filter(l => ['Fresh Leads','fresh'].includes(l.status ?? '')).length ?? 0
-  const contracted = kpiData?.filter(l => l.status === 'Contracted').length ?? 0
-  const totalValue = kpiData?.reduce((s, l) => s + Number(l.expected_value || 0), 0) ?? 0
+  const total      = kpis.total
+  const fresh      = kpis.fresh
+  const contracted = kpis.contracted
+  const totalValue = kpis.totalValue
 
   const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 

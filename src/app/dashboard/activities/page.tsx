@@ -1,30 +1,13 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
+import { getMyActivityBoard } from '@/domains/activities/queries'
 import { Calendar, PhoneCall, MessageCircle, MapPin, CheckCircle2, Clock, ArrowLeft } from 'lucide-react'
 import ActivityDoneButton from '@/components/activities/ActivityDoneButton' // سنبني هذا الزر بعد قليل
 
 export const dynamic = 'force-dynamic'
 
 export default async function ActivitiesPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
   // جلب مهام الوكيل الحالي مع بيانات العملاء
-  const { data: activities } = await supabase
-    .from('activities')
-    .select('*, leads(id, client_name, phone)')
-    .eq('agent_id', user?.id)
-    .order('scheduled_at', { ascending: true })
-
-  const pendingActivities = activities?.filter(a => a.outcome === 'pending') || []
-  const completedActivities = activities?.filter(a => a.outcome === 'completed') || []
+  const { pendingActivities, completedActivities } = await getMyActivityBoard()
 
   // أداة لاختيار الأيقونة المناسبة لنوع المهمة
   const getActivityIcon = (type: string) => {
