@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/store/authStore'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
-import { Building2, LayoutDashboard, LogIn, LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from 'lucide-react'
+import { Building2, Handshake, LayoutDashboard, LogIn, LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from 'lucide-react'
 
 export default function MarketplaceHeader({ user }: { user: MarketplaceUser | null }) {
   const router = useRouter()
@@ -105,9 +105,18 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 <LogIn className="ms-1 size-4" />
                 دخول
               </Button>
-              <Button onClick={() => router.push('/register')} className="bg-[#17375E] text-white hover:bg-[#102033]">
+              {/* Client registration — strictly assigns CLIENT role */}
+              <Button onClick={() => router.push('/register?role=client')} className="bg-[#17375E] text-white hover:bg-[#102033]">
                 <UserRound className="ms-1 size-4" />
-                حساب جديد
+                تسجيل عملاء جداد
+              </Button>
+              {/* Partner portal — for real estate agents & brokerage companies */}
+              <Button
+                onClick={() => router.push('/register?role=partner')}
+                className="hidden bg-[#C9964A] text-white hover:bg-[#b07e36] sm:inline-flex"
+              >
+                <Handshake className="ms-1 size-4" />
+                FAST PARTNERS
               </Button>
             </>
           )}

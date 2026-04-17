@@ -23,7 +23,13 @@
       "Bash(npm list *)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "Bash(node -e ' *)",
+      "Bash(xargs grep *)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"real estate CRM marketplace professional Arabic RTL property listing\" --design-system -p \"Fast Investment CRM\")",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }

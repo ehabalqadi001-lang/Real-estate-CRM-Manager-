@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { getDeveloperOptions } from '@/domains/inventory/queries'
 import { createBulkInventoryUnits, createInventoryUnit } from '@/domains/inventory/mutations'
+import { upsertUnit as _upsertUnit } from '@/domains/inventory/units'
+import type { Unit } from '@/lib/types/db'
 
 export async function getDevelopersList() {
   return getDeveloperOptions()
@@ -36,4 +38,8 @@ export async function addBulkUnits(units: Record<string, unknown>[], developer_i
 
   revalidatePath('/dashboard/inventory')
   return result.data
+}
+
+export async function upsertUnit(input: Partial<Unit> & { project_id: string }) {
+  return _upsertUnit(input)
 }

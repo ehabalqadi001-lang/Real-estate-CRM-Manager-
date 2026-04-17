@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Plus, X } from 'lucide-react'
-import { upsertUnit } from '@/domains/inventory/units'
+import { upsertUnit } from '@/app/dashboard/inventory/actions'
 
 const UNIT_TYPES = [
   { value: 'apartment', label: 'شقة' },
