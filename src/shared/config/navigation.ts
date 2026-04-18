@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Map,
   Megaphone,
+  Scale,
   Settings,
   ShieldCheck,
   Ticket,
@@ -87,6 +88,14 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'مركز البيانات', href: '/admin/data-entry', permission: 'inventory.read', icon: Database },
       { title: 'خدمة العملاء والتسويق', href: '/admin/cs-marketing', permission: 'messages.read', icon: HeadphonesIcon },
       { title: 'الحملات التسويقية', href: '/admin/cs-marketing', permission: 'messages.broadcast', icon: Megaphone },
+    ],
+  },
+  {
+    title: 'وحدات ERP المؤسسية',
+    items: [
+      { title: 'الموارد البشرية والرواتب', href: '/dashboard/erp/hr',      permission: 'erp.hr.view',      icon: Users },
+      { title: 'المحاسبة ودفتر الأستاذ',  href: '/dashboard/erp/finance',  permission: 'erp.finance.view', icon: BarChart3 },
+      { title: 'العقود والوثائق القانونية', href: '/dashboard/erp/legal',   permission: 'erp.legal.view',   icon: Scale },
     ],
   },
   {

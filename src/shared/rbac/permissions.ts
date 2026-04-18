@@ -87,6 +87,15 @@ export type Permission =
   | 'platform.manage'
   | 'platform.audit'
   | 'platform.reports'
+  // ── ERP Module Permissions ──
+  | 'erp.hr.view'
+  | 'erp.hr.manage'
+  | 'erp.payroll.view'
+  | 'erp.payroll.run'
+  | 'erp.legal.view'
+  | 'erp.legal.manage'
+  | 'erp.finance.view'
+  | 'erp.finance.manage'
 
 const ALL_COMPANY_PERMISSIONS: Permission[] = [
   'dashboard.view.company',
@@ -127,7 +136,7 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
 ]
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
-  super_admin: ['dashboard.view.platform', ...ALL_COMPANY_PERMISSIONS],
+  super_admin: ['dashboard.view.platform', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage'],
   platform_admin: ['dashboard.view.platform', 'admin.view', 'audit.view.company', 'report.view.company', 'support.view'],
   company_owner: ALL_COMPANY_PERMISSIONS,
   company_admin: ALL_COMPANY_PERMISSIONS,
@@ -173,7 +182,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   buyer_manager: ['dashboard.view.team', 'lead.view.team', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.team', 'report.view.team', 'notification.view.own', 'map.view'],
   seller_resale_manager: ['dashboard.view.team', 'client.view.company', 'client.create', 'listing.view', 'listing.manage', 'deal.view.team', 'deal.create', 'report.view.team', 'notification.view.own', 'map.view'],
   finance_officer: ['dashboard.view.company', 'deal.view.company', 'commission.view.company', 'commission.manage', 'payout.view.company', 'payout.manage', 'finance.view', 'finance.manage', 'report.view.company', 'notification.view.own'],
-  hr_officer: ['dashboard.view.company', 'team.view', 'team.manage', 'report.view.company', 'notification.view.own'],
+  hr_officer: ['dashboard.view.company', 'team.view', 'team.manage', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.payroll.view'],
   customer_support: ['dashboard.view.own', 'client.view.assigned', 'support.view', 'support.manage', 'notification.view.own'],
   developer_relations_manager: ['dashboard.view.team', 'developer.view', 'developer.manage', 'project.view', 'project.manage', 'unit.view', 'unit.manage', 'listing.view', 'report.view.team', 'notification.view.own', 'map.view'],
   admin: ALL_COMPANY_PERMISSIONS,
@@ -187,7 +196,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   ads_am: ['dashboard.view.team', 'ads.read', 'ads.create', 'ads.update', 'users.read', 'commissions.read', 'notification.view.own'],
   am_supervisor: ['dashboard.view.company', 'users.read', 'users.create', 'users.update', 'ads.read', 'ads.update', 'commissions.read', 'projects.read', 'report.view.company', 'notification.view.own'],
   collection_rep: ['dashboard.view.own', 'transactions.read', 'transactions.create', 'commissions.read', 'notification.view.own'],
-  finance_manager: ['dashboard.view.company', 'transactions.read', 'transactions.create', 'transactions.update', 'transactions.delete', 'transactions.approve_payout', 'transactions.export', 'commissions.read', 'commissions.update', 'commissions.approve', 'finance.view', 'finance.manage', 'payout.view.company', 'payout.manage', 'users.read', 'platform.reports', 'report.view.company', 'notification.view.own'],
+  finance_manager: ['dashboard.view.company', 'transactions.read', 'transactions.create', 'transactions.update', 'transactions.delete', 'transactions.approve_payout', 'transactions.export', 'commissions.read', 'commissions.update', 'commissions.approve', 'finance.view', 'finance.manage', 'payout.view.company', 'payout.manage', 'users.read', 'platform.reports', 'report.view.company', 'notification.view.own', 'erp.finance.view', 'erp.finance.manage', 'erp.payroll.view'],
   inventory_rep: ['dashboard.view.own', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.import', 'projects.read', 'notification.view.own'],
   data_manager: ['dashboard.view.team', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.import', 'projects.read', 'projects.create', 'projects.update', 'projects.delete', 'developer.view', 'report.view.team', 'notification.view.own'],
   campaign_specialist: ['dashboard.view.own', 'messages.read', 'messages.create', 'messages.broadcast', 'ads.read', 'users.read', 'notification.view.own'],
