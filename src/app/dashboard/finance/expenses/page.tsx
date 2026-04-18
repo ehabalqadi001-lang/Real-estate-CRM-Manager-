@@ -30,48 +30,48 @@ export default async function ExpensesPage({ searchParams }: PageProps) {
 
   return (
     <div className="p-6 space-y-5" dir="rtl">
-      <div className="flex items-center justify-between bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
             <Receipt size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">المصروفات</h1>
-            <p className="text-xs text-slate-400">{total} مصروف</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">المصروفات</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{total} مصروف</p>
           </div>
         </div>
         <AddExpenseButton />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center gap-3">
+        <div className="bg-[var(--fi-paper)] rounded-xl p-4 shadow-sm border border-[var(--fi-line)] flex items-center gap-3">
           <CheckCircle size={18} className="text-emerald-600" />
           <div>
-            <p className="text-xs text-slate-400">مُعتمدة</p>
+            <p className="text-xs text-[var(--fi-muted)]">مُعتمدة</p>
             <p className="font-black text-emerald-700">{fmt(totalApproved)} ج.م</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center gap-3">
+        <div className="bg-[var(--fi-paper)] rounded-xl p-4 shadow-sm border border-[var(--fi-line)] flex items-center gap-3">
           <Clock size={18} className="text-amber-600" />
           <div>
-            <p className="text-xs text-slate-400">قيد الانتظار</p>
+            <p className="text-xs text-[var(--fi-muted)]">قيد الانتظار</p>
             <p className="font-black text-amber-700">{fmt(totalPending)} ج.م</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-[var(--fi-paper)] rounded-2xl shadow-sm border border-[var(--fi-line)] overflow-hidden">
         {expenses.length === 0 ? (
           <div className="p-16 text-center">
             <Receipt size={40} className="mx-auto text-slate-200 mb-3" />
-            <p className="font-bold text-slate-600">لا توجد مصروفات مسجلة</p>
+            <p className="font-bold text-[var(--fi-muted)]">لا توجد مصروفات مسجلة</p>
           </div>
         ) : (
           <table className="w-full text-right text-sm" dir="rtl">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               <tr>
                 {['التاريخ','التصنيف','الوصف','المبلغ','الحالة',''].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-bold text-slate-500">{h}</th>
+                  <th key={h} className="px-4 py-3 text-xs font-bold text-[var(--fi-muted)]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -79,16 +79,16 @@ export default async function ExpensesPage({ searchParams }: PageProps) {
               {expenses.map((exp: any) => {
                 const cfg = STATUS_CFG[exp.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending
                 return (
-                  <tr key={exp.id} className="hover:bg-slate-50/60">
-                    <td className="px-4 py-3 text-xs text-slate-500" dir="ltr">
+                  <tr key={exp.id} className="hover:bg-[var(--fi-soft)]/60">
+                    <td className="px-4 py-3 text-xs text-[var(--fi-muted)]" dir="ltr">
                       {new Date(exp.expense_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-bold bg-slate-100 text-[var(--fi-muted)] px-2 py-0.5 rounded-md">
                         {CATEGORY_LABELS[exp.category] ?? exp.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-medium text-slate-800 max-w-[200px] truncate">
+                    <td className="px-4 py-3 font-medium text-[var(--fi-ink)] max-w-[200px] truncate">
                       {exp.description}
                     </td>
                     <td className="px-4 py-3 font-black text-red-600">{fmt(exp.amount)} ج.م</td>

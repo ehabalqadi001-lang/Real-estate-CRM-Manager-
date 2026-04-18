@@ -1,124 +1,187 @@
-'use client'
+import { FileBarChart2, TrendingUp, Users, Target, DollarSign, Download } from 'lucide-react'
+import { createServerClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/require-role'
+import ReportsCharts from './ReportsCharts'
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+export const dynamic = 'force-dynamic'
 
-interface DealReportRow {
-  id: string
-  unit_value?: number | null
-  amount_paid?: number | null
-  stage?: string | null
-  developer?: { name?: string | null } | string | null
-}
+export const metadata = { title: 'التقارير | FAST INVESTMENT' }
 
-export default function ReportsPage() {
-  const [deals, setDeals] = useState<DealReportRow[]>([])
-  const [loading, setLoading] = useState(true)
+const fmt = (n: number) =>
+  new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 
-  useEffect(() => {
-    let mounted = true
+export default async function ReportsPage() {
+  await requireAuth()
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-    async function fetchReportData() {
-      const { data } = await supabase
-        .from('deals')
-        .select('id, unit_value, amount_paid, stage, developer:developers(name)')
-        .order('created_at', { ascending: false })
+  const [{ data: leads }, { data: deals }, { data: profiles }] = await Promise.all([
+    supabase
+      .from('leads')
+      .select('status, source, expected_value, created_at, agent_id')
+      .eq('company_id', user?.id),
+    supabase
+      .from('deals')
+      .select('stage, unit_value, amount_paid, commission, created_at, agent_id')
+      .eq('company_id', user?.id),
+    supabase
+      .from('profiles')
+      .select('id, full_name')
+      .eq('company_id', user?.id),
+  ])
 
-      if (!mounted) return
-      setDeals((data ?? []) as DealReportRow[])
-      setLoading(false)
-    }
+  const safeLeads = leads ?? []
+  const safeDeals = deals ?? []
+  const profileMap = new Map((profiles ?? []).map(p => [p.id, p.full_name ?? 'وكيل']))
 
-    void fetchReportData()
-    return () => { mounted = false }
-  }, [])
+  // KPIs
+  const totalRevenue = safeDeals
+    .filter(d => ['Contracted', 'Registration', 'Handover', 'Won'].includes(d.stage ?? ''))
+    .reduce((s, d) => s + Number(d.unit_value ?? 0), 0)
+  const totalCommissions = safeDeals.reduce((s, d) => s + Number(d.commission ?? 0), 0)
+  const totalCollected   = safeDeals.reduce((s, d) => s + Number(d.amount_paid ?? 0), 0)
+  const conversion = safeLeads.length
+    ? Math.round((safeLeads.filter(l => l.status === 'Won').length / safeLeads.length) * 100)
+    : 0
 
-  if (loading) {
-    return <div className="p-12 text-center font-bold text-slate-500" dir="rtl">جاري تجميع البيانات التحليلية...</div>
-  }
-
-  const totalSales = deals.reduce((sum, deal) => sum + Number(deal.unit_value || 0), 0)
-  const totalCollected = deals.reduce((sum, deal) => sum + Number(deal.amount_paid || 0), 0)
-  const closedDealsCount = deals.filter((deal) => ['Contracted', 'Registration', 'Handover'].includes(String(deal.stage ?? ''))).length
-
-  const devPerformance: Record<string, number> = {}
-  deals.forEach((deal) => {
-    const dev = deal.developer
-    const devName = typeof dev === 'object' && dev?.name ? dev.name : typeof dev === 'string' ? dev : 'غير محدد'
-    devPerformance[devName] = (devPerformance[devName] ?? 0) + Number(deal.unit_value || 0)
+  // Monthly trend (last 12 months)
+  const now = new Date()
+  const monthlyTrend = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now)
+    d.setMonth(d.getMonth() - (11 - i))
+    const label = d.toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' })
+    const monthDeals = safeDeals.filter(dl => {
+      const dd = new Date(dl.created_at)
+      return dd.getMonth() === d.getMonth() && dd.getFullYear() === d.getFullYear()
+    })
+    const revenue = monthDeals
+      .filter(dl => ['Contracted', 'Registration', 'Handover', 'Won'].includes(dl.stage ?? ''))
+      .reduce((s, dl) => s + Number(dl.unit_value ?? 0), 0)
+    return { month: label, revenue, deals: monthDeals.length }
   })
 
-  const sortedDevs = Object.entries(devPerformance).sort((a, b) => b[1] - a[1])
-  const maxDevSales = sortedDevs.length > 0 ? sortedDevs[0][1] : 1
+  // Deals by stage
+  const stageCounts: Record<string, number> = {}
+  safeDeals.forEach(d => { const s = d.stage ?? 'New'; stageCounts[s] = (stageCounts[s] ?? 0) + 1 })
+  const stageData = Object.entries(stageCounts).map(([name, value]) => ({ name, value }))
+
+  // Agent leaderboard
+  const agentMap: Record<string, { deals: number; revenue: number }> = {}
+  safeDeals.forEach(d => {
+    if (!d.agent_id) return
+    const name = profileMap.get(d.agent_id) ?? 'وكيل'
+    if (!agentMap[name]) agentMap[name] = { deals: 0, revenue: 0 }
+    agentMap[name].deals++
+    agentMap[name].revenue += Number(d.unit_value ?? 0)
+  })
+  const agentData = Object.entries(agentMap)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 8)
+
+  // Developer performance
+  const { data: dealsFull } = await supabase
+    .from('deals')
+    .select('unit_value, stage, developer:developers(name)')
+    .eq('company_id', user?.id)
+    .in('stage', ['Contracted', 'Registration', 'Handover', 'Won'])
+
+  const devMap: Record<string, number> = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(dealsFull ?? []).forEach((d: any) => {
+    const devName: string = Array.isArray(d.developer)
+      ? (d.developer[0]?.name ?? 'غير محدد')
+      : (d.developer?.name ?? 'غير محدد')
+    devMap[devName] = (devMap[devName] ?? 0) + Number(d.unit_value ?? 0)
+  })
+  const sortedDevs = Object.entries(devMap).sort((a, b) => b[1] - a[1])
+  const maxDevSales = sortedDevs[0]?.[1] ?? 1
+
+  const kpis = [
+    { label: 'إجمالي الإيرادات',  value: `${fmt(totalRevenue)} ج.م`,    icon: DollarSign,  color: 'text-[var(--fi-emerald)]',  bg: 'bg-[var(--fi-soft)]' },
+    { label: 'إجمالي التحصيلات', value: `${fmt(totalCollected)} ج.م`,   icon: TrendingUp,  color: 'text-blue-600',             bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'إجمالي العملاء',   value: `${safeLeads.length}`,           icon: Users,       color: 'text-purple-600',           bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: 'معدل التحويل',      value: `${conversion}%`,               icon: Target,      color: 'text-amber-600',            bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { label: 'صافي العمولات',    value: `${fmt(totalCommissions)} ج.م`, icon: FileBarChart2, color: 'text-indigo-600',          bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+    { label: 'إجمالي الصفقات',   value: `${safeDeals.length}`,           icon: Target,      color: 'text-rose-600',             bg: 'bg-rose-50 dark:bg-rose-900/20' },
+  ]
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6" dir="rtl">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <h1 className="flex items-center gap-3 text-3xl font-black text-slate-950">
-          <svg width="28" height="28" fill="none" stroke="#185FA5" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M3 3v18h18" />
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-          </svg>
-          لوحة التقارير والتحليلات المالية
-        </h1>
-
-        <div className="grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-slate-500">إجمالي المبيعات (Total Sales Volume)</p>
-            <p className="mt-3 text-3xl font-black text-slate-950" dir="ltr">{totalSales.toLocaleString()} EGP</p>
-            <span className="mt-3 inline-flex rounded-lg bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">نمو عن الشهر السابق</span>
+    <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
+      {/* Header */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--fi-emerald)] shadow-lg shadow-[var(--fi-emerald)]/20">
+            <FileBarChart2 size={18} className="text-white" aria-hidden="true" />
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-slate-500">إجمالي التحصيلات المدفوعة</p>
-            <p className="mt-3 text-3xl font-black text-emerald-600" dir="ltr">{totalCollected.toLocaleString()} EGP</p>
-            <span className="mt-3 inline-flex rounded-lg bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">سيولة نقدية محققة</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-slate-500">نسبة الإغلاق (Closed Deals)</p>
-            <p className="mt-3 text-3xl font-black text-violet-600">{closedDealsCount} صفقات</p>
-            <span className="mt-3 inline-flex rounded-lg bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">تمت كتابة العقود بنجاح</span>
+          <div>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">التقارير والتحليلات</h1>
+            <p className="text-xs text-[var(--fi-muted)]">أداء المبيعات · الإيرادات · الوكلاء · المطورون</p>
           </div>
         </div>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="border-b border-slate-100 pb-4 text-xl font-black text-slate-900">
-            تقرير أداء المطورين العقاريين (Developer Performance)
-          </h2>
-
-          <div className="mt-6 space-y-5">
-            {sortedDevs.length === 0 ? (
-              <div className="py-10 text-center text-slate-500">لا توجد بيانات مبيعات حتى الآن.</div>
-            ) : (
-              sortedDevs.map(([devName, sales]) => {
-                const percentage = (sales / maxDevSales) * 100
-                return (
-                  <div key={devName}>
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-bold text-slate-900">{devName === 'غير محدد' ? 'تنبيه: غير محدد' : devName}</span>
-                      <span className="font-black text-blue-700" dir="ltr">{sales.toLocaleString()} EGP</span>
-                    </div>
-                    <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${percentage}%`,
-                          background: devName === 'غير محدد' ? '#DC2626' : 'linear-gradient(90deg, #185FA5, #3b82f6)',
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </section>
-
-        {sortedDevs.some(([name]) => name === 'غير محدد') && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-            تنبيه: توجد مبيعات مسجلة تحت بند غير محدد. يرجى تعديل هذه الصفقات وربطها بالمطور الصحيح لضمان دقة التقارير والعمولات.
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={undefined}
+          className="flex items-center gap-2 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 py-2.5 text-sm font-bold text-[var(--fi-ink)] transition hover:opacity-80"
+          aria-label="تصدير التقرير"
+        >
+          <Download size={14} aria-hidden="true" /> تصدير PDF
+        </button>
       </div>
+
+      {/* KPI grid */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        {kpis.map(kpi => {
+          const Icon = kpi.icon
+          return (
+            <div key={kpi.label} className="flex items-center gap-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+              <div className={`${kpi.bg} flex size-10 shrink-0 items-center justify-center rounded-lg`}>
+                <Icon size={18} className={kpi.color} aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-[var(--fi-muted)]">{kpi.label}</p>
+                <p className={`fi-tabular truncate text-base font-black leading-tight ${kpi.color}`}>{kpi.value}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Charts */}
+      <ReportsCharts monthlyTrend={monthlyTrend} stageData={stageData} agentData={agentData} />
+
+      {/* Developer Performance */}
+      {sortedDevs.length > 0 && (
+        <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+          <h2 className="mb-5 text-sm font-black text-[var(--fi-ink)]">تقرير أداء المطورين العقاريين</h2>
+          <div className="space-y-4">
+            {sortedDevs.map(([devName, sales]) => {
+              const pct = (sales / maxDevSales) * 100
+              return (
+                <div key={devName}>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className={`text-sm font-bold ${devName === 'غير محدد' ? 'text-red-500' : 'text-[var(--fi-ink)]'}`}>
+                      {devName}
+                    </span>
+                    <span className="fi-tabular text-sm font-black text-[var(--fi-emerald)]">{fmt(sales)} ج.م</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-[var(--fi-soft)]">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${pct}%`, background: devName === 'غير محدد' ? '#EF4444' : 'var(--fi-gradient-primary)' }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {sortedDevs.some(([n]) => n === 'غير محدد') && (
+            <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-700">
+              تنبيه: بعض الصفقات غير مرتبطة بمطور. يرجى تعديلها لضمان دقة التقارير.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

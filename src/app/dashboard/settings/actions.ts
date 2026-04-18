@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
+import { createRawClient } from '@/lib/supabase/server'
 
 export async function saveCompanySettings(formData: FormData) {
   const supabase = await createServerClient()
@@ -36,9 +37,40 @@ export async function getCompanySettings() {
 
   const { data } = await supabase
     .from('profiles')
-    .select('company_name, phone, full_name')
+    .select('company_name, phone, full_name, notification_prefs')
     .eq('id', companyId)
     .single()
 
   return data
+}
+
+export async function saveNotificationPrefs(prefs: Record<string, boolean>) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('غير مخوّل')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ notification_prefs: prefs })
+    .eq('id', user.id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/settings')
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createRawClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return { ok: false, error: 'غير مخوّل' }
+
+  // Re-authenticate with current password
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (signInError) return { ok: false, error: 'كلمة المرور الحالية غير صحيحة' }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
 }

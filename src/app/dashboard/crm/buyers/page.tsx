@@ -34,24 +34,24 @@ export default async function BuyersPage({ searchParams }: PageProps) {
   return (
     <div className="p-6 space-y-5" dir="rtl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
             <Users size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">المشترون المؤهلون</h1>
-            <p className="text-xs text-slate-400">{total} مشتري مهتم · عملاء في مراحل متقدمة</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">المشترون المؤهلون</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{total} مشتري مهتم · عملاء في مراحل متقدمة</p>
           </div>
         </div>
         <form method="GET">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-            <Search size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 bg-[var(--fi-soft)] border border-[var(--fi-line)] rounded-xl px-3 py-2">
+            <Search size={14} className="text-[var(--fi-muted)]" />
             <input
               name="query"
               defaultValue={params.query}
               placeholder="ابحث بالاسم أو الهاتف..."
-              className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-48"
+              className="bg-transparent text-sm text-[var(--fi-ink)] placeholder-slate-400 outline-none w-48"
             />
           </div>
         </form>
@@ -59,10 +59,10 @@ export default async function BuyersPage({ searchParams }: PageProps) {
 
       {/* Grid */}
       {buyers.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-16 text-center">
+        <div className="bg-[var(--fi-paper)] rounded-2xl border border-dashed border-[var(--fi-line)] p-16 text-center">
           <Users size={48} className="mx-auto text-slate-200 mb-3" />
-          <p className="font-bold text-slate-600">لا يوجد مشترون مؤهلون حالياً</p>
-          <p className="text-sm text-slate-400 mt-1">سيظهر هنا العملاء الذين وصلوا لمرحلة الاهتمام وما بعدها</p>
+          <p className="font-bold text-[var(--fi-muted)]">لا يوجد مشترون مؤهلون حالياً</p>
+          <p className="text-sm text-[var(--fi-muted)] mt-1">سيظهر هنا العملاء الذين وصلوا لمرحلة الاهتمام وما بعدها</p>
           <Link href="/dashboard/crm/leads" className="inline-flex items-center gap-2 mt-4 text-sm text-blue-600 font-bold hover:underline">
             عرض جميع العملاء المحتملين
           </Link>
@@ -78,7 +78,7 @@ export default async function BuyersPage({ searchParams }: PageProps) {
               <Link
                 key={buyer.id}
                 href={`/dashboard/crm/leads/${buyer.id}`}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all p-5 group"
+                className="bg-[var(--fi-paper)] rounded-2xl border border-[var(--fi-line)] shadow-sm hover:shadow-md hover:border-blue-200 transition-all p-5 group"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
@@ -87,9 +87,9 @@ export default async function BuyersPage({ searchParams }: PageProps) {
                       {name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-black text-slate-900 text-sm">{name}</p>
+                      <p className="font-black text-[var(--fi-ink)] text-sm">{name}</p>
                       {buyer.phone && (
-                        <p className="text-[11px] text-slate-400 font-medium" dir="ltr">{buyer.phone}</p>
+                        <p className="text-[11px] text-[var(--fi-muted)] font-medium" dir="ltr">{buyer.phone}</p>
                       )}
                     </div>
                   </div>
@@ -111,7 +111,7 @@ export default async function BuyersPage({ searchParams }: PageProps) {
 
                 {/* Requirements */}
                 {req && (
-                  <div className="space-y-1.5 text-[11px] text-slate-500">
+                  <div className="space-y-1.5 text-[11px] text-[var(--fi-muted)]">
                     {req.property_types?.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {req.property_types.slice(0, 3).map((t: string) => (
@@ -120,18 +120,18 @@ export default async function BuyersPage({ searchParams }: PageProps) {
                       </div>
                     )}
                     {req.preferred_areas?.length > 0 && (
-                      <div className="flex items-center gap-1 text-slate-400">
+                      <div className="flex items-center gap-1 text-[var(--fi-muted)]">
                         <MapPin size={10} />
                         {req.preferred_areas.slice(0, 2).join(' · ')}
                       </div>
                     )}
                     {req.purpose && (
-                      <div className="text-slate-500 font-medium">
+                      <div className="text-[var(--fi-muted)] font-medium">
                         {PURPOSE_LABELS[req.purpose] ?? req.purpose}
                       </div>
                     )}
                     {req.timeline && (
-                      <div className="text-slate-400">
+                      <div className="text-[var(--fi-muted)]">
                         الجدول الزمني: {TIMELINE_LABELS[req.timeline] ?? req.timeline}
                       </div>
                     )}
@@ -144,7 +144,7 @@ export default async function BuyersPage({ searchParams }: PageProps) {
 
                 {/* Footer */}
                 <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-[var(--fi-muted)]">
                     {new Date(buyer.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
                   </span>
                   <span className="flex items-center gap-1 text-[11px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -162,11 +162,11 @@ export default async function BuyersPage({ searchParams }: PageProps) {
         <div className="flex justify-center gap-2">
           {page > 1 && (
             <Link href={`?query=${params.query ?? ''}&page=${page - 1}`}
-              className="px-4 py-2 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-[var(--fi-paper)] border border-[var(--fi-line)] text-[var(--fi-muted)] hover:bg-[var(--fi-soft)]">
               السابق
             </Link>
           )}
-          <span className="px-4 py-2 text-sm font-bold text-slate-500">
+          <span className="px-4 py-2 text-sm font-bold text-[var(--fi-muted)]">
             صفحة {page} · {total} نتيجة
           </span>
           {page * 40 < total && (

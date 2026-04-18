@@ -15,7 +15,7 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   marketing:  { label: 'تسويق',     color: 'bg-orange-100 text-orange-700' },
   utilities:  { label: 'خدمات',     color: 'bg-yellow-100 text-yellow-700' },
   travel:     { label: 'سفر',       color: 'bg-sky-100 text-sky-700' },
-  other:      { label: 'أخرى',      color: 'bg-slate-100 text-slate-600' },
+  other:      { label: 'أخرى',      color: 'bg-slate-100 text-[var(--fi-muted)]' },
 }
 
 const fmt = (n: number) =>
@@ -38,19 +38,19 @@ export default async function FinancePage({ searchParams }: PageProps) {
   return (
     <div className="p-6 space-y-5" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
             <BarChart3 size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">المركز المالي</h1>
-            <p className="text-xs text-slate-400">الإيرادات · المصروفات · صافي الربح</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">المركز المالي</h1>
+            <p className="text-xs text-[var(--fi-muted)]">الإيرادات · المصروفات · صافي الربح</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/dashboard/finance/expenses"
-            className="flex items-center gap-2 border border-slate-200 text-slate-600 px-3 py-2 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">
+            className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors">
             <Receipt size={14} /> المصروفات
           </Link>
         </div>
@@ -97,12 +97,12 @@ export default async function FinancePage({ searchParams }: PageProps) {
               trend: null,
             },
           ].map(kpi => (
-            <div key={kpi.label} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+            <div key={kpi.label} className="bg-[var(--fi-paper)] rounded-xl p-4 shadow-sm border border-[var(--fi-line)]">
               <div className={`${kpi.bg} ${kpi.color} w-9 h-9 rounded-lg flex items-center justify-center mb-3`}>
                 <kpi.icon size={18} />
               </div>
               <p className={`text-xl font-black ${kpi.color}`}>{kpi.value}</p>
-              <p className="text-xs text-slate-400 mt-0.5 font-medium">{kpi.label}</p>
+              <p className="text-xs text-[var(--fi-muted)] mt-0.5 font-medium">{kpi.label}</p>
               {kpi.sub && <p className="text-[10px] text-slate-300 mt-0.5">{kpi.sub}</p>}
             </div>
           ))}
@@ -110,16 +110,16 @@ export default async function FinancePage({ searchParams }: PageProps) {
       )}
 
       {/* Revenue Chart */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h2 className="font-black text-slate-800 mb-4">الإيراد الشهري (آخر 12 شهر)</h2>
+      <div className="bg-[var(--fi-paper)] rounded-2xl shadow-sm border border-[var(--fi-line)] p-5">
+        <h2 className="font-black text-[var(--fi-ink)] mb-4">الإيراد الشهري (آخر 12 شهر)</h2>
         <FinanceChart data={trend} />
       </div>
 
       {/* Expenses by category */}
       {summary && Object.keys(summary.expensesByCategory).length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+        <div className="bg-[var(--fi-paper)] rounded-2xl shadow-sm border border-[var(--fi-line)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-black text-slate-800">توزيع المصروفات</h2>
+            <h2 className="font-black text-[var(--fi-ink)]">توزيع المصروفات</h2>
             <Link href="/dashboard/finance/expenses"
               className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
               عرض الكل <ArrowUpRight size={12} />
@@ -137,7 +137,7 @@ export default async function FinancePage({ searchParams }: PageProps) {
                   <div className="flex-1 bg-slate-100 rounded-full h-2">
                     <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-xs font-bold text-slate-700 w-24 text-left">
+                  <span className="text-xs font-bold text-[var(--fi-ink)] w-24 text-left">
                     {fmtFull(amount)} ج.م
                   </span>
                 </div>
@@ -155,10 +155,10 @@ export default async function FinancePage({ searchParams }: PageProps) {
           { href: '/dashboard/analytics',           label: 'التقارير',     desc: 'تحليلات وتوقعات المبيعات' },
         ].map(link => (
           <Link key={link.href} href={link.href}
-            className="bg-white rounded-xl border border-slate-100 p-4 hover:shadow-md hover:border-slate-200 transition-all flex items-center justify-between group">
+            className="bg-[var(--fi-paper)] rounded-xl border border-[var(--fi-line)] p-4 hover:shadow-md hover:border-[var(--fi-line)] transition-all flex items-center justify-between group">
             <div>
-              <p className="font-bold text-slate-900 text-sm">{link.label}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{link.desc}</p>
+              <p className="font-bold text-[var(--fi-ink)] text-sm">{link.label}</p>
+              <p className="text-xs text-[var(--fi-muted)] mt-0.5">{link.desc}</p>
             </div>
             <ArrowUpRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
           </Link>

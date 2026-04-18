@@ -53,50 +53,50 @@ export default async function AuditPage() {
   const auditLogs: AuditLog[] = logs || []
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+    <div className="p-6 space-y-6 bg-[var(--fi-soft)] min-h-screen" dir="rtl">
+      <div className="flex justify-between items-center bg-[var(--fi-paper)] p-6 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">سجل العمليات</h1>
-          <p className="text-sm text-slate-500 mt-1">تتبع كل عملية في النظام — آخر 200 إجراء</p>
+          <h1 className="text-2xl font-bold text-[var(--fi-ink)]">سجل العمليات</h1>
+          <p className="text-sm text-[var(--fi-muted)] mt-1">تتبع كل عملية في النظام — آخر 200 إجراء</p>
         </div>
-        <span className="text-sm text-slate-400">{auditLogs.length} سجل</span>
+        <span className="text-sm text-[var(--fi-muted)]">{auditLogs.length} سجل</span>
       </div>
 
       <Card className="overflow-hidden">
         {auditLogs.length === 0 ? (
-          <div className="p-20 text-center text-slate-400">
+          <div className="p-20 text-center text-[var(--fi-muted)]">
             <p className="text-lg font-semibold">لا توجد سجلات بعد</p>
             <p className="text-sm mt-1">ستظهر هنا كل العمليات التي تتم على النظام</p>
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               <tr>
-                <th className="text-right p-4 font-semibold text-slate-600">الإجراء</th>
-                <th className="text-right p-4 font-semibold text-slate-600">المستخدم</th>
-                <th className="text-right p-4 font-semibold text-slate-600">الجدول</th>
-                <th className="text-right p-4 font-semibold text-slate-600">المعرف</th>
-                <th className="text-right p-4 font-semibold text-slate-600">التوقيت</th>
+                <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">الإجراء</th>
+                <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">المستخدم</th>
+                <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">الجدول</th>
+                <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">المعرف</th>
+                <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">التوقيت</th>
               </tr>
             </thead>
             <tbody>
               {auditLogs.map((log) => {
                 const meta = ACTION_LABELS[log.action]
                 return (
-                  <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr key={log.id} className="border-b border-[var(--fi-line)] hover:bg-[var(--fi-soft)] transition-colors">
                     <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${meta?.color ?? 'bg-slate-100 text-slate-600'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${meta?.color ?? 'bg-slate-100 text-[var(--fi-muted)]'}`}>
                         {meta?.label ?? log.action}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-700">
+                    <td className="p-4 text-[var(--fi-ink)]">
                       {log.profiles?.full_name ?? log.profiles?.email ?? log.user_id.slice(0, 8) + '…'}
                     </td>
                     <td className="p-4">
                       <Badge variant="outline" className="font-mono text-xs">{log.target_table}</Badge>
                     </td>
-                    <td className="p-4 font-mono text-xs text-slate-400">{log.target_id.slice(0, 8)}…</td>
-                    <td className="p-4 text-slate-500 text-xs">
+                    <td className="p-4 font-mono text-xs text-[var(--fi-muted)]">{log.target_id.slice(0, 8)}…</td>
+                    <td className="p-4 text-[var(--fi-muted)] text-xs">
                       {formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: ar })}
                     </td>
                   </tr>

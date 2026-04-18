@@ -39,14 +39,14 @@ export default async function ContractsPage() {
     <div className="p-6 space-y-6" dir="rtl">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#00C27C] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
             <FileText size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">إدارة العقود</h1>
-            <p className="text-xs text-slate-400">{total} عقد نشط</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">إدارة العقود</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{total} عقد نشط</p>
           </div>
         </div>
         <button className="flex items-center gap-2 bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#00C27C]/20">
@@ -64,16 +64,16 @@ export default async function ContractsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'إجمالي العقود',  value: total,      icon: FileText,    color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-100' },
-          { label: 'تعاقد',          value: contracted,  icon: Clock,       color: 'text-slate-600',   bg: 'bg-slate-50',   border: 'border-slate-100' },
+          { label: 'تعاقد',          value: contracted,  icon: Clock,       color: 'text-[var(--fi-muted)]',   bg: 'bg-[var(--fi-soft)]',   border: 'border-[var(--fi-line)]' },
           { label: 'قيد التسجيل',   value: registered,  icon: AlertTriangle, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
           { label: 'تم التسليم',    value: handover,    icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
         ].map(kpi => (
-          <div key={kpi.label} className={`bg-white p-5 rounded-2xl shadow-sm border ${kpi.border} flex items-center gap-3`}>
+          <div key={kpi.label} className={`bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border ${kpi.border} flex items-center gap-3`}>
             <div className={`${kpi.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}>
               <kpi.icon size={18} className={kpi.color} />
             </div>
             <div>
-              <p className="text-xs text-slate-400 font-medium">{kpi.label}</p>
+              <p className="text-xs text-[var(--fi-muted)] font-medium">{kpi.label}</p>
               <p className={`text-2xl font-black ${kpi.color}`}>{kpi.value}</p>
             </div>
           </div>
@@ -87,9 +87,9 @@ export default async function ContractsPage() {
       </div>
 
       {/* Contracts table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+      <div className="bg-[var(--fi-paper)] rounded-2xl shadow-sm border border-[var(--fi-line)] overflow-hidden">
+        <div className="p-4 border-b border-[var(--fi-line)] bg-[var(--fi-soft)]/50">
+          <h3 className="font-bold text-[var(--fi-ink)] text-sm flex items-center gap-2">
             <FileText size={14} className="text-blue-600" /> سجل العقود
           </h3>
         </div>
@@ -97,16 +97,16 @@ export default async function ContractsPage() {
         {contracts.length === 0 ? (
           <div className="text-center py-16">
             <XCircle size={40} className="mx-auto text-slate-200 mb-3" />
-            <p className="text-slate-500 font-bold">لا توجد عقود مسجلة</p>
-            <p className="text-xs text-slate-400 mt-1">ستظهر هنا الصفقات التي وصلت مرحلة التعاقد</p>
+            <p className="text-[var(--fi-muted)] font-bold">لا توجد عقود مسجلة</p>
+            <p className="text-xs text-[var(--fi-muted)] mt-1">ستظهر هنا الصفقات التي وصلت مرحلة التعاقد</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
-              <thead className="bg-slate-50 border-b border-slate-100">
+              <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
                 <tr>
                   {['العقد', 'العميل', 'المرحلة', 'القيمة', 'التاريخ'].map(h => (
-                    <th key={h} className="px-4 py-3 text-xs font-bold text-slate-500">{h}</th>
+                    <th key={h} className="px-4 py-3 text-xs font-bold text-[var(--fi-muted)]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -115,12 +115,12 @@ export default async function ContractsPage() {
                   const stage = STAGE_STYLE[deal.stage ?? 'Contracted'] ?? STAGE_STYLE['Contracted']
                   const StageIcon = stage.icon
                   return (
-                    <tr key={deal.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={deal.id} className="hover:bg-[var(--fi-soft)] transition-colors">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-800">{deal.title ?? 'عقد'}</p>
-                        <p className="text-xs text-slate-400">{deal.id.slice(0, 8)}...</p>
+                        <p className="font-semibold text-[var(--fi-ink)]">{deal.title ?? 'عقد'}</p>
+                        <p className="text-xs text-[var(--fi-muted)]">{deal.id.slice(0, 8)}...</p>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{deal.client_name ?? '—'}</td>
+                      <td className="px-4 py-3 text-[var(--fi-muted)]">{deal.client_name ?? '—'}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${stage.bg} ${stage.color} ${stage.border}`}>
                           <StageIcon size={9} /> {stage.label}
@@ -129,7 +129,7 @@ export default async function ContractsPage() {
                       <td className="px-4 py-3 font-bold text-emerald-600 text-xs">
                         {fmt(Number(deal.unit_value ?? deal.amount ?? 0))}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-400">
+                      <td className="px-4 py-3 text-xs text-[var(--fi-muted)]">
                         {new Date(deal.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
                     </tr>
