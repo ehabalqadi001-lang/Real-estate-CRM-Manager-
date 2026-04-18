@@ -8,6 +8,21 @@ export async function updateClientProfileAction(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, message: 'يجب تسجيل الدخول أولا' }
 
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('role, account_type, status, is_active')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const currentRole = String(currentProfile?.role ?? '').trim()
+  const currentAccountType = String(currentProfile?.account_type ?? '').trim()
+  const shouldKeepClientIdentity =
+    !currentRole ||
+    currentRole === 'CLIENT' ||
+    currentRole === 'client' ||
+    currentRole === 'viewer' ||
+    currentAccountType === 'client'
+
   const payload = {
     full_name: String(formData.get('full_name') ?? '').trim(),
     email: user.email ?? null,
@@ -15,10 +30,10 @@ export async function updateClientProfileAction(formData: FormData) {
     region: String(formData.get('region') ?? '').trim(),
     preferred_contact: String(formData.get('preferred_contact') ?? 'whatsapp'),
     client_notes: String(formData.get('client_notes') ?? '').trim() || null,
-    role: 'CLIENT',
-    account_type: 'client',
-    status: 'active',
-    is_active: true,
+    role: shouldKeepClientIdentity ? 'CLIENT' : currentProfile?.role,
+    account_type: shouldKeepClientIdentity ? 'client' : currentProfile?.account_type,
+    status: shouldKeepClientIdentity ? 'active' : currentProfile?.status,
+    is_active: shouldKeepClientIdentity ? true : currentProfile?.is_active,
     updated_at: new Date().toISOString(),
   }
 

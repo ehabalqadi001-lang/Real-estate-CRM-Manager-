@@ -26,6 +26,30 @@ async function getSupabaseClient() {
   )
 }
 
+const ROLE_ALIASES: Record<string, string> = {
+  'Super Admin': 'super_admin',
+  Super_Admin: 'super_admin',
+  SuperAdmin: 'super_admin',
+  super_admin: 'super_admin',
+  platform_admin: 'platform_admin',
+  'Platform Admin': 'platform_admin',
+  company_owner: 'company_owner',
+  company_admin: 'company_admin',
+  'Company Admin': 'company_admin',
+  company: 'company_owner',
+  admin: 'company_admin',
+  Admin: 'company_admin',
+  CLIENT: 'viewer',
+  client: 'viewer',
+  viewer: 'viewer',
+}
+
+function normalizeRole(role: unknown) {
+  const value = String(role ?? '').trim()
+  if (!value) return 'agent'
+  return ROLE_ALIASES[value] ?? value
+}
+
 export async function loginAction(formData: FormData) {
   const email = String(formData.get('email') ?? '')
   const password = String(formData.get('password') ?? '')
@@ -48,7 +72,7 @@ export async function loginAction(formData: FormData) {
       .maybeSingle()
 
     const cookieStore = await cookies()
-    cookieStore.set('user_role', profile?.role ?? 'agent', {
+    cookieStore.set('user_role', normalizeRole(profile?.role), {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
