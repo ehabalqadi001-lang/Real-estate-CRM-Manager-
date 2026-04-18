@@ -5,7 +5,7 @@ import type { AppProfile } from '@/shared/auth/types'
 
 export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
   function openCommandPalette() {
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+    window.dispatchEvent(new Event('fi:open-command-palette'))
   }
 
   return (
@@ -48,9 +48,15 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
             <ShieldCheck className="size-4 text-[var(--fi-emerald)]" />
             {labelRole(profile.role)}
           </div>
-          <div className="flex size-10 items-center justify-center rounded-lg text-white" style={{ background: 'var(--fi-gradient-primary)' }}>
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className="flex size-10 items-center justify-center rounded-lg text-white shadow-sm transition hover:scale-[1.03]"
+            style={{ background: 'var(--fi-gradient-primary)' }}
+            aria-label="فتح لوحة الأوامر"
+          >
             <Sparkles className="size-4" />
-          </div>
+          </button>
         </div>
       </div>
     </header>

@@ -6,13 +6,22 @@ import { createServerSupabaseClient } from '@/shared/supabase/server'
 import type { AppProfile, AppRole, AppSession } from './types'
 
 const ROLE_ALIASES: Record<string, AppRole> = {
+  'Super Admin': 'super_admin',
   Super_Admin: 'super_admin',
+  SuperAdmin: 'super_admin',
   super_admin: 'super_admin',
+  platform_admin: 'platform_admin',
+  'Platform Admin': 'platform_admin',
   admin: 'company_admin',
   Admin: 'company_admin',
+  'Company Admin': 'company_admin',
   company: 'company_owner',
   company_admin: 'company_admin',
+  broker: 'broker',
   agent: 'agent',
+  Agent: 'agent',
+  CLIENT: 'viewer',
+  client: 'viewer',
 }
 
 function normalizeRole(role: string | null | undefined): AppRole {
@@ -51,4 +60,3 @@ export async function requireSession(): Promise<AppSession> {
   if (!session) redirect('/login')
   return session
 }
-
