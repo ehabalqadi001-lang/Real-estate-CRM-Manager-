@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import { EnterpriseSidebar } from './EnterpriseSidebar'
 import { EnterpriseTopbar } from './EnterpriseTopbar'
 import type { AppProfile } from '@/shared/auth/types'
@@ -9,8 +10,16 @@ interface DashboardShellProps {
 }
 
 export function DashboardShell({ children, profile }: DashboardShellProps) {
+  const brandColor = normalizeBrandColor(profile.tenant_primary_brand_color)
+  const shellStyle = brandColor
+    ? ({
+      '--fi-emerald': brandColor,
+      '--fi-gradient-primary': `linear-gradient(135deg, ${brandColor}, #0f172a)`,
+    } as CSSProperties)
+    : undefined
+
   return (
-    <div className="fi-shell-bg min-h-screen text-[var(--fi-ink)]" dir="rtl">
+    <div className="fi-shell-bg min-h-screen text-[var(--fi-ink)]" dir="rtl" style={shellStyle}>
       <div className="flex min-h-screen">
         <EnterpriseSidebar profile={profile} />
         <main className="min-w-0 flex-1 pb-24 lg:pb-0">
@@ -20,4 +29,9 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
       </div>
     </div>
   )
+}
+
+function normalizeBrandColor(color: string | null | undefined) {
+  if (!color) return null
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : null
 }

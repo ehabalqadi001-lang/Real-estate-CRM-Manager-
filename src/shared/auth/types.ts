@@ -82,6 +82,10 @@ export function isSuperAdmin(role: AppRole | string | null | undefined): boolean
 export interface AppProfile {
   id: string
   company_id: string | null
+  tenant_id?: string | null
+  tenant_name?: string | null
+  tenant_logo_url?: string | null
+  tenant_primary_brand_color?: string | null
   full_name: string | null
   email?: string | null
   role: AppRole

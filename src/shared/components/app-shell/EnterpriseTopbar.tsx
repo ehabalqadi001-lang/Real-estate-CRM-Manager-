@@ -4,6 +4,8 @@ import { Menu, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import type { AppProfile } from '@/shared/auth/types'
 
 export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
+  const tenantName = profile.tenant_name ?? 'FAST INVESTMENT'
+
   function openCommandPalette() {
     window.dispatchEvent(new Event('fi:open-command-palette'))
   }
@@ -25,7 +27,7 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
             <Menu className="size-5" />
           </button>
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">{tenantName}</p>
             <h1 className="mt-1 truncate text-base font-black text-[var(--fi-ink)] sm:text-lg">Enterprise Command Center</h1>
           </div>
         </div>

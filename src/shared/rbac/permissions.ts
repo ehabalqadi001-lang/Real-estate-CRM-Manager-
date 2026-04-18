@@ -136,8 +136,8 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
 ]
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
-  super_admin: ['dashboard.view.platform', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage'],
-  platform_admin: ['dashboard.view.platform', 'admin.view', 'audit.view.company', 'report.view.company', 'support.view'],
+  super_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage'],
+  platform_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', 'admin.view', 'audit.view.company', 'report.view.company', 'support.view'],
   company_owner: ALL_COMPANY_PERMISSIONS,
   company_admin: ALL_COMPANY_PERMISSIONS,
   sales_director: [

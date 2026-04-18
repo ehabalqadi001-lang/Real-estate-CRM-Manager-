@@ -37,13 +37,28 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, company_id, full_name, role, account_type, status, is_active')
+    .select('id, company_id, tenant_id, full_name, role, account_type, status, is_active')
     .eq('id', user.id)
     .single()
+
+  const tenantId = (profile?.tenant_id as string | null | undefined)
+    ?? (profile?.company_id as string | null | undefined)
+    ?? null
+  const { data: tenant } = tenantId
+    ? await supabase
+      .from('tenants')
+      .select('id, company_name, logo_url, primary_brand_color')
+      .eq('id', tenantId)
+      .maybeSingle()
+    : { data: null }
 
   const appProfile: AppProfile = {
     id: user.id,
     company_id: (profile?.company_id as string | null | undefined) ?? null,
+    tenant_id: tenantId,
+    tenant_name: (tenant?.company_name as string | null | undefined) ?? null,
+    tenant_logo_url: (tenant?.logo_url as string | null | undefined) ?? null,
+    tenant_primary_brand_color: (tenant?.primary_brand_color as string | null | undefined) ?? null,
     full_name: (profile?.full_name as string | null | undefined) ?? user.email?.split('@')[0] ?? null,
     email: user.email,
     role: normalizeRole(profile?.role as string | null | undefined),

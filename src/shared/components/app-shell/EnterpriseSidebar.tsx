@@ -22,10 +22,6 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     return () => window.removeEventListener('fi:open-sidebar', open)
   }, [])
 
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [pathname])
-
   const visibleGroups = dashboardNavigation
     .map((group) => ({
       ...group,
@@ -41,6 +37,9 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     .join('')
     .slice(0, 2)
     .toUpperCase()
+  const tenantName = profile.tenant_name ?? 'FAST INVESTMENT'
+  const tenantLogoUrl = normalizeLogoUrl(profile.tenant_logo_url)
+  const tenantLogoStyle = tenantLogoUrl ? { backgroundImage: `url(${JSON.stringify(tenantLogoUrl)})` } : undefined
 
   return (
     <>
@@ -48,11 +47,13 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         <div className="fi-glass flex h-full flex-col overflow-hidden rounded-lg">
           <div className="border-b border-[var(--fi-line)] p-4">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
-                <Building2 className="size-5" />
+              <span className="flex size-11 items-center justify-center overflow-hidden rounded-lg bg-[var(--fi-soft)] bg-contain bg-center bg-no-repeat text-[var(--fi-emerald)]" style={tenantLogoStyle}>
+                {!tenantLogoUrl && (
+                  <Building2 className="size-5" />
+                )}
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-sm font-black tracking-wide text-[var(--fi-ink)]">FAST INVESTMENT</span>
+                <span className="block truncate text-sm font-black tracking-wide text-[var(--fi-ink)]">{tenantName}</span>
                 <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">Enterprise CRM</span>
               </span>
             </Link>
@@ -70,7 +71,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             </div>
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-[11px] font-bold text-[var(--fi-emerald)]">
               <Crown className="size-3.5" />
-              FAST Workspace
+              {tenantName} Workspace
             </div>
           </div>
 
@@ -137,9 +138,10 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
                         const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
                         return (
                           <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
                               active
                                 ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
                                 : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
@@ -187,6 +189,16 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       </nav>
     </>
   )
+}
+
+function normalizeLogoUrl(url: string | null | undefined) {
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : null
+  } catch {
+    return null
+  }
 }
 
 function labelRole(role: string) {
