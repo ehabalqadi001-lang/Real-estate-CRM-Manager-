@@ -182,6 +182,10 @@ export default function DealDetailsPage() {
               style={{background:'#0f172a',color:'#fff',padding:'8px 16px',borderRadius:'8px',fontSize:'13px',fontWeight:800,textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}>
               📄 طباعة العقد
             </a>
+            <a href={`/api/pdf/proposal?dealId=${id}`} target="_blank" rel="noopener noreferrer"
+              style={{background:'#C9964A',color:'#fff',padding:'8px 16px',borderRadius:'8px',fontSize:'13px',fontWeight:800,textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}>
+              📊 المقترح الاستثماري PDF
+            </a>
             <select
               className="stage-badge"
               value={deal.stage ?? ''}
