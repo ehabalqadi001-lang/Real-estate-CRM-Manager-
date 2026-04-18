@@ -1,7 +1,6 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { FastInvestmentDashboard } from '@/components/dashboard/FastInvestmentDashboard'
+import { requireSession } from '@/shared/auth/session'
+import { createServerSupabaseClient } from '@/shared/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,28 +8,19 @@ type LeadRow = { id: string; status: string | null; expected_value: number | nul
 type DealRow = { id: string; stage: string | null; unit_value: number | null; amount: number | null; value: number | null; created_at: string }
 
 export default async function DashboardRoot() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const session = await requireSession()
+  const supabase = await createServerSupabaseClient()
 
   const [
-    { data: profile },
     { data: leads },
     { data: deals },
     { data: pendingAds },
     { data: notifications },
   ] = await Promise.all([
-    supabase.from('profiles').select('full_name, role, account_type').eq('id', user.id).maybeSingle(),
     supabase.from('leads').select('id, status, expected_value, created_at').limit(500),
     supabase.from('deals').select('id, stage, unit_value, amount, value, created_at').limit(500),
     supabase.from('ads').select('id').eq('status', 'pending').limit(200),
-    supabase.from('notifications').select('id').eq('user_id', user.id).eq('is_read', false).limit(100),
+    supabase.from('notifications').select('id').eq('user_id', session.user.id).eq('is_read', false).limit(100),
   ])
 
   const safeLeads = (leads ?? []) as LeadRow[]
@@ -51,8 +41,8 @@ export default async function DashboardRoot() {
         revenue,
         pendingAds: pendingAds?.length ?? 0,
         unreadNotifications: notifications?.length ?? 0,
-        role: profile?.role ?? 'agent',
-        name: profile?.full_name ?? user.email ?? 'FAST INVESTMENT',
+        role: session.profile.role,
+        name: session.profile.full_name ?? session.user.email ?? 'FAST INVESTMENT',
       }}
       chartData={chartData}
     />
