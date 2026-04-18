@@ -21,6 +21,26 @@ export type AppRole =
   | 'hr_officer'
   | 'customer_support'
   | 'developer_relations_manager'
+  // ── Fast Investment Departmental Roles ──
+  // Ad Approvals
+  | 'ad_reviewer'
+  | 'ad_manager'
+  // Account Management
+  | 'users_am'
+  | 'ads_am'
+  | 'am_supervisor'
+  // Finance
+  | 'collection_rep'
+  | 'finance_manager'
+  // Data Entry
+  | 'inventory_rep'
+  | 'data_manager'
+  // Marketing
+  | 'campaign_specialist'
+  | 'marketing_manager'
+  // Customer Service
+  | 'cs_agent'
+  | 'cs_supervisor'
   // أدوار قديمة للتوافق مع الكود الموجود
   | 'admin'    // = company_admin (legacy)
   | 'company'  // = company_owner (legacy)

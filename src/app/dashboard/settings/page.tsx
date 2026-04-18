@@ -2,6 +2,7 @@ import { Settings, ShieldCheck, Palette, Save } from 'lucide-react'
 import { getCompanySettings, saveCompanySettings } from './actions'
 import SettingsToggles from './SettingsToggles'
 import ChangePasswordDialog from './ChangePasswordDialog'
+import TwoFactorSetup from './TwoFactorSetup'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,13 +89,7 @@ export default async function SettingsPage() {
             أنت تمتلك صلاحيات <strong className="text-white">المدير الكامل</strong>. يمكنك تعديل العمولات، حذف الصفقات، وإدارة الفريق.
           </p>
           <ChangePasswordDialog />
-          <button
-            type="button"
-            className="w-full cursor-not-allowed rounded-xl border border-[var(--fi-emerald)]/20 bg-[var(--fi-emerald)]/10 py-2.5 text-sm font-bold text-[var(--fi-emerald)] opacity-60"
-            title="قريباً"
-          >
-            تفعيل المصادقة الثنائية (2FA) — قريباً
-          </button>
+          <TwoFactorSetup />
         </div>
       </div>
     </div>
