@@ -17,6 +17,11 @@ type RawAd = {
   status: MarketplaceProperty['status']
   views_count: number | null
   created_at: string
+  seller_profile?: {
+    full_name?: string | null
+    company_name?: string | null
+    account_type?: string | null
+  } | null
   profiles?: {
     full_name?: string | null
     company_name?: string | null
@@ -31,7 +36,7 @@ type RawAd = {
 export function mapAdToMarketplaceProperty(ad: RawAd): MarketplaceProperty {
   const location = ad.location ?? 'مصر'
   const [district = location, city = location] = location.split('،').map((part) => part.trim())
-  const profile = Array.isArray(ad.profiles) ? ad.profiles[0] : ad.profiles
+  const profile = ad.seller_profile ?? (Array.isArray(ad.profiles) ? ad.profiles[0] : ad.profiles)
 
   return {
     id: ad.id,

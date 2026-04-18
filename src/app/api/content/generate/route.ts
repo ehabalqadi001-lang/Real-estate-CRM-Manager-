@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     ركز في صياغتك على العائد على الاستثمار، حفظ رأس المال، واستخدم هاشتاجات مناسبة.`;
 
     // اختيار الموديل (استخدمنا النسخة السريعة والمجانية Flash)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    });
     
     // توليد المحتوى
     const result = await model.generateContent(prompt);

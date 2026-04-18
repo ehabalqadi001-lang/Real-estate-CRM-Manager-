@@ -19,7 +19,7 @@ export default async function MarketplacePage() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: profile }, { data: ads }] = await Promise.all([
+  const [{ data: profile }, { data: ads, error: adsError }] = await Promise.all([
     user
       ? supabase
           .from('profiles')
@@ -46,13 +46,30 @@ export default async function MarketplacePage() {
         status,
         views_count,
         created_at,
-        profiles:user_id(full_name, company_name, account_type)
+        user_id
       `)
       .eq('status', 'approved')
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(24),
   ])
+
+  if (adsError) {
+    console.error('Marketplace ads query failed', adsError)
+  }
+
+  const sellerIds = Array.from(
+    new Set((ads ?? []).map((ad) => ad.user_id).filter(Boolean))
+  )
+
+  const { data: sellerProfiles } = sellerIds.length
+    ? await supabase
+        .from('profiles')
+        .select('id, full_name, company_name, account_type')
+        .in('id', sellerIds)
+    : { data: [] }
+
+  const sellerById = new Map((sellerProfiles ?? []).map((seller) => [seller.id, seller]))
 
   const currentUser: MarketplaceUser | null = user
     ? {
@@ -64,7 +81,10 @@ export default async function MarketplacePage() {
     : null
 
   const properties: MarketplaceProperty[] = ads?.length
-    ? ads.map((ad) => mapAdToMarketplaceProperty(ad))
+    ? ads.map((ad) => mapAdToMarketplaceProperty({
+        ...ad,
+        seller_profile: sellerById.get(ad.user_id) ?? null,
+      }))
     : marketplaceSampleProperties
 
   const featuredCount = properties.filter((property) => property.featured).length

@@ -10,10 +10,15 @@ export async function updateClientProfileAction(formData: FormData) {
 
   const payload = {
     full_name: String(formData.get('full_name') ?? '').trim(),
+    email: user.email ?? null,
     phone: String(formData.get('phone') ?? '').trim(),
     region: String(formData.get('region') ?? '').trim(),
     preferred_contact: String(formData.get('preferred_contact') ?? 'whatsapp'),
     client_notes: String(formData.get('client_notes') ?? '').trim() || null,
+    role: 'CLIENT',
+    account_type: 'client',
+    status: 'active',
+    is_active: true,
     updated_at: new Date().toISOString(),
   }
 
@@ -23,8 +28,7 @@ export async function updateClientProfileAction(formData: FormData) {
 
   const { error } = await supabase
     .from('profiles')
-    .update(payload)
-    .eq('id', user.id)
+    .upsert({ id: user.id, ...payload }, { onConflict: 'id' })
 
   if (error) return { success: false, message: error.message }
 
