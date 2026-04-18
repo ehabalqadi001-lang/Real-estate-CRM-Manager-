@@ -26,9 +26,9 @@ export default async function MarketplacePage() {
       : Promise.resolve({ data: null }),
     supabase
       .from('ads')
-      .select(`id,title,description,price,currency,property_type,location,area_sqm,bedrooms,bathrooms,images,is_featured,is_urgent,status,views_count,created_at,user_id`)
+      .select(`id,title,description,price,currency,property_type,location,area_sqm,bedrooms,bathrooms,images,is_featured,is_urgent,listing_type,status,views_count,created_at,user_id`)
       .eq('status', 'approved')
-      .order('is_featured', { ascending: false })
+      .order('listing_type', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(24),
   ])

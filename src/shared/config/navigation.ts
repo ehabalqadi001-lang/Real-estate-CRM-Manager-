@@ -103,6 +103,7 @@ export const dashboardNavigation: NavigationGroup[] = [
     items: [
       { title: 'خدمة العملاء (قديم)', href: '/admin/customer-service', permission: 'support.view', icon: Ticket },
       { title: 'إدارة النظام', href: '/admin/super-dashboard', permission: 'admin.view', icon: Settings },
+      { title: 'Marketplace Points', href: '/admin/points', permission: 'platform.manage', icon: WalletCards },
       { title: 'مصفوفة الصلاحيات', href: '/admin/super-dashboard/permissions', permission: 'platform.manage', icon: ShieldCheck },
       { title: 'تعيين الأدوار الوظيفية', href: '/admin/super-dashboard/roles', permission: 'platform.manage', icon: ShieldCheck },
       { title: 'سجل العمليات', href: '/dashboard/audit', permission: 'audit.view.company', icon: ClipboardCheck },

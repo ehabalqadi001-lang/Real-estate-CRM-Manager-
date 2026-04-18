@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   points_spent    numeric(10,2) DEFAULT 0,
 
   status          text        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'cancelled')),
-  payment_method  text, -- stripe, paypal, bank_transfer, etc.
+  payment_method  text, -- paymob, wallet, bank_transfer, etc.
   payment_id      text, -- external payment reference
 
   notes           text,

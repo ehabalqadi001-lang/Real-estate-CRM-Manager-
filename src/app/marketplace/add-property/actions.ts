@@ -64,6 +64,11 @@ function optionalUuid(formData: FormData, key: string) {
   return value || null
 }
 
+function listingType(formData: FormData) {
+  const value = String(formData.get('listing_type') ?? 'REGULAR').toUpperCase()
+  return value === 'PREMIUM' ? 'PREMIUM' : 'REGULAR'
+}
+
 async function uploadFile(
   supabase: Awaited<ReturnType<typeof createRawClient>>,
   bucket: string,
@@ -159,7 +164,9 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
 
     const description = payload.marketing_description || payload.special_notes || payload.title
 
-    const { error } = await supabase.from('ads').insert({
+    const selectedListingType = listingType(formData)
+
+    const { data: ad, error } = await supabase.from('ads').insert({
       user_id: user.id,
       title: payload.title,
       description,
@@ -198,11 +205,25 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
       doc_files: docFiles,
       layout_file: layoutFile,
       masterplan_file: masterplanFile,
-      is_featured: false,
+      listing_type: selectedListingType,
+      is_featured: selectedListingType === 'PREMIUM',
       is_urgent: false,
     })
+      .select('id')
+      .single()
 
     if (error) return { error: error.message }
+
+    const { error: spendError } = await supabase.rpc('spend_points_for_marketplace_ad', {
+      p_user_id: user.id,
+      p_ad_id: ad.id,
+      p_listing_type: selectedListingType,
+    })
+
+    if (spendError) {
+      await supabase.from('ads').delete().eq('id', ad.id).eq('user_id', user.id)
+      return { error: `${spendError.message}. Please buy points before publishing this ad.` }
+    }
   } catch (error) {
     if (error instanceof z.ZodError) return { error: error.issues[0]?.message ?? 'بيانات غير مكتملة' }
     return { error: error instanceof Error ? error.message : 'فشل إرسال الإعلان' }

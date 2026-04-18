@@ -13,6 +13,7 @@ type RawAd = {
   bathrooms: number | null
   images: string[] | null
   is_featured: boolean | null
+  listing_type?: string | null
   is_urgent: boolean | null
   status: MarketplaceProperty['status']
   views_count: number | null
@@ -53,7 +54,7 @@ export function mapAdToMarketplaceProperty(ad: RawAd): MarketplaceProperty {
     bedrooms: ad.bedrooms,
     bathrooms: ad.bathrooms,
     imageUrl: ad.images?.[0] ?? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80',
-    featured: Boolean(ad.is_featured),
+    featured: Boolean(ad.is_featured) || ad.listing_type === 'PREMIUM',
     urgent: Boolean(ad.is_urgent),
     status: ad.status,
     viewsCount: ad.views_count ?? 0,

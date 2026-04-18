@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS tenant_subscriptions (
   current_period_end      timestamptz NOT NULL DEFAULT (now() + interval '30 days'),
   next_billing_date       date,
   grace_period_ends_at    timestamptz,
-  payment_provider        text        DEFAULT 'manual',   -- stripe | paymob | manual
+  payment_provider        text        DEFAULT 'manual',   -- paymob | manual
   provider_customer_id    text,
   provider_subscription_id text,
   payment_method_last4    text,

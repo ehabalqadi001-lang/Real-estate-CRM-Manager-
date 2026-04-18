@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/authStore'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
 import {
   Building2,
+  Coins,
   Handshake,
   LogIn,
   LogOut,
@@ -53,6 +54,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
         <nav className="hidden items-center gap-6 text-sm font-bold text-[#4B6175] md:flex">
           <Link href="/marketplace" className="text-[#17375E]">السوق</Link>
           <Link href="/marketplace#developers" className="transition hover:text-[#17375E]">المطورون</Link>
+          <Link href="/marketplace/buy-points" className="transition hover:text-[#27AE60]">Buy Points</Link>
           <Link href="/marketplace/add-property" className="transition hover:text-[#17375E]">أضف وحدتك</Link>
         </nav>
 
@@ -97,6 +99,10 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                   <DropdownMenuItem onClick={() => router.push('/marketplace/add-property')}>
                     <Plus className="ms-2 size-4" />
                     إضافة وحدة
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/marketplace/buy-points')}>
+                    <Coins className="ms-2 size-4" />
+                    Buy Points
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push('/marketplace/chat')}>
                     <MessageCircle className="ms-2 size-4" />

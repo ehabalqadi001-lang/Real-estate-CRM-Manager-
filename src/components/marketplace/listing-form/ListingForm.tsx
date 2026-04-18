@@ -72,6 +72,7 @@ export default function ListingForm({ projects, developers }: Props) {
   const [marketingDesc, setMarketingDesc] = useState('')
 
   const [pricingStrategy, setPricingStrategy] = useState('')
+  const [listingType, setListingType] = useState<'REGULAR' | 'PREMIUM'>('REGULAR')
   const [downPayment, setDownPayment] = useState('')
   const [installmentAmount, setInstallmentAmount] = useState('')
   const [totalCashPrice, setTotalCashPrice] = useState('')
@@ -150,6 +151,7 @@ export default function ListingForm({ projects, developers }: Props) {
     fd.set('special_notes', specialNotes)
     fd.set('marketing_description', marketingDesc)
     fd.set('pricing_strategy', pricingStrategy)
+    fd.set('listing_type', listingType)
     fd.set('down_payment', downPayment)
     fd.set('installment_amount', installmentAmount)
     fd.set('total_cash_price', totalCashPrice)
@@ -291,6 +293,26 @@ export default function ListingForm({ projects, developers }: Props) {
 
       {step === 3 && (
         <div className="space-y-6">
+          <SectionTitle>Marketplace visibility</SectionTitle>
+          <div className="grid gap-3 md:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setListingType('REGULAR')}
+              className={cn('rounded-lg border p-4 text-right transition', listingType === 'REGULAR' ? 'border-[#27AE60] bg-[#27AE60]/10 text-[#14532D]' : 'border-[#DDE6E4] bg-white text-[#4B6175]')}
+            >
+              <span className="block text-sm font-black">Regular ad</span>
+              <span className="mt-1 block text-xs font-bold">Costs the configured Regular points amount.</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setListingType('PREMIUM')}
+              className={cn('rounded-lg border p-4 text-right transition', listingType === 'PREMIUM' ? 'border-[#C9964A] bg-[#FFF8EC] text-[#7C531B]' : 'border-[#DDE6E4] bg-white text-[#4B6175]')}
+            >
+              <span className="block text-sm font-black">Premium ad</span>
+              <span className="mt-1 block text-xs font-bold">Ranks before Regular ads and spends Premium points.</span>
+            </button>
+          </div>
+
           <SectionTitle>استراتيجية التسعير</SectionTitle>
           <Field label="طريقة البيع *">
             <Select value={pricingStrategy} onValueChange={(value) => value && setPricingStrategy(value)}>

@@ -19,10 +19,12 @@ export default async function AddPropertyPage({
 
   if (!user) redirect('/login')
 
-  const [profileResult, projectsResult, developersResult] = await Promise.all([
+  const [profileResult, projectsResult, developersResult, walletResult, costResult] = await Promise.all([
     supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle(),
     supabase.from('projects').select('id, name').order('name'),
     supabase.from('developers').select('id, name').order('name'),
+    supabase.from('user_wallets').select('points_balance').eq('user_id', user.id).maybeSingle(),
+    supabase.from('ad_cost_config').select('regular_points_cost, premium_points_cost').eq('id', true).maybeSingle(),
   ])
 
   const currentUser: MarketplaceUser = {
@@ -49,9 +51,9 @@ export default async function AddPropertyPage({
               <Coins className="size-4 text-[#C9964A]" />
               محفظة الإعلانات
             </p>
-            <p className="mt-3 text-3xl font-black">إعلان مجاني واحد</p>
+            <p className="mt-3 text-3xl font-black">{Number(walletResult.data?.points_balance ?? 0).toLocaleString()} pts</p>
             <p className="mt-2 text-sm font-semibold leading-6 text-[#64748B]">
-              بعد الإعلان المجاني، يمكن ترقية الظهور أو إضافة إعلانات عبر الباقات المتاحة.
+              Regular: {Number(costResult.data?.regular_points_cost ?? 10).toLocaleString()} pts · Premium: {Number(costResult.data?.premium_points_cost ?? 50).toLocaleString()} pts
             </p>
           </aside>
         </div>
