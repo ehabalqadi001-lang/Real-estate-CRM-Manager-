@@ -66,8 +66,8 @@ export default async function BrokerPortalPage() {
       label: 'عمولات مدفوعة',
       value: `${data.paidAmount.toLocaleString('ar-EG')} ج`,
       icon: CheckCircle,
-      color: 'text-green-600',
-      bg: 'bg-green-50 dark:bg-green-900/20',
+      color: 'text-[var(--fi-emerald)]',
+      bg: 'bg-[var(--fi-soft)]',
       border: 'border-green-200 dark:border-green-800',
     },
     {
@@ -118,7 +118,7 @@ export default async function BrokerPortalPage() {
                 : 'أكمل رفع وثائق الهوية للحصول على صلاحيات كاملة.'}
             </p>
             {!isPending && (
-              <a href="/broker-portal/profile" className="text-xs font-medium text-green-600 underline mt-1 inline-block">
+              <a href="/broker-portal/profile" className="text-xs font-medium text-[var(--fi-emerald)] underline mt-1 inline-block">
                 إكمال التوثيق ←
               </a>
             )}
@@ -155,10 +155,10 @@ export default async function BrokerPortalPage() {
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Handshake className="w-4 h-4 text-green-600" />
+            <Handshake className="w-4 h-4 text-[var(--fi-emerald)]" />
             آخر الصفقات
           </h2>
-          <a href="/broker-portal/deals" className="text-xs text-green-600 hover:underline">عرض الكل</a>
+          <a href="/broker-portal/deals" className="text-xs text-[var(--fi-emerald)] hover:underline">عرض الكل</a>
         </div>
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {data.deals.length === 0 ? (

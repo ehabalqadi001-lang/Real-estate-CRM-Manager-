@@ -15,7 +15,7 @@ async function getBrokerProfile(userId: string) {
 const VERIFICATION_STATUS: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending:      { label: 'في انتظار المراجعة', color: 'text-yellow-600', icon: Clock },
   under_review: { label: 'قيد المراجعة',       color: 'text-blue-600',   icon: Clock },
-  verified:     { label: 'موثّق ✓',             color: 'text-green-600',  icon: CheckCircle },
+  verified:     { label: 'موثّق ✓',             color: 'text-[var(--fi-emerald)]',  icon: CheckCircle },
   rejected:     { label: 'مرفوض',               color: 'text-red-600',    icon: XCircle },
   suspended:    { label: 'موقوف',               color: 'text-orange-600', icon: XCircle },
 }
@@ -51,7 +51,7 @@ export default async function BrokerProfilePage() {
       {/* Verification Status Banner */}
       <div className={`rounded-xl border p-4 flex items-center gap-3 ${
         status === 'verified'
-          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          ? 'bg-[var(--fi-soft)] border-green-200 dark:border-green-800'
           : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
       }`}>
         <StatusIcon className={`w-5 h-5 ${statusCfg.color}`} />
@@ -67,10 +67,10 @@ export default async function BrokerProfilePage() {
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Shield className="w-4 h-4 text-green-600" />
+            <Shield className="w-4 h-4 text-[var(--fi-emerald)]" />
             اكتمال الملف الشخصي
           </h2>
-          <span className="text-2xl font-bold text-green-600">{completionPct}%</span>
+          <span className="text-2xl font-bold text-[var(--fi-emerald)]">{completionPct}%</span>
         </div>
         <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
           <div
@@ -99,7 +99,7 @@ export default async function BrokerProfilePage() {
       {/* Personal Info */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <User className="w-4 h-4 text-green-600" />
+          <User className="w-4 h-4 text-[var(--fi-emerald)]" />
           البيانات الشخصية
         </h2>
         <div className="grid grid-cols-1 gap-3">
@@ -121,7 +121,7 @@ export default async function BrokerProfilePage() {
       {/* Bank Info */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
         <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-green-600" />
+          <Building2 className="w-4 h-4 text-[var(--fi-emerald)]" />
           بيانات الحساب البنكي
         </h2>
         <div className="grid grid-cols-1 gap-3">

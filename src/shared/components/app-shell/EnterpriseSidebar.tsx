@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Building2, Crown, LogOut } from 'lucide-react'
+import { Building2, Crown, LogOut, X } from 'lucide-react'
 import { dashboardNavigation } from '@/shared/config/navigation'
 import type { AppProfile } from '@/shared/auth/types'
 import { hasPermission } from '@/shared/rbac/permissions'
@@ -13,6 +14,18 @@ interface EnterpriseSidebarProps {
 
 export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    const open = () => setMobileOpen(true)
+    window.addEventListener('fi:open-sidebar', open)
+    return () => window.removeEventListener('fi:open-sidebar', open)
+  }, [])
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
   const visibleGroups = dashboardNavigation
     .map((group) => ({
       ...group,
@@ -101,6 +114,58 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
           </div>
         </div>
       </aside>
+
+      {/* Mobile full-screen drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" dir="rtl">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+          <aside className="absolute inset-y-0 end-0 flex w-[280px] flex-col bg-[var(--fi-paper)] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--fi-line)] p-4">
+              <span className="text-sm font-black text-[var(--fi-ink)]">القائمة الرئيسية</span>
+              <button type="button" onClick={() => setMobileOpen(false)} aria-label="إغلاق القائمة" className="flex size-9 items-center justify-center rounded-lg hover:bg-[var(--fi-soft)] text-[var(--fi-muted)]">
+                <X className="size-4" />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
+              <div className="space-y-5">
+                {visibleGroups.map((group) => (
+                  <section key={group.title}>
+                    <p className="mb-2 px-2 text-[11px] font-black text-[var(--fi-muted)]">{group.title}</p>
+                    <div className="space-y-1">
+                      {group.items.map((item) => {
+                        const Icon = item.icon
+                        const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
+                              active
+                                ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
+                                : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
+                            }`}
+                          >
+                            <Icon className="size-4" />
+                            <span className="truncate">{item.title}</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </nav>
+            <div className="border-t border-[var(--fi-line)] p-3">
+              <form action="/auth/logout" method="post">
+                <button className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-red-50 hover:text-[var(--fi-danger)]">
+                  <LogOut className="size-4" />
+                  تسجيل الخروج
+                </button>
+              </form>
+            </div>
+          </aside>
+        </div>
+      )}
 
       <nav className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-lg p-1 lg:hidden" dir="rtl">
         {mobileItems.map((item) => {

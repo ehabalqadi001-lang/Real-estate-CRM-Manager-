@@ -365,6 +365,7 @@ function ImageUploadGrid({ files, onChange }: { files: File[]; onChange: (files:
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
         {files.map((file, index) => (
           <div key={`${file.name}-${index}`} className="group relative aspect-square overflow-hidden rounded-lg border border-[#DDE6E4] bg-[#FBFCFA]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
             <button type="button" onClick={() => onChange(files.filter((_, i) => i !== index))} className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-[#B54747] text-white opacity-0 transition group-hover:opacity-100">
               <X className="size-3" />

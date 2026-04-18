@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import {
   Building2, ArrowRight, Layers, BedDouble, Maximize2,
@@ -105,10 +106,11 @@ export default async function UnitDetailPage({ params }: PageProps) {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 overflow-hidden">
             {primaryImage ? (
               <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={primaryImage.url}
                   alt={primaryImage.title ?? unit.unit_number ?? 'صورة الوحدة'}
+                  width={1200}
+                  height={640}
                   className="w-full h-64 lg:h-80 object-cover"
                 />
                 <div className="absolute top-3 end-3">
@@ -139,8 +141,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
               <div className="flex gap-2 p-3 overflow-x-auto">
                 {images.slice(0, 6).map(img => (
                   <div key={img.id} className="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-400 transition-colors">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.thumbnail_url ?? img.url} alt="" className="w-full h-full object-cover" />
+                    <Image src={img.thumbnail_url ?? img.url} alt="" width={64} height={64} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -218,8 +219,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
                 {floorPlans.map(fp => (
                   <a key={fp.id} href={fp.url} target="_blank" rel="noreferrer"
                     className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={fp.thumbnail_url ?? fp.url} alt={fp.title ?? 'مخطط'} className="w-full h-32 object-cover" />
+                    <Image src={fp.thumbnail_url ?? fp.url} alt={fp.title ?? 'مخطط'} width={400} height={128} className="w-full h-32 object-cover" />
                     <div className="p-2 text-xs text-gray-600 dark:text-gray-400">{fp.title ?? 'مخطط الطابق'}</div>
                   </a>
                 ))}

@@ -8,13 +8,22 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
     window.dispatchEvent(new Event('fi:open-command-palette'))
   }
 
+  function openSidebar() {
+    window.dispatchEvent(new Event('fi:open-sidebar'))
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--fi-line)] bg-white/82 px-3 py-3 backdrop-blur-xl sm:px-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)] lg:hidden">
+          <button
+            type="button"
+            onClick={openSidebar}
+            aria-label="فتح القائمة الرئيسية"
+            className="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)] transition hover:bg-[var(--fi-soft)]/80 lg:hidden"
+          >
             <Menu className="size-5" />
-          </div>
+          </button>
           <div className="min-w-0">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT</p>
             <h1 className="mt-1 truncate text-base font-black text-[var(--fi-ink)] sm:text-lg">Enterprise Command Center</h1>
