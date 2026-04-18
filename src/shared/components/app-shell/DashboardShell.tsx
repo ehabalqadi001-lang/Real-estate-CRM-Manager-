@@ -10,10 +10,10 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, profile }: DashboardShellProps) {
   return (
-    <div className="fi-shell-bg min-h-screen text-white" dir="rtl">
+    <div className="fi-shell-bg min-h-screen text-[var(--fi-ink)]" dir="rtl">
       <div className="flex min-h-screen">
         <EnterpriseSidebar profile={profile} />
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 pb-24 lg:pb-0">
           <EnterpriseTopbar profile={profile} />
           {children}
         </main>
