@@ -10,6 +10,8 @@ type TenantMetric = {
   domain: string | null
   logo_url: string | null
   primary_brand_color: string | null
+  primary_color?: string | null
+  subdomain?: string | null
   plan_tier: string
   tenant_status: string
   subscription_status: string | null
@@ -78,8 +80,10 @@ export async function createTenant(formData: FormData) {
     .insert({
       company_name: companyName,
       domain: nullableText(formData.get('domain')),
+      subdomain: nullableText(formData.get('subdomain')),
       logo_url: nullableText(formData.get('logo_url')),
       primary_brand_color: normalizeColor(String(formData.get('primary_brand_color') ?? '')) ?? '#0f766e',
+      primary_color: normalizeColor(String(formData.get('primary_brand_color') ?? '')) ?? '#0f766e',
       plan_tier: planTier,
       status: String(formData.get('status') ?? 'trial'),
       max_users: Number(formData.get('max_users') ?? 5),

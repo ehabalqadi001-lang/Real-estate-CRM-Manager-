@@ -24,6 +24,7 @@ export async function saveCompanySettings(formData: FormData) {
 
   if (/^#[0-9a-f]{6}$/i.test(brandColor)) {
     tenantPayload.primary_brand_color = brandColor
+    tenantPayload.primary_color = brandColor
   }
 
   const { error } = await supabase
@@ -63,7 +64,7 @@ export async function getCompanySettings() {
   const [{ data: tenant }, { data: owner }] = await Promise.all([
     supabase
       .from('tenants')
-      .select('company_name, domain, logo_url, primary_brand_color, plan_tier, status')
+      .select('company_name, domain, subdomain, logo_url, primary_brand_color, primary_color, plan_tier, status')
       .eq('id', tenantId)
       .maybeSingle(),
     supabase
@@ -76,6 +77,7 @@ export async function getCompanySettings() {
   return {
     ...(owner ?? {}),
     ...(tenant ?? {}),
+    primary_brand_color: tenant?.primary_color ?? tenant?.primary_brand_color ?? '#0f766e',
     notification_prefs: profile?.notification_prefs ?? owner?.notification_prefs ?? null,
   }
 }

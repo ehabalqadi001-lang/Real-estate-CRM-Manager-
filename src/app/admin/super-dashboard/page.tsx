@@ -50,6 +50,7 @@ export default async function SuperDashboard() {
           <CardContent>
             <form action={createTenant} className="space-y-4">
               <Field label="Company name" name="company_name" required placeholder="Prime Brokerage" />
+              <Field label="Subdomain" name="subdomain" required placeholder="prime" />
               <Field label="Domain" name="domain" placeholder="prime.example.com" />
               <Field label="Initial admin email" name="admin_email" type="email" placeholder="admin@prime.example.com" />
               <Field label="Logo URL" name="logo_url" placeholder="https://..." />
@@ -89,7 +90,9 @@ export default async function SuperDashboard() {
                       </Badge>
                       <Badge variant="outline">{tenant.plan_tier}</Badge>
                     </div>
-                    <p className="mt-1 text-sm text-[var(--fi-muted)]">{tenant.domain ?? 'No custom domain'}</p>
+                    <p className="mt-1 text-sm text-[var(--fi-muted)]">
+                      {tenant.subdomain ? `${tenant.subdomain}.fastinvestment.com` : tenant.domain ?? 'No tenant subdomain'}
+                    </p>
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                       <MiniStat label="Users" value={tenant.user_count ?? 0} />
                       <MiniStat label="Leads" value={tenant.lead_count ?? 0} />

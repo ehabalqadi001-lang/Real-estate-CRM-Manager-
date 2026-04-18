@@ -34,6 +34,7 @@ export default async function SettingsPage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Company name" name="company_name" defaultValue={company?.company_name ?? ''} placeholder="FAST INVESTMENT" />
+            <Field label="Subdomain" name="subdomain" dir="ltr" defaultValue={company?.subdomain ?? ''} placeholder="apex" disabled />
             <Field label="Custom domain" name="domain" dir="ltr" defaultValue={company?.domain ?? ''} placeholder="crm.company.com" />
             <Field label="Support phone" name="phone" type="tel" dir="ltr" defaultValue={company?.phone ?? ''} placeholder="+201XXXXXXXXX" />
             <div>
