@@ -1,28 +1,36 @@
 import { getClientList } from '@/domains/clients/queries'
 import AddClientButton from '../../../components/clients/AddClientButton'
 import ClientsTable from '../../../components/clients/ClientsTable'
+import { Users } from 'lucide-react'
 
 export default async function ClientsPage() {
   const { clients, error: fetchError } = await getClientList()
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-arabic">إدارة العملاء</h1>
-          <p className="text-sm text-slate-500 mt-1">قاعدة بيانات المستثمرين والعملاء الحاليين</p>
+    <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
+      {/* Header */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--fi-emerald)] shadow-lg shadow-[var(--fi-emerald)]/20">
+            <Users size={18} className="text-white" aria-hidden="true" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">إدارة العملاء</h1>
+            <p className="text-xs text-[var(--fi-muted)]">قاعدة بيانات المستثمرين والعملاء الحاليين</p>
+          </div>
         </div>
         <AddClientButton />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      {/* Table / Error */}
+      <div className="overflow-hidden rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
         {fetchError ? (
-          <div className="p-20 text-center">
-            <div className="bg-red-50 text-red-600 p-4 rounded-xl inline-block mb-4">
-              <p className="font-bold">تنبيه بالنظام:</p>
-              <p className="text-sm">{fetchError}</p>
+          <div className="p-16 text-center">
+            <div className="mx-auto mb-4 inline-block rounded-xl border border-red-100 bg-red-50 p-4">
+              <p className="font-bold text-red-700">تنبيه بالنظام</p>
+              <p className="mt-1 text-sm text-red-600">{fetchError}</p>
             </div>
-            <p className="text-slate-500 text-xs">تأكد من وجود جدول العملاء وتفعيل سياسات RLS المناسبة في Supabase</p>
+            <p className="text-xs text-[var(--fi-muted)]">تأكد من وجود جدول العملاء وتفعيل سياسات RLS في Supabase</p>
           </div>
         ) : (
           <ClientsTable initialData={clients} />

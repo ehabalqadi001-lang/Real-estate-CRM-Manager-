@@ -29,7 +29,14 @@
       "Bash(python skills/ui-ux-pro-max/scripts/search.py \"real estate CRM marketplace professional Arabic RTL property listing\" --design-system -p \"Fast Investment CRM\")",
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__apply_migration",
-      "mcp__claude_ai_Supabase__execute_sql"
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"real estate CRM dashboard enterprise investment property management\" --design-system --persist -p \"FAST INVESTMENT CRM\" -f markdown)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"real estate CRM dashboard enterprise investment property management\" --design-system --persist -p \"FAST INVESTMENT CRM\" -f markdown)",
+      "Bash(where python3 *)",
+      "Bash(where python *)",
+      "Bash(py --version)",
+      "Bash(\"C:/Users/ehaba/AppData/Local/Microsoft/WindowsApps/python3.exe\" .claude/skills/ui-ux-pro-max/scripts/search.py \"real estate CRM dashboard enterprise investment property management\" --design-system --persist -p \"FAST INVESTMENT CRM\" -f markdown)",
+      "Bash(py -3 --version)"
     ]
   }
 }

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { BarChart2 } from 'lucide-react'
+import { BarChart2, TrendingUp, Users, Target, XCircle } from 'lucide-react'
 import AnalyticsCharts from './AnalyticsCharts'
 import { requireAdmin } from '@/lib/require-role'
 
@@ -25,14 +25,12 @@ export default async function AnalyticsPage() {
   const safeLeads = leads ?? []
   const safeDeals = deals ?? []
 
-  // ── Funnel data ─────────────────────────────────────────────
   const funnelStages = ['Fresh Leads', 'Contacted', 'Interested', 'Negotiation', 'Won', 'Lost']
   const funnelData = funnelStages.map(s => ({
     stage: s,
     count: safeLeads.filter(l => l.status === s).length,
   }))
 
-  // ── Source breakdown ─────────────────────────────────────────
   const sourceCounts: Record<string, number> = {}
   safeLeads.forEach(l => {
     const src = l.source ?? 'غير محدد'
@@ -43,17 +41,15 @@ export default async function AnalyticsPage() {
     .slice(0, 8)
     .map(([name, value]) => ({ name, value }))
 
-  // ── Lost reasons (from deal stage) ──────────────────────────
   const lostLeads = safeLeads.filter(l => l.status === 'Lost').length
   const lostReasons = [
-    { reason: 'السعر مرتفع', count: Math.round(lostLeads * 0.35) },
-    { reason: 'اختار منافس', count: Math.round(lostLeads * 0.25) },
-    { reason: 'غير جاهز للشراء', count: Math.round(lostLeads * 0.2) },
-    { reason: 'لا يجيب', count: Math.round(lostLeads * 0.12) },
-    { reason: 'أسباب أخرى', count: Math.round(lostLeads * 0.08) },
+    { reason: 'السعر مرتفع',       count: Math.round(lostLeads * 0.35) },
+    { reason: 'اختار منافس',        count: Math.round(lostLeads * 0.25) },
+    { reason: 'غير جاهز للشراء',   count: Math.round(lostLeads * 0.2)  },
+    { reason: 'لا يجيب',           count: Math.round(lostLeads * 0.12) },
+    { reason: 'أسباب أخرى',        count: Math.round(lostLeads * 0.08) },
   ].filter(r => r.count > 0)
 
-  // ── Monthly trend (last 6 months) ───────────────────────────
   const now = new Date()
   const monthlyTrend = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now)
@@ -71,7 +67,6 @@ export default async function AnalyticsPage() {
     return { month: label, leads: leadsCount, revenue }
   })
 
-  // ── Deal stage distribution ──────────────────────────────────
   const stageCounts: Record<string, number> = {}
   safeDeals.forEach(d => {
     const s = d.stage ?? 'New'
@@ -79,13 +74,49 @@ export default async function AnalyticsPage() {
   })
   const stageData = Object.entries(stageCounts).map(([name, value]) => ({ name, value }))
 
+  const totalRevenue = safeDeals
+    .filter(d => ['Contracted', 'Registration', 'Handover', 'Won'].includes(d.stage ?? ''))
+    .reduce((s, d) => s + Number(d.unit_value ?? 0), 0)
+  const conversion = safeLeads.length
+    ? Math.round((safeLeads.filter(l => l.status === 'Won').length / safeLeads.length) * 100)
+    : 0
+
+  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-        <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-          <BarChart2 size={20} className="text-indigo-600" /> التحليلات المتقدمة
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">قمع المبيعات — مصادر العملاء — أسباب الخسارة — الاتجاهات الشهرية</p>
+    <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
+      {/* Header */}
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:p-5">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-600/20">
+          <BarChart2 size={18} className="text-white" aria-hidden="true" />
+        </div>
+        <div>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">التحليلات المتقدمة</h1>
+          <p className="text-xs text-[var(--fi-muted)]">قمع المبيعات — مصادر العملاء — أسباب الخسارة — الاتجاهات الشهرية</p>
+        </div>
+      </div>
+
+      {/* Summary KPIs */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          { label: 'إجمالي العملاء',  value: fmt(safeLeads.length),  icon: Users,      color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: 'إجمالي الصفقات', value: fmt(safeDeals.length),  icon: Target,     color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+          { label: 'الإيرادات',       value: `${fmt(totalRevenue)} ج.م`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+          { label: 'معدل التحويل',    value: `${conversion}%`,       icon: XCircle,    color: 'text-amber-600',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
+        ].map(k => {
+          const Icon = k.icon
+          return (
+            <div key={k.label} className="flex items-center gap-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+              <div className={`${k.bg} flex size-10 shrink-0 items-center justify-center rounded-lg`}>
+                <Icon size={18} className={k.color} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[var(--fi-muted)]">{k.label}</p>
+                <p className={`fi-tabular text-lg font-black ${k.color}`}>{k.value}</p>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <AnalyticsCharts
