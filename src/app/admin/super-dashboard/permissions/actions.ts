@@ -1,15 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requirePermission } from '@/shared/rbac/require-permission'
 
 export async function upsertPermissionOverride(formData: FormData) {
-  await requirePermission('platform.manage')
+  const session = await requirePermission('platform.manage')
 
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Unauthorized' }
+  const supabase = createServiceRoleClient()
 
   const targetUserId = formData.get('user_id') as string
   const permissionId = formData.get('permission_id') as string
@@ -25,7 +23,7 @@ export async function upsertPermissionOverride(formData: FormData) {
         user_id: targetUserId,
         permission_id: permissionId,
         granted,
-        granted_by: user.id,
+        granted_by: session.user.id,
         reason: reason ?? null,
       },
       { onConflict: 'user_id,permission_id' },
@@ -40,7 +38,7 @@ export async function upsertPermissionOverride(formData: FormData) {
 export async function removePermissionOverride(formData: FormData) {
   await requirePermission('platform.manage')
 
-  const supabase = await createServerClient()
+  const supabase = createServiceRoleClient()
   const targetUserId = formData.get('user_id') as string
   const permissionId = formData.get('permission_id') as string
 
@@ -59,11 +57,9 @@ export async function removePermissionOverride(formData: FormData) {
 }
 
 export async function bulkGrantRolePermissions(formData: FormData) {
-  await requirePermission('platform.manage')
+  const session = await requirePermission('platform.manage')
 
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Unauthorized' }
+  const supabase = createServiceRoleClient()
 
   const targetUserId = formData.get('user_id') as string
   const permissionKeys = JSON.parse(formData.get('permission_keys') as string) as string[]
@@ -82,7 +78,7 @@ export async function bulkGrantRolePermissions(formData: FormData) {
     user_id: targetUserId,
     permission_id: p.id,
     granted,
-    granted_by: user.id,
+    granted_by: session.user.id,
   }))
 
   const { error } = await supabase

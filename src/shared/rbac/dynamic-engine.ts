@@ -2,6 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 import { hasPermission, type Permission } from './permissions'
 import type { AppRole } from '@/shared/auth/types'
 
@@ -58,7 +59,7 @@ export async function checkPermission(
  * Super Admin only.
  */
 export async function loadPermissionMatrixData() {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createServiceRoleClient()
 
   const [{ data: profiles }, { data: permissions }, { data: overrides }] = await Promise.all([
     supabase

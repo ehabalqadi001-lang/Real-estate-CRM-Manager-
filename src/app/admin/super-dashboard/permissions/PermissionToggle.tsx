@@ -1,7 +1,8 @@
 'use client'
 
-import { useTransition } from 'react'
-import { upsertPermissionOverride, removePermissionOverride } from './actions'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState, useTransition } from 'react'
+import { removePermissionOverride, upsertPermissionOverride } from './actions'
 
 interface Props {
   userId: string
@@ -12,63 +13,97 @@ interface Props {
 }
 
 const STATE_CLASSES = {
-  granted: 'bg-[#0F8F83] text-white border-[#0F8F83]',
-  revoked: 'bg-red-100 text-red-700 border-red-300',
-  default: 'bg-slate-100 text-slate-500 border-slate-200',
+  granted: 'border-[#27AE60] bg-[#27AE60] text-white shadow-sm',
+  revoked: 'border-red-200 bg-red-50 text-red-700',
+  default: 'border-slate-200 bg-slate-50 text-slate-500',
 }
 
 export function PermissionToggle({
   userId,
   permissionId,
-  permissionKey: _permissionKey,
+  permissionKey,
   currentState,
   defaultGranted,
 }: Props) {
+  const router = useRouter()
+  const [state, setState] = useState(currentState)
+  const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const cycle = () => {
+  const label = useMemo(() => {
+    if (state === 'granted') return '✓'
+    if (state === 'revoked') return '×'
+    return defaultGranted ? '~' : '—'
+  }, [defaultGranted, state])
+
+  const title =
+    state === 'granted'
+      ? 'ممنوحة كاستثناء. اضغط للمنع.'
+      : state === 'revoked'
+        ? 'ممنوعة كاستثناء. اضغط للعودة للوضع الافتراضي.'
+        : defaultGranted
+          ? 'ممنوحة افتراضياً من الدور. اضغط لتثبيتها كاستثناء.'
+          : 'غير ممنوحة افتراضياً. اضغط للمنح.'
+
+  function cycle() {
+    const previousState = state
+    const nextState = state === 'default' ? 'granted' : state === 'granted' ? 'revoked' : 'default'
+    setState(nextState)
+    setError(null)
+
     startTransition(async () => {
       const fd = new FormData()
       fd.set('user_id', userId)
       fd.set('permission_id', permissionId)
 
-      if (currentState === 'default') {
-        // grant explicitly
-        fd.set('granted', 'true')
-        await upsertPermissionOverride(fd)
-      } else if (currentState === 'granted') {
-        // revoke explicitly
-        fd.set('granted', 'false')
-        await upsertPermissionOverride(fd)
-      } else {
-        // remove override → back to default
-        await removePermissionOverride(fd)
+      const result =
+        previousState === 'default'
+          ? await grant(fd)
+          : previousState === 'granted'
+            ? await revoke(fd)
+            : await clear(fd)
+
+      if (result?.error) {
+        setState(previousState)
+        setError(result.error)
+        return
       }
+
+      router.refresh()
     })
   }
 
-  const label = currentState === 'granted' ? '✓' : currentState === 'revoked' ? '✗' : defaultGranted ? '~' : '—'
-  const title =
-    currentState === 'granted'
-      ? 'Override: Granted (click to revoke)'
-      : currentState === 'revoked'
-        ? 'Override: Revoked (click to clear)'
-        : defaultGranted
-          ? 'Default: granted by role (click to explicitly grant)'
-          : 'Default: no access (click to grant)'
-
   return (
-    <button
-      onClick={cycle}
-      disabled={pending}
-      title={title}
-      className={`
-        h-7 w-7 rounded border text-xs font-black transition-all duration-150
-        ${STATE_CLASSES[currentState]}
-        ${pending ? 'opacity-40 cursor-wait' : 'cursor-pointer hover:scale-110'}
-      `}
-    >
-      {pending ? '…' : label}
-    </button>
+    <div className="relative flex justify-center">
+      <button
+        type="button"
+        onClick={cycle}
+        disabled={pending}
+        title={error ?? title}
+        aria-label={`${permissionKey}: ${title}`}
+        className={`
+          flex size-9 items-center justify-center rounded-lg border text-sm font-black transition-all duration-150
+          ${STATE_CLASSES[state]}
+          ${pending ? 'cursor-wait opacity-50' : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md'}
+          ${error ? 'ring-2 ring-red-300' : ''}
+        `}
+      >
+        {pending ? '…' : label}
+      </button>
+    </div>
   )
+}
+
+async function grant(fd: FormData) {
+  fd.set('granted', 'true')
+  return upsertPermissionOverride(fd)
+}
+
+async function revoke(fd: FormData) {
+  fd.set('granted', 'false')
+  return upsertPermissionOverride(fd)
+}
+
+async function clear(fd: FormData) {
+  return removePermissionOverride(fd)
 }
