@@ -17,7 +17,7 @@ interface Props {
   templateHref?: string
 }
 
-export function ImportPanel({ title, description, accept = '.csv,.xlsx,.xls', action, icon, templateHref }: Props) {
+export function ImportPanel({ title, description, accept = '.csv,.xlsx', action, icon, templateHref }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [pending, startTransition] = useTransition()

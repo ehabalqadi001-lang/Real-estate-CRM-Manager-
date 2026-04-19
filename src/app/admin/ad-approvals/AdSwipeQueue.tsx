@@ -49,7 +49,7 @@ function formatAge(createdAt: string) {
 }
 
 export function AdSwipeQueue({ initialAds }: Props) {
-  const [queue, setQueue] = useState<AdCard[]>(initialAds)
+  const [queue] = useState<AdCard[]>(initialAds)
   const [current, setCurrent] = useState(0)
   const [rejectReason, setRejectReason] = useState('')
   const [showRejectInput, setShowRejectInput] = useState(false)

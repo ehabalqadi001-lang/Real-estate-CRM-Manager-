@@ -1,6 +1,5 @@
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Building2, FolderOpen, Layers, FileSpreadsheet, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
 import { ImportPanel } from './ImportPanel'
@@ -42,21 +41,21 @@ export default async function DataEntryHubPage() {
           description="أعمدة مطلوبة: name / الاسم — اختيارية: phone, address, description"
           icon={<Building2 className="size-6 text-[#0F8F83]" />}
           action={importDevelopersAction}
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx"
         />
         <ImportPanel
           title="رفع مشاريع"
           description="أعمدة: name / اسم المشروع — اختيارية: location, total_units, status"
           icon={<FolderOpen className="size-6 text-[#C9964A]" />}
           action={importProjectsAction}
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx"
         />
         <ImportPanel
           title="رفع وحدات / إنفنتوري"
           description="أعمدة: unit_number / رقم الوحدة — اختيارية: floor, area_sqm, price, status"
           icon={<Layers className="size-6 text-slate-500" />}
           action={importUnitsAction}
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx"
         />
       </div>
 

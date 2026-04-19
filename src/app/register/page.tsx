@@ -1,21 +1,20 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ElementType, type FormEvent, type ReactNode } from 'react'
+import { useMemo, useState, type ElementType, type FormEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, Briefcase, Building, FileText, Mail, MapPin, Phone, Upload, User, UserRound } from 'lucide-react'
 import { registerAction } from '@/app/login/actions'
 import { Button } from '@/components/ui/button'
 
 export default function RegisterPage() {
-  const [mode, setMode] = useState<'client' | 'partner'>('client')
+  const [mode] = useState<'client' | 'partner'>(() => {
+    if (typeof window === 'undefined') return 'client'
+    const params = new URLSearchParams(window.location.search)
+    return params.get('role') === 'partner' ? 'partner' : 'client'
+  })
   const [accountType, setAccountType] = useState<'individual' | 'company'>('individual')
   const [loading, setLoading] = useState(false)
   const [errorState, setErrorState] = useState<{ message: string; details: string } | null>(null)
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    setMode(params.get('role') === 'partner' ? 'partner' : 'client')
-  }, [])
 
   const copy = useMemo(() => {
     if (mode === 'partner') {

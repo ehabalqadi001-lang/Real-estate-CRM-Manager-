@@ -201,7 +201,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   data_manager: ['dashboard.view.team', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.import', 'projects.read', 'projects.create', 'projects.update', 'projects.delete', 'developer.view', 'report.view.team', 'notification.view.own'],
   campaign_specialist: ['dashboard.view.own', 'messages.read', 'messages.create', 'messages.broadcast', 'ads.read', 'users.read', 'notification.view.own'],
   marketing_manager: ['dashboard.view.company', 'messages.read', 'messages.create', 'messages.broadcast', 'messages.whatsapp', 'ads.read', 'users.read', 'platform.reports', 'projects.read', 'report.view.company', 'notification.view.own'],
-  cs_agent: ['dashboard.view.own', 'messages.read', 'messages.create', 'users.read', 'ads.read', 'support.view', 'notification.view.own'],
+  cs_agent: ['dashboard.view.own', 'admin.view', 'messages.read', 'messages.create', 'messages.whatsapp', 'users.read', 'ads.read', 'support.view', 'notification.view.own'],
   cs_supervisor: ['dashboard.view.team', 'messages.read', 'messages.create', 'messages.broadcast', 'messages.whatsapp', 'users.read', 'users.update', 'ads.read', 'support.view', 'support.manage', 'report.view.team', 'notification.view.own'],
 }
 

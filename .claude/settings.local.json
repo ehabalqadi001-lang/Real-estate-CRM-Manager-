@@ -39,7 +39,15 @@
       "Bash(py -3 --version)",
       "Bash(grep -v \"node_modules\\\\|//\")",
       "Bash(python3 -c ' *)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "mcp__plugin_vercel_vercel__deploy_to_vercel",
+      "mcp__plugin_vercel_vercel__list_deployments",
+      "mcp__plugin_vercel_vercel__get_deployment",
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__list_tables",
+      "Bash(vercel --version)",
+      "Bash(vercel --prod)",
+      "Bash(vercel --prod --force)"
     ]
   }
 }

@@ -1,7 +1,7 @@
 'use server'
 
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 async function getSupabaseClient() {
@@ -42,6 +42,42 @@ const ROLE_ALIASES: Record<string, string> = {
   CLIENT: 'viewer',
   client: 'viewer',
   viewer: 'viewer',
+}
+
+const FAST_INVESTMENT_WELCOME_WHATSAPP = 'مرحباً بك في FAST INVESTMENT. تم تفعيل حسابك بنجاح.'
+
+async function getRequestOrigin() {
+  const headerStore = await headers()
+  const host = headerStore.get('x-forwarded-host') ?? headerStore.get('host')
+  if (!host) return null
+
+  const protocol = headerStore.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
+  return `${protocol}://${host}`
+}
+
+async function sendRegistrationWelcomeWhatsApp(phone: string) {
+  const token = process.env.RESPOND_IO_API_TOKEN
+  const origin = await getRequestOrigin()
+
+  if (!token || !origin) return
+
+  const response = await fetch(`${origin}/api/whatsapp/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-fast-investment-internal-token': token,
+    },
+    body: JSON.stringify({
+      phone,
+      message: FAST_INVESTMENT_WELCOME_WHATSAPP,
+    }),
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `WhatsApp welcome route failed with status ${response.status}`)
+  }
 }
 
 function normalizeRole(role: unknown) {
@@ -157,6 +193,14 @@ export async function registerAction(formData: FormData) {
 
       if (profileError) {
         return { success: false, message: 'تم إنشاء الحساب ولم يكتمل حفظ الملف الشخصي', details: profileError.message }
+      }
+
+      if (phone) {
+        try {
+          await sendRegistrationWelcomeWhatsApp(phone)
+        } catch (error: unknown) {
+          console.error('Failed to send registration WhatsApp welcome message', error)
+        }
       }
     }
   } catch (err: unknown) {

@@ -3,9 +3,70 @@
 import { revalidatePath } from 'next/cache'
 import { createRawClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/shared/rbac/require-permission'
-import * as XLSX from 'xlsx'
+import readXlsxFile from 'read-excel-file/node'
 
 type ImportResult = { inserted: number; updated: number; errors: string[] }
+type CellValue = string | number | boolean | Date | null
+
+function parseCsvRows(text: string): CellValue[][] {
+  const rows: string[][] = []
+  let row: string[] = []
+  let value = ''
+  let quoted = false
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]
+    const next = text[i + 1]
+
+    if (char === '"' && quoted && next === '"') {
+      value += '"'
+      i += 1
+    } else if (char === '"') {
+      quoted = !quoted
+    } else if (char === ',' && !quoted) {
+      row.push(value)
+      value = ''
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') i += 1
+      row.push(value)
+      if (row.some((cell) => cell.trim())) rows.push(row)
+      row = []
+      value = ''
+    } else {
+      value += char
+    }
+  }
+
+  row.push(value)
+  if (row.some((cell) => cell.trim())) rows.push(row)
+  return rows
+}
+
+function rowsToRecords(rows: CellValue[][]) {
+  const [headerRow, ...dataRows] = rows
+  if (!headerRow) return []
+
+  const headers = headerRow.map((header) => String(header ?? '').trim())
+
+  return dataRows
+    .map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] ?? null])))
+    .filter((record) => Object.values(record).some((value) => value !== null && String(value).trim() !== '')) as Record<string, unknown>[]
+}
+
+async function parseSpreadsheetFile(file: File) {
+  const fileName = file.name.toLowerCase()
+
+  if (fileName.endsWith('.csv')) {
+    return rowsToRecords(parseCsvRows(await file.text()))
+  }
+
+  if (!fileName.endsWith('.xlsx')) {
+    throw new Error('صيغة الملف غير مدعومة. استخدم CSV أو XLSX.')
+  }
+
+  const rows = await readXlsxFile(Buffer.from(await file.arrayBuffer()))
+  return rowsToRecords(rows as unknown as CellValue[][])
+}
 
 // ── Developers ───────────────────────────────────────────────
 export async function importDevelopersAction(formData: FormData): Promise<ImportResult> {
@@ -15,10 +76,7 @@ export async function importDevelopersAction(formData: FormData): Promise<Import
   const file = formData.get('file') as File | null
   if (!file) return { inserted: 0, updated: 0, errors: ['لم يتم رفع ملف'] }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const wb = XLSX.read(buffer, { type: 'buffer' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: null })
+  const rows = await parseSpreadsheetFile(file)
 
   const records = rows.map((r) => ({
     name:        String(r['name'] ?? r['الاسم'] ?? r['اسم المطور'] ?? '').trim(),
@@ -48,10 +106,7 @@ export async function importProjectsAction(formData: FormData): Promise<ImportRe
   const file = formData.get('file') as File | null
   if (!file) return { inserted: 0, updated: 0, errors: ['لم يتم رفع ملف'] }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const wb = XLSX.read(buffer, { type: 'buffer' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: null })
+  const rows = await parseSpreadsheetFile(file)
 
   const errors: string[] = []
   const records = rows.map((r, i) => {
@@ -87,10 +142,7 @@ export async function importUnitsAction(formData: FormData): Promise<ImportResul
   const file = formData.get('file') as File | null
   if (!file) return { inserted: 0, updated: 0, errors: ['لم يتم رفع ملف'] }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const wb = XLSX.read(buffer, { type: 'buffer' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: null })
+  const rows = await parseSpreadsheetFile(file)
 
   const errors: string[] = []
   const records = rows.map((r, i) => {

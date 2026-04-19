@@ -3,7 +3,69 @@
 import { useState, useEffect } from 'react'
 import { PlusIcon, X, UploadCloud, FileSpreadsheet } from 'lucide-react'
 import { getDevelopersList, addSingleUnit, addBulkUnits } from '@/app/dashboard/inventory/actions'
-import * as XLSX from 'xlsx'
+import readXlsxFile from 'read-excel-file/browser'
+
+type CellValue = string | number | boolean | Date | null
+
+function parseCsvRows(text: string): CellValue[][] {
+  const rows: string[][] = []
+  let row: string[] = []
+  let value = ''
+  let quoted = false
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]
+    const next = text[i + 1]
+
+    if (char === '"' && quoted && next === '"') {
+      value += '"'
+      i += 1
+    } else if (char === '"') {
+      quoted = !quoted
+    } else if (char === ',' && !quoted) {
+      row.push(value)
+      value = ''
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') i += 1
+      row.push(value)
+      if (row.some((cell) => cell.trim())) rows.push(row)
+      row = []
+      value = ''
+    } else {
+      value += char
+    }
+  }
+
+  row.push(value)
+  if (row.some((cell) => cell.trim())) rows.push(row)
+  return rows
+}
+
+function rowsToRecords(rows: CellValue[][]) {
+  const [headerRow, ...dataRows] = rows
+  if (!headerRow) return []
+
+  const headers = headerRow.map((header) => String(header ?? '').trim())
+
+  return dataRows
+    .map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] ?? null])))
+    .filter((record) => Object.values(record).some((value) => value !== null && String(value).trim() !== '')) as Record<string, unknown>[]
+}
+
+async function parseSpreadsheetFile(file: File) {
+  const fileName = file.name.toLowerCase()
+
+  if (fileName.endsWith('.csv')) {
+    return rowsToRecords(parseCsvRows(await file.text()))
+  }
+
+  if (!fileName.endsWith('.xlsx')) {
+    throw new Error('صيغة الملف غير مدعومة. استخدم CSV أو XLSX.')
+  }
+
+  const rows = await readXlsxFile(file)
+  return rowsToRecords(rows as unknown as CellValue[][])
+}
 
 export default function AddUnitButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -46,24 +108,16 @@ export default function AddUnitButton() {
     if (!excelFile || !selectedDeveloper) return alert('يرجى اختيار المطور وملف الإكسيل')
     
     setLoading(true)
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      try {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer)
-        const workbook = XLSX.read(data, { type: 'array' })
-        const sheetName = workbook.SheetNames[0]
-        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
-        
-        await addBulkUnits(jsonData as Record<string, unknown>[], selectedDeveloper)
-        setIsOpen(false)
-        alert(`تمت إضافة ${jsonData.length} وحدة بنجاح!`)
-      } catch (error: unknown) {
-        alert('حدث خطأ أثناء معالجة الملف: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
-      } finally {
-        setLoading(false)
-      }
+    try {
+      const jsonData = await parseSpreadsheetFile(excelFile)
+      await addBulkUnits(jsonData, selectedDeveloper)
+      setIsOpen(false)
+      alert(`تمت إضافة ${jsonData.length} وحدة بنجاح!`)
+    } catch (error: unknown) {
+      alert('حدث خطأ أثناء معالجة الملف: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
+    } finally {
+      setLoading(false)
     }
-    reader.readAsArrayBuffer(excelFile)
   }
 
   return (
@@ -128,7 +182,7 @@ export default function AddUnitButton() {
                     </select>
                   </div>
                   <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 hover:bg-slate-50 transition-colors relative mt-4">
-                    <input type="file" accept=".xlsx, .xls, .csv" required onChange={(e) => setExcelFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <input type="file" accept=".xlsx,.csv" required onChange={(e) => setExcelFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     <UploadCloud size={40} className="mx-auto text-slate-400 mb-3" />
                     <p className="text-sm font-bold text-slate-700">{excelFile ? excelFile.name : 'اسحب ملف Excel هنا أو اضغط للاختيار'}</p>
                   </div>

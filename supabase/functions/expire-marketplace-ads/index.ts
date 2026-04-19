@@ -1,5 +1,11 @@
-// @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined
+  }
+  serve(handler: (request: Request) => Response | Promise<Response>): void
+}
 
 Deno.serve(async (request) => {
   const cronSecret = Deno.env.get('CRON_SECRET')
