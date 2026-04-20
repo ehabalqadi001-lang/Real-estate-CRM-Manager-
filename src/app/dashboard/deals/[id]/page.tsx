@@ -33,6 +33,22 @@ interface Activity {
   user?: { full_name?: string } | null
 }
 
+type LegacyDealSupabase = {
+  from(table: 'deal_activities'): {
+    insert(values: Array<{
+      deal_id: string
+      user_id?: string
+      action_type: string
+      description: string
+    }>): Promise<{ error: Error | null }>
+  }
+  from(table: 'deals'): {
+    update(values: { stage: string }): {
+      eq(column: 'id', value: string): Promise<{ error: Error | null }>
+    }
+  }
+}
+
 const CSS_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif !important; }
   .dashboard-container { display: flex; background: #f8fafc; min-height: 100vh; direction: rtl; }
@@ -109,8 +125,9 @@ export default function DealDetailsPage() {
     e.preventDefault();
     if (!newNote.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from('deal_activities').insert([{
-      deal_id: id,
+    const legacySupabase = supabase as unknown as LegacyDealSupabase;
+    await legacySupabase.from('deal_activities').insert([{
+      deal_id: String(id),
       user_id: user?.id,
       action_type: 'note',
       description: `أضاف ملاحظة: ${newNote}`
@@ -122,9 +139,10 @@ export default function DealDetailsPage() {
   const handleChangeStage = async (newStage: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     const oldStage = deal?.stage ?? '';
-    await supabase.from('deals').update({ stage: newStage }).eq('id', id);
-    await supabase.from('deal_activities').insert([{
-      deal_id: id,
+    const legacySupabase = supabase as unknown as LegacyDealSupabase;
+    await legacySupabase.from('deals').update({ stage: newStage }).eq('id', String(id));
+    await legacySupabase.from('deal_activities').insert([{
+      deal_id: String(id),
       user_id: user?.id,
       action_type: 'status_change',
       description: `تم تغيير مرحلة الصفقة من ${oldStage} إلى ${newStage}`

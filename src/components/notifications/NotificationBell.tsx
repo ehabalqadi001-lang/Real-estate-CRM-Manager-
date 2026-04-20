@@ -1,137 +1,87 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Bell, CheckCircle2, Circle, CheckCheck, X } from 'lucide-react'
-import { getMyNotifications, markNotificationAsRead } from '@/app/dashboard/notifications/actions'
-import { useNotificationStore } from '@/store/notificationStore'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Bell } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { NotificationCenter } from './NotificationCenter'
+import { useNotifications } from './useNotifications'
 
-interface DBNotification {
-  id: string
-  title: string
-  message: string
-  is_read: boolean
-  link: string | null
-  created_at?: string
-}
-
-export default function NotificationBell() {
-  const [dbNotifs, setDbNotifs] = useState<DBNotification[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const rtNotifs = useNotificationStore((s) => s.notifications)
-  const rtUnread = useNotificationStore((s) => s.unreadCount)
-  const markRtRead = useNotificationStore((s) => s.markAllRead)
+export function NotificationBell({ userId: providedUserId }: { userId?: string }) {
+  const [open, setOpen] = useState(false)
+  const [clientUserId, setClientUserId] = useState(providedUserId ?? '')
+  const userId = providedUserId ?? clientUserId
 
   useEffect(() => {
-    let mounted = true
-    async function load() {
-      const data = await getMyNotifications()
-      if (mounted) setDbNotifs(data)
-    }
-    void load()
-    return () => { mounted = false }
-  }, [])
+    if (providedUserId) return
+    import('@/shared/supabase/browser').then(async ({ createBrowserSupabaseClient }) => {
+      const supabase = createBrowserSupabaseClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setClientUserId(user.id)
+    })
+  }, [providedUserId])
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setIsOpen(false)
-    }
-    if (isOpen) document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [isOpen])
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    loadMore,
+    markRead,
+    markAllRead,
+    deleteAll,
+  } = useNotifications(userId)
 
-  const dbUnread = dbNotifs.filter(n => !n.is_read).length
-  const totalUnread = dbUnread + rtUnread
-
-  const handleRead = async (id: string, link: string | null) => {
-    await markNotificationAsRead(id)
-    setDbNotifs(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
-    setIsOpen(false)
-    if (link) window.location.assign(link)
-  }
-
-  const handleOpenPanel = () => {
-    setIsOpen(v => !v)
+  if (!userId) {
+    return (
+      <Button type="button" variant="outline" size="icon-lg" className="relative bg-white" aria-label="الإشعارات" disabled>
+        <Bell className="size-5 text-[var(--fi-emerald)]" />
+      </Button>
+    )
   }
 
   return (
-    <div className="relative" ref={panelRef}>
-      <button onClick={handleOpenPanel}
-        className="relative p-2 text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 rounded-lg shadow-inner">
-        <Bell size={20} />
-        {totalUnread > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white shadow-sm border-2 border-[#0A1128] animate-pulse">
-            {totalUnread > 9 ? '9+' : totalUnread}
-          </span>
-        )}
-      </button>
-
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 text-right" dir="rtl">
-          <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h3 className="font-black text-slate-800">الإشعارات</h3>
-            <div className="flex items-center gap-2">
-              {totalUnread > 0 && (
-                <span className="text-[10px] font-bold text-white bg-red-500 px-2.5 py-1 rounded-full">{totalUnread} جديد</span>
-              )}
-              <button onClick={() => { markRtRead(); setIsOpen(false) }}
-                className="text-slate-400 hover:text-slate-600 p-1" title="تعليم الكل كمقروء">
-                <CheckCheck size={15} />
-              </button>
-              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X size={15} />
-              </button>
-            </div>
-          </div>
-
-          <div className="max-h-96 overflow-y-auto divide-y divide-slate-50">
-            {/* Realtime notifications (from store) */}
-            {rtNotifs.map(n => (
-              <div key={`rt-${n.id}`}
-                className={`p-4 cursor-default hover:bg-slate-50 transition-colors ${!n.read ? 'bg-blue-50/40' : ''}`}>
-                <div className="flex gap-3 items-start">
-                  <div className="mt-1 shrink-0">
-                    {!n.read
-                      ? <Circle size={12} className="text-blue-600 fill-blue-600" />
-                      : <CheckCircle2 size={12} className="text-slate-300" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${!n.read ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>{n.title}</p>
-                    <p className={`text-xs mt-1 ${!n.read ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>{n.message}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {new Date(n.created_at).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
-                    </p>
-                  </div>
-                  <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">مباشر</span>
-                </div>
-              </div>
-            ))}
-
-            {/* DB-persisted notifications */}
-            {dbNotifs.length === 0 && rtNotifs.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 font-bold text-sm flex flex-col items-center gap-2">
-                <Bell size={32} className="text-slate-200" />
-                لا توجد إشعارات
-              </div>
-            ) : dbNotifs.map(n => (
-              <div key={n.id} onClick={() => handleRead(n.id, n.link)}
-                className={`p-4 cursor-pointer hover:bg-slate-50 transition-colors ${!n.is_read ? 'bg-blue-50/40' : ''}`}>
-                <div className="flex gap-3 items-start">
-                  <div className="mt-1 shrink-0">
-                    {!n.is_read
-                      ? <Circle size={12} className="text-blue-600 fill-blue-600" />
-                      : <CheckCircle2 size={12} className="text-slate-300" />}
-                  </div>
-                  <div>
-                    <p className={`text-sm ${!n.is_read ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>{n.title}</p>
-                    <p className={`text-xs mt-1 ${!n.is_read ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>{n.message}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="icon-lg"
+        className="relative bg-white"
+        aria-label="فتح الإشعارات"
+        onClick={() => setOpen(true)}
+      >
+        <Bell className="size-5 text-[var(--fi-emerald)]" />
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.span
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: [1, 1.22, 1], opacity: 1 }}
+              exit={{ scale: 0.4, opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white ring-2 ring-white"
+            >
+              {unreadCount > 99 ? '٩٩+' : unreadCount.toLocaleString('ar-EG')}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Button>
+      <NotificationCenter
+        open={open}
+        onOpenChange={setOpen}
+        notifications={notifications}
+        isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
+        hasMore={hasMore}
+        error={error}
+        onLoadMore={loadMore}
+        onMarkRead={markRead}
+        onMarkAllRead={markAllRead}
+        onDeleteAll={deleteAll}
+      />
+    </>
   )
 }
+
+export default NotificationBell

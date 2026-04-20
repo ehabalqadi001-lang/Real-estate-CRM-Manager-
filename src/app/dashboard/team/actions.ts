@@ -129,3 +129,33 @@ export async function assignLeadToMember(leadId: string, memberId: string) {
   revalidatePath('/dashboard/leads')
   return { success: true }
 }
+
+export async function updateMemberRole(memberId: string, role: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { error } = await supabase.from('profiles').update({ role }).eq('id', memberId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/team')
+}
+
+export async function suspendMember(memberId: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { error } = await supabase.from('profiles').update({ status: 'suspended', is_active: false }).eq('id', memberId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/team')
+}
+
+export async function inviteAgentByEmail(email: string, fullName: string) {
+  const result = await addTeamMember({ email, fullName, password: crypto.randomUUID().slice(0, 12) })
+  revalidatePath('/dashboard/team')
+  return result
+}

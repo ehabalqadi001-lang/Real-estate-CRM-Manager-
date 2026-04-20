@@ -1,52 +1,72 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import TeamList from '@/components/team/TeamList'
-import AddMemberButton from '@/components/team/AddMemberButton'
+import { TeamManagementClient, type TeamMemberRow } from '@/components/team/TeamManagementClient'
+import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { requireSession } from '@/shared/auth/session'
 
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const session = await requireSession()
+  const supabase = await createServerSupabaseClient()
+  const companyId = session.profile.company_id ?? session.user.id
 
-  interface TeamMember { id: string; name: string; role: string; phone: string | null; email: string | null; created_at: string }
-  let members: TeamMember[] = []
-  let fetchError = null
-  let exactErrorDetails: string | null = null
+  let profileQuery = supabase
+    .from('profiles')
+    .select('id, full_name, email, role, status, is_active, company_id')
+    .in('role', ['branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
+    .limit(300)
 
-  try {
-    const { data, error } = await supabase.from('team_members').select('*').order('created_at')
-    if (error) { exactErrorDetails = error.message; throw error; }
-    members = data || []
-  } catch (e: unknown) {
-    fetchError = "تعذر جلب بيانات فريق العمل.";
-    exactErrorDetails = exactErrorDetails || (e instanceof Error ? e.message : 'Unknown error');
-  }
+  if (companyId) profileQuery = profileQuery.eq('company_id', companyId)
+  const { data: profiles } = await profileQuery
+  const ids = (profiles ?? []).map((profile) => profile.id)
+
+  const [dealsResult, commissionsResult] = await Promise.all([
+    ids.length ? supabase.from('deals').select('id, agent_id, stage, unit_value, value, amount, final_price, created_at').in('agent_id', ids) : Promise.resolve({ data: [] }),
+    ids.length ? supabase.from('commissions').select('id, agent_id, amount, agent_amount, status, created_at').in('agent_id', ids) : Promise.resolve({ data: [] }),
+  ])
+
+  const deals = (dealsResult.data ?? []) as Array<Record<string, unknown>>
+  const commissions = (commissionsResult.data ?? []) as Array<Record<string, unknown>>
+  const now = new Date()
+
+  const members: TeamMemberRow[] = (profiles ?? []).map((profile) => {
+    const memberDeals = deals.filter((deal) => deal.agent_id === profile.id)
+    const monthDeals = memberDeals.filter((deal) => {
+      const date = new Date(String(deal.created_at))
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+    })
+    const memberCommissions = commissions.filter((commission) => commission.agent_id === profile.id)
+    return {
+      id: profile.id,
+      name: profile.full_name ?? 'عضو فريق',
+      email: profile.email ?? null,
+      role: profile.role ?? 'agent',
+      activeDeals: memberDeals.filter((deal) => !['closed', 'closed_won', 'lost', 'closed_lost'].includes(String(deal.stage))).length,
+      monthSales: monthDeals.reduce((sum, deal) => sum + Number(deal.final_price ?? deal.unit_value ?? deal.value ?? deal.amount ?? 0), 0),
+      commissions: memberCommissions.reduce((sum, commission) => sum + Number(commission.agent_amount ?? commission.amount ?? 0), 0),
+      status: profile.is_active === false || profile.status === 'suspended' ? 'suspended' : 'active',
+      sparkline: buildSparkline(memberDeals),
+    }
+  })
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <div className="flex justify-between items-center bg-[var(--fi-paper)] p-6 rounded-2xl shadow-sm border border-[var(--fi-line)]">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--fi-ink)]">إدارة فريق العمل</h1>
-          <p className="text-sm text-[var(--fi-muted)] mt-1">إضافة الموظفين وتوزيع المهام البيعية</p>
-        </div>
-        <AddMemberButton />
-      </div>
-
-      {fetchError ? (
-        <div className="bg-[var(--fi-paper)] rounded-2xl shadow-sm border border-red-100 p-10 text-center">
-           <p className="text-red-600 font-bold mb-2">تنبيه النظام</p>
-           <code className="bg-red-50 text-red-800 px-4 py-2 rounded-lg text-xs font-mono inline-block" dir="ltr">
-             Technical Error: {exactErrorDetails}
-           </code>
-        </div>
-      ) : (
-        <TeamList members={members} />
-      )}
-    </div>
+    <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+      <TeamManagementClient members={members} />
+    </main>
   )
+}
+
+function buildSparkline(deals: Array<Record<string, unknown>>) {
+  const now = new Date()
+  return Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() + index - 5, 1)
+    return {
+      label: date.toLocaleDateString('ar-EG', { month: 'short' }),
+      value: deals
+        .filter((deal) => {
+          const created = new Date(String(deal.created_at))
+          return created.getMonth() === date.getMonth() && created.getFullYear() === date.getFullYear()
+        })
+        .reduce((sum, deal) => sum + Number(deal.final_price ?? deal.unit_value ?? deal.value ?? deal.amount ?? 0), 0),
+    }
+  })
 }

@@ -2,12 +2,21 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 type NotifType = 'info' | 'success' | 'warning' | 'error'
+type DomainNotifType = NotifType | 'deal_moved' | 'new_client' | 'commission_paid' | 'task_due' | 'mention'
 
 interface NotifPayload {
   user_id: string
   title: string
   message?: string
-  type?: NotifType
+  type?: DomainNotifType
+  link?: string
+}
+
+interface SendNotificationPayload {
+  userId: string
+  type: DomainNotifType
+  title: string
+  body?: string
   link?: string
 }
 
@@ -27,6 +36,7 @@ export async function createNotification(payload: NotifPayload) {
       user_id:  payload.user_id,
       title:    payload.title,
       message:  payload.message ?? null,
+      body:     payload.message ?? null,
       type:     payload.type ?? 'info',
       link:     payload.link ?? null,
       is_read:  false,
@@ -34,6 +44,16 @@ export async function createNotification(payload: NotifPayload) {
   } catch {
     // Notifications are non-critical — never throw
   }
+}
+
+export async function sendNotification(payload: SendNotificationPayload) {
+  await createNotification({
+    user_id: payload.userId,
+    type: payload.type,
+    title: payload.title,
+    message: payload.body ?? '',
+    link: payload.link,
+  })
 }
 
 export async function notifyLeadAssigned(agentId: string, leadName: string, leadId: string) {

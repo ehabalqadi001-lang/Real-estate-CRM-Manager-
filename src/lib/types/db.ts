@@ -222,10 +222,12 @@ export interface Deal {
   value: number | null
   discount: number | null
   deal_date: string | null
+  expected_close_date?: string | null
   contract_signed_at: string | null
   handover_date: string | null
   notes: string | null
   created_at: string
+  updated_at?: string | null
 }
 
 // ─── COMMISSIONS ─────────────────────────────────────────────────
@@ -238,12 +240,38 @@ export interface Commission {
   amount: number | null
   rate: number | null
   total_amount: number | null
+  gross_deal_value?: number | null
+  gross_commission?: number | null
+  agent_amount?: number | null
+  company_amount?: number | null
   commission_rate: number | null
   status: 'pending' | 'approved' | 'paid' | 'disputed' | 'cancelled' | null
   commission_type: string | null
+  payment_method?: string | null
+  payment_reference?: string | null
+  payment_date?: string | null
+  receipt_url?: string | null
+  bank_details?: string | null
+  requested_at?: string | null
+  approved_by?: string | null
+  approved_at?: string | null
   expected_date: string | null
   paid_at: string | null
   notes: string | null
+  created_at: string
+}
+
+export interface CommissionRate {
+  id: string
+  developer_id: string | null
+  project_id: string | null
+  min_value: number | null
+  max_value: number | null
+  rate_percentage: number
+  agent_share_percentage: number | null
+  company_share_percentage: number | null
+  effective_from: string | null
+  effective_to: string | null
   created_at: string
 }
 
@@ -342,11 +370,48 @@ export interface Notification {
   user_id: string
   title: string
   message: string | null
-  type: 'info' | 'success' | 'warning' | 'error'
+  body?: string | null
+  type: 'info' | 'success' | 'warning' | 'error' | 'deal_moved' | 'new_client' | 'commission_paid' | 'task_due' | 'mention'
   is_read: boolean
+  read_at?: string | null
   link?: string | null
   related_entity_id?: string | null
   created_at: string
+}
+
+export interface DealActivity {
+  id: string
+  deal_id: string
+  user_id: string | null
+  action: string
+  note: string | null
+  action_type?: string | null
+  description?: string | null
+  created_at: string
+}
+
+export interface AuditLog {
+  id: string
+  user_id: string | null
+  action: string
+  target_table: string | null
+  target_id: string | null
+  metadata: Json | null
+  created_at: string
+  profiles?: Pick<Profile, 'full_name'>
+}
+
+export interface UserProfile {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  full_name: string | null
+  email: string | null
+  phone: string | null
+  company_name: string | null
+  account_type: string | null
+  status: string | null
+  created_at: string | null
 }
 
 // ─── RESALE LISTINGS ─────────────────────────────────────────────
@@ -395,6 +460,7 @@ export interface Database {
   public: {
     Tables: {
       profiles:           { Row: Profile;           Insert: Partial<Profile>;           Update: Partial<Profile>;           Relationships: [] }
+      user_profiles:      { Row: UserProfile;       Insert: Partial<UserProfile>;       Update: Partial<UserProfile>;       Relationships: [] }
       leads:              { Row: Lead;               Insert: Partial<Lead>;               Update: Partial<Lead>;               Relationships: [] }
       lead_activities:    { Row: LeadActivity;       Insert: Partial<LeadActivity>;       Update: Partial<LeadActivity>;       Relationships: [] }
       buyer_requirements: { Row: BuyerRequirement;   Insert: Partial<BuyerRequirement>;   Update: Partial<BuyerRequirement>;   Relationships: [] }
@@ -402,13 +468,16 @@ export interface Database {
       projects:           { Row: Project;             Insert: Partial<Project>;             Update: Partial<Project>;             Relationships: [] }
       units:              { Row: Unit;                Insert: Partial<Unit>;                Update: Partial<Unit>;                Relationships: [] }
       deals:              { Row: Deal;                Insert: Partial<Deal>;                Update: Partial<Deal>;                Relationships: [] }
+      deal_activities:    { Row: DealActivity;        Insert: Partial<DealActivity>;        Update: Partial<DealActivity>;        Relationships: [] }
       commissions:        { Row: Commission;          Insert: Partial<Commission>;          Update: Partial<Commission>;          Relationships: [] }
+      commission_rates:   { Row: CommissionRate;      Insert: Partial<CommissionRate>;      Update: Partial<CommissionRate>;      Relationships: [] }
       payouts:            { Row: Payout;              Insert: Partial<Payout>;              Update: Partial<Payout>;              Relationships: [] }
       payout_items:       { Row: PayoutItem;          Insert: Partial<PayoutItem>;          Update: Partial<PayoutItem>;          Relationships: [] }
       expenses:           { Row: Expense;             Insert: Partial<Expense>;             Update: Partial<Expense>;             Relationships: [] }
       targets:            { Row: Target;              Insert: Partial<Target>;              Update: Partial<Target>;              Relationships: [] }
       broker_profiles:    { Row: BrokerProfile;       Insert: Partial<BrokerProfile>;       Update: Partial<BrokerProfile>;       Relationships: [] }
       notifications:      { Row: Notification;        Insert: Partial<Notification>;        Update: Partial<Notification>;        Relationships: [] }
+      audit_logs:          { Row: AuditLog;            Insert: Partial<AuditLog>;            Update: Partial<AuditLog>;            Relationships: [] }
       resale_listings:    { Row: ResaleListing;       Insert: Partial<ResaleListing>;       Update: Partial<ResaleListing>;       Relationships: [] }
       unit_reservations:  { Row: UnitReservation;     Insert: Partial<UnitReservation>;     Update: Partial<UnitReservation>;     Relationships: [] }
       whatsapp_logs:      { Row: Record<string,unknown>; Insert: Record<string,unknown>; Update: Record<string,unknown>; Relationships: [] }

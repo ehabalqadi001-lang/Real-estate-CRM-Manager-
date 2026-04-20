@@ -49,6 +49,17 @@ interface AdminUser {
   status?: string
 }
 
+type AdminUsersTable = {
+  from(table: 'user_profiles'): {
+    select(columns: string): {
+      order(column: string, options: { ascending: boolean }): Promise<{ data: AdminUser[] | null; error: Error | null }>
+    }
+    update(values: Partial<AdminUser>): {
+      eq(column: 'id', value: string): Promise<{ error: Error | null }>
+    }
+  }
+}
+
 export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +68,8 @@ export default function AdminPage() {
     let mounted = true;
     async function fetchUsers() {
       setLoading(true);
-      const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
+      const adminSupabase = supabase as unknown as AdminUsersTable;
+      const { data, error } = await adminSupabase.from('user_profiles').select('*').order('created_at', { ascending: false });
       if (mounted && !error) setUsers(data || []);
       if (mounted) setLoading(false);
     }
@@ -67,7 +79,8 @@ export default function AdminPage() {
 
   const updateStatus = async (id: string, newStatus: string) => {
     if (confirm(`Are you sure you want to mark this account as ${newStatus}?`)) {
-      const { error } = await supabase.from('user_profiles').update({ status: newStatus }).eq('id', id);
+      const adminSupabase = supabase as unknown as AdminUsersTable;
+      const { error } = await adminSupabase.from('user_profiles').update({ status: newStatus }).eq('id', id);
       if (!error) {
         // تحديث الواجهة محلياً بدون إعادة جلب
         setUsers(prev => prev.map(u => u.id === id ? { ...u, status: newStatus } : u));

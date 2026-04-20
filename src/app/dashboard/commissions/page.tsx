@@ -1,157 +1,142 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import Link from 'next/link'
-import CommissionsList from '@/components/commissions/CommissionsList'
-import AddCommissionButton from '@/components/commissions/AddCommissionButton'
-import { Wallet, CheckCircle, Clock, Users, Building2, Briefcase, HardHat, Settings2 } from 'lucide-react'
+import { CommissionsDashboard } from '@/components/commissions/CommissionsDashboard'
+import type { CommissionLeadOption, CommissionProjectOption, CommissionRateOption, CommissionRow, CommissionStatus } from '@/components/commissions/commission-types'
+import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { requireSession } from '@/shared/auth/session'
 
 export const dynamic = 'force-dynamic'
 
-interface Commission {
-  id: string
-  amount: number
-  status: string
-  commission_type?: string
-  deal_value?: number
-  percentage?: number
-  created_at: string
-  team_members?: { name?: string }
-  deals?: { title?: string }
-}
-
-const TYPE_CONFIG: Record<string, { label: string; icon: typeof Users; color: string; bg: string; border: string }> = {
-  agent:     { label: 'وكيل',     icon: Users,      color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-100' },
-  manager:   { label: 'مدير',     icon: Briefcase,  color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-100' },
-  company:   { label: 'شركة',     icon: Building2,  color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-  developer: { label: 'مطور',     icon: HardHat,    color: 'text-orange-600',  bg: 'bg-orange-50',  border: 'border-orange-100' },
-}
-
 export default async function CommissionsPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const session = await requireSession()
+  const supabase = await createServerSupabaseClient()
+  const companyId = session.profile.company_id ?? session.user.id
 
-  let commissions: Commission[] = []
-  let fetchError: string | null = null
-  let exactErrorDetails: string | null = null
-
-  try {
-    const { data, error } = await supabase
-      .from('commissions')
-      .select('*, deals(title, unit_value), team_members!team_member_id(name)')
-      .order('created_at', { ascending: false })
-
-    if (error) { exactErrorDetails = error.message; throw error }
-    commissions = data || []
-  } catch (e: unknown) {
-    fetchError = 'تعذر جلب السجل المالي والعمولات.'
-    exactErrorDetails = exactErrorDetails || (e instanceof Error ? e.message : 'Unknown error')
-  }
-
-  const totalPending = commissions.filter(c => c.status === 'pending').reduce((s, c) => s + (Number(c.amount) || 0), 0)
-  const totalPaid    = commissions.filter(c => c.status === 'paid').reduce((s, c) => s + (Number(c.amount) || 0), 0)
-  const totalAll     = totalPending + totalPaid
-
-  // Per-type breakdown
-  const byType = Object.keys(TYPE_CONFIG).map(type => ({
-    type,
-    count:  commissions.filter(c => (c.commission_type ?? 'agent') === type).length,
-    amount: commissions.filter(c => (c.commission_type ?? 'agent') === type).reduce((s, c) => s + Number(c.amount || 0), 0),
-    paid:   commissions.filter(c => (c.commission_type ?? 'agent') === type && c.status === 'paid').reduce((s, c) => s + Number(c.amount || 0), 0),
-  }))
-
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
+  const [commissions, projects, rates, leads, agents] = await Promise.all([
+    getCommissions(supabase, companyId),
+    getProjects(supabase),
+    getRates(supabase),
+    getLeads(supabase, companyId),
+    getAgents(supabase, companyId),
+  ])
 
   return (
-    <div className="space-y-6 p-6" dir="rtl">
-
-      {/* Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Wallet className="text-emerald-600" /> إدارة العمولات
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">تتبع مستحقات فريق المبيعات والتحصيلات حسب النوع</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/commissions/rules"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-            <Settings2 size={15} /> قواعد العمولات
-          </Link>
-          <AddCommissionButton />
-        </div>
-      </div>
-
-      {fetchError ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-10 text-center">
-          <p className="text-red-600 font-bold mb-2">تنبيه النظام</p>
-          <p className="text-sm text-slate-500 mb-4">{fetchError}</p>
-          <code className="bg-red-50 text-red-800 px-4 py-2 rounded-lg text-xs font-mono inline-block" dir="ltr">
-            {exactErrorDetails}
-          </code>
-        </div>
-      ) : (
-        <>
-          {/* Summary KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-slate-500 mb-1">الإجمالي الكلي</p>
-                <h3 className="text-2xl font-black text-slate-900">{fmt(totalAll)}</h3>
-                <p className="text-xs text-slate-400 mt-1">{commissions.length} سجل</p>
-              </div>
-              <div className="bg-slate-100 p-3 rounded-full text-slate-500"><Wallet size={24} /></div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-amber-600 mb-1">معلقة</p>
-                <h3 className="text-2xl font-black text-slate-900">{fmt(totalPending)}</h3>
-                <p className="text-xs text-slate-400 mt-1">{commissions.filter(c => c.status === 'pending').length} سجل</p>
-              </div>
-              <div className="bg-amber-50 p-3 rounded-full text-amber-500"><Clock size={24} /></div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-emerald-600 mb-1">مصروفة</p>
-                <h3 className="text-2xl font-black text-slate-900">{fmt(totalPaid)}</h3>
-                <p className="text-xs text-slate-400 mt-1">{commissions.filter(c => c.status === 'paid').length} سجل</p>
-              </div>
-              <div className="bg-emerald-50 p-3 rounded-full text-emerald-500"><CheckCircle size={24} /></div>
-            </div>
-          </div>
-
-          {/* By type breakdown */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {byType.map(({ type, count, amount, paid }) => {
-              const cfg  = TYPE_CONFIG[type]
-              const Icon = cfg.icon
-              const pct  = amount > 0 ? ((paid / amount) * 100).toFixed(0) : '0'
-              return (
-                <div key={type} className={`bg-white rounded-2xl p-5 shadow-sm border ${cfg.border}`}>
-                  <div className={`${cfg.bg} ${cfg.color} w-10 h-10 rounded-xl flex items-center justify-center mb-3`}>
-                    <Icon size={20} />
-                  </div>
-                  <p className={`text-xs font-bold ${cfg.color} mb-1`}>{cfg.label}</p>
-                  <p className="text-xl font-black text-slate-900">{fmt(amount)}</p>
-                  <p className="text-[11px] text-slate-400 mt-1">{count} سجل · {pct}% مدفوع</p>
-                  {amount > 0 && (
-                    <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${cfg.bg.replace('50','500').replace('bg-','bg-')}`}
-                        style={{ width: `${pct}%` }} />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Detailed list */}
-          <CommissionsList commissions={commissions} />
-        </>
-      )}
-    </div>
+    <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+      <CommissionsDashboard
+        commissions={commissions}
+        projects={projects}
+        rates={rates}
+        leads={leads}
+        agents={agents}
+      />
+    </main>
   )
+}
+
+type ServerSupabase = Awaited<ReturnType<typeof createServerSupabaseClient>>
+
+async function getCommissions(supabase: ServerSupabase, companyId: string | null): Promise<CommissionRow[]> {
+  let query = supabase
+    .from('commissions')
+    .select('id, deal_id, agent_id, company_id, amount, total_amount, gross_deal_value, gross_commission, agent_amount, company_amount, commission_rate, status, payment_method, payment_reference, payment_date, receipt_url, notes, created_at, paid_at')
+    .order('created_at', { ascending: false })
+    .limit(1000)
+
+  if (companyId) query = query.eq('company_id', companyId)
+  const { data } = await query
+  const rows = (data ?? []) as Array<Record<string, unknown>>
+  const dealIds = Array.from(new Set(rows.map((row) => row.deal_id).filter(Boolean))) as string[]
+  const agentIds = Array.from(new Set(rows.map((row) => row.agent_id).filter(Boolean))) as string[]
+  const [deals, agents] = await Promise.all([getDealMap(supabase, dealIds), getAgentMap(supabase, agentIds)])
+
+  return rows.map((row) => {
+    const deal = typeof row.deal_id === 'string' ? deals.get(row.deal_id) : undefined
+    const agent = typeof row.agent_id === 'string' ? agents.get(row.agent_id) : undefined
+    const gross = Number(row.gross_commission ?? row.total_amount ?? row.amount ?? 0)
+    const agentAmount = Number(row.agent_amount ?? row.amount ?? gross)
+    return {
+      id: String(row.id),
+      dealId: typeof row.deal_id === 'string' ? row.deal_id : null,
+      agentId: typeof row.agent_id === 'string' ? row.agent_id : null,
+      agentName: agent ?? 'غير محدد',
+      clientName: deal?.clientName ?? 'غير محدد',
+      dealTitle: deal?.title ?? 'صفقة غير محددة',
+      projectName: deal?.projectName ?? 'غير محدد',
+      grossDealValue: Number(row.gross_deal_value ?? deal?.value ?? 0),
+      commissionRate: Number(row.commission_rate ?? 0),
+      grossCommission: gross,
+      agentAmount,
+      companyAmount: Number(row.company_amount ?? Math.max(gross - agentAmount, 0)),
+      status: normalizeStatus(String(row.status ?? 'pending')),
+      paymentMethod: typeof row.payment_method === 'string' ? row.payment_method : null,
+      paymentReference: typeof row.payment_reference === 'string' ? row.payment_reference : null,
+      paymentDate: typeof row.payment_date === 'string' ? row.payment_date : null,
+      receiptUrl: typeof row.receipt_url === 'string' ? row.receipt_url : null,
+      notes: typeof row.notes === 'string' ? row.notes : null,
+      createdAt: String(row.created_at),
+      paidAt: typeof row.paid_at === 'string' ? row.paid_at : null,
+    }
+  })
+}
+
+async function getDealMap(supabase: ServerSupabase, ids: string[]) {
+  if (ids.length === 0) return new Map<string, { title: string; clientName: string; projectName: string; value: number }>()
+  const { data } = await supabase
+    .from('deals')
+    .select('id, title, client_name, buyer_name, project_name, value, unit_value, amount, final_price')
+    .in('id', ids)
+
+  return new Map((data ?? []).map((deal) => [deal.id, {
+    title: deal.title ?? deal.project_name ?? 'صفقة',
+    clientName: deal.client_name ?? deal.buyer_name ?? 'عميل',
+    projectName: deal.project_name ?? 'مشروع',
+    value: Number(deal.final_price ?? deal.unit_value ?? deal.value ?? deal.amount ?? 0),
+  }]))
+}
+
+async function getAgentMap(supabase: ServerSupabase, ids: string[]) {
+  if (ids.length === 0) return new Map<string, string>()
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', ids)
+  return new Map((data ?? []).map((profile) => [profile.id, profile.full_name ?? 'عضو فريق']))
+}
+
+async function getProjects(supabase: ServerSupabase): Promise<CommissionProjectOption[]> {
+  const { data } = await supabase.from('projects').select('id, name, developer_id, developer_name').limit(500)
+  return (data ?? []).map((project) => ({
+    id: project.id,
+    name: project.name,
+    developerId: project.developer_id ?? null,
+    developerName: project.developer_name ?? 'مطوّر',
+  }))
+}
+
+async function getRates(supabase: ServerSupabase): Promise<CommissionRateOption[]> {
+  const { data } = await supabase.from('commission_rates').select('*').limit(500)
+  return ((data ?? []) as Array<Record<string, unknown>>).map((rate) => ({
+    id: String(rate.id),
+    developerId: typeof rate.developer_id === 'string' ? rate.developer_id : null,
+    projectId: typeof rate.project_id === 'string' ? rate.project_id : null,
+    minValue: Number(rate.min_value ?? 0),
+    maxValue: rate.max_value === null || rate.max_value === undefined ? null : Number(rate.max_value),
+    ratePercentage: Number(rate.rate_percentage ?? 0),
+    agentSharePercentage: Number(rate.agent_share_percentage ?? 70),
+    companySharePercentage: Number(rate.company_share_percentage ?? 30),
+  }))
+}
+
+async function getLeads(supabase: ServerSupabase, companyId: string | null): Promise<CommissionLeadOption[]> {
+  let query = supabase.from('leads').select('id, client_name, full_name, name, company_id').limit(500)
+  if (companyId) query = query.eq('company_id', companyId)
+  const { data } = await query
+  return (data ?? []).map((lead) => ({ id: lead.id, name: lead.client_name ?? lead.full_name ?? lead.name ?? 'عميل' }))
+}
+
+async function getAgents(supabase: ServerSupabase, companyId: string | null) {
+  let query = supabase.from('profiles').select('id, full_name, role, company_id').in('role', ['agent', 'broker', 'senior_agent', 'branch_manager']).limit(200)
+  if (companyId) query = query.eq('company_id', companyId)
+  const { data } = await query
+  return (data ?? []).map((agent) => ({ id: agent.id, name: agent.full_name ?? 'عضو فريق' }))
+}
+
+function normalizeStatus(status: string): CommissionStatus {
+  if (['pending', 'approved', 'processing', 'paid', 'disputed', 'cancelled'].includes(status)) return status as CommissionStatus
+  return 'pending'
 }
