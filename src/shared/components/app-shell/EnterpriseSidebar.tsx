@@ -39,9 +39,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     : []
 
   const navigationGroups = [...visibleGroups, ...platformGroup]
-
   const mobileItems = navigationGroups.flatMap((group) => group.items).slice(0, 5)
-
   const initials = (profile.full_name ?? profile.email ?? 'FI')
     .split(' ')
     .map((part) => part[0])
@@ -55,22 +53,20 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   return (
     <>
       <aside className="hidden h-screen w-[292px] shrink-0 p-4 lg:block" dir="rtl">
-        <div className="fi-glass flex h-full flex-col overflow-hidden rounded-lg">
+        <div className="fi-glass flex h-full flex-col overflow-hidden rounded-lg border border-[var(--fi-line)]">
           <div className="border-b border-[var(--fi-line)] p-4">
             <Link href="/dashboard" className="flex items-center gap-3">
               <span className="flex size-11 items-center justify-center overflow-hidden rounded-lg bg-[var(--fi-soft)] bg-contain bg-center bg-no-repeat text-[var(--fi-emerald)]" style={tenantLogoStyle}>
-                {!tenantLogoUrl && (
-                  <Building2 className="size-5" />
-                )}
+                {!tenantLogoUrl && <Building2 className="size-5" aria-hidden="true" />}
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-black tracking-wide text-[var(--fi-ink)]">{tenantName}</span>
-                <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">Enterprise CRM</span>
+                <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">لوحة CRM</span>
               </span>
             </Link>
           </div>
 
-          <div className="mx-4 mt-4 rounded-lg border border-[var(--fi-line)] bg-white/70 p-3">
+          <div className="mx-4 mt-4 rounded-lg border border-[var(--fi-line)] bg-white/70 p-3 dark:bg-white/5">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-lg text-xs font-black text-white" style={{ background: 'var(--fi-gradient-primary)' }}>
                 {initials}
@@ -81,8 +77,8 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               </div>
             </div>
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-[11px] font-bold text-[var(--fi-emerald)]">
-              <Crown className="size-3.5" />
-              {tenantName} Workspace
+              <Crown className="size-3.5" aria-hidden="true" />
+              مساحة عمل {tenantName}
             </div>
           </div>
 
@@ -104,7 +100,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
           <div className="border-t border-[var(--fi-line)] p-3">
             <form action="/auth/logout" method="post">
               <button className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-red-50 hover:text-[var(--fi-danger)]">
-                <LogOut className="size-4" />
+                <LogOut className="size-4" aria-hidden="true" />
                 تسجيل الخروج
               </button>
             </form>
@@ -112,14 +108,18 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         </div>
       </aside>
 
-      {/* Mobile full-screen drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden" dir="rtl">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden="true" />
           <aside className="absolute inset-y-0 end-0 flex w-[280px] flex-col bg-[var(--fi-paper)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--fi-line)] p-4">
               <span className="text-sm font-black text-[var(--fi-ink)]">القائمة الرئيسية</span>
-              <button type="button" onClick={() => setMobileOpen(false)} aria-label="إغلاق القائمة" className="flex size-9 items-center justify-center rounded-lg hover:bg-[var(--fi-soft)] text-[var(--fi-muted)]">
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="إغلاق القائمة"
+                className="flex size-9 items-center justify-center rounded-lg text-[var(--fi-muted)] hover:bg-[var(--fi-soft)]"
+              >
                 <X className="size-4" />
               </button>
             </div>
@@ -141,7 +141,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             <div className="border-t border-[var(--fi-line)] p-3">
               <form action="/auth/logout" method="post">
                 <button className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-red-50 hover:text-[var(--fi-danger)]">
-                  <LogOut className="size-4" />
+                  <LogOut className="size-4" aria-hidden="true" />
                   تسجيل الخروج
                 </button>
               </form>
@@ -162,7 +162,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
                 active ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)]' : 'text-[var(--fi-muted)]'
               }`}
             >
-              <Icon className="size-4" />
+              <Icon className="size-4" aria-hidden="true" />
               <span className="max-w-full truncate">{item.title}</span>
             </Link>
           )
@@ -199,7 +199,7 @@ function SidebarGroup({
         className="mb-2 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[11px] font-black text-[var(--fi-muted)] transition hover:bg-[var(--fi-soft)] hover:text-[var(--fi-ink)]"
       >
         <span className="truncate">{group.title}</span>
-        <ChevronDown className={`size-3.5 transition ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`size-3.5 transition ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {isOpen && (
@@ -215,10 +215,10 @@ function SidebarGroup({
                 className={`group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
                   active
                     ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
-                    : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
+                    : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)] dark:hover:bg-white/5'
                 }`}
               >
-                <Icon className="size-4 shrink-0" />
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
                 <span className="min-w-0 flex-1 truncate leading-5">{item.title}</span>
               </Link>
             )

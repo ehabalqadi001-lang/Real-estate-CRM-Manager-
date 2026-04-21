@@ -1,37 +1,78 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, X, Loader2, DollarSign, Percent, User, Briefcase } from 'lucide-react'
+import { Briefcase, DollarSign, Loader2, Percent, PlusIcon, User, X } from 'lucide-react'
 import { closeDeal } from '@/app/dashboard/deals/actions'
 
-interface Lead { id: string; client_name: string }
-interface TeamMember { id: string; full_name: string }
+interface Lead {
+  id: string
+  client_name: string
+}
 
-export default function AddDealButton({ activeLeads, teamMembers }: { activeLeads: Lead[], teamMembers: TeamMember[] }) {
+interface TeamMember {
+  id: string
+  full_name: string
+}
+
+interface AddDealButtonProps {
+  activeLeads: Lead[]
+  teamMembers: TeamMember[]
+}
+
+export default function AddDealButton({ activeLeads, teamMembers }: AddDealButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const canSubmit = activeLeads.length > 0 && teamMembers.length > 0
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+
+    const formData = new FormData(event.currentTarget)
+    const leadId = String(formData.get('leadId') ?? '')
+    const agentId = String(formData.get('agentId') ?? '')
+    const finalPrice = Number(formData.get('finalPrice'))
+    const commissionRate = Number(formData.get('commissionRate'))
+
+    if (!leadId) {
+      setError('اختر العميل الذي أتم الشراء أولاً.')
+      return
+    }
+
+    if (!agentId) {
+      setError('اختر الوكيل المسؤول عن الصفقة أولاً.')
+      return
+    }
+
+    if (!Number.isFinite(finalPrice) || finalPrice <= 0) {
+      setError('أدخل قيمة عقد صحيحة أكبر من صفر.')
+      return
+    }
+
+    if (!Number.isFinite(commissionRate) || commissionRate <= 0) {
+      setError('أدخل نسبة عمولة صحيحة أكبر من صفر.')
+      return
+    }
+
     setIsLoading(true)
-    const formData = new FormData(e.currentTarget)
-    
+
     try {
-      const payload = {
-        leadId: (formData.get('leadId') ?? '') as string,
-        agentId: (formData.get('agentId') ?? '') as string,
-        finalPrice: Number(formData.get('finalPrice')),
-        commissionRate: Number(formData.get('commissionRate')),
-        discount: 0
-      }
-      
-      const response = await closeDeal(payload)
-      if (response && response.success) {
+      const response = await closeDeal({
+        leadId,
+        agentId,
+        finalPrice,
+        commissionRate,
+        discount: 0,
+      })
+
+      if (response?.success) {
         setIsOpen(false)
         window.location.reload()
       }
-    } catch (error: unknown) {
-      alert("تعذر حفظ الصفقة: " + (error instanceof Error ? error.message : 'خطأ غير معروف'))
+    } catch (caughtError: unknown) {
+      setError(caughtError instanceof Error ? caughtError.message : 'تعذر حفظ الصفقة. حاول مرة أخرى.')
     } finally {
       setIsLoading(false)
     }
@@ -39,66 +80,139 @@ export default function AddDealButton({ activeLeads, teamMembers }: { activeLead
 
   return (
     <>
-      <button 
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
+        className="flex min-h-11 items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-lg transition-all hover:bg-emerald-700"
       >
-        <PlusIcon size={18} /> توثيق صفقة جديدة
+        <PlusIcon size={18} aria-hidden="true" />
+        توثيق صفقة جديدة
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" dir="rtl">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-            
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                <Briefcase className="text-emerald-600"/> توثيق عقد مبيعات
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" dir="rtl">
+          <div className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
+              <h2 className="flex items-center gap-2 text-xl font-black text-slate-800">
+                <Briefcase className="text-emerald-600" aria-hidden="true" />
+                توثيق عقد مبيعات
               </h2>
-              <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 transition-colors">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-200"
+                aria-label="إغلاق"
+              >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              
+            <form onSubmit={handleSubmit} noValidate className="space-y-5 p-6">
+              {!canSubmit && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-800">
+                  {activeLeads.length === 0
+                    ? 'لا يوجد عملاء نشطون متاحون للتوثيق حالياً.'
+                    : 'لا يوجد وكلاء متاحون داخل الشركة. أضف وكيل أو فعّل حساب الوكيل أولاً.'}
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-bold leading-6 text-red-700">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><User size={16}/> العميل (Lead)</label>
-                <select name="leadId" required className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl font-medium outline-none focus:border-emerald-500">
+                <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                  <User size={16} aria-hidden="true" />
+                  العميل
+                </label>
+                <select
+                  name="leadId"
+                  defaultValue=""
+                  disabled={isLoading || activeLeads.length === 0}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 font-medium outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   <option value="">اختر العميل الذي أتم الشراء...</option>
-                  {activeLeads.map(lead => (
-                    <option key={lead.id} value={lead.id}>{lead.client_name}</option>
+                  {activeLeads.map((lead) => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.client_name || 'عميل بدون اسم'}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><User size={16}/> الوكيل المسؤول</label>
-                <select name="agentId" required className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl font-medium outline-none focus:border-emerald-500">
+                <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                  <User size={16} aria-hidden="true" />
+                  الوكيل المسؤول
+                </label>
+                <select
+                  name="agentId"
+                  defaultValue=""
+                  disabled={isLoading || teamMembers.length === 0}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 font-medium outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   <option value="">اختر الوكيل لإضافة العمولة لحسابه...</option>
-                  {teamMembers.map(agent => (
-                    <option key={agent.id} value={agent.id}>{agent.full_name}</option>
+                  {teamMembers.map((agent) => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.full_name || 'وكيل بدون اسم'}
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><DollarSign size={16}/> قيمة العقد النهائي</label>
-                  <input type="number" name="finalPrice" required min="0" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl font-bold outline-none focus:border-emerald-500" placeholder="مثال: 5000000" />
+                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                    <DollarSign size={16} aria-hidden="true" />
+                    قيمة العقد النهائية
+                  </label>
+                  <input
+                    type="number"
+                    name="finalPrice"
+                    min="1"
+                    inputMode="decimal"
+                    disabled={isLoading}
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 font-bold outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    placeholder="مثال: 5000000"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><Percent size={16}/> نسبة العمولة (%)</label>
-                  <input type="number" step="0.01" name="commissionRate" required min="0" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl font-bold outline-none focus:border-emerald-500" placeholder="مثال: 2.5" />
+                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                    <Percent size={16} aria-hidden="true" />
+                    نسبة العمولة (%)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="commissionRate"
+                    min="0.01"
+                    inputMode="decimal"
+                    disabled={isLoading}
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 font-bold outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    placeholder="مثال: 2.5"
+                  />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100">
-                <button type="submit" disabled={isLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl font-black transition-all flex justify-center items-center gap-2">
-                  {isLoading ? <><Loader2 size={18} className="animate-spin"/> جاري التوثيق...</> : 'تأكيد الصفقة وحساب العمولة'}
+              <div className="border-t border-slate-100 pt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading || !canSubmit}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 p-3.5 font-black text-white transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                      جاري التوثيق...
+                    </>
+                  ) : (
+                    'تأكيد الصفقة وحساب العمولة'
+                  )}
                 </button>
               </div>
             </form>
-
           </div>
         </div>
       )}

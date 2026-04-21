@@ -1,5 +1,16 @@
 import Link from 'next/link'
-import { BarChart3, Building2, ChevronDown, CircleDollarSign, Code2, Headphones, LayoutDashboard, Megaphone, ShieldCheck, Users } from 'lucide-react'
+import {
+  BarChart3,
+  Building2,
+  ChevronDown,
+  CircleDollarSign,
+  Code2,
+  Headphones,
+  LayoutDashboard,
+  Megaphone,
+  ShieldCheck,
+  Users,
+} from 'lucide-react'
 import { requirePermission } from '@/shared/rbac/require-permission'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="border-b border-white/10 p-5">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)]">
-              <ShieldCheck className="size-5" />
+              <ShieldCheck className="size-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-xs font-black text-[var(--fi-emerald)]">FAST INVESTMENT</p>
@@ -26,12 +37,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <details key={group.title} className="group" open={index < 2}>
               <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-xs font-black text-white/45 transition hover:bg-white/5 hover:text-white">
                 <span>{group.title}</span>
-                <ChevronDown className="size-3.5 transition group-open:rotate-180" />
+                <ChevronDown className="size-3.5 transition group-open:rotate-180" aria-hidden="true" />
               </summary>
               <div className="mt-1 space-y-1">
                 {group.items.map((item) => (
                   <Link key={item.href} href={item.href} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white">
-                    <item.icon className="size-4 shrink-0" />
+                    <item.icon className="size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   </Link>
                 ))}
