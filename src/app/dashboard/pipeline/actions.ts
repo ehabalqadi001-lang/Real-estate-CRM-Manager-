@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { hasPermission, normalizeRole, type Role } from '@/lib/permissions'
+import { getCountryCode } from '@/lib/country'
+import { calculateDealVat } from '@/lib/tax'
 
 export type CreateDealInput = {
   leadId: string
@@ -55,6 +57,8 @@ export async function createPipelineDeal(input: CreateDealInput) {
   const actor = await requirePermission(supabase, 'deals:write')
   const canAssignAgents = hasPermission(actor.role, 'team:manage') || actor.role === 'senior_agent'
   const agentId = canAssignAgents && input.agentId ? input.agentId : actor.id
+  const countryCode = await getCountryCode()
+  const tax = calculateDealVat(input.value, countryCode)
 
   if (agentId !== actor.id) await assertAgentInCompany(supabase, actor, agentId)
 
@@ -69,6 +73,11 @@ export async function createPipelineDeal(input: CreateDealInput) {
       title: input.title,
       value: input.value,
       unit_value: input.value,
+      country_code: countryCode,
+      subtotal_amount: tax.subtotal,
+      tax_rate: tax.taxRate,
+      tax_amount: tax.tax,
+      total_with_tax: tax.total,
       expected_close_date: input.expectedCloseDate || null,
       notes: input.notes || null,
     })
@@ -92,18 +101,30 @@ export async function updatePipelineDeal(input: UpdateDealInput) {
   const supabase = await createServerSupabaseClient()
   const actor = await requirePermission(supabase, 'deals:write')
   await assertDealScope(supabase, actor, input.dealId)
+  const countryCode = await getCountryCode()
 
   const update: {
     stage?: string
     value?: number
     unit_value?: number
+    country_code?: string
+    subtotal_amount?: number
+    tax_rate?: number
+    tax_amount?: number
+    total_with_tax?: number
     expected_close_date?: string | null
     notes?: string | null
   } = {}
   if (input.stage) update.stage = input.stage
   if (typeof input.value === 'number') {
+    const tax = calculateDealVat(input.value, countryCode)
     update.value = input.value
     update.unit_value = input.value
+    update.country_code = countryCode
+    update.subtotal_amount = tax.subtotal
+    update.tax_rate = tax.taxRate
+    update.tax_amount = tax.tax
+    update.total_with_tax = tax.total
   }
   if (input.expectedCloseDate !== undefined) update.expected_close_date = input.expectedCloseDate
   if (input.notes !== undefined) update.notes = input.notes

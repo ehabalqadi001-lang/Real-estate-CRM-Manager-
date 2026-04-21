@@ -7,6 +7,9 @@ import Providers from '@/components/Providers'
 import PWAInstaller from '@/components/PWAInstaller'
 import NotificationListener from '@/components/NotificationListener'
 import { cn } from "@/lib/utils";
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+import { getLocaleFromCookies } from '@/lib/country'
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -30,23 +33,28 @@ export const metadata: Metadata = {
   other: { 'mobile-web-app-capable': 'yes' },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocaleFromCookies()
+  const messages = await getMessages()
+
   return (
     // إضافة suppressHydrationWarning لمنع أخطاء next-themes التحذيرية
-    <html lang="ar" dir="rtl" className={cn(cairo.variable, inter.variable, geist.variable, "font-cairo")} suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'en' ? 'ltr' : 'rtl'} className={cn(cairo.variable, inter.variable, geist.variable, "font-cairo")} suppressHydrationWarning>
       {/* دعم الألوان الداكنة في خلفية النظام (Dark Mode background) */}
       <body className={`font-cairo bg-slate-50 dark:bg-slate-950 text-navy-dark dark:text-slate-100 antialiased transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Providers>
-            <CommandPalette />
-            <PWAInstaller />
-            <NotificationListener />
-            {children}
-          </Providers>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <Providers>
+              <CommandPalette />
+              <PWAInstaller />
+              <NotificationListener />
+              {children}
+            </Providers>
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

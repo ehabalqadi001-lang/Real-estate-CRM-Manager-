@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { sendNotification } from '@/lib/notify'
 import { hasPermission, normalizeRole, type Role } from '@/lib/permissions'
+import { getCountryCode } from '@/lib/country'
+import { calculateCommissionVat, calculateDealVat } from '@/lib/tax'
 
 export type CommissionRequestInput = {
   commissionId: string
@@ -106,14 +108,22 @@ export async function payCommission(commissionId: string) {
 export async function addCommission(formData: FormData) {
   const supabase = await createServerSupabaseClient()
   const actor = await requirePermission(supabase, 'commissions:approve')
+  const countryCode = await getCountryCode()
+  const amount = Number(formData.get('amount') || 0)
+  const tax = calculateCommissionVat(amount, countryCode)
   const payload = {
     deal_id: formData.get('deal_id') || null,
     agent_id: formData.get('member_id') || null,
     company_id: actor.companyId ?? actor.id,
-    amount: Number(formData.get('amount') || 0),
-    total_amount: Number(formData.get('amount') || 0),
-    gross_commission: Number(formData.get('amount') || 0),
-    agent_amount: Number(formData.get('amount') || 0),
+    amount,
+    total_amount: amount,
+    gross_commission: amount,
+    agent_amount: amount,
+    country_code: countryCode,
+    subtotal_amount: tax.subtotal,
+    tax_rate: tax.taxRate,
+    tax_amount: tax.tax,
+    total_with_tax: tax.total,
     commission_type: formData.get('commission_type') || 'agent',
     status: formData.get('status') || 'pending',
   }
@@ -152,6 +162,8 @@ export async function createDealFromCalculator(input: {
 }) {
   const supabase = await createServerSupabaseClient()
   const actor = await requirePermission(supabase, 'deals:write')
+  const countryCode = await getCountryCode()
+  const tax = calculateDealVat(input.value, countryCode)
 
   const { data, error } = await supabase
     .from('deals')
@@ -163,6 +175,11 @@ export async function createDealFromCalculator(input: {
       title: input.title,
       value: input.value,
       unit_value: input.value,
+      country_code: countryCode,
+      subtotal_amount: tax.subtotal,
+      tax_rate: tax.taxRate,
+      tax_amount: tax.tax,
+      total_with_tax: tax.total,
       stage: 'new',
     })
     .select('id')
