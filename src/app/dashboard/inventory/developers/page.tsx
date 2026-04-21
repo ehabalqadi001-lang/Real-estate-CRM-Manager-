@@ -32,7 +32,7 @@ export default async function InventoryDevelopersPage() {
 
   return (
     <main className="space-y-5 p-4 sm:p-6" dir="rtl">
-      <header className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+      <header className="ds-card-hover rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)] text-white">
             <Building2 className="size-5" />
@@ -60,7 +60,7 @@ export default async function InventoryDevelopersPage() {
 
             return (
               <Link key={developer.id} href={`/dashboard/inventory?developer=${developer.id}`}>
-                <Card className="h-full border-[var(--fi-line)] bg-[var(--fi-paper)] transition hover:shadow-md">
+                <Card className="ds-card-hover h-full border-[var(--fi-line)] bg-[var(--fi-paper)] transition hover:shadow-md">
                   <CardContent className="space-y-5 p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">

@@ -68,7 +68,7 @@ export function UnitCard({ unit, onDetails, onHeld }: UnitCardProps) {
   }
 
   return (
-    <article className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm transition hover:shadow-md">
+    <article className="ds-card-hover overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm transition hover:shadow-md">
       <div className="relative aspect-[4/3] bg-[var(--fi-soft)]">
         {unit.coverImageUrl ? (
           <Image

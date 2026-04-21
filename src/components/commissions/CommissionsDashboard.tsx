@@ -82,7 +82,7 @@ export function CommissionsDashboard({
 
   return (
     <section className="space-y-4" dir="rtl">
-      <div className="rounded-xl border border-[var(--fi-line)] bg-white p-4">
+      <div className="ds-card-hover rounded-xl border border-[var(--fi-line)] bg-white p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export function CommissionsDashboard({
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-[var(--fi-line)] bg-white">
+      <div className="ds-card-hover overflow-hidden rounded-xl border border-[var(--fi-line)] bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-right text-sm">
             <thead className="bg-[var(--fi-soft)]">
@@ -174,7 +174,7 @@ export function CommissionsDashboard({
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[var(--fi-line)] bg-white p-4">
+    <div className="ds-card-hover rounded-xl border border-[var(--fi-line)] bg-white p-4">
       <p className="text-xs font-black text-[var(--fi-muted)]">{label}</p>
       <p className="mt-2 text-xl font-black text-[var(--fi-ink)]">{value}</p>
     </div>

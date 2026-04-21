@@ -376,7 +376,12 @@ function SortableDealCard({ deal, disabled, onClick, onMove }: {
   onMove: (dealId: string, stage: PipelineStage) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: deal.id, disabled })
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.45 : 1 }
+  const baseTransform = CSS.Transform.toString(transform)
+  const style = {
+    transform: [baseTransform, isDragging ? 'scale(1.02)' : ''].filter(Boolean).join(' ') || undefined,
+    transition,
+    opacity: isDragging ? 0.45 : 1,
+  }
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -403,7 +408,7 @@ function CompactDealCard({ deal, onClick, dragHandle, isOverlay = false }: {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-right shadow-sm transition hover:border-[var(--fi-emerald)] hover:shadow-md ${isOverlay ? 'w-72 rotate-1 shadow-xl' : ''}`}
+      className={`ds-card-hover w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-right shadow-sm transition hover:border-[var(--fi-emerald)] hover:shadow-md ${isOverlay ? 'w-72 rotate-1 shadow-xl' : ''}`}
     >
       <div className="flex items-start gap-2">
         {dragHandle}
@@ -687,7 +692,7 @@ function FilterSelect({ label, value, onChange, icon, children }: {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3">
+    <div className="ds-card-hover rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3">
       <p className="text-xs font-black text-[var(--fi-muted)]">{label}</p>
       <p className="fi-tabular mt-2 text-xl font-black text-[var(--fi-ink)]">{value}</p>
     </div>

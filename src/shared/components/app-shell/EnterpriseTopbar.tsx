@@ -3,6 +3,7 @@
 import { Menu, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import type { AppProfile } from '@/shared/auth/types'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
   const tenantName = profile.tenant_name ?? 'FAST INVESTMENT'
@@ -48,6 +49,7 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <NotificationBell userId={profile.id} />
           <button
             type="button"

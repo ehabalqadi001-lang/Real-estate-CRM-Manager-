@@ -162,7 +162,7 @@ export default async function InventoryPage({
 
   return (
     <main className="space-y-5 p-4 sm:p-6" dir="rtl">
-      <header className="flex flex-col gap-4 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <header className="ds-card-hover flex flex-col gap-4 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)] text-white">
             <Building2 className="size-5" />
@@ -202,7 +202,7 @@ export default async function InventoryPage({
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Home }) {
   return (
-    <Card className="border-[var(--fi-line)] bg-[var(--fi-paper)]">
+    <Card className="ds-card-hover border-[var(--fi-line)] bg-[var(--fi-paper)]">
       <CardContent className="flex items-center gap-3 p-4">
         <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
           <Icon className="size-4" />
