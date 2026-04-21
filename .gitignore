@@ -78,3 +78,5 @@ next-env.d.ts
 skills-lock.json
 skills/
 supabase/.temp/
+
+.vercel
