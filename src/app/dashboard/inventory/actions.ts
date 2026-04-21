@@ -18,7 +18,9 @@ export async function addSingleUnit(formData: FormData) {
     developer_id: String(formData.get('developer_id') ?? ''),
     unit_type: String(formData.get('unit_type') ?? ''),
     price: Number.parseFloat(String(formData.get('price') ?? '0')) || 0,
+    area_sqm: Number.parseFloat(String(formData.get('area_sqm') ?? '0')) || undefined,
     status: String(formData.get('status') ?? 'available'),
+    description: String(formData.get('description') ?? ''),
   })
 
   if (!result.ok) {

@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { AiFollowUpMessageButton } from '@/components/ai/ai-follow-up-message-button'
 import { createBrowserSupabaseClient } from '@/shared/supabase/browser'
 import type { CreateDealInput, UpdateDealInput } from '@/app/dashboard/pipeline/actions'
 
@@ -484,6 +485,13 @@ function DealDetailSheet({ deal, activities, onClose, onUpdate, onAddActivity }:
               <Field label="ملاحظات الصفقة">
                 <textarea className="min-h-24 rounded-lg border border-[var(--fi-line)] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[var(--fi-emerald)]/30" value={notes} onChange={(event) => setNotes(event.target.value)} />
               </Field>
+              <AiFollowUpMessageButton
+                clientName={deal.clientName}
+                dealStage={stageLabel(stage)}
+                lastContactDate={deal.updatedAt ?? deal.createdAt}
+                propertyInterest={deal.unitName || deal.projectName || deal.title}
+                objections={notes || deal.notes}
+              />
               <Button
                 type="button"
                 className="w-full gap-2 bg-[var(--fi-emerald)] text-white hover:bg-[var(--fi-emerald)]/90"

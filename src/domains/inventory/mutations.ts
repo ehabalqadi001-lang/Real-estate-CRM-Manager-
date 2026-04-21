@@ -28,7 +28,9 @@ export async function createInventoryUnit(input: CreateInventoryUnitInput): Prom
     developer_id: input.developer_id.trim(),
     unit_type: input.unit_type.trim(),
     price: input.price,
+    area_sqm: input.area_sqm ?? null,
     status: input.status || 'available',
+    description: input.description?.trim() || null,
   }])
 
   if (error) {

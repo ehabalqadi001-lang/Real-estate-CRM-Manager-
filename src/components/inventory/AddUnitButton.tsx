@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { PlusIcon, X, UploadCloud, FileSpreadsheet } from 'lucide-react'
 import { getDevelopersList, addSingleUnit, addBulkUnits } from '@/app/dashboard/inventory/actions'
+import { AiPropertyDescriptionButton } from '@/components/ai/ai-property-description-button'
 import readXlsxFile from 'read-excel-file/browser'
 
 type CellValue = string | number | boolean | Date | null
@@ -74,6 +75,11 @@ export default function AddUnitButton() {
   const [developers, setDevelopers] = useState<{id: string, name: string}[]>([])
   const [selectedDeveloper, setSelectedDeveloper] = useState('')
   const [excelFile, setExcelFile] = useState<File | null>(null)
+  const [unitName, setUnitName] = useState('')
+  const [unitType, setUnitType] = useState('')
+  const [unitPrice, setUnitPrice] = useState('')
+  const [unitArea, setUnitArea] = useState('')
+  const [unitDescription, setUnitDescription] = useState('')
 
   useEffect(() => {
     if (!isOpen) return
@@ -148,11 +154,11 @@ export default function AddUnitButton() {
                 <form onSubmit={handleSingleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">اسم الوحدة / الكود</label>
-                    <input name="unit_name" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                    <input name="unit_name" required value={unitName} onChange={(event) => setUnitName(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">المطور العقاري</label>
-                    <select name="developer_id" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                    <select name="developer_id" required value={selectedDeveloper} onChange={(event) => setSelectedDeveloper(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                       <option value="">-- اختر المطور --</option>
                       {developers.map(dev => <option key={dev.id} value={dev.id}>{dev.name}</option>)}
                     </select>
@@ -160,12 +166,39 @@ export default function AddUnitButton() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">نوع الوحدة</label>
-                      <input name="unit_type" placeholder="شقة، فيلا، تجاري..." required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                      <input name="unit_type" placeholder="شقة، فيلا، تجاري..." required value={unitType} onChange={(event) => setUnitType(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">السعر</label>
-                      <input name="price" type="number" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                      <input name="price" type="number" required value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">المساحة بالمتر</label>
+                    <input name="area_sqm" type="number" min="1" value={unitArea} onChange={(event) => setUnitArea(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="block text-xs font-bold text-slate-700">وصف تسويقي</label>
+                      <AiPropertyDescriptionButton
+                        input={{
+                          projectName: developers.find((developer) => developer.id === selectedDeveloper)?.name ?? unitName,
+                          area: Number(unitArea) || 120,
+                          bedrooms: null,
+                          price: Number(unitPrice) || 0,
+                          finishing: null,
+                          unitType,
+                        }}
+                        onGenerated={setUnitDescription}
+                      />
+                    </div>
+                    <textarea
+                      name="description"
+                      value={unitDescription}
+                      onChange={(event) => setUnitDescription(event.target.value)}
+                      className="min-h-28 w-full rounded-lg border px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                      placeholder="اكتب وصفاً مختصراً أو استخدم التوليد بالذكاء الاصطناعي"
+                    />
                   </div>
                   <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold mt-2">{loading ? 'جاري الحفظ...' : 'حفظ الوحدة'}</button>
                 </form>

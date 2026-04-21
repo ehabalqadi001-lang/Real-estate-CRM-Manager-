@@ -35,7 +35,9 @@ export interface CreateInventoryUnitInput {
   developer_id: string
   unit_type: string
   price: number
+  area_sqm?: number
   status?: string
+  description?: string
 }
 
 export interface BulkInventoryUnitInput {

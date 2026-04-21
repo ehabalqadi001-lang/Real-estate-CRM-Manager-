@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { holdInventoryUnit } from '@/app/dashboard/inventory/actions'
+import { AiPriceAnalyzerButton } from '@/components/ai/ai-price-analyzer-button'
 import { HoldTimer } from './hold-timer'
 import type { InventoryUnit } from './inventory-types'
 
@@ -213,7 +214,7 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
                 </TabsContent>
               </Tabs>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Link href={`/dashboard/pipeline/new?unit=${unit.id}`} className={buttonVariants({ className: 'h-8 gap-1.5 px-2.5' })}>
                   <Send className="size-4" />
                   إضافة لصفقة
@@ -226,6 +227,17 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
                   <Hand className="size-4" />
                   احتجاز ٤٨ ساعة
                 </Button>
+                <AiPriceAnalyzerButton
+                  input={{
+                    unitId: unit.id,
+                    projectId: unit.projectId,
+                    unitType: unit.unitType,
+                    areaSqm: unit.areaSqm,
+                    price: unit.price,
+                    city: unit.city,
+                    finishing: unit.finishing,
+                  }}
+                />
               </div>
             </div>
           </>
