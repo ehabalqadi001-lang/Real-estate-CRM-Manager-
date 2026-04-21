@@ -1,25 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-export function useCountUp(target: number, duration = 850) {
-  const [value, setValue] = useState(0)
+type UseCountUpOptions = {
+  duration?: number
+  decimals?: number
+  enabled?: boolean
+}
+
+export function useCountUp(value: number, options: UseCountUpOptions = {}) {
+  const { duration = 900, decimals = 0, enabled = true } = options
+  const [displayValue, setDisplayValue] = useState(enabled ? 0 : value)
 
   useEffect(() => {
-    const start = performance.now()
-    const from = 0
+    if (!enabled) {
+      setDisplayValue(value)
+      return
+    }
+
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (media.matches) {
+      setDisplayValue(value)
+      return
+    }
+
     let frame = 0
+    const startedAt = performance.now()
+    const from = displayValue
+    const diff = value - from
 
     function tick(now: number) {
-      const progress = Math.min(1, (now - start) / duration)
+      const progress = Math.min((now - startedAt) / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
-      setValue(Math.round(from + (target - from) * eased))
+      setDisplayValue(from + diff * eased)
       if (progress < 1) frame = requestAnimationFrame(tick)
     }
 
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [duration, target])
+  }, [value, duration, enabled])
 
-  return value
+  return useMemo(() => Number(displayValue.toFixed(decimals)), [displayValue, decimals])
 }

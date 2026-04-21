@@ -6,6 +6,13 @@
   --color-primary-700: #2C5282;
   --color-primary-900: #1A365D;
 
+  /* Fast Investment Brand */
+  --color-brand-emerald: #27AE60;
+  --color-brand-emerald-strong: #15803D;
+  --color-brand-blue: #3498DB;
+  --color-brand-gold: #C9964A;
+  --color-brand-ink: #17202A;
+
   /* Semantic Colors */
   --color-success: #276749;
   --color-warning: #B7791F;
@@ -36,42 +43,94 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.10);
   --shadow-lift: 0 16px 38px rgba(26,54,93,0.14);
+  --shadow-command: 0 24px 80px rgba(13,27,42,0.20);
 
+  /* Surfaces */
   --color-bg: #F7FAF8;
   --color-surface: #FFFFFF;
+  --color-surface-muted: #EEF7F1;
   --color-border: #E4ECE7;
   --color-text: #17202A;
+  --color-text-muted: #667085;
+  --color-focus: #27AE60;
+
+  /* Compatibility with existing FI tokens */
+  --fi-bg: var(--color-bg);
+  --fi-paper: var(--color-surface);
+  --fi-soft: var(--color-surface-muted);
+  --fi-ink: var(--color-text);
+  --fi-muted: var(--color-text-muted);
+  --fi-line: var(--color-border);
+  --fi-emerald: var(--color-brand-emerald);
+  --fi-blue: var(--color-brand-blue);
 }
 
 [data-theme="dark"] {
   --color-bg: #0D1B2A;
   --color-surface: #1A2B3C;
+  --color-surface-muted: #132437;
   --color-border: #2D3748;
   --color-text: #E2E8F0;
+  --color-text-muted: #94A3B8;
+  --color-focus: #00C27C;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md: 0 6px 18px rgba(0,0,0,0.38);
+  --shadow-lg: 0 14px 38px rgba(0,0,0,0.45);
+  --shadow-lift: 0 20px 48px rgba(0,0,0,0.50);
+  --shadow-command: 0 28px 90px rgba(0,0,0,0.58);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  min-width: 375px;
+  line-height: var(--line-height-arabic);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+[dir="ltr"] body,
+html[lang="en"] body {
+  line-height: var(--line-height-base);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-brand-emerald) 24%, transparent);
+}
+
+/* Bento Grid Dashboard Layout */
 .ds-bento-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--space-4);
+  width: 100%;
 }
 
-.ds-bento-main {
+.ds-bento-main,
+.ds-bento-sidebar,
+.ds-bento-full {
   grid-column: span 12 / span 12;
-}
-
-.ds-bento-sidebar {
-  grid-column: span 12 / span 12;
+  min-width: 0;
 }
 
 .ds-bento-kpi {
-  grid-column: span 6 / span 6;
+  grid-column: span 12 / span 12;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .ds-bento-kpi {
+    grid-column: span 6 / span 6;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -88,12 +147,26 @@
   }
 }
 
+.ds-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
 .ds-card-hover {
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 
 .ds-card-hover:hover {
   transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-brand-emerald) 42%, var(--color-border));
+  box-shadow: var(--shadow-lift);
+}
+
+.ds-kanban-dragging {
+  transform: scale(1.025);
   box-shadow: var(--shadow-lift);
 }
 
@@ -105,11 +178,20 @@
   animation: ds-toast-slide-in 220ms ease both;
 }
 
-.ds-skeleton {
+.ds-command-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-command);
+}
+
+.ds-skeleton,
+.ds-chart-shimmer {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-border) 58%, transparent);
+  background: color-mix(in srgb, var(--color-border) 62%, var(--color-surface));
 }
 
 .ds-skeleton::after,
@@ -118,16 +200,22 @@
   inset: 0;
   content: '';
   transform: translateX(100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, #ffffff 58%, transparent), transparent);
   animation: ds-shimmer 1.35s infinite;
 }
 
+[data-theme="dark"] .ds-skeleton::after,
+[data-theme="dark"] .ds-chart-shimmer::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
 .ds-chart-shimmer {
-  position: relative;
   min-height: 260px;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-primary-100) 38%, var(--color-surface));
+}
+
+.ds-optimistic {
+  opacity: 0.72;
+  pointer-events: none;
 }
 
 @keyframes ds-fade-slide-up {
@@ -161,8 +249,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ds-page-enter,
   .ds-toast-enter,
+  .ds-card-hover,
   .ds-skeleton::after,
   .ds-chart-shimmer::after {
     animation: none;
+    transition: none;
   }
 }

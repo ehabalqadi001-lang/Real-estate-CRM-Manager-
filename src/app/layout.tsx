@@ -46,7 +46,7 @@ export default async function RootLayout({
     <html lang={locale} dir={locale === 'en' ? 'ltr' : 'rtl'} className={cn(cairo.variable, inter.variable, geist.variable, "font-cairo")} suppressHydrationWarning>
       {/* دعم الألوان الداكنة في خلفية النظام (Dark Mode background) */}
       <body className={`font-cairo bg-slate-50 dark:bg-slate-950 text-navy-dark dark:text-slate-100 antialiased transition-colors duration-300`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute={['class', 'data-theme']} defaultTheme="system" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <Providers>
               <CommandPalette />
