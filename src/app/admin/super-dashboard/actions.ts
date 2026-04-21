@@ -109,6 +109,12 @@ export async function createTenant(formData: FormData) {
   if (subscriptionError) throw new Error(subscriptionError.message)
 
   if (adminEmail) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', adminEmail)
+      .maybeSingle()
+
     await supabase
       .from('profiles')
       .update({
@@ -121,6 +127,19 @@ export async function createTenant(formData: FormData) {
         is_active: true,
       })
       .eq('email', adminEmail)
+
+    if (profile?.id) {
+      await supabase
+        .from('user_profiles')
+        .update({
+          company_id: tenant.id,
+          role: 'company_admin',
+          account_type: 'company',
+          status: 'active',
+          onboarding_completed: true,
+        })
+        .eq('id', profile.id)
+    }
   }
 
   revalidatePath('/admin/super-dashboard')

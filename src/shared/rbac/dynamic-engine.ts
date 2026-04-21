@@ -61,7 +61,11 @@ export async function checkPermission(
 export async function loadPermissionMatrixData() {
   const supabase = createServiceRoleClient()
 
-  const [{ data: profiles }, { data: permissions }, { data: overrides }] = await Promise.all([
+  const [{ data: userProfiles }, { data: legacyProfiles }, { data: permissions }, { data: overrides }] = await Promise.all([
+    supabase
+      .from('user_profiles')
+      .select('id, full_name, role')
+      .order('full_name'),
     supabase
       .from('profiles')
       .select('id, full_name, email, role')
@@ -74,9 +78,13 @@ export async function loadPermissionMatrixData() {
       .from('user_permission_overrides')
       .select('user_id, permission_id, granted, reason, granted_by'),
   ])
+  const legacyById = new Map((legacyProfiles ?? []).map((profile) => [profile.id, profile]))
+  const profiles = userProfiles && userProfiles.length > 0
+    ? userProfiles.map((profile) => ({ ...profile, email: legacyById.get(profile.id)?.email ?? null }))
+    : legacyProfiles ?? []
 
   return {
-    profiles: profiles ?? [],
+    profiles,
     permissions: permissions ?? [],
     overrides: overrides ?? [],
   }

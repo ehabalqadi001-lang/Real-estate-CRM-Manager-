@@ -7,6 +7,7 @@ import { Eye, Mail, Shield, UserX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { updateMemberRole, suspendMember, inviteAgentByEmail } from '@/app/dashboard/team/actions'
+import { canAssignRole, normalizeRole, type Role } from '@/lib/permissions'
 
 export type TeamMemberRow = {
   id: string
@@ -20,7 +21,13 @@ export type TeamMemberRow = {
   sparkline: Array<{ label: string; value: number }>
 }
 
-export function TeamManagementClient({ members }: { members: TeamMemberRow[] }) {
+export function TeamManagementClient({
+  members,
+  currentRole,
+}: {
+  members: TeamMemberRow[]
+  currentRole: Role
+}) {
   const [view, setView] = useState<'table' | 'leaderboard'>('table')
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteName, setInviteName] = useState('')
@@ -28,6 +35,10 @@ export function TeamManagementClient({ members }: { members: TeamMemberRow[] }) 
 
   const sorted = useMemo(() => [...members].sort((a, b) => b.monthSales - a.monthSales), [members])
   const rows = view === 'leaderboard' ? sorted : members
+  const roleOptions = useMemo(
+    () => (['branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'] as Role[]).filter((role) => canAssignRole(currentRole, role)),
+    [currentRole],
+  )
 
   return (
     <section className="space-y-4" dir="rtl">
@@ -39,22 +50,27 @@ export function TeamManagementClient({ members }: { members: TeamMemberRow[] }) 
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant={view === 'table' ? 'default' : 'outline'} onClick={() => setView('table')}>جدول</Button>
-            <Button variant={view === 'leaderboard' ? 'default' : 'outline'} onClick={() => setView('leaderboard')}>Leaderboard</Button>
+            <Button variant={view === 'leaderboard' ? 'default' : 'outline'} onClick={() => setView('leaderboard')}>ترتيب الأداء</Button>
           </div>
         </div>
+
         <div className="mt-4 grid gap-2 md:grid-cols-[1fr_1fr_auto]">
           <Input placeholder="اسم الوسيط" value={inviteName} onChange={(event) => setInviteName(event.target.value)} />
           <Input placeholder="البريد الإلكتروني" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} />
-          <Button disabled={isPending || !inviteEmail} className="gap-2 bg-[var(--fi-emerald)] text-white hover:bg-[var(--fi-emerald)]/90" onClick={() => startTransition(async () => {
-            const result = await inviteAgentByEmail(inviteEmail, inviteName)
-            if (result.success) {
-              toast.success('تم إرسال الدعوة')
-              setInviteEmail('')
-              setInviteName('')
-            } else {
-              toast.error(result.error ?? 'تعذر إرسال الدعوة')
-            }
-          })}>
+          <Button
+            disabled={isPending || !inviteEmail}
+            className="gap-2 bg-[var(--fi-emerald)] text-white hover:bg-[var(--fi-emerald)]/90"
+            onClick={() => startTransition(async () => {
+              const result = await inviteAgentByEmail(inviteEmail, inviteName)
+              if (result.success) {
+                toast.success('تم إرسال الدعوة')
+                setInviteEmail('')
+                setInviteName('')
+              } else {
+                toast.error(result.error ?? 'تعذر إرسال الدعوة')
+              }
+            })}
+          >
             <Mail className="size-4" />
             إضافة وسيط
           </Button>
@@ -77,18 +93,31 @@ export function TeamManagementClient({ members }: { members: TeamMemberRow[] }) 
               </tr>
             </thead>
             <tbody>
-              {rows.map((member, index) => (
+              {rows.length === 0 ? (
+                <tr>
+                  <td className="p-6 text-center font-bold text-[var(--fi-muted)]" colSpan={8}>لا يوجد أعضاء فريق حتى الآن</td>
+                </tr>
+              ) : rows.map((member, index) => (
                 <tr key={member.id} className="border-t border-[var(--fi-line)]">
                   <td className="p-3">
                     <p className="font-black text-[var(--fi-ink)]">{view === 'leaderboard' ? `${index + 1}. ` : ''}{member.name}</p>
-                    <p className="text-xs font-semibold text-[var(--fi-muted)]">{member.email}</p>
+                    <p className="text-xs font-semibold text-[var(--fi-muted)]">{member.email ?? 'بدون بريد مسجل'}</p>
                   </td>
                   <td className="p-3">
-                    <select className="h-9 rounded-lg border border-[var(--fi-line)] bg-white px-2" value={member.role} onChange={(event) => startTransition(async () => {
-                      await updateMemberRole(member.id, event.target.value)
-                      toast.success('تم تحديث الدور')
-                    })}>
-                      {['branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'].map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
+                    <select
+                      className="h-9 rounded-lg border border-[var(--fi-line)] bg-white px-2"
+                      value={normalizeRole(member.role)}
+                      disabled={isPending || !roleOptions.length}
+                      onChange={(event) => startTransition(async () => {
+                        try {
+                          await updateMemberRole(member.id, event.target.value)
+                          toast.success('تم تحديث الدور')
+                        } catch (error) {
+                          toast.error(error instanceof Error ? error.message : 'تعذر تحديث الدور')
+                        }
+                      })}
+                    >
+                      {roleOptions.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
                     </select>
                   </td>
                   <td className="p-3 font-black">{member.activeDeals.toLocaleString('ar-EG')}</td>
@@ -103,15 +132,31 @@ export function TeamManagementClient({ members }: { members: TeamMemberRow[] }) 
                       </ResponsiveContainer>
                     </div>
                   </td>
-                  <td className="p-3"><span className={member.status === 'suspended' ? 'rounded-full bg-red-50 px-2 py-1 text-xs font-black text-red-700' : 'rounded-full bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-700'}>{member.status === 'suspended' ? 'معلق' : 'نشط'}</span></td>
+                  <td className="p-3">
+                    <span className={member.status === 'suspended' ? 'rounded-full bg-red-50 px-2 py-1 text-xs font-black text-red-700' : 'rounded-full bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-700'}>
+                      {member.status === 'suspended' ? 'معلق' : 'نشط'}
+                    </span>
+                  </td>
                   <td className="p-3">
                     <div className="flex gap-1">
                       <Button size="icon-sm" variant="outline" title="عرض التفاصيل"><Eye className="size-4" /></Button>
                       <Button size="icon-sm" variant="outline" title="تعديل الدور"><Shield className="size-4" /></Button>
-                      <Button size="icon-sm" variant="destructive" title="تعليق الحساب" onClick={() => startTransition(async () => {
-                        await suspendMember(member.id)
-                        toast.success('تم تعليق الحساب')
-                      })}><UserX className="size-4" /></Button>
+                      <Button
+                        size="icon-sm"
+                        variant="destructive"
+                        title="تعليق الحساب"
+                        disabled={isPending}
+                        onClick={() => startTransition(async () => {
+                          try {
+                            await suspendMember(member.id)
+                            toast.success('تم تعليق الحساب')
+                          } catch (error) {
+                            toast.error(error instanceof Error ? error.message : 'تعذر تعليق الحساب')
+                          }
+                        })}
+                      >
+                        <UserX className="size-4" />
+                      </Button>
                     </div>
                   </td>
                 </tr>

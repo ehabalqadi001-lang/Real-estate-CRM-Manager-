@@ -173,3 +173,152 @@ export async function sendWelcomeEmail(params: {
     // silent
   }
 }
+
+function companyDecisionHtml(params: {
+  title: string
+  eyebrow: string
+  ownerName: string
+  companyName: string
+  message: string
+  actionLabel?: string
+  actionUrl?: string
+  reason?: string
+  tone: 'approved' | 'rejected' | 'info'
+}) {
+  const toneStyles = {
+    approved: {
+      header: 'linear-gradient(135deg,#065f46 0%,#047857 100%)',
+      panelBg: '#ecfdf5',
+      panelBorder: '#a7f3d0',
+      accent: '#047857',
+    },
+    rejected: {
+      header: 'linear-gradient(135deg,#991b1b 0%,#dc2626 100%)',
+      panelBg: '#fef2f2',
+      panelBorder: '#fecaca',
+      accent: '#b91c1c',
+    },
+    info: {
+      header: 'linear-gradient(135deg,#1e40af 0%,#2563eb 100%)',
+      panelBg: '#eff6ff',
+      panelBorder: '#bfdbfe',
+      accent: '#1d4ed8',
+    },
+  }[params.tone]
+
+  return `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /></head>
+    <body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;direction:rtl">
+      <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+        <div style="background:${toneStyles.header};padding:28px 32px">
+          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:900">FAST INVESTMENT CRM</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,.72);font-size:13px">${params.eyebrow}</p>
+        </div>
+        <div style="padding:30px 32px">
+          <p style="color:#475569;font-size:14px;margin:0 0 18px">مرحباً ${params.ownerName}،</p>
+          <h2 style="color:#0f172a;font-size:20px;font-weight:900;margin:0 0 10px">${params.title}</h2>
+          <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 20px">${params.message}</p>
+          <div style="background:${toneStyles.panelBg};border:1px solid ${toneStyles.panelBorder};border-radius:12px;padding:18px;margin:18px 0">
+            <div style="font-size:12px;color:#64748b;margin-bottom:6px">الشركة</div>
+            <div style="font-size:17px;font-weight:900;color:#0f172a">${params.companyName}</div>
+            ${params.reason ? `<div style="margin-top:14px;font-size:12px;color:#64748b">التفاصيل</div><div style="margin-top:4px;font-size:14px;line-height:1.7;color:${toneStyles.accent};font-weight:700">${params.reason}</div>` : ''}
+          </div>
+          ${params.actionUrl && params.actionLabel ? `<a href="${params.actionUrl}" style="display:inline-block;background:${toneStyles.accent};color:#fff;text-decoration:none;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:800">${params.actionLabel}</a>` : ''}
+        </div>
+        <div style="padding:16px 32px;border-top:1px solid #f1f5f9;color:#94a3b8;font-size:11px;text-align:center">
+          هذا البريد أُرسل تلقائياً من منصة FAST INVESTMENT CRM
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
+export async function sendCompanyApprovedEmail(params: {
+  to: string
+  ownerName: string
+  companyName: string
+  loginUrl?: string
+}) {
+  if (!process.env.RESEND_API_KEY) return
+  const loginUrl = params.loginUrl ?? `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/login`
+  try {
+    await getResend().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `تمت الموافقة على شركة ${params.companyName}`,
+      html: companyDecisionHtml({
+        title: 'تم تفعيل حساب شركتك',
+        eyebrow: 'موافقة حساب شركة وساطة',
+        ownerName: params.ownerName,
+        companyName: params.companyName,
+        message: 'راجع فريق المنصة بيانات شركتك وتمت الموافقة عليها. يمكنك الآن تسجيل الدخول وإدارة الفريق والعملاء والصفقات من لوحة الشركة.',
+        actionLabel: 'تسجيل الدخول الآن',
+        actionUrl: loginUrl,
+        tone: 'approved',
+      }),
+    })
+  } catch {
+    // email errors must never crash the admin flow
+  }
+}
+
+export async function sendCompanyRejectedEmail(params: {
+  to: string
+  ownerName: string
+  companyName: string
+  reason: string
+}) {
+  if (!process.env.RESEND_API_KEY) return
+  try {
+    await getResend().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `تعذر قبول طلب شركة ${params.companyName}`,
+      html: companyDecisionHtml({
+        title: 'تعذر قبول طلب التسجيل',
+        eyebrow: 'نتيجة مراجعة الشركة',
+        ownerName: params.ownerName,
+        companyName: params.companyName,
+        message: 'بعد مراجعة الطلب، تعذر تفعيل حساب الشركة في الوقت الحالي. يمكنك مراجعة السبب أدناه والتواصل مع فريق الدعم لإعادة التقديم عند استكمال المطلوب.',
+        reason: params.reason,
+        tone: 'rejected',
+      }),
+    })
+  } catch {
+    // silent
+  }
+}
+
+export async function sendCompanyInfoRequestedEmail(params: {
+  to: string
+  ownerName: string
+  companyName: string
+  reason: string
+  dashboardUrl?: string
+}) {
+  if (!process.env.RESEND_API_KEY) return
+  const dashboardUrl = params.dashboardUrl ?? `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/company`
+  try {
+    await getResend().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `مطلوب استكمال بيانات شركة ${params.companyName}`,
+      html: companyDecisionHtml({
+        title: 'مطلوب استكمال بيانات الشركة',
+        eyebrow: 'طلب معلومات إضافية',
+        ownerName: params.ownerName,
+        companyName: params.companyName,
+        message: 'يحتاج فريق المنصة إلى بيانات أو وثائق إضافية قبل تفعيل حساب شركتك. برجاء مراجعة المطلوب وتحديث البيانات من لوحة الشركة.',
+        reason: params.reason,
+        actionLabel: 'فتح لوحة الشركة',
+        actionUrl: dashboardUrl,
+        tone: 'info',
+      }),
+    })
+  } catch {
+    // silent
+  }
+}

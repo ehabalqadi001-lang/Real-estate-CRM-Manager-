@@ -1,6 +1,9 @@
 import { createServerClient as _createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 async function cookieHandler() {
   const cookieStore = await cookies()
   return {
@@ -23,8 +26,8 @@ async function cookieHandler() {
 export async function createServerClient() {
   const c = await cookieHandler()
   return _createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl!,
+    supabaseKey!,
     { cookies: c }
   )
 }
@@ -33,8 +36,8 @@ export async function createServerClient() {
 export async function createRawClient() {
   const c = await cookieHandler()
   return _createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl!,
+    supabaseKey!,
     { cookies: c }
   )
 }

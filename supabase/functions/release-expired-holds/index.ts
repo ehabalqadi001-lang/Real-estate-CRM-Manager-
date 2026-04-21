@@ -1,0 +1,36 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined
+  }
+  serve(handler: (request: Request) => Response | Promise<Response>): void
+}
+
+Deno.serve(async (request) => {
+  const cronSecret = Deno.env.get('CRON_SECRET')
+  if (cronSecret && request.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return new Response(JSON.stringify({ error: 'Missing Supabase env' }), { status: 500 })
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  const { data, error } = await supabase.rpc('release_expired_unit_holds')
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  }
+
+  return new Response(JSON.stringify({ released: data ?? 0 }), {
+    headers: { 'content-type': 'application/json' },
+  })
+})

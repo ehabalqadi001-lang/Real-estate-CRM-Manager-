@@ -1,8 +1,8 @@
 'use server'
 
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { canAssignRole, canManageRole, canManageTeam, normalizeRole, type Role } from '@/lib/permissions'
 
 interface TeamMemberPayload {
   email?: string
@@ -11,102 +11,102 @@ interface TeamMemberPayload {
   phone?: string
 }
 
-function isFormData(p: TeamMemberPayload | FormData): p is FormData {
-  return typeof (p as FormData).get === 'function'
+type ActorProfile = {
+  id: string
+  role: Role
+  companyId: string | null
+  branchId: string | null
 }
 
-// 1. الدالة المستردة: إضافة وكيل جديد للفريق
-export async function addTeamMember(payload: TeamMemberPayload | FormData) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+type MemberProfile = {
+  id: string
+  role: Role
+  companyId: string | null
+}
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
+function isFormData(payload: TeamMemberPayload | FormData): payload is FormData {
+  return typeof (payload as FormData).get === 'function'
+}
+
+export async function addTeamMember(payload: TeamMemberPayload | FormData) {
+  const supabase = await createServerSupabaseClient()
+  const actor = await requireTeamManager(supabase)
 
   const fd = isFormData(payload)
-  const email = fd ? payload.get('email') as string : payload.email
-  const password = (fd ? payload.get('password') as string : payload.password) || '123456'
-  const fullName = fd ? payload.get('fullName') as string : payload.fullName
-  const phone = fd ? payload.get('phone') as string : payload.phone
+  const email = fd ? String(payload.get('email') ?? '') : payload.email ?? ''
+  const password = (fd ? String(payload.get('password') ?? '') : payload.password) || crypto.randomUUID().slice(0, 12)
+  const fullName = fd ? String(payload.get('fullName') ?? '') : payload.fullName ?? ''
+  const phone = fd ? String(payload.get('phone') ?? '') : payload.phone ?? ''
 
-  if (!email) return { success: false, error: 'البريد الإلكتروني مطلوب' }
+  if (!email.trim()) return { success: false, error: 'البريد الإلكتروني مطلوب' }
+  if (!actor.companyId && actor.role !== 'super_admin') return { success: false, error: 'لا يمكن إضافة وكيل بدون شركة مرتبطة' }
 
-  // تحديد ختم الشركة التابع لها المدير
-  const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
-  const targetCompanyId = profile?.company_id || user.id
-
-  // إنشاء حساب الوكيل وربطه بالشركة
-  const { error } = await supabase.auth.signUp({
-    email: email,
-    password: password,
+  const targetCompanyId = actor.companyId
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
     options: {
       data: {
-        full_name: fullName,
-        phone: phone,
+        full_name: fullName || email,
+        phone,
         role: 'agent',
-        company_id: targetCompanyId
-      }
-    }
+        company_id: targetCompanyId,
+      },
+    },
   })
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/dashboard/team')
-  revalidatePath('/company/dashboard')
+  if (signUpData.user) {
+    const insertPayload = {
+      id: signUpData.user.id,
+      full_name: fullName || email,
+      phone: phone || null,
+      role: 'agent',
+      account_type: 'individual',
+      company_id: targetCompanyId,
+      branch_id: actor.branchId,
+      status: 'active',
+      onboarding_completed: true,
+    }
+
+    const { error: profileError } = await supabase.from('user_profiles').insert(insertPayload)
+    if (profileError) return { success: false, error: profileError.message }
+  }
+
+  revalidateTeam()
   return { success: true }
 }
 
-// 2. دالة جلب أعضاء الفريق
 export async function getTeamMembers() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const supabase = await createServerSupabaseClient()
+  const actor = await getActorProfile(supabase)
+  if (!actor || !canManageTeam(actor.role)) return []
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('company_id')
-    .eq('id', user.id)
-    .single()
-    
-  const targetCompanyId = profile?.company_id ? profile.company_id : user.id
-
+  const targetCompanyId = actor.companyId ?? actor.id
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, role')
+    .from('user_profiles')
+    .select('id, full_name, role')
     .eq('company_id', targetCompanyId)
-    .eq('role', 'agent')
+    .in('role', ['branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'])
+    .order('full_name')
 
   if (error) throw new Error(error.message)
-  return data || []
+  return (data || []).map((member) => ({ ...member, email: null }))
 }
 
-// 3. المحرك الآلي: التفويض + إطلاق الإشعارات
 export async function assignLeadToMember(leadId: string, memberId: string) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const supabase = await createServerSupabaseClient()
+  const actor = await requireTeamManager(supabase)
+  const member = await requireManagedMember(supabase, actor, memberId)
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
+  if (!canManageRole(actor.role, member.role)) throw new Error('غير مصرح بتكليف هذا العضو')
 
   const { data: lead } = await supabase
     .from('leads')
     .select('client_name')
     .eq('id', leadId)
-    .single()
+    .maybeSingle()
 
   const { error: updateError } = await supabase
     .from('leads')
@@ -120,9 +120,11 @@ export async function assignLeadToMember(leadId: string, memberId: string) {
       .from('notifications')
       .insert({
         user_id: memberId,
-        title: '🎯 تكليف إداري: عميل جديد',
-        message: `القيادة قامت بتفويض العميل (${lead.client_name}) إلى عهدتك. يرجى مراجعة الصندوق الأسود والمتابعة فوراً.`,
-        link: `/dashboard/leads/${leadId}`
+        type: 'new_client',
+        title: 'تكليف إداري: عميل جديد',
+        body: `تم تكليفك بمتابعة العميل ${lead.client_name ?? ''}.`,
+        message: `تم تكليفك بمتابعة العميل ${lead.client_name ?? ''}.`,
+        link: `/dashboard/leads/${leadId}`,
       })
   }
 
@@ -131,31 +133,107 @@ export async function assignLeadToMember(leadId: string, memberId: string) {
 }
 
 export async function updateMemberRole(memberId: string, role: string) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
-  const { error } = await supabase.from('profiles').update({ role }).eq('id', memberId)
+  const supabase = await createServerSupabaseClient()
+  const actor = await requireTeamManager(supabase)
+  const member = await requireManagedMember(supabase, actor, memberId)
+  const nextRole = normalizeRole(role)
+
+  if (member.id === actor.id) throw new Error('لا يمكنك تغيير دور حسابك الحالي')
+  if (!canManageRole(actor.role, member.role) || !canAssignRole(actor.role, nextRole)) {
+    throw new Error('غير مصرح بتعديل هذا الدور')
+  }
+
+  const { error } = await supabase.from('user_profiles').update({ role: nextRole }).eq('id', memberId)
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard/team')
+  await supabase.from('profiles').update({ role: nextRole }).eq('id', memberId)
+  revalidateTeam()
 }
 
 export async function suspendMember(memberId: string) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
-  const { error } = await supabase.from('profiles').update({ status: 'suspended', is_active: false }).eq('id', memberId)
+  const supabase = await createServerSupabaseClient()
+  const actor = await requireTeamManager(supabase)
+  const member = await requireManagedMember(supabase, actor, memberId)
+
+  if (member.id === actor.id) throw new Error('لا يمكنك تعليق حسابك الحالي')
+  if (!canManageRole(actor.role, member.role)) throw new Error('غير مصرح بتعليق هذا الحساب')
+
+  const { error } = await supabase.from('user_profiles').update({ status: 'suspended' }).eq('id', memberId)
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard/team')
+  await supabase.from('profiles').update({ status: 'suspended', is_active: false }).eq('id', memberId)
+  revalidateTeam()
 }
 
 export async function inviteAgentByEmail(email: string, fullName: string) {
-  const result = await addTeamMember({ email, fullName, password: crypto.randomUUID().slice(0, 12) })
-  revalidatePath('/dashboard/team')
+  const result = await addTeamMember({ email, fullName })
+  revalidateTeam()
   return result
+}
+
+async function requireTeamManager(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>) {
+  const actor = await getActorProfile(supabase)
+  if (!actor) throw new Error('يجب تسجيل الدخول أولًا')
+  if (!canManageTeam(actor.role)) throw new Error('غير مصرح بإدارة الفريق')
+  return actor
+}
+
+async function getActorProfile(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>): Promise<ActorProfile | null> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('id, role, company_id, branch_id, status')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { data: legacyProfile } = userProfile ? { data: null } : await supabase
+    .from('profiles')
+    .select('id, role, company_id, status')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const profile = userProfile ?? legacyProfile
+  if (!profile || profile.status === 'suspended' || profile.status === 'rejected') return null
+
+  const branchId = 'branch_id' in profile && typeof profile.branch_id === 'string' ? profile.branch_id : null
+
+  return {
+    id: user.id,
+    role: normalizeRole(profile.role ?? 'viewer'),
+    companyId: profile.company_id ?? null,
+    branchId,
+  }
+}
+
+async function requireManagedMember(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  actor: ActorProfile,
+  memberId: string,
+): Promise<MemberProfile> {
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('id, role, company_id')
+    .eq('id', memberId)
+    .maybeSingle()
+
+  const { data: legacyProfile } = userProfile ? { data: null } : await supabase
+    .from('profiles')
+    .select('id, role, company_id')
+    .eq('id', memberId)
+    .maybeSingle()
+
+  const profile = userProfile ?? legacyProfile
+  if (!profile) throw new Error('عضو الفريق غير موجود')
+  if (actor.role !== 'super_admin' && actor.companyId !== profile.company_id) throw new Error('لا يمكنك إدارة عضو خارج شركتك')
+
+  return {
+    id: profile.id,
+    role: normalizeRole(profile.role ?? 'viewer'),
+    companyId: profile.company_id ?? null,
+  }
+}
+
+function revalidateTeam() {
+  revalidatePath('/dashboard/team')
+  revalidatePath('/company/dashboard')
 }

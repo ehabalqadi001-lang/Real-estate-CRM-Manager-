@@ -9,6 +9,8 @@ export type AppRole =
   // إدارة الشركة
   | 'company_owner'
   | 'company_admin'
+  | 'branch_manager'
+  | 'senior_agent'
   | 'sales_director'
   | 'team_leader'
   // الوسطاء والمبيعات
@@ -45,16 +47,17 @@ export type AppRole =
   | 'admin'    // = company_admin (legacy)
   | 'company'  // = company_owner (legacy)
   | 'agent'    // = broker (legacy)
+  | 'individual'
   | 'viewer'
 
 // مجموعات الأدوار للتحقق السريع
 export const MANAGER_ROLES: AppRole[] = [
   'super_admin', 'platform_admin', 'company_owner', 'company_admin',
-  'sales_director', 'admin', 'company',
+  'branch_manager', 'sales_director', 'team_leader', 'admin', 'company',
 ]
 
 export const BROKER_ROLES: AppRole[] = [
-  'broker', 'freelancer', 'agent',
+  'broker', 'freelancer', 'senior_agent', 'agent',
 ]
 
 export const FINANCE_ROLES: AppRole[] = [

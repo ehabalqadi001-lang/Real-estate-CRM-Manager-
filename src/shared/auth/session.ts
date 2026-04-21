@@ -17,8 +17,12 @@ const ROLE_ALIASES: Record<string, AppRole> = {
   'Company Admin': 'company_admin',
   company: 'company_owner',
   company_admin: 'company_admin',
+  branch_manager: 'branch_manager',
+  senior_agent: 'senior_agent',
   broker: 'broker',
+  team_leader: 'branch_manager',
   agent: 'agent',
+  individual: 'individual',
   Agent: 'agent',
   CLIENT: 'viewer',
   client: 'viewer',
@@ -35,11 +39,29 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
 
   if (error || !user) return null
 
-  const { data: profile } = await supabase
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('id, company_id, branch_id, full_name, role, account_type, status, onboarding_completed')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { data: legacyProfile } = userProfile ? { data: null } : await supabase
     .from('profiles')
     .select('id, company_id, tenant_id, full_name, role, account_type, status, is_active')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  const profile = (userProfile ?? legacyProfile) as {
+    id?: string
+    company_id?: string | null
+    tenant_id?: string | null
+    full_name?: string | null
+    role?: string | null
+    account_type?: string | null
+    status?: string | null
+    is_active?: boolean | null
+    onboarding_completed?: boolean | null
+  } | null
 
   const tenantId = (profile?.tenant_id as string | null | undefined)
     ?? (profile?.company_id as string | null | undefined)
@@ -71,7 +93,7 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
     role: effectiveRole,
     account_type: (profile?.account_type as string | null | undefined) ?? null,
     status: (profile?.status as string | null | undefined) ?? null,
-    is_active: (profile?.is_active as boolean | null | undefined) ?? true,
+    is_active: profile?.status === 'suspended' || profile?.status === 'rejected' ? false : (profile?.is_active ?? true),
   }
 
   return { user, profile: appProfile }

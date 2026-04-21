@@ -1,6 +1,7 @@
 import { TeamManagementClient, type TeamMemberRow } from '@/components/team/TeamManagementClient'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
+import { normalizeRole } from '@/lib/permissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,15 +10,8 @@ export default async function TeamPage() {
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
 
-  let profileQuery = supabase
-    .from('profiles')
-    .select('id, full_name, email, role, status, is_active, company_id')
-    .in('role', ['branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
-    .limit(300)
-
-  if (companyId) profileQuery = profileQuery.eq('company_id', companyId)
-  const { data: profiles } = await profileQuery
-  const ids = (profiles ?? []).map((profile) => profile.id)
+  const profiles = await getTeamProfiles(supabase, companyId)
+  const ids = profiles.map((profile) => profile.id)
 
   const [dealsResult, commissionsResult] = await Promise.all([
     ids.length ? supabase.from('deals').select('id, agent_id, stage, unit_value, value, amount, final_price, created_at').in('agent_id', ids) : Promise.resolve({ data: [] }),
@@ -28,7 +22,7 @@ export default async function TeamPage() {
   const commissions = (commissionsResult.data ?? []) as Array<Record<string, unknown>>
   const now = new Date()
 
-  const members: TeamMemberRow[] = (profiles ?? []).map((profile) => {
+  const members: TeamMemberRow[] = profiles.map((profile) => {
     const memberDeals = deals.filter((deal) => deal.agent_id === profile.id)
     const monthDeals = memberDeals.filter((deal) => {
       const date = new Date(String(deal.created_at))
@@ -38,21 +32,72 @@ export default async function TeamPage() {
     return {
       id: profile.id,
       name: profile.full_name ?? 'عضو فريق',
-      email: profile.email ?? null,
+      email: profile.email,
       role: profile.role ?? 'agent',
       activeDeals: memberDeals.filter((deal) => !['closed', 'closed_won', 'lost', 'closed_lost'].includes(String(deal.stage))).length,
       monthSales: monthDeals.reduce((sum, deal) => sum + Number(deal.final_price ?? deal.unit_value ?? deal.value ?? deal.amount ?? 0), 0),
       commissions: memberCommissions.reduce((sum, commission) => sum + Number(commission.agent_amount ?? commission.amount ?? 0), 0),
-      status: profile.is_active === false || profile.status === 'suspended' ? 'suspended' : 'active',
+      status: profile.status === 'suspended' || profile.status === 'rejected' ? 'suspended' : 'active',
       sparkline: buildSparkline(memberDeals),
     }
   })
 
   return (
     <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
-      <TeamManagementClient members={members} />
+      <TeamManagementClient members={members} currentRole={normalizeRole(session.profile.role)} />
     </main>
   )
+}
+
+type ServerSupabase = Awaited<ReturnType<typeof createServerSupabaseClient>>
+
+type TeamProfile = {
+  id: string
+  full_name: string | null
+  email: string | null
+  role: string | null
+  status: string | null
+  company_id: string | null
+}
+
+async function getTeamProfiles(supabase: ServerSupabase, companyId: string | null): Promise<TeamProfile[]> {
+  let userProfilesQuery = supabase
+    .from('user_profiles')
+    .select('id, full_name, role, status, company_id')
+    .in('role', ['branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'])
+    .limit(300)
+
+  if (companyId) userProfilesQuery = userProfilesQuery.eq('company_id', companyId)
+  const { data: userProfiles, error } = await userProfilesQuery
+
+  if (!error && userProfiles && userProfiles.length > 0) {
+    return userProfiles.map((profile) => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      email: null,
+      role: profile.role,
+      status: profile.status,
+      company_id: profile.company_id,
+    }))
+  }
+
+  let legacyQuery = supabase
+    .from('profiles')
+    .select('id, full_name, email, role, status, company_id')
+    .in('role', ['branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
+    .limit(300)
+
+  if (companyId) legacyQuery = legacyQuery.eq('company_id', companyId)
+  const { data: legacyProfiles } = await legacyQuery
+
+  return (legacyProfiles ?? []).map((profile) => ({
+    id: profile.id,
+    full_name: profile.full_name,
+    email: profile.email ?? null,
+    role: profile.role,
+    status: profile.status,
+    company_id: profile.company_id,
+  }))
 }
 
 function buildSparkline(deals: Array<Record<string, unknown>>) {

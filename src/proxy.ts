@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { normalizeRole, type Role } from '@/lib/permissions'
+import { hasPermission, normalizeRole } from '@/lib/permissions'
+import { createClient } from '@/utils/supabase/middleware'
 
 const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/company', '/team', '/commissions']
 
@@ -8,45 +8,47 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (!PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next()
 
-  let response = NextResponse.next({ request })
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
-        },
-      },
-    },
-  )
+  const { supabase, getResponse } = createClient(request)
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect(request, '/login')
 
-  const { data: profile } = await supabase
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('role, account_type, company_id, status, onboarding_completed')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { data: legacyProfile } = userProfile ? { data: null } : await supabase
     .from('profiles')
     .select('role, account_type, company_id, status')
     .eq('id', user.id)
     .maybeSingle()
 
-  const role = normalizeRole(profile?.role ?? 'viewer')
+  const profile = (userProfile ?? legacyProfile) as {
+    role?: string | null
+    account_type?: string | null
+    company_id?: string | null
+    status?: string | null
+    onboarding_completed?: boolean | null
+  } | null
+  const role = normalizeRole(profile?.role ?? (isConfiguredPlatformOwner(user.email ?? null) ? 'super_admin' : 'viewer'))
   const accountType = profile?.account_type ?? 'individual'
-  const onboardingCompleted = profile?.status !== 'pending'
+  const onboardingCompleted = profile?.onboarding_completed ?? Boolean(profile && profile.status !== 'pending')
+
+  if (!profile && role !== 'super_admin') return redirect(request, '/onboarding/individual')
+  if (profile?.status === 'suspended' || profile?.status === 'rejected') return redirect(request, '/login')
 
   if (!onboardingCompleted && pathname.startsWith('/dashboard')) {
     return redirect(request, accountType === 'company' ? '/onboarding/company' : '/onboarding/individual')
   }
 
   if (pathname.startsWith('/admin') && role !== 'super_admin') return redirect(request, '/dashboard')
-  if (pathname.startsWith('/company') && !allowed(role, ['super_admin', 'company_admin', 'branch_manager'])) return redirect(request, '/dashboard')
-  if (pathname.startsWith('/team') && !profile?.company_id) return redirect(request, '/dashboard')
-  if ((pathname.startsWith('/commissions') || pathname.startsWith('/dashboard/commissions')) && role === 'viewer') return redirect(request, '/dashboard')
+  if (pathname.startsWith('/company') && !hasPermission(role, 'company:access')) return redirect(request, '/dashboard')
+  if ((pathname.startsWith('/team') || pathname.startsWith('/dashboard/team')) && (!hasCompanyScope(profile?.company_id, role) || !hasPermission(role, 'team:read'))) return redirect(request, '/dashboard')
+  if ((pathname.startsWith('/commissions') || pathname.startsWith('/dashboard/commissions')) && !hasPermission(role, 'commissions:read')) return redirect(request, '/dashboard')
 
-  return response
+  return getResponse()
 }
 
 export const config = {
@@ -59,6 +61,21 @@ function redirect(request: NextRequest, path: string) {
   return NextResponse.redirect(url)
 }
 
-function allowed(role: Role, roles: Role[]) {
-  return roles.includes(role)
+function isConfiguredPlatformOwner(email: string | null) {
+  if (!email) return false
+  const configured = [
+    process.env.FAST_INVESTMENT_SUPER_ADMIN_EMAILS,
+    process.env.SUPER_ADMIN_EMAILS,
+    'admin@fastinvestment.com',
+  ]
+    .filter(Boolean)
+    .flatMap((value) => String(value).split(','))
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean)
+
+  return configured.includes(email.toLowerCase())
+}
+
+function hasCompanyScope(companyId: string | null | undefined, role: ReturnType<typeof normalizeRole>) {
+  return Boolean(companyId) || role === 'super_admin' || role === 'company_admin'
 }

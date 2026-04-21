@@ -66,10 +66,10 @@ export async function sendBroadcast(formData: FormData) {
 
   const supabase = await createRawClient()
 
-  // Fetch phone numbers for the target segment
-  let query = supabase.from('profiles').select('id, full_name')
+  // Fetch users for the target segment from the canonical RBAC table.
+  let query = supabase.from('user_profiles').select('id, full_name, status')
   if (segment === 'active') {
-    query = query.eq('is_active', true)
+    query = query.eq('status', 'active')
   }
   const { data: users } = await query.limit(500)
   if (!users?.length) return { error: 'لا يوجد مستخدمون في هذا القطاع' }

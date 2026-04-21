@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { sendRespondIoTextMessage, normalizeRespondIoPhone, RespondIoError } from '@/lib/respondIo'
+import { normalizeWhatsAppPhone, sendTemplate, sendText, WhatsAppError } from '@/lib/whatsapp'
 import { createRawClient } from '@/lib/supabase/server'
 import { getCurrentSession } from '@/shared/auth/session'
 import { hasPermission } from '@/shared/rbac/permissions'
@@ -11,6 +11,10 @@ type SendWhatsAppPayload = {
   to?: string
   message?: string
   text?: string
+  templateName?: string
+  templateParams?: string[] | Record<string, string | number | null | undefined>
+  leadId?: string | null
+  agentId?: string | null
   userId?: string | null
 }
 
@@ -66,18 +70,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload.' }, { status: 400 })
   }
 
-  const phone = normalizeRespondIoPhone(body.phone ?? body.to ?? '')
+  const phone = normalizeWhatsAppPhone(body.phone ?? body.to ?? '')
   const message = (body.message ?? body.text ?? '').trim()
 
-  if (!phone || !message) {
-    return NextResponse.json({ error: 'phone and message are required.' }, { status: 400 })
+  if (!phone || (!message && !body.templateName)) {
+    return NextResponse.json({ error: 'phone and message/templateName are required.' }, { status: 400 })
   }
 
   try {
-    const result = await sendRespondIoTextMessage({ phone, message })
+    const result = body.templateName
+      ? await sendTemplate(phone, body.templateName, body.templateParams ?? [], {
+          leadId: body.leadId ?? null,
+          agentId: body.agentId ?? null,
+        })
+      : await sendText(phone, message, {
+          leadId: body.leadId ?? null,
+          agentId: body.agentId ?? null,
+        })
+
     await logWhatsAppAttempt({
       phone,
-      message,
+      message: message || body.templateName || '',
       status: 'sent',
       messageId: result.messageId,
       userId: body.userId ?? null,
@@ -88,13 +101,13 @@ export async function POST(request: NextRequest) {
       messageId: result.messageId,
     })
   } catch (error) {
-    const status = error instanceof RespondIoError ? error.status : 500
-    const details = error instanceof RespondIoError ? error.details : null
+    const status = error instanceof WhatsAppError ? error.status : 500
+    const details = error instanceof WhatsAppError ? error.details : null
     const errorMessage = error instanceof Error ? error.message : 'Failed to send WhatsApp message.'
 
     await logWhatsAppAttempt({
       phone,
-      message,
+      message: message || body.templateName || '',
       status: 'failed',
       userId: body.userId ?? null,
       failedReason: errorMessage,

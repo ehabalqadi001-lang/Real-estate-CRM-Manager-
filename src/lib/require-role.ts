@@ -1,11 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-
-type Role = 'agent' | 'admin' | 'company_admin' | 'super_admin'
-
-const ADMIN_ROLES: Role[] = ['admin', 'company_admin', 'super_admin', 'Admin', 'company'] as Role[]
-const SUPER_ROLES: Role[] = ['super_admin', 'Super_Admin'] as Role[]
+import { hasPermission, normalizeRole } from '@/lib/permissions'
 
 export async function getServerUser() {
   const cookieStore = await cookies()
@@ -18,13 +14,20 @@ export async function getServerUser() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { user: null, role: null, supabase }
 
-  const { data: profile } = await supabase
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('role, company_id, full_name, status')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { data: legacyProfile } = userProfile ? { data: null } : await supabase
     .from('profiles')
     .select('role, company_id, full_name')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  return { user, role: profile?.role ?? 'agent', profile, supabase }
+  const profile = userProfile ?? legacyProfile
+  return { user, role: normalizeRole(profile?.role ?? 'viewer'), profile, supabase }
 }
 
 export async function requireAuth() {
@@ -35,18 +38,16 @@ export async function requireAuth() {
 
 export async function requireAdmin() {
   const result = await requireAuth()
-  const isAdmin = ADMIN_ROLES.includes(result.role as Role) || SUPER_ROLES.includes(result.role as Role)
-  if (!isAdmin) redirect('/dashboard')
+  if (!hasPermission(result.role, 'team:manage')) redirect('/dashboard')
   return result
 }
 
 export async function requireSuperAdmin() {
   const result = await requireAuth()
-  const isSuperAdmin = SUPER_ROLES.includes(result.role as Role)
-  if (!isSuperAdmin) redirect('/dashboard')
+  if (result.role !== 'super_admin') redirect('/dashboard')
   return result
 }
 
 export function isAdminRole(role: string | null): boolean {
-  return ADMIN_ROLES.includes(role as Role) || SUPER_ROLES.includes(role as Role)
+  return hasPermission(role, 'team:manage')
 }

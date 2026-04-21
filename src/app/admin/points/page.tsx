@@ -13,7 +13,7 @@ export default async function PointsAdminPage() {
   await requirePermission('platform.manage')
   const supabase = await createServerClient()
 
-  const [{ data: costs }, { data: wallets }, { data: users }] = await Promise.all([
+  const [{ data: costs }, { data: wallets }, { data: userProfiles }, { data: legacyUsers }] = await Promise.all([
     supabase.from('ad_cost_config').select('*').eq('id', true).maybeSingle(),
     supabase
       .from('user_wallets')
@@ -21,12 +21,29 @@ export default async function PointsAdminPage() {
       .order('updated_at', { ascending: false })
       .limit(20),
     supabase
+      .from('user_profiles')
+      .select('id, full_name, company_id')
+      .order('full_name')
+      .limit(200),
+    supabase
       .from('profiles')
       .select('id, full_name, email, company_name')
       .order('full_name')
       .limit(200),
   ])
 
+  const legacyById = new Map((legacyUsers ?? []).map((user) => [user.id, user]))
+  const users = userProfiles && userProfiles.length > 0
+    ? userProfiles.map((user) => {
+      const legacy = legacyById.get(user.id)
+      return {
+        id: user.id,
+        full_name: user.full_name,
+        email: legacy?.email ?? null,
+        company_name: legacy?.company_name ?? user.company_id ?? null,
+      }
+    })
+    : legacyUsers ?? []
   const userById = new Map((users ?? []).map((user) => [user.id, user]))
 
   return (

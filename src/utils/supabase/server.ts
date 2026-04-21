@@ -1,30 +1,35 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-// 1. أضفنا كلمة async هنا
-export async function createClient() {
-  // 2. أضفنا كلمة await هنا
-  const cookieStore = await cookies()
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+type CookieStore = Awaited<ReturnType<typeof cookies>>
+
+function createServerSupabaseClient(cookieStore: CookieStore) {
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl!,
+    supabaseKey!,
     {
       cookies: {
-        // 3. التحديث الجديد من Supabase (استخدام getAll بدلاً من get)
         getAll() {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
           } catch {
-            // يتم تجاهل هذا الخطأ عمداً في الـ Server Components
+            // Server Components cannot set cookies directly. Proxy refreshes sessions.
           }
         },
       },
-    }
+    },
   )
+}
+
+export function createClient(cookieStore: CookieStore): ReturnType<typeof createServerSupabaseClient>
+export function createClient(): Promise<ReturnType<typeof createServerSupabaseClient>>
+export function createClient(cookieStore?: CookieStore) {
+  if (cookieStore) return createServerSupabaseClient(cookieStore)
+  return cookies().then((store) => createServerSupabaseClient(store))
 }

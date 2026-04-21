@@ -31,17 +31,26 @@ export default async function AccountManagerWorkspacePage() {
 
   const supabase = await createServerClient()
 
-  const [{ data: profiles, count: totalUsers }, { count: activeAds }] = await Promise.all([
+  const [{ data: userProfiles, count: totalUsers }, { data: legacyProfiles }, { count: activeAds }] = await Promise.all([
     supabase
-      .from('profiles')
-      .select('id, full_name, email, role, status, account_type', { count: 'exact' })
-      .not('role', 'in', '(super_admin,platform_admin,admin,company_admin,company_owner)')
+      .from('user_profiles')
+      .select('id, full_name, role, status, account_type', { count: 'exact' })
+      .not('role', 'in', '(super_admin,company_admin)')
       .order('full_name')
       .limit(20),
+    supabase
+      .from('profiles')
+      .select('id, full_name, email, role, status, account_type')
+      .not('role', 'in', '(super_admin,platform_admin,admin,company_admin,company_owner)')
+      .order('full_name')
+      .limit(200),
     supabase.from('ads').select('id', { count: 'exact', head: true }).eq('status', 'active'),
   ])
 
-  const users = (profiles ?? []) as Profile[]
+  const emailById = new Map((legacyProfiles ?? []).map((profile) => [profile.id, profile.email ?? null]))
+  const users = (userProfiles && userProfiles.length > 0
+    ? userProfiles.map((profile) => ({ ...profile, email: emailById.get(profile.id) ?? null }))
+    : legacyProfiles ?? []) as Profile[]
 
   return (
     <div className="space-y-6">

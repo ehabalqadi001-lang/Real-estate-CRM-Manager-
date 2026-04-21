@@ -44,6 +44,7 @@ export function hasPermission(role: string | null | undefined, permission: Permi
 export function normalizeRole(role: string): Role {
   if (role === 'admin' || role === 'company' || role === 'company_owner') return 'company_admin'
   if (role === 'broker' || role === 'freelancer') return 'agent'
+  if (role === 'team_leader') return 'branch_manager'
   if (role === 'platform_admin') return 'super_admin'
   if (['super_admin', 'company_admin', 'branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'].includes(role)) return role as Role
   return 'viewer'
@@ -56,4 +57,28 @@ export function canAccess(role: string | null | undefined, resource: string, act
 export function isAtLeast(role: string | null | undefined, minimum: Role) {
   if (!role) return false
   return ROLE_RANK[normalizeRole(role)] >= ROLE_RANK[minimum]
+}
+
+export function canManageRole(actorRole: string | null | undefined, targetRole: string | null | undefined) {
+  if (!actorRole || !targetRole) return false
+  const actor = normalizeRole(actorRole)
+  const target = normalizeRole(targetRole)
+  if (actor === 'super_admin') return target !== 'super_admin'
+  if (actor === 'company_admin') return ROLE_RANK[target] < ROLE_RANK.company_admin
+  if (actor === 'branch_manager') return ROLE_RANK[target] < ROLE_RANK.branch_manager
+  return false
+}
+
+export function canAssignRole(actorRole: string | null | undefined, nextRole: string | null | undefined) {
+  if (!actorRole || !nextRole) return false
+  const actor = normalizeRole(actorRole)
+  const next = normalizeRole(nextRole)
+  if (actor === 'super_admin') return next !== 'super_admin'
+  if (actor === 'company_admin') return ROLE_RANK[next] < ROLE_RANK.company_admin
+  if (actor === 'branch_manager') return ROLE_RANK[next] < ROLE_RANK.branch_manager
+  return false
+}
+
+export function canManageTeam(actorRole: string | null | undefined) {
+  return hasPermission(actorRole, 'team:manage')
 }

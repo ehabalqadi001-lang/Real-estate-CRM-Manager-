@@ -27,10 +27,15 @@ export default async function RoleAssignmentPage() {
   await requirePermission('platform.manage')
   const supabase = await createRawClient()
 
-  const [{ data: profiles }, { data: fiRoles }] = await Promise.all([
+  const [{ data: userProfiles }, { data: legacyProfiles }, { data: fiRoles }] = await Promise.all([
+    supabase.from('user_profiles').select('id, full_name, role').order('full_name'),
     supabase.from('profiles').select('id, full_name, email, role').order('full_name'),
     supabase.from('roles').select('id, name, slug, department_id, departments(name)').order('name'),
   ])
+  const emailById = new Map((legacyProfiles ?? []).map((profile) => [profile.id, profile.email ?? null]))
+  const profiles = userProfiles && userProfiles.length > 0
+    ? userProfiles.map((profile) => ({ ...profile, email: emailById.get(profile.id) ?? null }))
+    : legacyProfiles ?? []
 
   return (
     <div className="space-y-6">

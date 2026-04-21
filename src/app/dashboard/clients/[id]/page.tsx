@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowRight, MessageCircle, Pencil, UserRound } from 'lucide-react'
+import { ArrowRight, Pencil, UserRound } from 'lucide-react'
 import { getClientDetail } from '@/domains/clients/queries'
+import { WhatsAppButton } from '@/components/whatsapp/whatsapp-button'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -107,9 +108,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
         </div>
         <div className="flex flex-wrap gap-2">
           {whatsappPhone && (
-            <a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer" className="btn-wa">
-              <MessageCircle size={16} /> واتساب
-            </a>
+            <WhatsAppButton phone={whatsappPhone} clientName={name} context="follow_up" />
           )}
           <button type="button" className="btn-edit">
             <Pencil size={16} /> تعديل البيانات

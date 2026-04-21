@@ -184,6 +184,18 @@ create policy "company_admin_update" on public.user_profiles
     )
   );
 
+drop policy if exists "company_admin_insert" on public.user_profiles;
+create policy "company_admin_insert" on public.user_profiles
+  for insert with check (
+    id = auth.uid()
+    or exists (
+      select 1 from public.user_profiles up
+      where up.id = auth.uid()
+        and up.role in ('super_admin','company_admin','branch_manager')
+        and (up.company_id = user_profiles.company_id or up.role = 'super_admin')
+    )
+  );
+
 create index if not exists user_profiles_company_role_idx on public.user_profiles(company_id, role);
 create index if not exists user_profiles_status_idx on public.user_profiles(status);
 
