@@ -18,8 +18,8 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--fi-line)] bg-white/82 px-3 py-3 backdrop-blur-xl sm:px-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="grid min-w-0 grid-cols-[auto_1fr_auto] items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3 overflow-hidden">
           <button
             type="button"
             onClick={openSidebar}
@@ -30,11 +30,11 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
           </button>
           <div className="min-w-0">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">{tenantName}</p>
-            <h1 className="mt-1 truncate text-base font-black text-[var(--fi-ink)] sm:text-lg">Enterprise Command Center</h1>
+            <h1 className="mt-1 truncate text-sm font-black text-[var(--fi-ink)] sm:text-lg">Enterprise Command Center</h1>
           </div>
         </div>
 
-        <div className="hidden flex-1 justify-center px-8 md:flex">
+        <div className="hidden min-w-0 justify-center px-2 md:flex xl:px-8">
           <button
             type="button"
             onClick={openCommandPalette}
@@ -48,7 +48,7 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center justify-end gap-2">
           <ThemeToggle />
           <NotificationBell userId={profile.id} />
           <button

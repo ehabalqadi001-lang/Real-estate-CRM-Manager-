@@ -1,9 +1,10 @@
 export interface ClientListItem {
   id: string
   name: string | null
+  full_name?: string | null
   phone: string | null
   status: string | null
-  created_at: string
+  created_at: string | null
 }
 
 export interface ClientListResult {

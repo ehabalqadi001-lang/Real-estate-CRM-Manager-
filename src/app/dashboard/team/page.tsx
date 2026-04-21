@@ -64,7 +64,7 @@ async function getTeamProfiles(supabase: ServerSupabase, companyId: string | nul
   let userProfilesQuery = supabase
     .from('user_profiles')
     .select('id, full_name, role, status, company_id')
-    .in('role', ['branch_manager', 'senior_agent', 'agent', 'individual', 'viewer'])
+    .in('role', ['company_owner', 'company_admin', 'branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
     .limit(300)
 
   if (companyId) userProfilesQuery = userProfilesQuery.eq('company_id', companyId)
@@ -84,7 +84,7 @@ async function getTeamProfiles(supabase: ServerSupabase, companyId: string | nul
   let legacyQuery = supabase
     .from('profiles')
     .select('id, full_name, email, role, status, company_id')
-    .in('role', ['branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
+    .in('role', ['company_owner', 'company_admin', 'branch_manager', 'senior_agent', 'agent', 'broker', 'individual', 'viewer'])
     .limit(300)
 
   if (companyId) legacyQuery = legacyQuery.eq('company_id', companyId)

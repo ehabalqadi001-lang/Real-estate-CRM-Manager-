@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Building2, Crown, LogOut, X } from 'lucide-react'
+import { Building2, ChevronDown, Crown, LogOut, Settings, X } from 'lucide-react'
 import { dashboardNavigation } from '@/shared/config/navigation'
 import type { AppProfile } from '@/shared/auth/types'
 import { hasPermission } from '@/shared/rbac/permissions'
@@ -15,6 +15,7 @@ interface EnterpriseSidebarProps {
 export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const open = () => setMobileOpen(true)
@@ -23,13 +24,23 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   }, [])
 
   const visibleGroups = dashboardNavigation
+    .filter((group) => !group.items.every((item) => item.href.startsWith('/admin')))
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => hasPermission(profile.role, item.permission)),
+      items: group.items.filter((item) => item.href.startsWith('/dashboard') && hasPermission(profile.role, item.permission)),
     }))
     .filter((group) => group.items.length > 0)
 
-  const mobileItems = visibleGroups.flatMap((group) => group.items).slice(0, 5)
+  const platformGroup = hasPermission(profile.role, 'admin.view')
+    ? [{
+      title: 'نظام المنصة',
+      items: [{ title: 'لوحة مالك المنصة', href: '/admin', permission: 'admin.view' as const, icon: Settings }],
+    }]
+    : []
+
+  const navigationGroups = [...visibleGroups, ...platformGroup]
+
+  const mobileItems = navigationGroups.flatMap((group) => group.items).slice(0, 5)
 
   const initials = (profile.full_name ?? profile.email ?? 'FI')
     .split(' ')
@@ -77,30 +88,15 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
 
           <nav className="flex-1 overflow-y-auto px-3 py-4">
             <div className="space-y-5">
-              {visibleGroups.map((group) => (
-                <section key={group.title}>
-                  <p className="mb-2 px-2 text-[11px] font-black text-[var(--fi-muted)]">{group.title}</p>
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      const Icon = item.icon
-                      const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
-                            active
-                              ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
-                              : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
-                          }`}
-                        >
-                          <Icon className="size-4" />
-                          <span className="truncate">{item.title}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </section>
+              {navigationGroups.map((group, index) => (
+                <SidebarGroup
+                  key={group.title}
+                  group={group}
+                  pathname={pathname}
+                  defaultOpen={index < 2}
+                  open={openGroups[group.title]}
+                  onToggle={() => setOpenGroups((current) => ({ ...current, [group.title]: !(current[group.title] ?? index < 2) }))}
+                />
               ))}
             </div>
           </nav>
@@ -129,31 +125,16 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             </div>
             <nav className="flex-1 overflow-y-auto px-3 py-4">
               <div className="space-y-5">
-                {visibleGroups.map((group) => (
-                  <section key={group.title}>
-                    <p className="mb-2 px-2 text-[11px] font-black text-[var(--fi-muted)]">{group.title}</p>
-                    <div className="space-y-1">
-                      {group.items.map((item) => {
-                        const Icon = item.icon
-                        const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                        return (
-                          <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
-                              active
-                                ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
-                                : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
-                            }`}
-                          >
-                            <Icon className="size-4" />
-                            <span className="truncate">{item.title}</span>
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  </section>
+                {navigationGroups.map((group, index) => (
+                  <SidebarGroup
+                    key={group.title}
+                    group={group}
+                    pathname={pathname}
+                    defaultOpen={index < 2}
+                    open={openGroups[group.title]}
+                    onToggle={() => setOpenGroups((current) => ({ ...current, [group.title]: !(current[group.title] ?? index < 2) }))}
+                    onNavigate={() => setMobileOpen(false)}
+                  />
                 ))}
               </div>
             </nav>
@@ -188,6 +169,63 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         })}
       </nav>
     </>
+  )
+}
+
+type SidebarNavigationGroup = typeof dashboardNavigation[number]
+
+function SidebarGroup({
+  group,
+  pathname,
+  defaultOpen,
+  open,
+  onToggle,
+  onNavigate,
+}: {
+  group: SidebarNavigationGroup
+  pathname: string
+  defaultOpen: boolean
+  open: boolean | undefined
+  onToggle: () => void
+  onNavigate?: () => void
+}) {
+  const isOpen = open ?? defaultOpen
+
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="mb-2 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[11px] font-black text-[var(--fi-muted)] transition hover:bg-[var(--fi-soft)] hover:text-[var(--fi-ink)]"
+      >
+        <span className="truncate">{group.title}</span>
+        <ChevronDown className={`size-3.5 transition ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="space-y-1">
+          {group.items.map((item) => {
+            const Icon = item.icon
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                className={`group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
+                  active
+                    ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)] shadow-sm'
+                    : 'text-[var(--fi-muted)] hover:bg-slate-50 hover:text-[var(--fi-ink)]'
+                }`}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="min-w-0 flex-1 truncate leading-5">{item.title}</span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </section>
   )
 }
 

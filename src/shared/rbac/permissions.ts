@@ -145,7 +145,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'lead.view.team',
     'lead.create',
     'lead.assign',
-    'client.view.assigned',
+    'client.view.company',
     'client.create',
     'broker.view.company',
     'team.view',
@@ -221,7 +221,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   developer_relations_manager: ['dashboard.view.team', 'developer.view', 'developer.manage', 'project.view', 'project.manage', 'unit.view', 'unit.manage', 'listing.view', 'report.view.team', 'notification.view.own', 'map.view'],
   admin: ALL_COMPANY_PERMISSIONS,
   company: ALL_COMPANY_PERMISSIONS,
-  agent: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
+  agent: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
   individual: ['dashboard.view.own', 'lead.create', 'unit.view', 'listing.view', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
   viewer: ['dashboard.view.own', 'notification.view.own'],
   // ── Fast Investment Departmental Roles ──

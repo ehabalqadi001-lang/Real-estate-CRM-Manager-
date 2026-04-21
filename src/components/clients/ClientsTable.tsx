@@ -1,73 +1,95 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 interface Client {
   id: string
   name: string | null
+  full_name?: string | null
   phone: string | null
   status: string | null
-  created_at: string
+  created_at: string | null
+}
+
+const statusLabels: Record<string, string> = {
+  active: 'نشط',
+  follow_up: 'قيد المتابعة',
+  new: 'جديد',
+  inactive: 'غير نشط',
+  converted: 'تم التحويل',
+  lost: 'مفقود',
 }
 
 export default function ClientsTable({ initialData }: { initialData: Client[] }) {
   const [searchTerm, setSearchTerm] = useState('')
-
-  // حماية الكود من الـ null (Fallback to empty string)
   const safeData = Array.isArray(initialData) ? initialData : []
 
-  const filteredClients = safeData.filter(client => {
-    const safeName = client?.name || ''
-    const safePhone = client?.phone || ''
-    return safeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-           safePhone.includes(searchTerm)
-  })
+  const filteredClients = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    if (!query) return safeData
+
+    return safeData.filter((client) => {
+      const safeName = client.name || client.full_name || ''
+      const safePhone = client.phone || ''
+      return safeName.toLowerCase().includes(query) || safePhone.includes(query)
+    })
+  }, [safeData, searchTerm])
 
   if (safeData.length === 0) {
     return (
-      <div className="p-10 text-center text-slate-500 font-medium">
-        لا توجد بيانات عملاء حالياً. أضف أول عميل الآن!
+      <div className="p-10 text-center text-sm font-bold text-[var(--fi-muted)]">
+        لا توجد بيانات عملاء حالياً. أضف أول عميل الآن.
       </div>
     )
   }
 
   return (
     <div className="w-full">
-      <div className="p-4 border-b border-slate-100">
+      <div className="border-b border-[var(--fi-line)] p-4">
         <input
           type="text"
           placeholder="بحث عن عميل بالاسم أو الهاتف..."
-          className="w-full max-w-sm px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={(e) => setSearchTerm(e.target.value)}
+          className="h-11 w-full max-w-sm rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-4 text-sm text-[var(--fi-ink)] outline-none focus:ring-2 focus:ring-[var(--fi-emerald)]/30"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
         />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-right">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
+        <table className="w-full min-w-[760px] text-right">
+          <thead className="bg-[var(--fi-soft)] text-xs text-[var(--fi-muted)]">
             <tr>
-              <th className="px-6 py-3 font-medium">الاسم</th>
-              <th className="px-6 py-3 font-medium">الهاتف</th>
-              <th className="px-6 py-3 font-medium">الحالة</th>
-              <th className="px-6 py-3 font-medium">تاريخ الإضافة</th>
+              <th className="px-6 py-3 font-black">الاسم</th>
+              <th className="px-6 py-3 font-black">الهاتف</th>
+              <th className="px-6 py-3 font-black">الحالة</th>
+              <th className="px-6 py-3 font-black">تاريخ الإضافة</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredClients.map((client) => (
-              <tr key={client.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{client.name || 'غير محدد'}</td>
-                <td className="px-6 py-4 text-sm text-slate-600">{client.phone || 'غير محدد'}</td>
-                <td className="px-6 py-4 text-sm">
-                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                    client.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                  }`}>
-                    {client.status === 'active' ? 'نشط' : 'قيد المتابعة'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-500">
-                  {new Date(client.created_at).toLocaleDateString('ar-EG')}
+          <tbody className="divide-y divide-[var(--fi-line)]">
+            {filteredClients.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
+                  لا توجد نتائج مطابقة للبحث.
                 </td>
               </tr>
-            ))}
+            ) : filteredClients.map((client) => {
+              const status = client.status ?? 'active'
+              return (
+                <tr key={client.id} className="transition-colors hover:bg-[var(--fi-soft)]">
+                  <td className="px-6 py-4 text-sm font-black text-[var(--fi-ink)]">{client.name || client.full_name || 'غير محدد'}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-[var(--fi-muted)]" dir="ltr">{client.phone || 'غير محدد'}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${
+                      status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                    }`}>
+                      {statusLabels[status] ?? status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-semibold text-[var(--fi-muted)]">
+                    {client.created_at ? new Date(client.created_at).toLocaleDateString('ar-EG') : 'غير محدد'}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

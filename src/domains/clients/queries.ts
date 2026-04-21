@@ -5,20 +5,36 @@ import { createServerSupabaseClient } from '@/shared/supabase/server'
 import type { ClientDealSummary, ClientDetail, ClientDetailResult, ClientListItem, ClientListResult } from './types'
 
 export async function getClientList(): Promise<ClientListResult> {
-  await requirePermission('client.view.assigned')
+  const session = await requirePermission('client.view.assigned')
   const supabase = await createServerSupabaseClient()
+  const companyId = session.profile.company_id ?? null
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('clients')
-      .select('id, name, phone, status, created_at')
+      .select('id, name, full_name, phone, status, created_at')
       .order('created_at', { ascending: false })
+      .limit(500)
+
+    if (companyId) query = query.eq('company_id', companyId)
+
+    const { data, error } = await query
 
     if (error) {
       return { clients: [], error: error.message }
     }
 
-    return { clients: (data ?? []) as ClientListItem[], error: null }
+    return {
+      clients: (data ?? []).map((client) => ({
+        id: client.id,
+        name: client.name ?? client.full_name ?? 'عميل بدون اسم',
+        full_name: client.full_name,
+        phone: client.phone,
+        status: client.status ?? 'active',
+        created_at: client.created_at ?? new Date().toISOString(),
+      })),
+      error: null,
+    }
   } catch {
     return {
       clients: [],

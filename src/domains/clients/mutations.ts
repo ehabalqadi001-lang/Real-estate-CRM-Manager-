@@ -11,7 +11,7 @@ function cleanOptional(value: string | null | undefined) {
 }
 
 export async function createClient(input: CreateClientInput): Promise<ActionResult> {
-  await requirePermission('client.create')
+  const session = await requirePermission('client.create')
   const supabase = await createServerSupabaseClient()
 
   const name = input.name.trim()
@@ -25,9 +25,13 @@ export async function createClient(input: CreateClientInput): Promise<ActionResu
     .from('clients')
     .insert([{
       name,
+      full_name: name,
       phone,
       email: cleanOptional(input.email),
       status: 'active',
+      company_id: session.profile.company_id,
+      assigned_to: session.user.id,
+      user_id: session.user.id,
     }])
 
   if (error) {
