@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { AlertTriangle, ArrowDown, ArrowUp, Bot, Check, CircleDollarSign, Target, Users, WalletCards, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,7 @@ import {
   type DashboardRange,
   useDashboardData,
 } from './useDashboardData'
+import { useCountUp } from '@/hooks/use-count-up'
 
 type DashboardKPIsProps = {
   initialData: DashboardData
@@ -41,6 +43,8 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
     {
       label: 'إجمالي العملاء',
       value: data.kpis.totalClients.toLocaleString('ar-EG'),
+      countValue: data.kpis.totalClients,
+      suffix: '',
       detail: 'مقارنة بالفترة السابقة',
       change: data.kpis.clientsChange,
       icon: Users,
@@ -48,6 +52,8 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
     {
       label: 'صفقات نشطة',
       value: data.kpis.activeDeals.toLocaleString('ar-EG'),
+      countValue: data.kpis.activeDeals,
+      suffix: '',
       detail: 'داخل خط المبيعات',
       change: null,
       icon: Target,
@@ -55,6 +61,8 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
     {
       label: 'العمولات المستحقة',
       value: formatMoney(data.kpis.pendingCommissions),
+      countValue: null,
+      suffix: '',
       detail: 'معلقة أو معتمدة',
       change: null,
       icon: CircleDollarSign,
@@ -62,6 +70,8 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
     {
       label: 'معدل التحويل',
       value: `${data.kpis.conversionRate.toLocaleString('ar-EG')}٪`,
+      countValue: data.kpis.conversionRate,
+      suffix: '٪',
       detail: 'من العملاء إلى صفقات',
       change: null,
       icon: WalletCards,
@@ -121,8 +131,15 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
           )}
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {cards.map((card) => (
-              <Card key={card.label} className="border-[var(--fi-line)] bg-[var(--fi-paper)]">
+            {cards.map((card, index) => (
+              <motion.div
+                key={card.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.04 }}
+                whileHover={{ y: -2 }}
+              >
+              <Card className="ds-card-hover border-[var(--fi-line)] bg-[var(--fi-paper)]">
                 <CardContent className="pt-1">
                   <div className="flex items-start justify-between gap-3">
                     <span className="flex size-11 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
@@ -130,11 +147,14 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
                     </span>
                     {card.change !== null && <TrendBadge value={card.change} />}
                   </div>
-                  <p className="fi-tabular mt-4 text-2xl font-black text-[var(--fi-ink)]">{isLoading ? '...' : card.value}</p>
+                  <p className="fi-tabular mt-4 text-2xl font-black text-[var(--fi-ink)]">
+                    {isLoading ? '...' : card.countValue === null ? card.value : <CountUpValue value={card.countValue} suffix={card.suffix} />}
+                  </p>
                   <p className="mt-1 text-sm font-black text-[var(--fi-ink)]">{card.label}</p>
                   <p className="mt-1 text-xs font-semibold text-[var(--fi-muted)]">{card.detail}</p>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
         </CardContent>
@@ -238,6 +258,11 @@ function TrendBadge({ value }: { value: number }) {
       {Math.abs(value).toLocaleString('ar-EG')}٪
     </span>
   )
+}
+
+function CountUpValue({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const current = useCountUp(value)
+  return <>{current.toLocaleString('ar-EG')}{suffix}</>
 }
 
 function formatMoney(value: number) {

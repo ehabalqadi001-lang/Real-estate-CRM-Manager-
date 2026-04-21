@@ -1,4 +1,5 @@
 import { ActivityFeed, type ActivityFeedItem } from '@/components/dashboard/ActivityFeed'
+import { BentoDashboardLayout } from '@/components/dashboard/BentoDashboardLayout'
 import { DashboardKPIs } from '@/components/dashboard/DashboardKPIs'
 import type { DashboardData, DashboardKpi, StagePoint } from '@/components/dashboard/useDashboardData'
 import type { AuditLog, Commission, Deal, Lead, Profile } from '@/lib/types/db'
@@ -19,11 +20,15 @@ export default async function DashboardRoot() {
 
   return (
     <main className="space-y-4 px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
-      <DashboardKPIs
-        initialData={dashboardData}
-        context={{ userId: session.user.id, companyId }}
+      <BentoDashboardLayout
+        main={(
+          <DashboardKPIs
+            initialData={dashboardData}
+            context={{ userId: session.user.id, companyId }}
+          />
+        )}
+        sidebar={<ActivityFeed initialActivities={activities} />}
       />
-      <ActivityFeed initialActivities={activities} />
     </main>
   )
 }
