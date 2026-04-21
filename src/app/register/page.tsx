@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [accountType, setAccountType] = useState<'individual' | 'company'>('individual')
   const [loading, setLoading] = useState(false)
   const [errorState, setErrorState] = useState<{ message: string; details: string } | null>(null)
+  const isAlreadyRegistered = `${errorState?.message ?? ''} ${errorState?.details ?? ''}`.toLowerCase().includes('registered')
 
   const copy = useMemo(() => {
     if (mode === 'partner') {
@@ -74,6 +75,14 @@ export default function RegisterPage() {
             <AlertTriangle className="mx-auto mb-2 size-5 text-[#B54747]" />
             <p className="text-sm font-black text-[#B54747]">{errorState.message}</p>
             <p className="mt-1 text-xs font-semibold text-[#64748B]" dir="ltr">{errorState.details}</p>
+            {isAlreadyRegistered && (
+              <Link
+                href="/forgot-password"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-lg bg-[#17375E] px-4 text-sm font-black text-white transition hover:bg-[#102033]"
+              >
+                استعادة كلمة المرور بدلاً من إنشاء حساب جديد
+              </Link>
+            )}
           </div>
         )}
 
@@ -155,6 +164,10 @@ export default function RegisterPage() {
           <p className="mt-5 text-center text-sm font-semibold text-[#64748B]">
             لديك حساب بالفعل؟{' '}
             <Link href="/login" className="font-black text-[#17375E]">تسجيل الدخول</Link>
+          </p>
+          <p className="mt-2 text-center text-sm font-semibold text-[#64748B]">
+            نسيت كلمة المرور؟{' '}
+            <Link href="/forgot-password" className="font-black text-[#17375E]">استعادة الحساب</Link>
           </p>
         </form>
       </div>

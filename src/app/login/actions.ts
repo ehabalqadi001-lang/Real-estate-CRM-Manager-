@@ -173,6 +173,13 @@ export async function registerAction(formData: FormData) {
     })
 
     if (error) {
+      if (error.message.toLowerCase().includes('registered')) {
+        return {
+          success: false,
+          message: 'هذا البريد مسجل بالفعل',
+          details: 'User already registered',
+        }
+      }
       return { success: false, message: 'فشل إنشاء الحساب', details: error.message }
     }
 

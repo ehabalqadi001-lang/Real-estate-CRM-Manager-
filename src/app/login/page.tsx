@@ -90,6 +90,14 @@ export default function LoginPage() {
               <label htmlFor="login-password" className="mb-1.5 block text-sm font-bold text-[var(--fi-ink)]">
                 كلمة المرور
               </label>
+              <div className="-mt-1 mb-2 text-left">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-black text-[var(--fi-emerald)] transition-opacity hover:opacity-80"
+                >
+                  نسيت كلمة المرور؟
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" aria-hidden="true" />
                 <input
@@ -134,6 +142,12 @@ export default function LoginPage() {
               className="block font-bold text-[#C9964A] hover:opacity-80 transition-opacity"
             >
               FAST PARTNERS — انضم كشريك
+            </Link>
+            <Link
+              href="/forgot-password"
+              className="block font-bold text-[var(--fi-muted)] transition-colors hover:text-[var(--fi-emerald)]"
+            >
+              استعادة كلمة المرور لكل الحسابات
             </Link>
           </div>
         </div>
