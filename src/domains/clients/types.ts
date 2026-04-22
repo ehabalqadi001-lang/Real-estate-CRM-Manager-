@@ -25,6 +25,7 @@ export interface ClientDetail {
 
 export interface ClientDealSummary {
   id: string
+  lead_id?: string | null
   title: string | null
   compound: string | null
   developer: string | null
@@ -39,9 +40,24 @@ export interface ClientDealSummary {
   created_at: string | null
 }
 
+export interface ClientCallSummary {
+  id: string
+  lead_id: string | null
+  provider_call_sid: string | null
+  direction: string
+  status: string
+  duration_seconds: number | null
+  recording_url: string | null
+  recording_status: string | null
+  started_at: string | null
+  ended_at: string | null
+  created_at: string
+}
+
 export interface ClientDetailResult {
   client: ClientDetail | null
   deals: ClientDealSummary[]
+  calls: ClientCallSummary[]
   error: string | null
 }
 

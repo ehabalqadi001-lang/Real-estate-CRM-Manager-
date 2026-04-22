@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowRight, Pencil, UserRound } from 'lucide-react'
+import { ArrowRight, Mic2, Pencil, PhoneCall, UserRound } from 'lucide-react'
 import { getClientDetail } from '@/domains/clients/queries'
 import { WhatsAppButton } from '@/components/whatsapp/whatsapp-button'
+import type { ClientCallSummary } from '@/domains/clients/types'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -21,6 +22,12 @@ const CSS_STYLES = `
   .stat-label { font-size: 13px; color: #64748b; font-weight: 600; }
   .section-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .deal-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: 0.2s; border-right: 5px solid #185FA5; }
+  .call-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 12px; border-right: 5px solid #27AE60; }
+  .call-status { border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 900; white-space: nowrap; }
+  .call-status.completed { background: #dcfce7; color: #166534; }
+  .call-status.in_progress, .call-status.ringing { background: #dbeafe; color: #1d4ed8; }
+  .call-status.queued { background: #fef9c3; color: #854d0e; }
+  .call-status.failed, .call-status.no_answer, .call-status.busy { background: #fee2e2; color: #991b1b; }
   .btn-wa { background: #25D366; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
   .btn-edit { background: #fff; border: 1px solid #cbd5e1; color: #0f172a; padding: 10px 20px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   @media (max-width: 768px) {
@@ -44,7 +51,7 @@ function normalizeWhatsAppPhone(phone: string | null) {
 
 export default async function ClientProfilePage({ params }: PageProps) {
   const { id } = await params
-  const { client, deals, error } = await getClientDetail(id)
+  const { client, deals, calls, error } = await getClientDetail(id)
 
   if (!client && !error) notFound()
 
@@ -162,6 +169,102 @@ export default async function ClientProfilePage({ params }: PageProps) {
           )
         })
       )}
+
+      <div className="section-title mt-8">
+        <PhoneCall size={20} />
+        سجل المكالمات المموهة
+      </div>
+
+      {calls.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+          لا توجد مكالمات مسجلة لهذا العميل حتى الآن. ستظهر هنا حالة المكالمة ورابط التسجيل بعد تفعيل Twilio وإجراء مكالمة فعلية.
+        </div>
+      ) : (
+        calls.map((call) => <CallHistoryCard key={call.id} call={call} />)
+      )}
     </div>
   )
+}
+
+function CallHistoryCard({ call }: { call: ClientCallSummary }) {
+  return (
+    <div className="call-card">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`call-status ${call.status}`}>{labelCallStatus(call.status)}</span>
+            <span className="text-xs font-bold text-slate-500">{labelCallDirection(call.direction)}</span>
+          </div>
+          <div className="mt-3 grid gap-2 text-sm font-bold text-slate-600 sm:grid-cols-2">
+            <span>بدأت: {formatDateTime(call.started_at ?? call.created_at)}</span>
+            <span>المدة: {formatDuration(call.duration_seconds)}</span>
+            <span>حالة التسجيل: {labelRecordingStatus(call.recording_status)}</span>
+            <span dir="ltr">SID: {call.provider_call_sid ?? 'غير متاح'}</span>
+          </div>
+        </div>
+        {call.recording_url ? (
+          <a
+            href={call.recording_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white"
+          >
+            <Mic2 size={16} />
+            فتح التسجيل
+          </a>
+        ) : (
+          <span className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-500">لا يوجد تسجيل بعد</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function labelCallStatus(status: string) {
+  const labels: Record<string, string> = {
+    queued: 'في الانتظار',
+    ringing: 'يرن',
+    in_progress: 'جارية',
+    completed: 'مكتملة',
+    failed: 'فشلت',
+    no_answer: 'لم يتم الرد',
+    busy: 'مشغول',
+  }
+  return labels[status] ?? status
+}
+
+function labelCallDirection(direction: string) {
+  const labels: Record<string, string> = {
+    agent_to_client: 'من الوكيل إلى العميل',
+    developer_to_client: 'من المطور إلى العميل',
+    client_to_agent: 'من العميل إلى الوكيل',
+    client_to_developer: 'من العميل إلى المطور',
+  }
+  return labels[direction] ?? direction
+}
+
+function labelRecordingStatus(status: string | null) {
+  const labels: Record<string, string> = {
+    none: 'لا يوجد',
+    processing: 'قيد المعالجة',
+    available: 'متاح',
+    failed: 'فشل التسجيل',
+  }
+  return labels[status ?? 'none'] ?? 'لا يوجد'
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) return 'غير محدد'
+  return new Intl.DateTimeFormat('ar-EG', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+
+function formatDuration(seconds: number | null) {
+  const total = Number(seconds ?? 0)
+  if (!total) return 'لم تبدأ'
+  const minutes = Math.floor(total / 60)
+  const remainingSeconds = total % 60
+  return `${minutes}د ${remainingSeconds}ث`
 }

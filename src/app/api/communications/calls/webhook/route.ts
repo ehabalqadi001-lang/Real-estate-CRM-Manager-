@@ -70,13 +70,14 @@ export async function POST(request: NextRequest) {
       company_id: call.company_id,
       lead_id: call.lead_id,
       project_id: call.project_id,
-      event_type: status === 'completed' ? 'call_completed' : 'call_status_changed',
+      event_type: 'request_call',
       event_count: 1,
       metadata: {
         call_session_id: call.id,
         provider: 'twilio',
         provider_call_sid: providerCallSid || null,
         status,
+        webhook_event: status === 'completed' ? 'call_completed' : 'call_status_changed',
         duration_seconds: durationSeconds,
       },
     })

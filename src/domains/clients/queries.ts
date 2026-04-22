@@ -2,7 +2,7 @@ import 'server-only'
 
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
-import type { ClientDealSummary, ClientDetail, ClientDetailResult, ClientListItem, ClientListResult } from './types'
+import type { ClientCallSummary, ClientDealSummary, ClientDetail, ClientDetailResult, ClientListItem, ClientListResult } from './types'
 
 export async function getClientList(): Promise<ClientListResult> {
   const session = await requirePermission('client.view.assigned')
@@ -55,12 +55,12 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
       .single()
 
     if (clientError) {
-      return { client: null, deals: [], error: clientError.message }
+      return { client: null, deals: [], calls: [], error: clientError.message }
     }
 
     const { data: dealsData, error: dealsError } = await supabase
       .from('deals')
-      .select('id, title, compound, developer, developer_name, property_type, unit_value, amount, value, final_price, stage, status, created_at')
+      .select('id, lead_id, title, compound, developer, developer_name, property_type, unit_value, amount, value, final_price, stage, status, created_at')
       .eq('client_id', clientId)
       .order('created_at', { ascending: false })
 
@@ -68,19 +68,33 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
       return {
         client: clientData as ClientDetail,
         deals: [],
+        calls: [],
         error: dealsError.message,
       }
     }
 
+    const deals = (dealsData ?? []) as ClientDealSummary[]
+    const leadIds = Array.from(new Set(deals.map((deal) => deal.lead_id).filter(Boolean))) as string[]
+    const { data: callsData } = leadIds.length
+      ? await supabase
+          .from('masked_call_sessions')
+          .select('id, lead_id, provider_call_sid, direction, status, duration_seconds, recording_url, recording_status, started_at, ended_at, created_at')
+          .in('lead_id', leadIds)
+          .order('created_at', { ascending: false })
+          .limit(50)
+      : { data: [] }
+
     return {
       client: clientData as ClientDetail,
-      deals: (dealsData ?? []) as ClientDealSummary[],
+      deals,
+      calls: (callsData ?? []) as ClientCallSummary[],
       error: null,
     }
   } catch {
     return {
       client: null,
       deals: [],
+      calls: [],
       error: 'تعذر الاتصال بخادم قاعدة البيانات',
     }
   }
