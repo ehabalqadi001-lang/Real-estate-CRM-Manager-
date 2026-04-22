@@ -45,6 +45,7 @@ export const dashboardNavigation: NavigationGroup[] = [
     title: 'مركز القيادة',
     items: [
       { title: 'اللوحة التنفيذية', href: '/dashboard', permission: 'dashboard.view.own', icon: LayoutDashboard },
+      { title: 'سياق الشركة', href: '/dashboard/company-context', permission: 'platform.manage', icon: Building2 },
       { title: 'التحليلات والتقارير', href: '/dashboard/reports', permission: 'report.view.own', icon: BarChart3 },
       { title: 'الإشعارات', href: '/dashboard/notifications', permission: 'notification.view.own', icon: Bell },
       { title: 'بوابة الموظف', href: '/dashboard/employee', permission: 'erp.attendance.use', icon: ClipboardCheck },

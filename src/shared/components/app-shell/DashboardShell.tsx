@@ -3,13 +3,15 @@ import type { CSSProperties } from 'react'
 import { EnterpriseSidebar } from './EnterpriseSidebar'
 import { EnterpriseTopbar } from './EnterpriseTopbar'
 import type { AppProfile } from '@/shared/auth/types'
+import type { CompanyOption } from '@/shared/company-context/server'
 
 interface DashboardShellProps {
   children: ReactNode
   profile: AppProfile
+  companyOptions?: CompanyOption[]
 }
 
-export function DashboardShell({ children, profile }: DashboardShellProps) {
+export function DashboardShell({ children, profile, companyOptions = [] }: DashboardShellProps) {
   const brandColor = normalizeBrandColor(profile.tenant_primary_brand_color)
   const shellStyle = brandColor
     ? ({
@@ -23,7 +25,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
       <div className="flex min-h-screen">
         <EnterpriseSidebar profile={profile} />
         <main className="min-w-0 flex-1 pb-24 lg:pb-0">
-          <EnterpriseTopbar profile={profile} />
+          <EnterpriseTopbar profile={profile} companyOptions={companyOptions} />
           {children}
         </main>
       </div>

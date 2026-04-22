@@ -4,6 +4,7 @@ import { AnimatedCount } from '@/components/design-system/animated-count'
 import { BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
+import { getActiveCompanyContext } from '@/shared/company-context/server'
 import { nullableUuid } from '@/lib/uuid'
 import {
   Briefcase,
@@ -58,35 +59,42 @@ const STAGE_CONFIG: Record<string, { label: string; color: string; bg: string }>
 export default async function DealsPage({ searchParams }: PageProps) {
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
+  const companyContext = await getActiveCompanyContext(session)
   const params = await searchParams
   const page = Math.max(1, parseInt(params?.page || '1', 10))
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
-  const targetCompanyId = nullableUuid(session.profile.company_id) ?? nullableUuid(session.profile.tenant_id) ?? session.user.id
+  const targetCompanyId = nullableUuid(companyContext.companyId)
 
   const [
     { data: activeLeads },
     { data: teamMembers },
     { data: deals, count: totalDealsCount },
   ] = await Promise.all([
-    supabase
-      .from('leads')
-      .select('id, client_name')
-      .eq('company_id', targetCompanyId)
-      .neq('status', 'Won')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('profiles')
-      .select('id, full_name')
-      .eq('company_id', targetCompanyId)
-      .in('role', ['agent', 'senior_agent', 'branch_manager', 'company_admin', 'company_owner', 'admin', 'company'])
-      .order('full_name'),
-    supabase
-      .from('deals')
-      .select('id, stage, final_price, created_at, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' })
-      .eq('company_id', targetCompanyId)
-      .order('created_at', { ascending: false })
-      .range(from, to),
+    targetCompanyId
+      ? supabase
+        .from('leads')
+        .select('id, client_name')
+        .eq('company_id', targetCompanyId)
+        .neq('status', 'Won')
+        .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [] }),
+    targetCompanyId
+      ? supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('company_id', targetCompanyId)
+        .in('role', ['agent', 'senior_agent', 'branch_manager', 'company_admin', 'company_owner', 'admin', 'company'])
+        .order('full_name')
+      : Promise.resolve({ data: [] }),
+    targetCompanyId
+      ? supabase
+        .from('deals')
+        .select('id, stage, final_price, created_at, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' })
+        .eq('company_id', targetCompanyId)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+      : Promise.resolve({ data: [], count: 0 }),
   ])
 
   const safeLeads = ((activeLeads ?? []) as unknown as LeadOption[]).filter((lead) => lead.id)
@@ -121,6 +129,12 @@ export default async function DealsPage({ searchParams }: PageProps) {
           <AddDealButton activeLeads={safeLeads} teamMembers={safeTeamMembers} />
         </div>
       </section>
+
+      {!targetCompanyId ? (
+        <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-800">
+          اختر شركة نشطة من أعلى الصفحة أولاً حتى يمكن عرض العملاء والوكلاء وتوثيق الصفقات داخل نطاق شركة صحيح.
+        </section>
+      ) : null}
 
       <section className="ds-bento-grid" aria-label="مؤشرات الصفقات">
         <BentoKpiCard

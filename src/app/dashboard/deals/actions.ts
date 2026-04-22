@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { notifyAdmins, notifyDealClosed } from '@/lib/notify'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { requireSession } from '@/shared/auth/session'
+import { getActiveCompanyContext } from '@/shared/company-context/server'
 import { nullableUuid } from '@/lib/uuid'
 
 interface DealPayload {
@@ -15,6 +17,8 @@ interface DealPayload {
 }
 
 export async function closeDeal(payload: DealPayload) {
+  const session = await requireSession()
+  const companyContext = await getActiveCompanyContext(session)
   const supabase = await createServerSupabaseClient()
   const {
     data: { user },
@@ -48,6 +52,7 @@ export async function closeDeal(payload: DealPayload) {
   if (!lead) throw new Error('لم يتم العثور على العميل المحدد.')
 
   const companyId =
+    nullableUuid(companyContext.companyId) ??
     nullableUuid(profile?.company_id) ??
     nullableUuid(profile?.tenant_id) ??
     nullableUuid(lead.company_id)

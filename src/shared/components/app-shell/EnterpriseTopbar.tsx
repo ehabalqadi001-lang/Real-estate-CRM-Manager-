@@ -2,11 +2,13 @@
 
 import { Menu, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import type { AppProfile } from '@/shared/auth/types'
+import type { CompanyOption } from '@/shared/company-context/server'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import ThemeToggle from '@/components/ThemeToggle'
+import { CompanyContextSwitcher } from './CompanyContextSwitcher'
 
-export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
-  const tenantName = profile.tenant_name ?? 'FAST INVESTMENT'
+export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: AppProfile; companyOptions?: CompanyOption[] }) {
+  const tenantName = profile.active_company_name ?? profile.tenant_name ?? 'FAST INVESTMENT'
 
   function openCommandPalette() {
     window.dispatchEvent(new Event('fi:open-command-palette'))
@@ -51,6 +53,7 @@ export function EnterpriseTopbar({ profile }: { profile: AppProfile }) {
         <div className="flex min-w-0 items-center justify-end gap-2">
           <ThemeToggle />
           <NotificationBell userId={profile.id} />
+          <CompanyContextSwitcher activeCompanyId={profile.active_company_id ?? profile.company_id} companies={companyOptions} />
           <button
             type="button"
             onClick={openCommandPalette}
