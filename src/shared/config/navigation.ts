@@ -21,6 +21,7 @@ import {
   Settings,
   ShieldCheck,
   Ticket,
+  UserCog,
   Users,
   Vault,
   WalletCards,
@@ -70,6 +71,7 @@ export const dashboardNavigation: NavigationGroup[] = [
     title: 'المخزون والسوق',
     items: [
       { title: 'المطورون', href: '/dashboard/developers', permission: 'developer.view', icon: Landmark },
+      { title: 'صلاحيات المطورين', href: '/dashboard/developer-accounts', permission: 'developer.manage', icon: UserCog },
       { title: 'تكاملات المطورين', href: '/dashboard/integrations', permission: 'inventory.import', icon: PlugZap },
       { title: 'المشاريع', href: '/dashboard/projects', permission: 'project.view', icon: Building2 },
       { title: 'الوحدات', href: '/dashboard/inventory/units', permission: 'unit.view', icon: Home },

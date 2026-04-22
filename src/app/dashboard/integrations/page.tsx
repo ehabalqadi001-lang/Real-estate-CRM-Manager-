@@ -7,6 +7,7 @@ import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLa
 import { AnimatedCount } from '@/components/design-system/animated-count'
 import { AddIntegrationForm } from './AddIntegrationForm'
 import { InventoryImportForm } from './InventoryImportForm'
+import { BatchProcessButton } from './BatchProcessButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -154,6 +155,7 @@ export default async function IntegrationsPage() {
                 <th className="px-4 py-3 text-right">الصفوف</th>
                 <th className="px-4 py-3 text-right">المعالج</th>
                 <th className="px-4 py-3 text-right">الأخطاء</th>
+                <th className="px-4 py-3 text-right">إجراء</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
@@ -169,11 +171,14 @@ export default async function IntegrationsPage() {
                   <td className="px-4 py-3 font-bold">{batch.total_rows}</td>
                   <td className="px-4 py-3 font-bold text-emerald-700">{batch.processed_rows}</td>
                   <td className="px-4 py-3 font-bold text-red-700">{batch.failed_rows}</td>
+                  <td className="px-4 py-3">
+                    <BatchProcessButton batchId={batch.id} />
+                  </td>
                 </tr>
               ))}
               {!batches.length ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
                     لا توجد ملفات استيراد حتى الآن.
                   </td>
                 </tr>
