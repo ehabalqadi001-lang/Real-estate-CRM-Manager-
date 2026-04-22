@@ -1,224 +1,365 @@
-import { createRawClient } from '@/lib/supabase/server'
-import { requireSession } from '@/shared/auth/session'
-import { Users, TrendingUp, Clock, DollarSign, Award, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import {
+  BadgeDollarSign,
+  BriefcaseBusiness,
+  CalendarCheck2,
+  Download,
+  ShieldCheck,
+  Users,
+} from 'lucide-react'
+import { createRawClient } from '@/lib/supabase/server'
+import { requireSession } from '@/shared/auth/session'
+import type { AppRole } from '@/shared/auth/types'
+import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
+import { AnimatedCount } from '@/components/design-system/animated-count'
+import { AddEmployeeForm, type DepartmentOption } from './AddEmployeeForm'
+import { EnvironmentLockButton } from './EnvironmentLockButton'
+import { SmartAttendanceWidget, type SmartAttendanceEmployee } from './SmartAttendanceWidget'
 
 export const dynamic = 'force-dynamic'
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+type EmployeeRow = {
+  id: string
+  user_id: string | null
+  employee_number: string
+  department_id: string | null
+  job_title: string | null
+  hire_date: string | null
+  base_salary: number | null
+  basic_salary: number | null
+  commission_rate: number | null
+  status: string | null
+  is_env_locked: boolean | null
+  allowed_ip: string | null
+  profiles: {
+    full_name: string | null
+    role: string | null
+    email: string | null
+  } | null
+}
 
-const fmtFull = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
+type AttendanceRow = {
+  employee_id: string
+  check_in: string | null
+  check_out: string | null
+  status: string | null
+}
+
+type PayrollRow = {
+  employee_id: string
+  total_commissions: number | null
+  deductions: number | null
+  net_salary: number | null
+}
+
+const HR_ROLES: AppRole[] = [
+  'super_admin',
+  'platform_admin',
+  'hr_manager',
+  'hr_staff',
+  'hr_officer',
+  'finance_manager',
+]
+
+const HR_WRITE_ROLES: AppRole[] = [
+  'super_admin',
+  'platform_admin',
+  'hr_manager',
+  'hr_staff',
+  'hr_officer',
+]
+
+const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
 
 export default async function ERPHRPage() {
   const session = await requireSession()
   const { profile } = session
 
-  const allowedRoles = ['super_admin', 'hr_manager', 'hr_officer', 'finance_manager']
-  if (!allowedRoles.includes(profile.role ?? '')) redirect('/dashboard')
+  if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
 
   const supabase = await createRawClient()
-  const companyId = profile.company_id
+  const companyId = profile.company_id ?? profile.tenant_id
+  if (!companyId && profile.role !== 'super_admin') redirect('/dashboard')
 
   const now = new Date()
   const month = now.getMonth() + 1
-  const year  = now.getFullYear()
+  const year = now.getFullYear()
+  const today = now.toISOString().slice(0, 10)
 
   const [
-    { data: employees },
-    { data: commissions },
-    { data: attendance },
-    { data: payrollRuns },
+    departmentsResult,
+    employeesResult,
+    attendanceResult,
+    payrollResult,
   ] = await Promise.all([
     supabase
+      .from('departments')
+      .select('id, name, name_ar, slug')
+      .in('slug', ['sales', 'finance', 'marketing', 'data-entry', 'customer-service', 'hr'])
+      .order('name'),
+    supabase
       .from('employees')
-      .select('id, employee_number, base_salary, hire_date, department_id, profile:profiles!employees_id_fkey(full_name, role, email)')
+      .select(`
+        id,
+        user_id,
+        employee_number,
+        department_id,
+        job_title,
+        hire_date,
+        base_salary,
+        basic_salary,
+        commission_rate,
+        status,
+        is_env_locked,
+        allowed_ip,
+        profiles!employees_id_fkey(full_name, role, email)
+      `)
       .eq('company_id', companyId)
-      .is('termination_date', null)
-      .order('employee_number'),
-
+      .order('created_at', { ascending: false }),
     supabase
-      .from('commission_calculations')
-      .select('employee_id, total_commission, status')
-      .eq('company_id', companyId)
-      .eq('period_month', month)
-      .eq('period_year', year),
-
+      .from('attendance')
+      .select('employee_id, check_in, check_out, status')
+      .eq('date', today),
     supabase
-      .from('attendance_logs')
-      .select('employee_id, status')
-      .eq('company_id', companyId)
-      .gte('log_date', `${year}-${String(month).padStart(2, '0')}-01`)
-      .lte('log_date', new Date(year, month, 0).toISOString().split('T')[0]),
-
-    supabase
-      .from('payroll_runs')
-      .select('id, period_month, period_year, total_net, status, run_date')
-      .eq('company_id', companyId)
-      .order('run_date', { ascending: false })
-      .limit(5),
+      .from('payroll')
+      .select('employee_id, total_commissions, deductions, net_salary')
+      .eq('month', month)
+      .eq('year', year),
   ])
 
-  const totalHeadcount   = employees?.length ?? 0
-  const totalPayroll     = employees?.reduce((s, e) => s + Number(e.base_salary ?? 0), 0) ?? 0
-  const totalCommissions = commissions?.reduce((s, c) => s + Number(c.total_commission ?? 0), 0) ?? 0
-  const absentToday      = attendance?.filter(a => a.status === 'absent').length ?? 0
-  const presentToday     = attendance?.filter(a => a.status === 'present').length ?? 0
+  const departments = (departmentsResult.data ?? []) as DepartmentOption[]
+  const employees = ((employeesResult.data ?? []) as unknown as EmployeeRow[]).map((employee) => ({
+    ...employee,
+    profiles: Array.isArray(employee.profiles) ? employee.profiles[0] : employee.profiles,
+  }))
+  const attendance = (attendanceResult.data ?? []) as AttendanceRow[]
+  const payroll = (payrollResult.data ?? []) as PayrollRow[]
+  const pageError = departmentsResult.error || employeesResult.error || attendanceResult.error || payrollResult.error
+  const canManageHr = HR_WRITE_ROLES.includes(profile.role)
 
-  const commByEmployee = new Map<string, number>()
-  for (const c of commissions ?? []) {
-    commByEmployee.set(c.employee_id, (commByEmployee.get(c.employee_id) ?? 0) + Number(c.total_commission))
-  }
+  const attendanceByEmployee = new Map(attendance.map((item) => [item.employee_id, item]))
+  const payrollByEmployee = new Map(payroll.map((item) => [item.employee_id, item]))
+  const departmentById = new Map(departments.map((department) => [department.id, department]))
+
+  const activeEmployees = employees.filter((employee) => (employee.status ?? 'active') === 'active')
+  const lockedEmployees = employees.filter((employee) => employee.is_env_locked).length
+  const presentToday = attendance.filter((item) => item.check_in && item.status !== 'blocked').length
+  const totalPayroll = payroll.reduce((sum, item) => sum + Number(item.net_salary ?? 0), 0)
+  const totalCommissions = payroll.reduce((sum, item) => sum + Number(item.total_commissions ?? 0), 0)
+
+  const selfEmployee = employees.find((employee) => employee.user_id === session.user.id || employee.id === session.user.id)
+  const selfAttendance = selfEmployee ? attendanceByEmployee.get(selfEmployee.id) : null
+  const smartEmployee: SmartAttendanceEmployee | null = selfEmployee
+    ? {
+      id: selfEmployee.id,
+      fullName: selfEmployee.profiles?.full_name ?? profile.full_name ?? 'موظف',
+      jobTitle: selfEmployee.job_title,
+      isEnvLocked: Boolean(selfEmployee.is_env_locked),
+      todayCheckIn: selfAttendance?.check_in ?? null,
+      todayCheckOut: selfAttendance?.check_out ?? null,
+    }
+    : null
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
-      {/* Header */}
-      <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center">
-            <Users size={18} className="text-white" />
-          </div>
+    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+      <section className="ds-card p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">إدارة الموارد البشرية</h1>
-            <p className="text-xs text-[var(--fi-muted)]">الموظفون · الحضور · العمولات · الرواتب</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT HRMS</p>
+            <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة الموارد البشرية والرواتب</h1>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
+              مركز موحد لإضافة الموظفين، عزل صلاحيات أقسام HR، ربط بيئة العمل، تسجيل الحضور الذكي، ومتابعة الرواتب والعمولات.
+            </p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
           <Link
             href={`/api/erp/payroll/preview?month=${month}&year=${year}`}
             target="_blank"
-            className="flex items-center gap-2 border border-violet-300 text-violet-700 px-3 py-2 rounded-xl text-sm font-bold hover:bg-violet-50 transition-colors"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-4 text-sm font-black text-[var(--fi-ink)] transition hover:border-[var(--fi-emerald)] dark:bg-white/5"
           >
-            <DollarSign size={14} /> معاينة الراتب
+            <Download className="size-4" aria-hidden="true" />
+            معاينة رواتب الشهر
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'إجمالي الموظفين', value: totalHeadcount, icon: Users, color: 'bg-violet-50 text-violet-600', suffix: '' },
-          { label: 'إجمالي الرواتب الأساسية', value: totalPayroll, icon: DollarSign, color: 'bg-emerald-50 text-emerald-600', suffix: ' ج.م' },
-          { label: 'عمولات الشهر', value: totalCommissions, icon: Award, color: 'bg-amber-50 text-amber-600', suffix: ' ج.م' },
-          { label: 'حاضر / غائب اليوم', value: presentToday, icon: Clock, color: 'bg-sky-50 text-sky-600', suffix: ` / ${absentToday}` },
-        ].map((kpi) => (
-          <div key={kpi.label} className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-8 h-8 ${kpi.color} rounded-lg flex items-center justify-center`}>
-                <kpi.icon size={15} />
-              </div>
-              <span className="text-xs text-[var(--fi-muted)]">{kpi.label}</span>
-            </div>
-            <p className="text-2xl font-black text-[var(--fi-ink)]">
-              {typeof kpi.value === 'number' && kpi.value > 9999 ? fmt(kpi.value) : kpi.value}{kpi.suffix}
+      {pageError ? (
+        <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+          تعذر تحميل بيانات الموارد البشرية: {pageError.message}
+        </section>
+      ) : null}
+
+      <BentoGrid>
+        <BentoKpiCard
+          title="إجمالي الموظفين النشطين"
+          value={<AnimatedCount value={activeEmployees.length} />}
+          hint="كل الأقسام"
+          icon={<Users className="size-5" />}
+        />
+        <BentoKpiCard
+          title="حضور اليوم"
+          value={<AnimatedCount value={presentToday} />}
+          hint={`${formatter.format(lockedEmployees)} بيئة مربوطة`}
+          icon={<CalendarCheck2 className="size-5" />}
+        />
+        <BentoKpiCard
+          title="صافي الرواتب"
+          value={<><AnimatedCount value={totalPayroll} /> <span className="text-base">ج.م</span></>}
+          hint={`${month}/${year}`}
+          icon={<BadgeDollarSign className="size-5" />}
+        />
+        <BentoKpiCard
+          title="عمولات محتسبة"
+          value={<><AnimatedCount value={totalCommissions} /> <span className="text-base">ج.م</span></>}
+          hint="من payroll"
+          icon={<BriefcaseBusiness className="size-5" />}
+        />
+      </BentoGrid>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+        {canManageHr ? (
+          <AddEmployeeForm departments={departments} />
+        ) : (
+          <section className="ds-card p-5">
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">صلاحيات الموارد البشرية</h2>
+            <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
+              يمكنك مراجعة الرواتب والتقارير فقط. إنشاء الموظفين وربط بيئة العمل متاح حصراً لمدير النظام وفريق الموارد البشرية.
             </p>
-          </div>
-        ))}
+          </section>
+        )}
+        <SmartAttendanceWidget employee={smartEmployee} />
       </div>
 
-      {/* Employee table */}
-      <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-[var(--fi-line)]">
-          <h2 className="font-bold text-[var(--fi-ink)]">الموظفون النشطون</h2>
+      <section className="ds-card overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-[var(--fi-line)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">سجل الموظفين</h2>
+            <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">الرواتب، الأقسام، حالة البيئة، وحضور اليوم.</p>
+          </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-xs font-black text-[var(--fi-emerald)]">
+            <ShieldCheck className="size-4" aria-hidden="true" />
+            HR فقط
+          </span>
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[980px] text-sm">
             <thead>
-              <tr className="bg-[var(--fi-soft)] text-[var(--fi-muted)] text-xs">
-                <th className="text-right px-4 py-3">رقم الموظف</th>
-                <th className="text-right px-4 py-3">الاسم</th>
-                <th className="text-right px-4 py-3">الدور</th>
-                <th className="text-right px-4 py-3">الراتب الأساسي</th>
-                <th className="text-right px-4 py-3">عمولة الشهر</th>
-                <th className="text-right px-4 py-3">تاريخ التعيين</th>
+              <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
+                <th className="px-4 py-3 text-right">الموظف</th>
+                <th className="px-4 py-3 text-right">القسم</th>
+                <th className="px-4 py-3 text-right">الدور</th>
+                <th className="px-4 py-3 text-right">الراتب</th>
+                <th className="px-4 py-3 text-right">العمولة</th>
+                <th className="px-4 py-3 text-right">حضور اليوم</th>
+                <th className="px-4 py-3 text-right">بيئة العمل</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
-              {(employees ?? []).map(emp => {
-                const p = Array.isArray(emp.profile) ? emp.profile[0] : emp.profile
-                const comm = commByEmployee.get(emp.id) ?? 0
+              {employees.map((employee) => {
+                const employeeAttendance = attendanceByEmployee.get(employee.id)
+                const employeePayroll = payrollByEmployee.get(employee.id)
+                const department = employee.department_id ? departmentById.get(employee.department_id) : null
                 return (
-                  <tr key={emp.id} className="hover:bg-[var(--fi-soft)] transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--fi-muted)]">{emp.employee_number}</td>
-                    <td className="px-4 py-3 font-semibold text-[var(--fi-ink)]">{p?.full_name ?? '—'}</td>
-                    <td className="px-4 py-3 text-[var(--fi-muted)]">{p?.role ?? '—'}</td>
-                    <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{fmtFull(Number(emp.base_salary ?? 0))} ج.م</td>
-                    <td className="px-4 py-3">
-                      {comm > 0
-                        ? <span className="text-emerald-600 font-bold">{fmtFull(comm)} ج.م</span>
-                        : <span className="text-[var(--fi-muted)]">—</span>}
+                  <tr key={employee.id} className="align-top transition hover:bg-[var(--fi-soft)]/60">
+                    <td className="px-4 py-4">
+                      <p className="font-black text-[var(--fi-ink)]">{employee.profiles?.full_name ?? 'بدون اسم'}</p>
+                      <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.employee_number}</p>
+                      <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? 'بدون بريد'}</p>
                     </td>
-                    <td className="px-4 py-3 text-[var(--fi-muted)] text-xs">
-                      {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString('ar-EG') : '—'}
+                    <td className="px-4 py-4 font-bold text-[var(--fi-ink)]">{department?.name_ar ?? department?.name ?? 'غير محدد'}</td>
+                    <td className="px-4 py-4">
+                      <p className="font-bold text-[var(--fi-ink)]">{employee.job_title ?? 'غير محدد'}</p>
+                      <p className="mt-1 text-xs text-[var(--fi-muted)]">{labelRole(employee.profiles?.role)}</p>
+                    </td>
+                    <td className="px-4 py-4 font-black text-[var(--fi-ink)]">
+                      {formatter.format(Number(employee.basic_salary ?? employee.base_salary ?? employeePayroll?.net_salary ?? 0))} ج.م
+                    </td>
+                    <td className="px-4 py-4 font-black text-emerald-600">
+                      {formatter.format(Number(employeePayroll?.total_commissions ?? 0))} ج.م
+                      <span className="mt-1 block text-xs text-[var(--fi-muted)]">{Number(employee.commission_rate ?? 0)}%</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <AttendanceBadge attendance={employeeAttendance} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="mb-2">
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${
+                          employee.is_env_locked
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-amber-50 text-amber-700'
+                        }`}>
+                          {employee.is_env_locked ? 'مربوطة' : 'غير مربوطة'}
+                        </span>
+                      </div>
+                      {canManageHr ? (
+                        <EnvironmentLockButton employeeId={employee.id} locked={Boolean(employee.is_env_locked)} />
+                      ) : null}
                     </td>
                   </tr>
                 )
               })}
-              {!employees?.length && (
+              {!employees.length ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--fi-muted)]">
-                    <AlertCircle size={24} className="mx-auto mb-2 opacity-40" />
-                    لا يوجد موظفون نشطون
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm font-bold text-[var(--fi-muted)]">
+                    لا يوجد موظفون حتى الآن. استخدم نموذج إضافة موظف لإنشاء أول حساب.
                   </td>
                 </tr>
-              )}
+              ) : null}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
+    </main>
+  )
+}
 
-      {/* Recent payroll runs */}
-      {(payrollRuns?.length ?? 0) > 0 && (
-        <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-[var(--fi-line)]">
-            <h2 className="font-bold text-[var(--fi-ink)]">آخر مسيرات الرواتب</h2>
-          </div>
-          <div className="divide-y divide-[var(--fi-line)]">
-            {(payrollRuns ?? []).map(run => (
-              <div key={run.id} className="flex items-center justify-between px-4 py-3 hover:bg-[var(--fi-soft)]">
-                <div>
-                  <p className="font-semibold text-[var(--fi-ink)] text-sm">
-                    {run.period_month}/{run.period_year}
-                  </p>
-                  <p className="text-xs text-[var(--fi-muted)]">{new Date(run.run_date).toLocaleDateString('ar-EG')}</p>
-                </div>
-                <div className="text-left">
-                  <p className="font-black text-[var(--fi-ink)]">{fmtFull(Number(run.total_net ?? 0))} ج.م</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                    run.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                    run.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                    'bg-amber-100 text-amber-700'
-                  }`}>{run.status === 'paid' ? 'مدفوع' : run.status === 'approved' ? 'معتمد' : 'مسودة'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+function AttendanceBadge({ attendance }: { attendance: AttendanceRow | undefined }) {
+  if (!attendance) {
+    return <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">لم يسجل</span>
+  }
 
-      {/* Commission pipeline link */}
-      <div className="flex gap-3">
-        <Link href="/dashboard/commissions" className="flex-1 bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4 hover:border-violet-300 transition-colors flex items-center gap-3">
-          <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
-            <TrendingUp size={16} className="text-amber-600" />
-          </div>
-          <div>
-            <p className="font-bold text-[var(--fi-ink)] text-sm">العمولات</p>
-            <p className="text-xs text-[var(--fi-muted)]">خط أنابيب العمولات للشهر الحالي</p>
-          </div>
-        </Link>
-        <Link href="/dashboard/team" className="flex-1 bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4 hover:border-violet-300 transition-colors flex items-center gap-3">
-          <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
-            <Users size={16} className="text-violet-600" />
-          </div>
-          <div>
-            <p className="font-bold text-[var(--fi-ink)] text-sm">الفريق</p>
-            <p className="text-xs text-[var(--fi-muted)]">إدارة أعضاء الفريق والأدوار</p>
-          </div>
-        </Link>
-      </div>
+  if (attendance.status === 'blocked') {
+    return <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-700">خارج النطاق</span>
+  }
+
+  return (
+    <div>
+      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+        حاضر
+      </span>
+      <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">
+        {formatTime(attendance.check_in)} - {formatTime(attendance.check_out)}
+      </p>
     </div>
   )
+}
+
+function formatTime(value: string | null | undefined) {
+  if (!value) return '...'
+  return new Intl.DateTimeFormat('ar-EG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+}
+
+function labelRole(role: string | null | undefined) {
+  const labels: Record<string, string> = {
+    super_admin: 'مدير النظام',
+    platform_admin: 'مدير المنصة',
+    company_owner: 'مالك الشركة',
+    company_admin: 'مدير الشركة',
+    branch_manager: 'مدير فرع',
+    senior_agent: 'وكيل أول',
+    agent: 'وكيل مبيعات',
+    finance_officer: 'مسؤول مالي',
+    finance_manager: 'مدير مالي',
+    hr_manager: 'مدير موارد بشرية',
+    hr_staff: 'موظف موارد بشرية',
+    hr_officer: 'مسؤول موارد بشرية',
+    customer_support: 'خدمة عملاء',
+    marketing_manager: 'مدير تسويق',
+    inventory_rep: 'إدخال بيانات',
+    data_manager: 'مدير بيانات',
+    viewer: 'مشاهد',
+  }
+
+  return labels[role ?? ''] ?? role ?? 'غير محدد'
 }

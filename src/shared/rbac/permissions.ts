@@ -90,6 +90,9 @@ export type Permission =
   // ── ERP Module Permissions ──
   | 'erp.hr.view'
   | 'erp.hr.manage'
+  | 'erp.hr.onboard'
+  | 'erp.attendance.use'
+  | 'erp.attendance.manage'
   | 'erp.payroll.view'
   | 'erp.payroll.run'
   | 'erp.legal.view'
@@ -136,10 +139,10 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
 ]
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
-  super_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage'],
+  super_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage'],
   platform_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', 'admin.view', 'audit.view.company', 'report.view.company', 'support.view'],
-  company_owner: ALL_COMPANY_PERMISSIONS,
-  company_admin: ALL_COMPANY_PERMISSIONS,
+  company_owner: [...ALL_COMPANY_PERMISSIONS, 'erp.attendance.use'],
+  company_admin: [...ALL_COMPANY_PERMISSIONS, 'erp.attendance.use'],
   branch_manager: [
     'dashboard.view.team',
     'lead.view.team',
@@ -216,13 +219,15 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   buyer_manager: ['dashboard.view.team', 'lead.view.team', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.team', 'report.view.team', 'notification.view.own', 'map.view'],
   seller_resale_manager: ['dashboard.view.team', 'client.view.company', 'client.create', 'listing.view', 'listing.manage', 'deal.view.team', 'deal.create', 'report.view.team', 'notification.view.own', 'map.view'],
   finance_officer: ['dashboard.view.company', 'deal.view.company', 'commission.view.company', 'commission.manage', 'payout.view.company', 'payout.manage', 'finance.view', 'finance.manage', 'report.view.company', 'notification.view.own'],
-  hr_officer: ['dashboard.view.company', 'team.view', 'team.manage', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.payroll.view'],
+  hr_manager: ['dashboard.view.company', 'team.view', 'team.manage', 'users.read', 'users.create', 'users.update', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.hr.manage', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view', 'erp.payroll.run'],
+  hr_staff: ['dashboard.view.company', 'team.view', 'users.read', 'users.create', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view'],
+  hr_officer: ['dashboard.view.company', 'team.view', 'team.manage', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view'],
   customer_support: ['dashboard.view.own', 'client.view.assigned', 'support.view', 'support.manage', 'notification.view.own'],
   developer_relations_manager: ['dashboard.view.team', 'developer.view', 'developer.manage', 'project.view', 'project.manage', 'unit.view', 'unit.manage', 'listing.view', 'report.view.team', 'notification.view.own', 'map.view'],
   admin: ALL_COMPANY_PERMISSIONS,
   company: ALL_COMPANY_PERMISSIONS,
-  agent: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
-  individual: ['dashboard.view.own', 'lead.create', 'unit.view', 'listing.view', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
+  agent: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view', 'erp.attendance.use'],
+  individual: ['dashboard.view.own', 'lead.create', 'unit.view', 'listing.view', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view', 'erp.attendance.use'],
   viewer: ['dashboard.view.own', 'notification.view.own'],
   // ── Fast Investment Departmental Roles ──
   ad_reviewer: ['dashboard.view.own', 'ads.read', 'ads.approve', 'ads.reject', 'notification.view.own'],

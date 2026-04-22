@@ -44,6 +44,7 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'اللوحة التنفيذية', href: '/dashboard', permission: 'dashboard.view.own', icon: LayoutDashboard },
       { title: 'التحليلات والتقارير', href: '/dashboard/reports', permission: 'report.view.own', icon: BarChart3 },
       { title: 'الإشعارات', href: '/dashboard/notifications', permission: 'notification.view.own', icon: Bell },
+      { title: 'بوابة الموظف', href: '/dashboard/employee', permission: 'erp.attendance.use', icon: ClipboardCheck },
     ],
   },
   {
@@ -81,6 +82,14 @@ export const dashboardNavigation: NavigationGroup[] = [
     ],
   },
   {
+    title: 'وحدات ERP المؤسسية',
+    items: [
+      { title: 'الموارد البشرية والرواتب', href: '/dashboard/erp/hr', permission: 'erp.hr.view', icon: Users },
+      { title: 'المحاسبة ودفتر الأستاذ', href: '/dashboard/erp/finance', permission: 'erp.finance.view', icon: BarChart3 },
+      { title: 'العقود والوثائق القانونية', href: '/dashboard/erp/legal', permission: 'erp.legal.view', icon: Scale },
+    ],
+  },
+  {
     title: 'الأقسام التشغيلية',
     items: [
       { title: 'اعتماد الإعلانات', href: '/admin/ad-approvals', permission: 'ads.approve', icon: ShieldCheck },
@@ -90,14 +99,6 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'خدمة العملاء والتسويق', href: '/admin/cs-marketing', permission: 'messages.read', icon: HeadphonesIcon },
       { title: 'واتساب والاتصالات', href: '/admin/whatsapp', permission: 'messages.read', icon: MessageCircle },
       { title: 'الحملات التسويقية', href: '/admin/cs-marketing', permission: 'messages.broadcast', icon: Megaphone },
-    ],
-  },
-  {
-    title: 'وحدات ERP المؤسسية',
-    items: [
-      { title: 'الموارد البشرية والرواتب', href: '/dashboard/erp/hr', permission: 'erp.hr.view', icon: Users },
-      { title: 'المحاسبة ودفتر الأستاذ', href: '/dashboard/erp/finance', permission: 'erp.finance.view', icon: BarChart3 },
-      { title: 'العقود والوثائق القانونية', href: '/dashboard/erp/legal', permission: 'erp.legal.view', icon: Scale },
     ],
   },
   {
