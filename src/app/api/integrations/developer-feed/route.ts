@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/service'
+import { verifyDeveloperFeedRequest } from '@/lib/integrations/developer-feed-auth'
 import { nullableUuid } from '@/lib/uuid'
 
 export const dynamic = 'force-dynamic'
@@ -29,20 +30,49 @@ type FeedPayload = {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await request.json() as FeedPayload
-    const integrationId = nullableUuid(payload.integrationId)
-    if (!integrationId) {
-      return NextResponse.json({ error: 'integrationId مطلوب وصحيح.' }, { status: 400 })
+    const rawBody = await request.text()
+    const payload = JSON.parse(rawBody) as FeedPayload
+    const hasSignedHeaders =
+      request.headers.has('x-fi-client-key') ||
+      request.headers.has('x-fi-timestamp') ||
+      request.headers.has('x-fi-signature')
+    const authResult = hasSignedHeaders ? await verifyDeveloperFeedRequest(request, rawBody) : null
+    if (authResult && !authResult.ok) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
     }
 
     const supabase = createServiceRoleClient()
-    const { data: integration, error: integrationError } = await supabase
-      .from('api_integrations')
-      .select('id, company_id, developer_id, active')
-      .eq('id', integrationId)
-      .maybeSingle()
+    const signedClient = authResult?.ok ? authResult.client : null
+    const integrationId = nullableUuid(payload.integrationId)
+    let integration: { id: string; company_id: string | null; developer_id: string | null; active: boolean } | null = null
 
-    if (integrationError) throw integrationError
+    if (signedClient) {
+      const { data, error: integrationError } = await supabase
+        .from('api_integrations')
+        .select('id, company_id, developer_id, active')
+        .eq('developer_id', signedClient.developer_id)
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (integrationError) throw integrationError
+      integration = data
+    } else {
+      if (!integrationId) {
+        return NextResponse.json({ error: 'integrationId مطلوب وصحيح أو استخدم توقيع HMAC للمطور.' }, { status: 400 })
+      }
+
+      const { data, error: integrationError } = await supabase
+        .from('api_integrations')
+        .select('id, company_id, developer_id, active')
+        .eq('id', integrationId)
+        .maybeSingle()
+
+      if (integrationError) throw integrationError
+      integration = data
+    }
+
     if (!integration || !integration.active) {
       return NextResponse.json({ error: 'التكامل غير موجود أو غير نشط.' }, { status: 404 })
     }
@@ -53,10 +83,14 @@ export async function POST(request: NextRequest) {
       .insert({
         integration_id: integration.id,
         company_id: integration.company_id,
-        developer_id: nullableUuid(payload.developerId) ?? integration.developer_id,
+        developer_id: signedClient?.developer_id ?? nullableUuid(payload.developerId) ?? integration.developer_id,
         external_reference: payload.externalReference ?? null,
         event_type: eventType,
-        payload,
+        payload: {
+          ...payload,
+          auth_mode: signedClient ? 'hmac' : 'legacy_integration_id',
+          developer_api_client_id: signedClient?.id ?? null,
+        },
         status: 'pending',
       })
       .select('id')
@@ -70,7 +104,7 @@ export async function POST(request: NextRequest) {
         .from('marketplace_properties')
         .insert({
           company_id: integration.company_id,
-          developer_id: nullableUuid(payload.developerId) ?? integration.developer_id,
+          developer_id: signedClient?.developer_id ?? nullableUuid(payload.developerId) ?? integration.developer_id,
           source_type: payload.property.sourceType ?? 'primary',
           listing_channel: 'developer_feed',
           title: payload.property.title ?? payload.property.titleAr ?? 'وحدة من تكامل مطور',

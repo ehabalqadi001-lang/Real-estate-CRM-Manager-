@@ -8,9 +8,19 @@ import { AnimatedCount } from '@/components/design-system/animated-count'
 export const dynamic = 'force-dynamic'
 
 type DeveloperAccountRow = {
+  id: string
   developer_id: string
   role: string
   developers: { id: string; name: string | null; name_ar: string | null; logo_url: string | null } | null
+}
+
+type ProjectAccessRow = {
+  developer_account_id: string
+  project_id: string
+  can_view_leads: boolean
+  can_manage_inventory: boolean
+  can_manage_media: boolean
+  can_manage_meetings: boolean
 }
 
 type ProjectRow = {
@@ -60,7 +70,7 @@ export default async function DeveloperPortalPage() {
   const [{ data: developerAccounts, error: accountsError }, { data: allDevelopers }] = await Promise.all([
     supabase
       .from('developer_accounts')
-      .select('developer_id, role, developers(id, name, name_ar, logo_url)')
+      .select('id, developer_id, role, developers(id, name, name_ar, logo_url)')
       .eq('user_id', session.user.id)
       .eq('status', 'active'),
     session.profile.role === 'super_admin' || session.profile.role === 'platform_admin'
@@ -74,6 +84,7 @@ export default async function DeveloperPortalPage() {
 
   const accountRows = ((developerAccounts ?? []) as unknown as DeveloperAccountRow[])
   const platformDeveloperRows = (allDevelopers ?? []).map((developer) => ({
+    id: `platform-${developer.id}`,
     developer_id: developer.id,
     role: 'platform_viewer',
     developers: developer,
@@ -89,11 +100,37 @@ export default async function DeveloperPortalPage() {
     redirect('/dashboard/developers')
   }
 
-  const { data: projectsData, error: projectsError } = await supabase
+  const fullProjectAccessRoles = new Set(['developer_admin', 'developer_manager', 'platform_viewer'])
+  const hasFullDeveloperAccess = developerRows.some((account) => fullProjectAccessRoles.has(account.role))
+  const accountIds = developerRows
+    .filter((account) => !account.id.startsWith('platform-'))
+    .map((account) => account.id)
+
+  const { data: projectAccessRows, error: accessError } = accountIds.length
+    ? await supabase
+        .from('developer_projects_access')
+        .select('developer_account_id, project_id, can_view_leads, can_manage_inventory, can_manage_media, can_manage_meetings')
+        .in('developer_account_id', accountIds)
+    : { data: [], error: null }
+
+  if (accessError) throw new Error(accessError.message)
+
+  const accessRows = (projectAccessRows ?? []) as ProjectAccessRow[]
+  const scopedProjectIds = new Set(accessRows.map((row) => row.project_id))
+  let projectsQuery = supabase
     .from('projects')
     .select('id, developer_id, name, name_ar, city, location, status, total_units, available_units, min_price, max_price, trust_score')
-    .in('developer_id', developerIds)
     .order('created_at', { ascending: false })
+
+  if (hasFullDeveloperAccess) {
+    projectsQuery = projectsQuery.in('developer_id', developerIds)
+  } else if (scopedProjectIds.size) {
+    projectsQuery = projectsQuery.in('id', Array.from(scopedProjectIds))
+  } else {
+    projectsQuery = projectsQuery.eq('id', '00000000-0000-0000-0000-000000000000')
+  }
+
+  const { data: projectsData, error: projectsError } = await projectsQuery
 
   if (projectsError) throw new Error(projectsError.message)
 
@@ -168,6 +205,11 @@ export default async function DeveloperPortalPage() {
               </p>
             </div>
             <div className="divide-y divide-[var(--fi-line)]">
+              {!hasFullDeveloperAccess && !scopedProjectIds.size ? (
+                <div className="border-b border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
+                  حسابك مرتبط بالمطور، لكن لم يتم تخصيص أي مشروع له حتى الآن من شاشة صلاحيات بوابة المطور.
+                </div>
+              ) : null}
               {projects.map((project) => {
                 const projectUnits = units.filter((unit) => unit.project_id === project.id)
                 const projectEngagement = engagements
