@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
     const headers = rows[0] ? Object.keys(rows[0]) : []
     const mapping = detectMapping(headers)
     const failedRows = mappedRows.filter((row) => !row.project_name || !row.unit_number || !row.price).length
-    const status = failedRows === 0 ? 'completed' : failedRows === mappedRows.length ? 'failed' : 'partially_completed'
-    const now = new Date().toISOString()
+    const status = 'pending'
     const supabase = await createServerSupabaseClient()
 
     const { data: batch, error: batchError } = await supabase
@@ -53,17 +52,19 @@ export async function POST(request: NextRequest) {
         source_name: file.name,
         status,
         total_rows: mappedRows.length,
-        processed_rows: mappedRows.length - failedRows,
+        processed_rows: 0,
         failed_rows: failedRows,
         mapping_payload: {
           detected_mapping: mapping,
           headers,
           file_size: file.size,
           mime_type: file.type,
+          review_required: true,
+          valid_rows: mappedRows.length - failedRows,
         },
         error_summary: failedRows ? `${failedRows} صفوف تحتاج مراجعة قبل تطبيقها على المخزون.` : null,
         created_by: session.user.id,
-        completed_at: now,
+        completed_at: null,
       })
       .select('id')
       .single()
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
         raw_payload: rows[index] ?? {},
         mapped_payload: mapped,
         target_table: 'units',
-        status: mapped.project_name && mapped.unit_number && mapped.price ? 'processed' : 'failed',
+        status: 'pending',
         error_message: mapped.project_name && mapped.unit_number && mapped.price ? null : 'اسم المشروع ورقم الوحدة والسعر مطلوبة.',
       }))
 
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
       success: true,
       batchId: batch.id,
       totalRows: mappedRows.length,
-      processedRows: mappedRows.length - failedRows,
+      processedRows: 0,
       failedRows,
       mapping,
     }, { status: 201 })

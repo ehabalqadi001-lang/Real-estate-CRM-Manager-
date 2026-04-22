@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { FileSpreadsheet, Loader2, UploadCloud } from 'lucide-react'
 
 type DeveloperOption = { id: string; name_ar: string | null; name: string | null }
@@ -48,12 +49,12 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
     <section className="ds-card p-5" dir="rtl">
       <div className="mb-5 flex items-center gap-3">
         <span className="flex size-11 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
-          <FileSpreadsheet className="size-5" />
+          <FileSpreadsheet className="size-5" aria-hidden="true" />
         </span>
         <div>
           <h2 className="text-xl font-black text-[var(--fi-ink)]">استيراد Excel / CSV</h2>
           <p className="text-sm font-semibold text-[var(--fi-muted)]">
-            رفع ملف المطور وإنشاء batch مع Auto Mapping للحقول.
+            رفع ملف المطور وإنشاء batch مع Auto Mapping للحقول قبل تطبيقه على المخزون.
           </p>
         </div>
       </div>
@@ -66,7 +67,10 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
 
       {result ? (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold leading-7 text-emerald-700">
-          تم إنشاء batch بنجاح: {result.totalRows} صفوف، تمت معالجة {result.processedRows}، وتحتاج {result.failedRows} للمراجعة.
+          تم إنشاء batch بنجاح: {result.totalRows} صفوف. راجع Auto-Mapping قبل المعالجة النهائية. صفوف تحتاج انتباه: {result.failedRows}.
+          <Link className="ms-2 underline" href={`/dashboard/integrations/batches/${result.batchId}`}>
+            فتح شاشة المراجعة
+          </Link>
         </div>
       ) : null}
 
@@ -87,7 +91,7 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
           className="rounded-lg border border-dashed border-[var(--fi-line)] bg-white p-4 text-sm font-bold text-[var(--fi-muted)] dark:bg-white/5"
         />
         <button type="submit" disabled={pending} className="fi-primary-button flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60">
-          {pending ? <Loader2 className="size-4 animate-spin" /> : <UploadCloud className="size-4" />}
+          {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <UploadCloud className="size-4" aria-hidden="true" />}
           {pending ? 'جاري الاستيراد...' : 'رفع وتحليل الملف'}
         </button>
       </form>

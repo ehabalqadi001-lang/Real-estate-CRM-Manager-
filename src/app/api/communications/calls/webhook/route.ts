@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   try {
     const configuredSecret = process.env.TWILIO_WEBHOOK_SECRET || process.env.COMMUNICATIONS_WEBHOOK_SECRET
     if (configuredSecret) {
-      const providedSecret = request.headers.get('x-fast-investment-webhook-secret')
+      const providedSecret = request.headers.get('x-fast-investment-webhook-secret') ?? request.nextUrl.searchParams.get('secret')
       if (providedSecret !== configuredSecret) {
         return NextResponse.json({ error: 'غير مصرح باستقبال تحديث المكالمة.' }, { status: 401 })
       }
@@ -102,6 +102,9 @@ function normalizeProviderStatus(status: string) {
 
 function normalizeRecordingStatus(status: string) {
   const value = status.toLowerCase()
+  if (value === 'completed') return 'available'
+  if (value === 'in-progress' || value === 'in_progress') return 'processing'
+  if (value === 'absent') return 'failed'
   if (['processing', 'available', 'failed'].includes(value)) return value
   return 'none'
 }

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Activity, DatabaseZap, PlugZap, RefreshCw } from 'lucide-react'
 import { requireSession } from '@/shared/auth/session'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
@@ -172,7 +173,15 @@ export default async function IntegrationsPage() {
                   <td className="px-4 py-3 font-bold text-emerald-700">{batch.processed_rows}</td>
                   <td className="px-4 py-3 font-bold text-red-700">{batch.failed_rows}</td>
                   <td className="px-4 py-3">
-                    <BatchProcessButton batchId={batch.id} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/dashboard/integrations/batches/${batch.id}`}
+                        className="inline-flex min-h-9 items-center justify-center rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-black text-[var(--fi-ink)] transition hover:border-[var(--fi-emerald)] dark:bg-white/5"
+                      >
+                        مراجعة
+                      </Link>
+                      <BatchProcessButton batchId={batch.id} />
+                    </div>
                   </td>
                 </tr>
               ))}

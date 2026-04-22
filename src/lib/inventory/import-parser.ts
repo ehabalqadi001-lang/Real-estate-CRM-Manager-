@@ -60,6 +60,21 @@ export function mapInventoryRow(row: ParsedInventoryRow) {
     Object.entries(row).map(([key, value]) => [canonicalHeader(key), normalizeCellValue(value)]),
   )
 
+  return normalizeMappedInventoryRow(mapped)
+}
+
+export function mapInventoryRowWithMapping(row: ParsedInventoryRow, mapping: Record<string, string>) {
+  const mapped = Object.fromEntries(
+    Object.entries(row).map(([key, value]) => {
+      const target = mapping[key] || canonicalHeader(key)
+      return [target, normalizeCellValue(value)]
+    }),
+  )
+
+  return normalizeMappedInventoryRow(mapped)
+}
+
+function normalizeMappedInventoryRow(mapped: Record<string, unknown>) {
   return {
     developer_name: stringValue(mapped.developer_name),
     project_name: stringValue(mapped.project_name),
