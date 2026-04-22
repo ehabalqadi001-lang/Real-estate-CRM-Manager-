@@ -16,6 +16,7 @@ import { AnimatedCount } from '@/components/design-system/animated-count'
 import { AddEmployeeForm, type DepartmentOption } from './AddEmployeeForm'
 import { EnvironmentLockButton } from './EnvironmentLockButton'
 import { SmartAttendanceWidget, type SmartAttendanceEmployee } from './SmartAttendanceWidget'
+import { nullableUuid } from '@/lib/uuid'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,11 +33,18 @@ type EmployeeRow = {
   status: string | null
   is_env_locked: boolean | null
   allowed_ip: string | null
-  profiles: {
-    full_name: string | null
-    role: string | null
-    email: string | null
-  } | null
+  profiles:
+    | {
+        full_name: string | null
+        role: string | null
+        email: string | null
+      }
+    | {
+        full_name: string | null
+        role: string | null
+        email: string | null
+      }[]
+    | null
 }
 
 type AttendanceRow = {
@@ -79,7 +87,7 @@ export default async function ERPHRPage() {
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
 
   const supabase = await createRawClient()
-  const companyId = profile.company_id ?? profile.tenant_id
+  const companyId = nullableUuid(profile.company_id) ?? nullableUuid(profile.tenant_id)
   if (!companyId && profile.role !== 'super_admin') redirect('/dashboard')
 
   const now = new Date()
@@ -87,20 +95,16 @@ export default async function ERPHRPage() {
   const year = now.getFullYear()
   const today = now.toISOString().slice(0, 10)
 
-  const [
-    departmentsResult,
-    employeesResult,
-    attendanceResult,
-    payrollResult,
-  ] = await Promise.all([
-    supabase
-      .from('departments')
-      .select('id, name, name_ar, slug')
-      .in('slug', ['sales', 'finance', 'marketing', 'data-entry', 'customer-service', 'hr'])
-      .order('name'),
-    supabase
-      .from('employees')
-      .select(`
+  const departmentsQuery = supabase
+    .from('departments')
+    .select('id, name, name_ar, slug')
+    .in('slug', ['sales', 'finance', 'marketing', 'data-entry', 'customer-service', 'hr'])
+    .order('name')
+
+  let employeesQuery = supabase
+    .from('employees')
+    .select(
+      `
         id,
         user_id,
         employee_number,
@@ -114,9 +118,17 @@ export default async function ERPHRPage() {
         is_env_locked,
         allowed_ip,
         profiles!employees_id_fkey(full_name, role, email)
-      `)
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false }),
+      `,
+    )
+    .order('created_at', { ascending: false })
+
+  if (companyId) {
+    employeesQuery = employeesQuery.eq('company_id', companyId)
+  }
+
+  const [departmentsResult, employeesResult, attendanceResult, payrollResult] = await Promise.all([
+    departmentsQuery,
+    employeesQuery,
     supabase
       .from('attendance')
       .select('employee_id, check_in, check_out, status')
@@ -137,6 +149,7 @@ export default async function ERPHRPage() {
   const payroll = (payrollResult.data ?? []) as PayrollRow[]
   const pageError = departmentsResult.error || employeesResult.error || attendanceResult.error || payrollResult.error
   const canManageHr = HR_WRITE_ROLES.includes(profile.role)
+  const canCreateEmployees = canManageHr && Boolean(companyId)
 
   const attendanceByEmployee = new Map(attendance.map((item) => [item.employee_id, item]))
   const payrollByEmployee = new Map(payroll.map((item) => [item.employee_id, item]))
@@ -152,13 +165,13 @@ export default async function ERPHRPage() {
   const selfAttendance = selfEmployee ? attendanceByEmployee.get(selfEmployee.id) : null
   const smartEmployee: SmartAttendanceEmployee | null = selfEmployee
     ? {
-      id: selfEmployee.id,
-      fullName: selfEmployee.profiles?.full_name ?? profile.full_name ?? 'موظف',
-      jobTitle: selfEmployee.job_title,
-      isEnvLocked: Boolean(selfEmployee.is_env_locked),
-      todayCheckIn: selfAttendance?.check_in ?? null,
-      todayCheckOut: selfAttendance?.check_out ?? null,
-    }
+        id: selfEmployee.id,
+        fullName: selfEmployee.profiles?.full_name ?? profile.full_name ?? 'موظف',
+        jobTitle: selfEmployee.job_title,
+        isEnvLocked: Boolean(selfEmployee.is_env_locked),
+        todayCheckIn: selfAttendance?.check_in ?? null,
+        todayCheckOut: selfAttendance?.check_out ?? null,
+      }
     : null
 
   return (
@@ -167,7 +180,9 @@ export default async function ERPHRPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT HRMS</p>
-            <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة الموارد البشرية والرواتب</h1>
+            <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">
+              إدارة الموارد البشرية والرواتب
+            </h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
               مركز موحد لإضافة الموظفين، عزل صلاحيات أقسام HR، ربط بيئة العمل، تسجيل الحضور الذكي، ومتابعة الرواتب والعمولات.
             </p>
@@ -204,37 +219,66 @@ export default async function ERPHRPage() {
         />
         <BentoKpiCard
           title="صافي الرواتب"
-          value={<><AnimatedCount value={totalPayroll} /> <span className="text-base">ج.م</span></>}
+          value={
+            <>
+              <AnimatedCount value={totalPayroll} /> <span className="text-base">ج.م</span>
+            </>
+          }
           hint={`${month}/${year}`}
           icon={<BadgeDollarSign className="size-5" />}
         />
         <BentoKpiCard
           title="عمولات محتسبة"
-          value={<><AnimatedCount value={totalCommissions} /> <span className="text-base">ج.م</span></>}
+          value={
+            <>
+              <AnimatedCount value={totalCommissions} /> <span className="text-base">ج.م</span>
+            </>
+          }
           hint="من payroll"
           icon={<BriefcaseBusiness className="size-5" />}
         />
       </BentoGrid>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-        {canManageHr ? (
+        {canCreateEmployees ? (
           <AddEmployeeForm departments={departments} />
         ) : (
           <section className="ds-card p-5">
-            <h2 className="text-xl font-black text-[var(--fi-ink)]">صلاحيات الموارد البشرية</h2>
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">إضافة موظف جديد</h2>
             <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-              يمكنك مراجعة الرواتب والتقارير فقط. إنشاء الموظفين وربط بيئة العمل متاح حصراً لمدير النظام وفريق الموارد البشرية.
+              إنشاء الموظفين متاح لمدير النظام وفريق الموارد البشرية داخل شركة محددة فقط.
+            </p>
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-800">
+              حسابك الحالي غير مرتبط بشركة صالحة. افتح لوحة شركة محددة أو اربط الحقل
+              <span className="mx-1 rounded bg-white px-2 py-1 font-mono text-xs">company_id</span>
+              قبل إنشاء حسابات موظفين.
+            </div>
+          </section>
+        )}
+
+        {smartEmployee ? (
+          <SmartAttendanceWidget employee={smartEmployee} />
+        ) : (
+          <section className="ds-card p-5">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <ShieldCheck className="size-6" aria-hidden="true" />
+            </div>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">SMART ATTENDANCE</p>
+            <h2 className="mt-2 text-xl font-black text-[var(--fi-ink)]">تسجيل الحضور الذكي</h2>
+            <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
+              يظهر زر الحضور للحسابات المرتبطة بسجل موظف فقط. مدير النظام يستطيع إدارة السجلات بدون تسجيل حضور شخصي.
             </p>
           </section>
         )}
-        <SmartAttendanceWidget employee={smartEmployee} />
       </div>
 
       <section className="ds-card overflow-hidden">
         <div className="flex flex-col gap-2 border-b border-[var(--fi-line)] p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-black text-[var(--fi-ink)]">سجل الموظفين</h2>
-            <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">الرواتب، الأقسام، حالة البيئة، وحضور اليوم.</p>
+            <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
+              الرواتب، الأقسام، حالة البيئة، وحضور اليوم.
+            </p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-xs font-black text-[var(--fi-emerald)]">
             <ShieldCheck className="size-4" aria-hidden="true" />
@@ -267,7 +311,9 @@ export default async function ERPHRPage() {
                       <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.employee_number}</p>
                       <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? 'بدون بريد'}</p>
                     </td>
-                    <td className="px-4 py-4 font-bold text-[var(--fi-ink)]">{department?.name_ar ?? department?.name ?? 'غير محدد'}</td>
+                    <td className="px-4 py-4 font-bold text-[var(--fi-ink)]">
+                      {department?.name_ar ?? department?.name ?? 'غير محدد'}
+                    </td>
                     <td className="px-4 py-4">
                       <p className="font-bold text-[var(--fi-ink)]">{employee.job_title ?? 'غير محدد'}</p>
                       <p className="mt-1 text-xs text-[var(--fi-muted)]">{labelRole(employee.profiles?.role)}</p>
@@ -284,17 +330,17 @@ export default async function ERPHRPage() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="mb-2">
-                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${
-                          employee.is_env_locked
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-amber-50 text-amber-700'
-                        }`}>
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${
+                            employee.is_env_locked
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-amber-50 text-amber-700'
+                          }`}
+                        >
                           {employee.is_env_locked ? 'مربوطة' : 'غير مربوطة'}
                         </span>
                       </div>
-                      {canManageHr ? (
-                        <EnvironmentLockButton employeeId={employee.id} locked={Boolean(employee.is_env_locked)} />
-                      ) : null}
+                      {canManageHr ? <EnvironmentLockButton employeeId={employee.id} locked={Boolean(employee.is_env_locked)} /> : null}
                     </td>
                   </tr>
                 )
@@ -302,7 +348,7 @@ export default async function ERPHRPage() {
               {!employees.length ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-sm font-bold text-[var(--fi-muted)]">
-                    لا يوجد موظفون حتى الآن. استخدم نموذج إضافة موظف لإنشاء أول حساب.
+                    لا يوجد موظفون حتى الآن. استخدم نموذج إضافة موظف لإنشاء أول حساب داخل شركة مرتبطة.
                   </td>
                 </tr>
               ) : null}
@@ -325,9 +371,7 @@ function AttendanceBadge({ attendance }: { attendance: AttendanceRow | undefined
 
   return (
     <div>
-      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-        حاضر
-      </span>
+      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">حاضر</span>
       <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">
         {formatTime(attendance.check_in)} - {formatTime(attendance.check_out)}
       </p>

@@ -15,6 +15,8 @@ import {
   Map,
   Megaphone,
   MessageCircle,
+  Network,
+  PlugZap,
   Scale,
   Settings,
   ShieldCheck,
@@ -61,12 +63,14 @@ export const dashboardNavigation: NavigationGroup[] = [
     items: [
       { title: 'إدارة الوسطاء', href: '/dashboard/brokers', permission: 'broker.view.company', icon: ShieldCheck },
       { title: 'الفريق', href: '/dashboard/team', permission: 'team.view', icon: ClipboardCheck },
+      { title: 'خلايا العمل', href: '/dashboard/cells', permission: 'team.manage', icon: Network },
     ],
   },
   {
     title: 'المخزون والسوق',
     items: [
       { title: 'المطورون', href: '/dashboard/developers', permission: 'developer.view', icon: Landmark },
+      { title: 'تكاملات المطورين', href: '/dashboard/integrations', permission: 'inventory.import', icon: PlugZap },
       { title: 'المشاريع', href: '/dashboard/projects', permission: 'project.view', icon: Building2 },
       { title: 'الوحدات', href: '/dashboard/inventory/units', permission: 'unit.view', icon: Home },
       { title: 'إعادة البيع', href: '/dashboard/resale', permission: 'listing.view', icon: WalletCards },

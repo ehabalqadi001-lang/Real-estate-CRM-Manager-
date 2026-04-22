@@ -89,7 +89,7 @@ export default function AddDealButton({ activeLeads, teamMembers }: AddDealButto
         توثيق صفقة جديدة
       </button>
 
-      {isOpen && (
+      {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" dir="rtl">
           <div className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
@@ -108,19 +108,19 @@ export default function AddDealButton({ activeLeads, teamMembers }: AddDealButto
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5 p-6">
-              {!canSubmit && (
+              {!canSubmit ? (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-800">
                   {activeLeads.length === 0
                     ? 'لا يوجد عملاء نشطون متاحون للتوثيق حالياً.'
-                    : 'لا يوجد وكلاء متاحون داخل الشركة. أضف وكيل أو فعّل حساب الوكيل أولاً.'}
+                    : 'لا يوجد وكلاء متاحون داخل الشركة. أضف وكيلاً أو فعّل حساب الوكيل أولاً.'}
                 </div>
-              )}
+              ) : null}
 
-              {error && (
+              {error ? (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-bold leading-6 text-red-700">
                   {error}
                 </div>
-              )}
+              ) : null}
 
               <div className="space-y-1.5">
                 <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
@@ -215,7 +215,7 @@ export default function AddDealButton({ activeLeads, teamMembers }: AddDealButto
             </form>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   )
 }

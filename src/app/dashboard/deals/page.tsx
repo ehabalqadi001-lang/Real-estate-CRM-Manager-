@@ -4,6 +4,7 @@ import { AnimatedCount } from '@/components/design-system/animated-count'
 import { BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
+import { nullableUuid } from '@/lib/uuid'
 import {
   Briefcase,
   Calendar,
@@ -61,7 +62,7 @@ export default async function DealsPage({ searchParams }: PageProps) {
   const page = Math.max(1, parseInt(params?.page || '1', 10))
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
-  const targetCompanyId = session.profile.company_id || session.user.id
+  const targetCompanyId = nullableUuid(session.profile.company_id) ?? nullableUuid(session.profile.tenant_id) ?? session.user.id
 
   const [
     { data: activeLeads },
