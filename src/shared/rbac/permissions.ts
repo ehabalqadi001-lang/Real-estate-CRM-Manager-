@@ -136,6 +136,11 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
   'support.manage',
   'notification.view.own',
   'map.view',
+  'inventory.read',
+  'inventory.create',
+  'inventory.update',
+  'inventory.delete',
+  'inventory.import',
 ]
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
@@ -223,7 +228,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   hr_staff: ['dashboard.view.company', 'team.view', 'users.read', 'users.create', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view'],
   hr_officer: ['dashboard.view.company', 'team.view', 'team.manage', 'report.view.company', 'notification.view.own', 'erp.hr.view', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view'],
   customer_support: ['dashboard.view.own', 'client.view.assigned', 'support.view', 'support.manage', 'notification.view.own'],
-  developer_relations_manager: ['dashboard.view.team', 'developer.view', 'developer.manage', 'project.view', 'project.manage', 'unit.view', 'unit.manage', 'listing.view', 'report.view.team', 'notification.view.own', 'map.view'],
+  developer_relations_manager: ['dashboard.view.team', 'developer.view', 'developer.manage', 'project.view', 'project.manage', 'unit.view', 'unit.manage', 'listing.view', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.import', 'report.view.team', 'notification.view.own', 'map.view'],
   admin: ALL_COMPANY_PERMISSIONS,
   company: ALL_COMPANY_PERMISSIONS,
   agent: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view', 'erp.attendance.use'],

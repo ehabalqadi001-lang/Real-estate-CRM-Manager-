@@ -6,6 +6,7 @@ import { nullableUuid } from '@/lib/uuid'
 import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
 import { AnimatedCount } from '@/components/design-system/animated-count'
 import { AddIntegrationForm } from './AddIntegrationForm'
+import { InventoryImportForm } from './InventoryImportForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,17 @@ type IntegrationRow = {
   last_status: string | null
   sync_frequency_minutes: number | null
   active: boolean | null
+  created_at: string
+}
+
+type BatchRow = {
+  id: string
+  source_name: string | null
+  source_type: string
+  status: string
+  total_rows: number
+  processed_rows: number
+  failed_rows: number
   created_at: string
 }
 
@@ -41,23 +53,31 @@ export default async function IntegrationsPage() {
 
   const integrationsQuery = supabase.from('api_integrations').select('*').order('created_at', { ascending: false })
   const eventsQuery = supabase.from('inventory_feed_events').select('id, status, event_type').limit(200)
+  const batchesQuery = supabase
+    .from('inventory_ingestion_batches')
+    .select('id, source_name, source_type, status, total_rows, processed_rows, failed_rows, created_at')
+    .order('created_at', { ascending: false })
+    .limit(8)
 
   if (companyId) {
     integrationsQuery.eq('company_id', companyId)
     eventsQuery.eq('company_id', companyId)
+    batchesQuery.eq('company_id', companyId)
   }
 
-  const [integrationsResult, developersResult, eventsResult] = await Promise.all([
+  const [integrationsResult, developersResult, eventsResult, batchesResult] = await Promise.all([
     integrationsQuery,
     supabase.from('developers').select('id, name, name_ar').order('name_ar'),
     eventsQuery,
+    batchesQuery,
   ])
 
   const integrations = (integrationsResult.data ?? []) as IntegrationRow[]
   const developers = developersResult.data ?? []
   const events = eventsResult.data ?? []
+  const batches = (batchesResult.data ?? []) as BatchRow[]
   const failedEvents = events.filter((event) => event.status === 'failed').length
-  const pageError = integrationsResult.error || developersResult.error || eventsResult.error
+  const pageError = integrationsResult.error || developersResult.error || eventsResult.error || batchesResult.error
 
   return (
     <main className="space-y-6 p-4 sm:p-6" dir="rtl">
@@ -83,7 +103,10 @@ export default async function IntegrationsPage() {
       </BentoGrid>
 
       <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <AddIntegrationForm developers={developers} />
+        <div className="space-y-6">
+          <AddIntegrationForm developers={developers} />
+          <InventoryImportForm developers={developers} />
+        </div>
         <section className="ds-card overflow-hidden">
           <div className="border-b border-[var(--fi-line)] p-5">
             <h2 className="text-xl font-black text-[var(--fi-ink)]">مصادر البيانات</h2>
@@ -115,6 +138,50 @@ export default async function IntegrationsPage() {
           </div>
         </section>
       </div>
+
+      <section className="ds-card overflow-hidden">
+        <div className="border-b border-[var(--fi-line)] p-5">
+          <h2 className="text-xl font-black text-[var(--fi-ink)]">آخر ملفات الاستيراد</h2>
+          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">كل ملف يمر عبر batch مستقل قبل تطبيقه على المخزون.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
+            <thead>
+              <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
+                <th className="px-4 py-3 text-right">الملف</th>
+                <th className="px-4 py-3 text-right">المصدر</th>
+                <th className="px-4 py-3 text-right">الحالة</th>
+                <th className="px-4 py-3 text-right">الصفوف</th>
+                <th className="px-4 py-3 text-right">المعالج</th>
+                <th className="px-4 py-3 text-right">الأخطاء</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--fi-line)]">
+              {batches.map((batch) => (
+                <tr key={batch.id}>
+                  <td className="px-4 py-3 font-black text-[var(--fi-ink)]">{batch.source_name ?? batch.id}</td>
+                  <td className="px-4 py-3 font-bold text-[var(--fi-muted)]">{batch.source_type}</td>
+                  <td className="px-4 py-3">
+                    <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
+                      {labelBatchStatus(batch.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-bold">{batch.total_rows}</td>
+                  <td className="px-4 py-3 font-bold text-emerald-700">{batch.processed_rows}</td>
+                  <td className="px-4 py-3 font-bold text-red-700">{batch.failed_rows}</td>
+                </tr>
+              ))}
+              {!batches.length ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
+                    لا توجد ملفات استيراد حتى الآن.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   )
 }
@@ -141,4 +208,16 @@ function labelStatus(status: string | null) {
   }
 
   return labels[status ?? 'pending'] ?? 'بانتظار أول مزامنة'
+}
+
+function labelBatchStatus(status: string) {
+  const labels: Record<string, string> = {
+    pending: 'بانتظار المعالجة',
+    processing: 'قيد المعالجة',
+    completed: 'مكتمل',
+    failed: 'فشل',
+    partially_completed: 'مكتمل جزئياً',
+  }
+
+  return labels[status] ?? status
 }
