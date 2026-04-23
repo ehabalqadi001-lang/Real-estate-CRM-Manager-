@@ -2,7 +2,7 @@
 
 import { useState, type ElementType, type FormEvent } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, ArrowUpRight, Building2, Lock, Mail, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, Building2, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { loginAction } from './actions'
 

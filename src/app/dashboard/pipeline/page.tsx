@@ -21,7 +21,7 @@ export default async function PipelinePage() {
   ])
 
   return (
-    <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+    <main className="sales-command px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
       <PipelineBoard
         initialDeals={deals}
         leads={leads}
@@ -29,6 +29,8 @@ export default async function PipelinePage() {
         agents={agents}
         activities={activities}
         canAssignAgents={canAssignAgents}
+        userRole={session.profile.role}
+        userName={session.profile.full_name ?? session.profile.email ?? 'FAST INVESTMENT'}
         onStageChange={updatePipelineDealStage}
         onCreateDeal={createPipelineDeal}
         onUpdateDeal={updatePipelineDeal}

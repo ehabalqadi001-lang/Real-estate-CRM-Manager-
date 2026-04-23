@@ -159,8 +159,23 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
     .reduce((sum, item) => sum + Number(item.broker_commission_amount ?? 0), 0)
 
   return (
-    <main className="space-y-5 p-4 sm:p-6" dir="rtl">
-      <section className="rounded-2xl border border-[var(--fi-line)] bg-white p-5 shadow-sm">
+    <main className="sales-command space-y-5 p-4 sm:p-6" dir="rtl">
+      <section className="sales-hero rounded-3xl p-5 sm:p-6">
+        <div className="relative z-10 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-100">FAST INVESTMENT COMMAND CENTER</p>
+            <h1 className="mt-3 text-2xl font-black text-white sm:text-4xl">Sale Claims & Partner Growth Desk</h1>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-blue-100">
+              Real-time BRM control for EOI, reservations, contracts, developer claims, commission collection and partner payouts.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-sm font-black text-white backdrop-blur">
+            Every approved claim moves revenue forward.
+          </div>
+        </div>
+      </section>
+
+      <section className="sales-card rounded-3xl border border-[var(--fi-line)] bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">BROKER RELATIONSHIP MANAGEMENT</p>
@@ -182,7 +197,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
         <Kpi label="جاهز لتحديد الصرف" value={`${money(payable)} ج.م`} icon={Banknote} />
       </section>
 
-      <section className="rounded-2xl border border-[var(--fi-line)] bg-white shadow-sm">
+      <section className="sales-card rounded-3xl border border-[var(--fi-line)] bg-white shadow-sm">
         <div className="border-b border-[var(--fi-line)] p-5">
           <h2 className="text-lg font-black text-[var(--fi-ink)]">طلبات إنشاء حساب الشركاء</h2>
           <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">اعتماد أو رفض الحسابات مع تعيين Account Manager.</p>
@@ -191,7 +206,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
           {appRows.length === 0 ? (
             <EmptyState label="لا توجد طلبات شركاء حتى الآن" />
           ) : appRows.map((application) => (
-            <article key={application.id} className="grid gap-4 p-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+            <article key={application.id} className="grid gap-4 p-5 transition hover:bg-white/60 xl:grid-cols-[minmax(0,1fr)_420px]">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
@@ -255,7 +270,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[var(--fi-line)] bg-white shadow-sm">
+      <section className="sales-card rounded-3xl border border-[var(--fi-line)] bg-white shadow-sm">
         <div className="border-b border-[var(--fi-line)] p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -301,7 +316,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
             <input name="developer" defaultValue={params.developer ?? ''} placeholder="بحث بالمطور" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <input name="payoutDate" defaultValue={params.payoutDate ?? ''} type="date" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
-              <button className="h-10 rounded-lg bg-[#0C1A2E] px-3 text-xs font-black text-white">فلترة</button>
+              <button className="sales-primary h-10 rounded-xl px-3 text-xs font-black text-white">فلترة</button>
             </div>
           </form>
         </div>
@@ -309,7 +324,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
           {saleRows.length === 0 ? (
             <EmptyState label="لا توجد مبيعات مطابقة للفلاتر الحالية" />
           ) : saleRows.map((sale) => (
-            <article key={sale.id} className="grid gap-4 p-5 xl:grid-cols-[minmax(0,1fr)_460px]">
+            <article key={sale.id} className="grid gap-4 p-5 transition hover:bg-white/60 xl:grid-cols-[minmax(0,1fr)_460px]">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{saleStage[sale.stage ?? 'eoi']}</span>
@@ -348,8 +363,8 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
 
 function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon: LucideIcon }) {
   return (
-    <div className="rounded-2xl border border-[var(--fi-line)] bg-white p-4 shadow-sm">
-      <Icon className="size-5 text-[var(--fi-emerald)]" />
+    <div className="sales-kpi rounded-3xl border border-[var(--fi-line)] bg-white p-4 shadow-sm">
+      <Icon className="size-5 text-[var(--sales-blue)]" />
       <p className="mt-3 text-xl font-black text-[var(--fi-ink)]">{value}</p>
       <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{label}</p>
     </div>
@@ -358,11 +373,11 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 
 function ReviewApplicationForm({ applicationId }: { applicationId: string }) {
   return (
-    <form action={reviewPartnerApplication} className="space-y-2 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
+    <form action={reviewPartnerApplication} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3">
       <input type="hidden" name="applicationId" value={applicationId} />
       <textarea name="reason" rows={2} placeholder="سبب الرفض أو طلب الاستكمال" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-sm font-semibold outline-none" />
       <div className="grid grid-cols-3 gap-2">
-        <button name="decision" value="approved" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--fi-emerald)] px-3 py-2 text-xs font-black text-white"><UserCheck className="size-4" /> اعتماد</button>
+        <button name="decision" value="approved" className="sales-success inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black text-white"><UserCheck className="size-4" /> اعتماد</button>
         <button name="decision" value="needs_info" className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 py-2 text-xs font-black text-white"><Clock className="size-4" /> استكمال</button>
         <button name="decision" value="rejected" className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-xs font-black text-white"><XCircle className="size-4" /> رفض</button>
       </div>
@@ -372,11 +387,11 @@ function ReviewApplicationForm({ applicationId }: { applicationId: string }) {
 
 function ReviewSaleForm({ saleId }: { saleId: string }) {
   return (
-    <form action={reviewBrokerSale} className="space-y-2 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
+    <form action={reviewBrokerSale} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3">
       <input type="hidden" name="saleId" value={saleId} />
       <textarea name="reason" rows={2} placeholder="سبب الرفض إن وجد" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-sm font-semibold outline-none" />
       <div className="grid grid-cols-2 gap-2">
-        <button name="decision" value="approved" className="rounded-lg bg-[var(--fi-emerald)] px-3 py-2 text-xs font-black text-white">اعتماد البيع وإنشاء العمولة</button>
+        <button name="decision" value="approved" className="sales-success rounded-xl px-3 py-2 text-xs font-black text-white">اعتماد البيع وإنشاء العمولة</button>
         <button name="decision" value="rejected" className="rounded-lg bg-red-600 px-3 py-2 text-xs font-black text-white">رفض البيع</button>
       </div>
     </form>
@@ -385,7 +400,7 @@ function ReviewSaleForm({ saleId }: { saleId: string }) {
 
 function LifecycleForm({ saleId, current }: { saleId: string; current: string }) {
   return (
-    <form action={updateBrokerSaleLifecycle} className="space-y-2 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
+    <form action={updateBrokerSaleLifecycle} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3">
       <input type="hidden" name="saleId" value={saleId} />
       <select name="lifecycle" defaultValue={current} className="h-10 w-full rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold">
         <option value="claim_submitted_to_developer">تقديم المطالبة للمطور</option>
@@ -398,7 +413,7 @@ function LifecycleForm({ saleId, current }: { saleId: string; current: string })
         <input name="brokerPayoutDueDate" type="date" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-semibold" />
         <input name="paymentReference" placeholder="مرجع الدفع" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-semibold" />
       </div>
-      <button className="w-full rounded-lg bg-[#0C1A2E] px-3 py-2 text-xs font-black text-white">تحديث مرحلة العمولة</button>
+      <button className="sales-primary w-full rounded-xl px-3 py-2 text-xs font-black text-white">تحديث مرحلة العمولة</button>
     </form>
   )
 }

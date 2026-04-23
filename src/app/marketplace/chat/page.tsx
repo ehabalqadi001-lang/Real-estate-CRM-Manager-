@@ -13,7 +13,7 @@ export default async function MarketplaceChatPage() {
     : null
 
   return (
-    <div className="nextora-market min-h-screen text-[#102033]">
+    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6">
@@ -24,14 +24,14 @@ export default async function MarketplaceChatPage() {
           </p>
         </div>
 
-        <div className="nextora-card grid min-h-[560px] overflow-hidden rounded-lg lg:grid-cols-[320px_1fr]">
-          <aside className="border-b border-[#2D2D2D] bg-[#111111] p-4 lg:border-b-0 lg:border-l">
+        <div className="grid min-h-[560px] overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm lg:grid-cols-[320px_1fr]">
+          <aside className="border-b border-[#DDE6E4] bg-[#EEF6F5] p-4 lg:border-b-0 lg:border-l">
             <p className="mb-4 flex items-center gap-2 font-black">
               <MessageCircle className="size-4 text-[#0F8F83]" />
               المحادثات النشطة
             </p>
             {['شقة التجمع الخامس', 'فيلا الشروق', 'تاون هاوس زايد'].map((thread, index) => (
-              <div key={thread} className="mb-2 rounded-lg border border-[#2D2D2D] bg-[#1A1A1A] p-3">
+              <div key={thread} className="mb-2 rounded-lg bg-white p-3">
                 <p className="font-black">{thread}</p>
                 <p className="mt-1 text-xs font-semibold text-[#64748B]">{index === 0 ? 'رسالة جديدة منذ 5 دقائق' : 'بانتظار رد العميل'}</p>
               </div>
@@ -39,7 +39,7 @@ export default async function MarketplaceChatPage() {
           </aside>
 
           <section className="flex flex-col">
-            <div className="border-b border-[#2D2D2D] p-4">
+            <div className="border-b border-[#DDE6E4] p-4">
               <p className="flex items-center gap-2 font-black">
                 <ShieldCheck className="size-4 text-[#0F8F83]" />
                 محادثة آمنة بدون مشاركة رقم الهاتف
@@ -50,14 +50,14 @@ export default async function MarketplaceChatPage() {
               <Bubble mine text="نعم، يمكن تنسيق ميعاد عبر الفريق بدون تبادل أرقام." />
               <Bubble mine={false} text="ممتاز، أريد معرفة خطة السداد والموقع بدقة." />
             </div>
-            <div className="border-t border-[#2D2D2D] p-4">
+            <div className="border-t border-[#DDE6E4] p-4">
               <div className="flex gap-2">
                 <input
                   aria-label="رسالة"
                   className="min-h-10 flex-1 rounded-lg border border-[#DDE6E4] px-3 text-sm font-semibold outline-none focus:ring-3 focus:ring-[#0F8F83]/20"
                   placeholder="اكتب رسالتك..."
                 />
-                <button className="inline-flex size-10 items-center justify-center rounded-lg bg-white text-[#0D0D0D]">
+                <button className="inline-flex size-10 items-center justify-center rounded-lg bg-[#0F8F83] text-white">
                   <Send className="size-4" />
                 </button>
               </div>
@@ -72,7 +72,7 @@ export default async function MarketplaceChatPage() {
 function Bubble({ text, mine }: { text: string; mine: boolean }) {
   return (
     <div className={`flex ${mine ? 'justify-start' : 'justify-end'}`}>
-      <p className={`max-w-md rounded-lg px-4 py-3 text-sm font-semibold leading-6 ${mine ? 'bg-white text-[#0D0D0D]' : 'border border-[#2D2D2D] bg-[#1A1A1A] text-white'}`}>
+      <p className={`max-w-md rounded-lg px-4 py-3 text-sm font-semibold leading-6 ${mine ? 'bg-[#17375E] text-white' : 'bg-[#EEF6F5] text-[#102033]'}`}>
         {text}
       </p>
     </div>

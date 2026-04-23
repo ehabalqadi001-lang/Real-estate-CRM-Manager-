@@ -36,7 +36,7 @@ export default function PropertyGrid({
 
   if (!sortedProperties.length) {
     return (
-      <div className="nextora-card rounded-3xl border-dashed p-10 text-center">
+      <div className="rounded-3xl border border-dashed border-market-line bg-white p-10 text-center">
         <p className="text-xl font-black text-market-ink">لا توجد عقارات مطابقة الآن</p>
         <p className="mt-2 text-sm font-semibold text-market-slate">
           جرب تغيير الفلاتر أو أضف عقارك ليظهر بعد موافقة الفريق.
@@ -74,7 +74,7 @@ function PropertyCard({
   const router = useRouter()
 
   return (
-    <Card className={`nextora-card overflow-hidden rounded-3xl py-0 transition hover:-translate-y-1 hover:shadow-lg ${property.featured ? 'border-white/45' : 'border-market-line'}`}>
+    <Card className={`overflow-hidden rounded-3xl border bg-white py-0 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${property.featured ? 'border-market-gold/70' : 'border-market-line'}`}>
       <div className="relative">
         <Image
           src={property.imageUrl}
@@ -90,14 +90,14 @@ function PropertyCard({
               مميز
             </Badge>
           )}
-          <Badge className="bg-black/70 text-white backdrop-blur">{property.listingKind === 'primary' ? 'Primary' : 'Resale'}</Badge>
+          <Badge className="bg-white/92 text-market-navy">{property.listingKind === 'primary' ? 'Primary' : 'Resale'}</Badge>
         </div>
         <Button
           variant="ghost"
           size="icon"
           aria-label="حفظ العقار"
           onClick={onToggleFavorite}
-          className="absolute left-3 top-3 rounded-2xl bg-black/55 text-white backdrop-blur hover:bg-black/75"
+          className="absolute left-3 top-3 rounded-2xl bg-white/88 text-market-navy hover:bg-white"
         >
           <Heart className={`size-4 ${favorite ? 'fill-market-rose text-market-rose' : ''}`} />
         </Button>
@@ -149,12 +149,12 @@ function PropertyCard({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" className="rounded-2xl border-market-line bg-transparent text-white hover:bg-white/10" onClick={() => router.push(`/marketplace/${property.id}`)}>
+          <Button variant="outline" className="rounded-2xl border-market-line" onClick={() => router.push(`/marketplace/${property.id}`)}>
             <Eye className="ms-1 size-4" />
             التفاصيل
           </Button>
           <Button
-            className="nextora-button rounded-2xl"
+            className="rounded-2xl bg-market-teal text-white hover:bg-[#0B6F66]"
             onClick={() => router.push(user ? `/marketplace/chat?ad=${property.id}` : '/login')}
           >
             {user ? <MessageCircle className="ms-1 size-4" /> : <LockKeyhole className="ms-1 size-4" />}

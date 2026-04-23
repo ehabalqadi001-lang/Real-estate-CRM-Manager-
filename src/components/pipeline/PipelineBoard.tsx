@@ -17,7 +17,7 @@ import {
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'sonner'
-import { Calendar, Filter, GripVertical, MessageCircle, Plus, Save, Search, User, WalletCards } from 'lucide-react'
+import { Calendar, Filter, GripVertical, MessageCircle, Plus, Save, Search, Sparkles, Target, TrendingUp, User, WalletCards } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -81,6 +81,8 @@ type PipelineBoardProps = {
   agents: PipelineAgentOption[]
   activities: DealActivityItem[]
   canAssignAgents: boolean
+  userRole?: string
+  userName?: string
   onStageChange: (dealId: string, stage: PipelineStage) => Promise<void>
   onCreateDeal: (input: CreateDealInput) => Promise<{ id: string }>
   onUpdateDeal: (input: UpdateDealInput) => Promise<void>
@@ -104,6 +106,8 @@ export function PipelineBoard({
   agents,
   activities,
   canAssignAgents,
+  userRole,
+  userName,
   onStageChange,
   onCreateDeal,
   onUpdateDeal,
@@ -179,6 +183,7 @@ export function PipelineBoard({
   const projects = Array.from(new Set(deals.map((deal) => deal.projectName).filter(Boolean)))
   const totalValue = filteredDeals.reduce((sum, deal) => sum + deal.value, 0)
   const avgDeal = filteredDeals.length ? totalValue / filteredDeals.length : 0
+  const closedDeals = filteredDeals.filter((deal) => deal.stage === 'closed').length
 
   function moveDeal(dealId: string, targetStage: PipelineStage) {
     const current = deals.find((deal) => deal.id === dealId)
@@ -211,17 +216,19 @@ export function PipelineBoard({
   }
 
   return (
-    <section className="space-y-4" dir="rtl">
-      <Card className="border-[var(--fi-line)] bg-white">
+    <section className="sales-command-shell space-y-5" dir="rtl">
+      <WelcomeHeader role={userRole} name={userName} totalValue={totalValue} closedDeals={closedDeals} />
+
+      <Card className="sales-card overflow-hidden rounded-3xl border-[var(--fi-line)] bg-white">
         <CardHeader className="gap-4 xl:grid-cols-[1fr_auto]">
           <div>
-            <Badge className="bg-[var(--fi-soft)] text-[var(--fi-emerald)]">SALES PIPELINE</Badge>
+            <Badge className="sales-pill bg-[var(--fi-soft)] px-3 py-1 text-[var(--sales-blue)]">SALES PIPELINE</Badge>
             <CardTitle className="mt-3 text-2xl font-black text-[var(--fi-ink)]">خط المبيعات</CardTitle>
             <CardDescription className="mt-2 font-semibold leading-7 text-[var(--fi-muted)]">
               كانبان كامل للصفقات مع تحديث تفاؤلي ومزامنة مباشرة بين أعضاء الفريق.
             </CardDescription>
           </div>
-          <Button className="h-10 gap-2 bg-[var(--fi-emerald)] text-white hover:bg-[var(--fi-emerald)]/90" onClick={() => setIsAddOpen(true)}>
+          <Button className="sales-primary h-11 gap-2 rounded-2xl px-5" onClick={() => setIsAddOpen(true)}>
             <Plus className="size-4" />
             صفقة جديدة
           </Button>
@@ -233,7 +240,7 @@ export function PipelineBoard({
             <Stat label="متوسط الصفقة" value={formatMoney(avgDeal)} />
           </div>
 
-          <div className="grid gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3 md:grid-cols-4">
+          <div className="grid gap-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3 md:grid-cols-4">
             <FilterSelect icon={<User className="size-4" />} value={agentFilter} onChange={setAgentFilter} label="الوسيط">
               <option value="all">كل الوسطاء</option>
               {agents.map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
@@ -248,8 +255,8 @@ export function PipelineBoard({
               <option value="month">هذا الشهر</option>
               <option value="quarter">آخر 3 أشهر</option>
             </FilterSelect>
-            <label className="flex h-10 items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-3">
-              <Filter className="size-4 text-[var(--fi-emerald)]" />
+            <label className="flex h-11 items-center gap-2 rounded-2xl border border-[var(--fi-line)] bg-white px-3">
+              <Filter className="size-4 text-[var(--sales-blue)]" />
               <Input
                 className="h-8 border-0 p-0 shadow-none focus-visible:ring-0"
                 inputMode="numeric"
@@ -328,6 +335,55 @@ export function PipelineBoard({
   )
 }
 
+function WelcomeHeader({ role, name, totalValue, closedDeals }: {
+  role?: string
+  name?: string
+  totalValue: number
+  closedDeals: number
+}) {
+  const profile = getWelcomeProfile(role)
+
+  return (
+    <section className="sales-hero rounded-3xl p-5 sm:p-6 lg:p-7">
+      <div className="relative z-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-blue-100">
+            <Sparkles className="size-3.5" />
+            FAST INVESTMENT
+          </div>
+          <h1 className="mt-4 max-w-4xl text-2xl font-black leading-tight text-white sm:text-4xl">
+            {profile.title}
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-blue-100 sm:text-base">
+            {profile.message}
+          </p>
+          {name && (
+            <p className="mt-4 inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-black text-white">
+              Active workspace: {name}
+            </p>
+          )}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-3">
+              <Target className="size-5 text-emerald-300" />
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-100">Closed Wins</p>
+            </div>
+            <p className="fi-tabular mt-3 text-3xl font-black text-white">{closedDeals.toLocaleString('ar-EG')}</p>
+          </div>
+          <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="size-5 text-blue-200" />
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-100">Active Pipeline</p>
+            </div>
+            <p className="fi-tabular mt-3 text-2xl font-black text-white">{formatMoney(totalValue)}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function PipelineColumn({
   stage,
   disabled,
@@ -343,21 +399,21 @@ function PipelineColumn({
   const total = stage.deals.reduce((sum, deal) => sum + deal.value, 0)
 
   return (
-    <section className={`flex min-h-[560px] w-[310px] shrink-0 flex-col rounded-lg border bg-white shadow-sm transition ${isOver ? 'border-[var(--fi-emerald)] ring-2 ring-[var(--fi-emerald)]/20' : 'border-[var(--fi-line)]'}`}>
-      <div className="border-b border-[var(--fi-line)] p-3">
+    <section className={`sales-stage-column flex min-h-[560px] w-[320px] shrink-0 flex-col rounded-3xl border shadow-sm transition ${isOver ? 'border-[var(--sales-blue)] ring-2 ring-[var(--sales-blue)]/20' : 'border-[var(--fi-line)]'}`}>
+      <div className="border-b border-[var(--fi-line)] p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className={`size-2.5 rounded-full ${stage.tone}`} />
             <h2 className="font-black text-[var(--fi-ink)]">{stage.label}</h2>
           </div>
-          <Badge variant="secondary">{stage.deals.length.toLocaleString('ar-EG')}</Badge>
+          <Badge className="sales-pill" variant="secondary">{stage.deals.length.toLocaleString('ar-EG')}</Badge>
         </div>
-        <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">{formatMoney(total)}</p>
+        <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">Stage value: {formatMoney(total)}</p>
       </div>
       <SortableContext items={stage.deals.map((deal) => deal.id)} strategy={verticalListSortingStrategy}>
         <div ref={setNodeRef} className="min-h-32 flex-1 space-y-2 overflow-y-auto p-2">
           {stage.deals.length === 0 ? (
-            <div className="flex min-h-28 items-center justify-center rounded-lg border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 text-center text-xs font-bold text-[var(--fi-muted)]">
+            <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)]/70 px-4 text-center text-xs font-bold text-[var(--fi-muted)]">
               لا توجد صفقات في هذه المرحلة
             </div>
           ) : stage.deals.map((deal) => (
@@ -385,7 +441,7 @@ function SortableDealCard({ deal, disabled, onClick, onMove }: {
 
   return (
     <div ref={setNodeRef} style={style}>
-      <CompactDealCard deal={deal} onClick={onClick} dragHandle={<button {...attributes} {...listeners} className="flex size-8 touch-none items-center justify-center rounded-lg text-[var(--fi-muted)] hover:bg-[var(--fi-soft)] md:cursor-grab" aria-label="سحب الصفقة"><GripVertical className="size-4" /></button>} />
+      <CompactDealCard deal={deal} onClick={onClick} dragHandle={<button {...attributes} {...listeners} className="flex size-8 touch-none items-center justify-center rounded-xl text-[var(--fi-muted)] hover:bg-[var(--fi-soft)] md:cursor-grab" aria-label="سحب الصفقة"><GripVertical className="size-4" /></button>} />
       <div className="mt-1 hidden grid-cols-2 gap-1 max-md:grid">
         {STAGES.map((stage) => stage.key).includes(deal.stage) && (
           <>
@@ -408,7 +464,7 @@ function CompactDealCard({ deal, onClick, dragHandle, isOverlay = false }: {
     <button
       type="button"
       onClick={onClick}
-      className={`ds-card-hover w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-right shadow-sm transition hover:border-[var(--fi-emerald)] hover:shadow-md ${isOverlay ? 'w-72 rotate-1 shadow-xl' : ''}`}
+      className={`sales-deal-card w-full rounded-2xl border border-[var(--fi-line)] bg-white p-3 text-right shadow-sm transition ${isOverlay ? 'w-72 rotate-1 shadow-xl' : ''}`}
     >
       <div className="flex items-start gap-2">
         {dragHandle}
@@ -416,7 +472,7 @@ function CompactDealCard({ deal, onClick, dragHandle, isOverlay = false }: {
           <p className="truncate text-sm font-black text-[var(--fi-ink)]">{deal.clientName}</p>
           <p className="mt-1 truncate text-xs font-bold text-[var(--fi-muted)]">{deal.unitName || deal.projectName || deal.title}</p>
           <div className="mt-3 flex items-center justify-between gap-2">
-            <Badge className="bg-[var(--fi-soft)] text-[var(--fi-emerald)]">{stageLabel(deal.stage)}</Badge>
+            <Badge className="sales-pill bg-[var(--fi-soft)] text-[var(--sales-blue)]">{stageLabel(deal.stage)}</Badge>
             <span className="text-xs font-black text-[var(--fi-ink)]">{formatMoney(deal.value)}</span>
           </div>
           <div className="mt-3 flex items-center justify-between gap-2 text-[11px] font-bold text-[var(--fi-muted)]">
@@ -460,7 +516,7 @@ function DealDetailSheet({ deal, activities, onClose, onUpdate, onAddActivity }:
 
   return (
     <Sheet open={deal !== null} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="left" className="w-full overflow-y-auto bg-white sm:max-w-xl" dir="rtl">
+      <SheetContent side="left" className="sales-command-sheet w-full overflow-y-auto bg-white sm:max-w-xl" dir="rtl">
         {deal && (
           <>
             <SheetHeader>
@@ -562,7 +618,7 @@ function AddDealSheet({ open, leads, units, agents, canAssignAgents, onClose, on
 
   return (
     <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-      <SheetContent side="left" className="w-full overflow-y-auto bg-white sm:max-w-xl" dir="rtl">
+      <SheetContent side="left" className="sales-command-sheet w-full overflow-y-auto bg-white sm:max-w-xl" dir="rtl">
         <SheetHeader>
           <SheetTitle className="text-right text-xl font-black text-[var(--fi-ink)]">صفقة جديدة</SheetTitle>
           <SheetDescription className="text-right font-semibold">اختر العميل والوحدة ثم سجل قيمة الصفقة المتوقعة.</SheetDescription>
@@ -680,8 +736,8 @@ function FilterSelect({ label, value, onChange, icon, children }: {
   children: ReactNode
 }) {
   return (
-    <label className="flex h-10 items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-3">
-      <span className="text-[var(--fi-emerald)]">{icon}</span>
+    <label className="flex h-11 items-center gap-2 rounded-2xl border border-[var(--fi-line)] bg-white px-3">
+      <span className="text-[var(--sales-blue)]">{icon}</span>
       <span className="sr-only">{label}</span>
       <select className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[var(--fi-ink)] outline-none" value={value} onChange={(event) => onChange(event.target.value)}>
         {children}
@@ -692,7 +748,7 @@ function FilterSelect({ label, value, onChange, icon, children }: {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="ds-card-hover rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3">
+    <div className="sales-kpi rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4">
       <p className="text-xs font-black text-[var(--fi-muted)]">{label}</p>
       <p className="fi-tabular mt-2 text-xl font-black text-[var(--fi-ink)]">{value}</p>
     </div>
@@ -754,6 +810,32 @@ function moveRelative(deal: PipelineDeal, delta: number, onMove: (dealId: string
 
 function stageLabel(stage: PipelineStage) {
   return STAGES.find((item) => item.key === stage)?.label ?? stage
+}
+
+function getWelcomeProfile(role?: string) {
+  const normalized = String(role ?? '').toLowerCase()
+  if (['agent', 'broker', 'senior_agent', 'sales', 'sales_manager'].some((item) => normalized.includes(item))) {
+    return {
+      title: 'Welcome back, Champion!',
+      message: "Let's break some records and close high-value deals today.",
+    }
+  }
+  if (['client', 'buyer', 'customer'].some((item) => normalized.includes(item))) {
+    return {
+      title: 'Welcome to your investment portal.',
+      message: "Let's build your future with confidence.",
+    }
+  }
+  if (['partner', 'company', 'broker_company'].some((item) => normalized.includes(item))) {
+    return {
+      title: 'Welcome, Partner.',
+      message: 'Together we drive exponential growth. Here is your current pipeline.',
+    }
+  }
+  return {
+    title: 'Fast Investment Command Center',
+    message: 'Real-time insights for strategic decisions across every sales motion.',
+  }
 }
 
 function daysInStage(value: string) {

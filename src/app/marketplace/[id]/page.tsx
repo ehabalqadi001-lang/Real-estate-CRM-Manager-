@@ -22,11 +22,11 @@ export default async function MarketplaceDetailPage({ params }: PageProps<'/mark
   if (!property) notFound()
 
   return (
-    <div className="nextora-market min-h-screen text-[#102033]">
+    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <section className="nextora-card overflow-hidden rounded-lg">
+          <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
             <Image
               src={property.imageUrl}
               alt={property.title}
@@ -42,7 +42,7 @@ export default async function MarketplaceDetailPage({ params }: PageProps<'/mark
             </div>
           </section>
           <aside className="space-y-4">
-            <div className="nextora-card rounded-lg p-4">
+            <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
               <p className="flex items-center gap-2 font-black">
                 <ShieldCheck className="size-4 text-[#0F8F83]" />
                 تواصل آمن
@@ -50,7 +50,7 @@ export default async function MarketplaceDetailPage({ params }: PageProps<'/mark
               <p className="mt-2 text-sm font-semibold leading-7 text-[#64748B]">
                 رقم الهاتف مخفي. ابدأ محادثة داخلية لحماية بيانات الطرفين وتوثيق الطلب.
               </p>
-              <Button className="nextora-button mt-4 w-full">
+              <Button className="mt-4 w-full bg-[#0F8F83] text-white hover:bg-[#0B6F66]">
                 <MessageCircle className="ms-1 size-4" />
                 بدء محادثة
               </Button>

@@ -24,7 +24,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
   const methodLabel = useMemo(() => method === 'card' ? 'Pay by Card' : 'Pay by Mobile Wallet', [method])
 
   return (
-    <form action={createPointCheckoutSession} className="nextora-card flex h-full flex-col rounded-lg p-5">
+    <form action={createPointCheckoutSession} className="flex h-full flex-col rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
       <input type="hidden" name="package_id" value={pointPackage.id} />
       <input type="hidden" name="payment_method" value={method} />
       <input type="hidden" name="accepted_terms" value={accepted ? 'on' : ''} />
@@ -39,14 +39,14 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
         </span>
       </div>
 
-      <div className="mt-5 rounded-lg border border-[#2D2D2D] bg-[#111111] p-4">
+      <div className="mt-5 rounded-lg bg-[#F3F8F4] p-4">
         <p className="text-3xl font-black text-[#17375E]">{Number(pointPackage.points_amount).toLocaleString()} pts</p>
         <p className="mt-1 text-sm font-bold text-[#64748B]">
           {Number(pointPackage.amount_egp).toLocaleString()} {pointPackage.currency}
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 rounded-lg bg-[#111111] p-1">
+      <div className="mt-5 grid grid-cols-2 gap-2 rounded-lg bg-[#F6FAF7] p-1">
         <PaymentMethodButton active={method === 'card'} icon={CreditCard} label="Card" onClick={() => setMethod('card')} />
         <PaymentMethodButton active={method === 'wallet'} icon={Smartphone} label="Wallet" onClick={() => setMethod('wallet')} />
       </div>
@@ -57,7 +57,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
         </div>
       )}
 
-      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-[#2D2D2D] bg-[#111111] p-3 text-sm font-bold leading-6 text-[#A1A1AA] transition hover:border-[#8AB4FF]/50">
+      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] p-3 text-sm font-bold leading-6 text-[#334155] transition hover:border-[#27AE60]/50">
         <span
           className={cn(
             'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition',
@@ -84,7 +84,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
       <Button
         type="submit"
         disabled={!accepted}
-        className="nextora-button mt-4 h-11 w-full disabled:cursor-not-allowed"
+        className="mt-4 h-11 w-full bg-[#27AE60] text-white hover:bg-[#1F8E4F] disabled:cursor-not-allowed"
       >
         {method === 'card' ? <CreditCard className="size-4" /> : <Smartphone className="size-4" />}
         {accepted ? methodLabel : 'Accept terms to continue'}
@@ -115,7 +115,7 @@ function PaymentMethodButton({
       onClick={onClick}
       className={cn(
         'flex h-10 items-center justify-center gap-2 rounded-md text-sm font-black transition',
-        active ? 'bg-white text-[#0D0D0D] shadow-sm ring-1 ring-white/20' : 'text-[#A1A1AA] hover:text-white'
+        active ? 'bg-white text-[#27AE60] shadow-sm ring-1 ring-[#27AE60]/20' : 'text-[#64748B] hover:text-[#102033]'
       )}
     >
       <Icon className="size-4" />

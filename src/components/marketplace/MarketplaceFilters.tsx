@@ -39,7 +39,7 @@ export default function MarketplaceFilters() {
   }
 
   return (
-    <section className="nextora-card mb-8 rounded-3xl p-4 sm:p-5">
+    <section className="mb-8 rounded-3xl border border-market-line bg-white p-4 shadow-[0_18px_50px_rgba(16,32,51,0.06)] sm:p-5">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function MarketplaceFilters() {
           </p>
         </div>
         {activeCount > 0 && (
-          <Button variant="outline" onClick={() => setFilters(initialFilters)} className="rounded-2xl border-market-line bg-transparent text-white hover:bg-white/10">
+          <Button variant="outline" onClick={() => setFilters(initialFilters)} className="rounded-2xl border-market-line">
             <X className="ms-1 size-4" />
             مسح الفلاتر
           </Button>
@@ -69,7 +69,7 @@ export default function MarketplaceFilters() {
               value={filters.query}
               onChange={(event) => updateFilter('query', event.target.value)}
               placeholder="اسم الكمبوند، المنطقة، نوع الوحدة"
-              className="h-11 rounded-2xl border-market-line bg-market-paper pr-10 font-semibold text-white"
+              className="h-11 rounded-2xl border-market-line bg-market-paper pr-10 font-semibold"
             />
           </div>
         </div>
@@ -137,7 +137,7 @@ export default function MarketplaceFilters() {
             value={filters.minPrice}
             onChange={(event) => updateFilter('minPrice', event.target.value)}
             placeholder="مثال: 1500000"
-            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold text-white"
+            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
         <div className="space-y-2">
@@ -148,7 +148,7 @@ export default function MarketplaceFilters() {
             value={filters.maxPrice}
             onChange={(event) => updateFilter('maxPrice', event.target.value)}
             placeholder="مثال: 8000000"
-            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold text-white"
+            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
       </div>
@@ -173,7 +173,7 @@ function FilterSelect({
     <div className="space-y-2">
       <Label>{label}</Label>
       <Select value={value} onValueChange={(nextValue) => onValueChange(nextValue ?? 'all')}>
-        <SelectTrigger className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold text-white">
+        <SelectTrigger className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold">
           <span className="flex items-center gap-2">
             {icon}
             <SelectValue />

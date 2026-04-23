@@ -115,7 +115,6 @@ export async function runFastAgent(messages: FastAgentMessage[], options: FastCo
 
 async function collectAllowedContext(session: AppSession | null, question: string): Promise<FastToolResult[]> {
   const supabase = await createServerSupabaseClient()
-  const role = session?.profile.role ?? 'guest'
   const sessionRole = session?.profile.role
   const companyId = session?.profile.company_id ?? session?.profile.tenant_id ?? null
   const normalizedQuestion = question.toLowerCase()
