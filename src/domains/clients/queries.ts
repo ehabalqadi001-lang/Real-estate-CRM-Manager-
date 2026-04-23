@@ -2,7 +2,7 @@ import 'server-only'
 
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
-import type { ClientCallSummary, ClientDealSummary, ClientDetail, ClientDetailResult, ClientListItem, ClientListResult } from './types'
+import type { ClientCallSummary, ClientDealSummary, ClientDetail, ClientDetailResult, ClientListResult } from './types'
 
 export async function getClientList(): Promise<ClientListResult> {
   const session = await requirePermission('client.view.assigned')

@@ -221,6 +221,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   ],
   broker: ['dashboard.view.own', 'broker.view.own', 'lead.create', 'unit.view', 'listing.view', 'deal.view.own', 'commission.view.own', 'payout.view.own', 'notification.view.own'],
   freelancer: ['dashboard.view.own', 'lead.view.own', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.own', 'deal.create', 'commission.view.own', 'payout.view.own', 'notification.view.own', 'map.view'],
+  account_manager: ['dashboard.view.team', 'lead.view.team', 'client.view.company', 'broker.view.company', 'broker.manage', 'deal.view.team', 'deal.approve', 'commission.view.company', 'commission.manage', 'payout.view.company', 'report.view.team', 'notification.view.own', 'map.view'],
   buyer_manager: ['dashboard.view.team', 'lead.view.team', 'lead.create', 'client.view.assigned', 'client.create', 'unit.view', 'listing.view', 'deal.view.team', 'report.view.team', 'notification.view.own', 'map.view'],
   seller_resale_manager: ['dashboard.view.team', 'client.view.company', 'client.create', 'listing.view', 'listing.manage', 'deal.view.team', 'deal.create', 'report.view.team', 'notification.view.own', 'map.view'],
   finance_officer: ['dashboard.view.company', 'deal.view.company', 'commission.view.company', 'commission.manage', 'payout.view.company', 'payout.manage', 'finance.view', 'finance.manage', 'report.view.company', 'notification.view.own'],

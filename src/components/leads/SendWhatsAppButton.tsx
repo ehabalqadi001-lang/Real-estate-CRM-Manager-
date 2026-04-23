@@ -13,7 +13,7 @@ interface Props {
 const TEMPLATES = [
   {
     label: 'تحية ترحيبية',
-    body: (name: string) => `أهلاً بك أستاذ ${name}،\nنسعد بتواصلنا معك ونرحب بك في فريق EHAB & ESLAM.\nكيف يمكننا مساعدتك اليوم؟`,
+    body: (name: string) => `أهلاً بك أستاذ ${name}،\nنسعد بتواصلنا معك ونرحب بك في FAST INVESTMENT.\nكيف يمكننا مساعدتك اليوم؟`,
   },
   {
     label: 'متابعة عرض',

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { ArrowRight, Building2, DollarSign, Mail, Phone, User } from 'lucide-react'
 import Link from 'next/link'
 import { addLead } from '../actions'
+import SubmitLeadButton from './SubmitLeadButton'
 
 async function createLeadAction(formData: FormData) {
   'use server'
@@ -109,9 +110,7 @@ export default async function NewLeadPage({ searchParams }: PageProps) {
             </div>
 
             <div className="border-t border-slate-100 pt-5">
-              <button type="submit" className="w-full rounded-2xl bg-[#00C27C] p-3.5 font-black text-white shadow-lg shadow-[#00C27C]/20 transition-colors hover:bg-[#009F64]">
-                تأكيد وإضافة العميل
-              </button>
+              <SubmitLeadButton />
             </div>
           </form>
         </div>

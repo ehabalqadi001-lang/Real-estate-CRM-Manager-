@@ -7,6 +7,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
   Line,
   LineChart,
   Pie,
@@ -46,9 +47,9 @@ export function DashboardCharts({
 }: DashboardChartsProps) {
   if (isLoading) {
     return (
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 2xl:grid-cols-2">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="min-h-[340px] border-[var(--fi-line)] bg-white">
+          <Card key={index} className="min-h-[340px] min-w-0 border-[var(--fi-line)] bg-white">
             <CardHeader>
               <div className="h-5 w-36 animate-pulse rounded bg-[var(--fi-line)]" />
               <div className="h-4 w-52 animate-pulse rounded bg-[var(--fi-line)]" />
@@ -63,13 +64,13 @@ export function DashboardCharts({
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid gap-4 2xl:grid-cols-2">
       <ChartCard title="المبيعات الشهرية" description="آخر 6 أشهر حسب الصفقات المغلقة">
         <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={salesByMonth}>
+          <BarChart data={salesByMonth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} />
+            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} tick={{ fontSize: 11 }} />
             <Tooltip content={<ArabicTooltip valueLabel="ج.م" />} />
             <Bar dataKey="sales" name="المبيعات" fill="var(--fi-emerald)" radius={[8, 8, 0, 0]} />
           </BarChart>
@@ -78,10 +79,10 @@ export function DashboardCharts({
 
       <ChartCard title="نمو العملاء" description="النمو التراكمي للعملاء خلال الفترة">
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={clientGrowth}>
+          <LineChart data={clientGrowth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} width={42} />
+            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} width={42} tick={{ fontSize: 11 }} />
             <Tooltip content={<ArabicTooltip />} />
             <Line type="monotone" dataKey="cumulativeClients" name="العملاء" stroke="var(--fi-blue)" strokeWidth={3} dot={{ r: 3 }} />
           </LineChart>
@@ -96,19 +97,17 @@ export function DashboardCharts({
                 data={dealsByStage}
                 dataKey="count"
                 nameKey="stage"
-                innerRadius={56}
-                outerRadius={92}
+                innerRadius={58}
+                outerRadius={88}
                 paddingAngle={3}
-                label={(props) => {
-                  const payload = props.payload as StagePoint | undefined
-                  return payload ? `${payload.stage}: ${payload.count.toLocaleString('ar-EG')}` : ''
-                }}
+                labelLine={false}
               >
                 {dealsByStage.map((entry, index) => (
                   <Cell key={entry.stage} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip content={<ArabicTooltip />} />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         ) : (
@@ -116,9 +115,9 @@ export function DashboardCharts({
         )}
       </ChartCard>
 
-      <ChartCard title="العمولات" description="العمولات المعتمدة أو المدفوعة شهريا">
+      <ChartCard title="العمولات" description="العمولات المعتمدة أو المدفوعة شهرياً">
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={commissionsByMonth}>
+          <AreaChart data={commissionsByMonth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <defs>
               <linearGradient id="commissionFill" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor="var(--fi-emerald)" stopOpacity={0.28} />
@@ -126,8 +125,8 @@ export function DashboardCharts({
               </linearGradient>
             </defs>
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} />
+            <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} tick={{ fontSize: 11 }} />
             <Tooltip content={<ArabicTooltip valueLabel="ج.م" />} />
             <Area type="monotone" dataKey="commissions" name="العمولات" stroke="var(--fi-emerald)" strokeWidth={3} fill="url(#commissionFill)" />
           </AreaChart>
@@ -139,12 +138,12 @@ export function DashboardCharts({
 
 function ChartCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <Card className="border-[var(--fi-line)] bg-white">
+    <Card className="min-h-[340px] min-w-0 border-[var(--fi-line)] bg-white">
       <CardHeader>
         <CardTitle className="text-base font-black text-[var(--fi-ink)]">{title}</CardTitle>
         <CardDescription className="font-semibold text-[var(--fi-muted)]">{description}</CardDescription>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="min-w-0">{children}</CardContent>
     </Card>
   )
 }

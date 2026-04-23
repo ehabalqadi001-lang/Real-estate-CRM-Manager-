@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { Card, EmptyState, ErrorState, LoadingState, Screen } from '../../components/ui'
 import { supabase } from '../../lib/supabase'
@@ -19,11 +19,7 @@ export default function InventoryTab() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    void load()
-  }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     const { data, error: queryError } = await supabase
@@ -35,7 +31,14 @@ export default function InventoryTab() {
     if (queryError) setError(queryError.message)
     setUnits((data ?? []) as UnitRow[])
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      void load()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [load])
 
   const filtered = units.filter((unit) => `${unit.unit_name ?? ''} ${unit.unit_type ?? ''}`.includes(search))
 

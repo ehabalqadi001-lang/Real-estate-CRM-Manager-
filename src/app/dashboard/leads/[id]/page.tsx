@@ -196,7 +196,7 @@ export default async function LeadProfilePage({ params }: PageProps) {
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
                   <div className="flex justify-between items-start mb-3 border-b border-slate-50 pb-3">
                     <span className="text-xs font-black text-slate-900 bg-slate-100 px-2 py-1 rounded-md">
-                      {report.profiles?.full_name || 'وكيل مبيعات (EHAB & ESLAM TEAM)'}
+                      {report.profiles?.full_name || 'وكيل مبيعات (FAST INVESTMENT)'}
                     </span>
                     <time className="text-[11px] font-bold text-slate-400 bg-white border border-slate-100 px-2 py-1 rounded-md shadow-sm">
                       {new Date(report.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}

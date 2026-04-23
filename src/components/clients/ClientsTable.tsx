@@ -22,7 +22,7 @@ const statusLabels: Record<string, string> = {
 
 export default function ClientsTable({ initialData }: { initialData: Client[] }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const safeData = Array.isArray(initialData) ? initialData : []
+  const safeData = useMemo(() => Array.isArray(initialData) ? initialData : [], [initialData])
 
   const filteredClients = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()

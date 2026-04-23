@@ -51,6 +51,42 @@ export async function updateClientProfileAction(formData: FormData) {
   return { success: true, message: 'تم حفظ البيانات الشخصية' }
 }
 
+export async function createClientSupportTicketAction(formData: FormData) {
+  const supabase = await createRawClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, message: 'يجب تسجيل الدخول أولا' }
+
+  const title = String(formData.get('title') ?? '').trim()
+  const description = String(formData.get('description') ?? '').trim()
+  const category = String(formData.get('category') ?? 'marketplace').trim()
+  const priority = String(formData.get('priority') ?? 'medium').trim()
+
+  if (!title || !description) {
+    return { success: false, message: 'عنوان الطلب ووصفه مطلوبان' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id, tenant_id')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { error } = await supabase.from('support_tickets').insert({
+    user_id: user.id,
+    company_id: profile?.company_id ?? profile?.tenant_id ?? null,
+    title,
+    description,
+    category,
+    priority: ['low', 'medium', 'high', 'critical'].includes(priority) ? priority : 'medium',
+    status: 'open',
+  })
+
+  if (error) return { success: false, message: error.message }
+
+  revalidatePath('/marketplace/profile')
+  return { success: true, message: 'تم إرسال طلب الدعم وسيتم متابعته من خدمة العملاء' }
+}
+
 export async function changeClientPasswordAction(formData: FormData) {
   const supabase = await createRawClient()
   const { data: { user } } = await supabase.auth.getUser()

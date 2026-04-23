@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   if (!process.env.GEMINI_API_KEY) {
-    return NextResponse.json({ error: 'GEMINI_API_KEY غير مضبوط على الخادم' }, { status: 500 })
+    return NextResponse.json({
+      description: buildFallbackDescription(await req.json()),
+      warning: 'Gemini غير مضبوط على الخادم، تم إنشاء وصف احتياطي.',
+    })
   }
 
   const body = await req.json()
@@ -24,8 +27,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ description })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'فشل الاتصال بخدمة Gemini'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({
+      description: buildFallbackDescription(body),
+      warning: isQuotaError(message)
+        ? 'تم تجاوز حد استخدام Gemini مؤقتًا، تم إنشاء وصف احتياطي قابل للتعديل.'
+        : 'تعذر الاتصال بـ Gemini، تم إنشاء وصف احتياطي قابل للتعديل.',
+      detail: message,
+    })
   }
+}
+
+function isQuotaError(message: string) {
+  const lower = message.toLowerCase()
+  return lower.includes('429') || lower.includes('quota') || lower.includes('rate limit') || lower.includes('too many requests')
+}
+
+function buildFallbackDescription(data: Record<string, unknown>) {
+  const title = text(data.title, 'وحدة عقارية مميزة')
+  const unitType = text(data.unit_type, 'وحدة')
+  const location = text(data.area_location, 'موقع مميز')
+  const project = text(data.project_name, 'مشروع مميز')
+  const developer = text(data.developer_name, 'مطور موثوق')
+  const area = text(data.area_sqm, 'مساحة مناسبة')
+  const rooms = text(data.rooms, '')
+  const bathrooms = text(data.bathrooms, '')
+  const finishing = text(data.finishing, 'تشطيب مناسب')
+  const notes = text(data.special_notes, '')
+  const price = formatMoney(data.total_cash_price)
+  const downPayment = formatMoney(data.down_payment)
+  const installment = formatMoney(data.installment_amount)
+
+  const layout = [
+    `تقدم FAST INVESTMENT فرصة مميزة لامتلاك ${unitType} بعنوان "${title}" في ${location} داخل ${project} مع ${developer}.`,
+    `تبلغ المساحة الإجمالية ${area} م²${rooms ? `، وتضم ${rooms} غرف` : ''}${bathrooms ? ` و${bathrooms} حمامات` : ''}، مع ${finishing} وتوزيع عملي يناسب السكن أو الاستثمار حسب طبيعة الوحدة.`,
+    `السعر الكاش ${price}${downPayment !== 'غير محدد' ? `، والمقدم ${downPayment}` : ''}${installment !== 'غير محدد' ? `، والقسط ${installment}` : ''}.`,
+    notes && notes !== 'لا يوجد' ? `تفاصيل إضافية: ${notes}.` : '',
+    'للمهتمين بالشراء أو المقارنة الاستثمارية، يمكن مراجعة بيانات الوحدة وتحديد أنسب طريقة للتعاقد وفقًا للمستندات المتاحة.',
+  ].filter(Boolean)
+
+  return layout.join('\n\n')
 }
 
 function buildPrompt(data: Record<string, unknown>) {

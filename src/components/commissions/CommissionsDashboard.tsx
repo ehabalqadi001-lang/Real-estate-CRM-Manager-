@@ -73,6 +73,8 @@ export function CommissionsDashboard({
     { header: 'الإجراء', cell: ({ row }) => row.original.status !== 'paid' ? <CommissionRequestSheet commission={row.original} /> : <Button size="sm" variant="outline" onClick={() => downloadCommissionStatement([row.original], 'إيصال عمولة')}>PDF</Button> },
   ], [])
 
+  // TanStack Table intentionally returns stable methods that React Compiler cannot memoize safely.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filtered,
     columns,

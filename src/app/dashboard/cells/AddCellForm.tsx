@@ -25,7 +25,7 @@ export function AddCellForm({ agents }: { agents: AgentOption[] }) {
           </p>
           <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">إنشاء خلية عمل</h2>
           <p className="mt-1 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-            قسّم فريق EHAB & ESLAM إلى خلايا مستقلة مع قائد، هدف GMV، ومعدل تحويل واضح لكل خلية.
+            قسّم فريق FAST INVESTMENT إلى خلايا مستقلة مع قائد، هدف GMV، ومعدل تحويل واضح لكل خلية.
           </p>
         </div>
         <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">

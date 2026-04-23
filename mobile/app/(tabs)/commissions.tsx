@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { Card, EmptyState, ErrorState, LoadingState, Screen } from '../../components/ui'
 import { supabase } from '../../lib/supabase'
@@ -17,11 +17,7 @@ export default function CommissionsTab() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    void load()
-  }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     const { data: { user } } = await supabase.auth.getUser()
@@ -35,7 +31,14 @@ export default function CommissionsTab() {
     if (queryError) setError(queryError.message)
     setRows((data ?? []) as CommissionRow[])
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      void load()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [load])
 
   const total = useMemo(() => rows.reduce((sum, row) => sum + Number(row.agent_amount ?? row.gross_commission ?? 0), 0), [rows])
 

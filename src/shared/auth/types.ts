@@ -13,6 +13,7 @@ export type AppRole =
   | 'hr_staff'
   | 'broker'
   | 'freelancer'
+  | 'account_manager'
   | 'buyer_manager'
   | 'seller_resale_manager'
   | 'finance_officer'
@@ -46,6 +47,7 @@ export const MANAGER_ROLES: AppRole[] = [
   'branch_manager',
   'sales_director',
   'team_leader',
+  'account_manager',
   'hr_manager',
   'admin',
   'company',

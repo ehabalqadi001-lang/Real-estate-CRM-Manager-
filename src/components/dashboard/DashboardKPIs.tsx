@@ -160,7 +160,7 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
+      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
           <DashboardCharts
             salesByMonth={data.salesByMonth}

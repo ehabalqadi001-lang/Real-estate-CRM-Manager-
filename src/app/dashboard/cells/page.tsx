@@ -45,7 +45,7 @@ export default async function CellsPage() {
     return (
       <main className="space-y-6 p-4 sm:p-6" dir="rtl">
         <section className="ds-card p-5 sm:p-6">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">EHAB & ESLAM TEAM OPERATIONS</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT OPERATIONS</p>
           <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة خلايا العمل</h1>
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-800">
             حسابك الحالي غير مرتبط بشركة صالحة. اربط حساب المدير بشركة قبل إنشاء خلايا العمل.
@@ -85,7 +85,7 @@ export default async function CellsPage() {
   return (
     <main className="space-y-6 p-4 sm:p-6" dir="rtl">
       <section className="ds-card p-5 sm:p-6">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">EHAB & ESLAM TEAM OPERATIONS</p>
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT OPERATIONS</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة خلايا العمل</h1>
         <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
           تتبع كل خلية، قائدها، أعضائها، أهداف GMV، ومعدلات التحويل بشكل مستقل مع رؤية مركزية للإدارة.

@@ -711,7 +711,7 @@ create policy "cell_performance_snapshots_write" on public.cell_performance_snap
   with check (app_private.is_platform_admin() or (company_id = app_private.current_company() and app_private.is_company_operator()));
 
 -- Relationship documentation for the generated API.
-comment on table public.work_cells is 'Multi-tenant sales cells for EHAB & ESLAM TEAM style operating model.';
+comment on table public.work_cells is 'Multi-tenant sales cells for FAST INVESTMENT style operating model.';
 comment on table public.marketplace_properties is 'Headless property abstraction combining primary developer inventory and verified resale listings.';
 comment on table public.api_integrations is 'API gateway registry for developer inventory/prices/payment-plan feeds.';
 comment on table public.resale_valuations is 'AVM and manual valuation records for resale units.';

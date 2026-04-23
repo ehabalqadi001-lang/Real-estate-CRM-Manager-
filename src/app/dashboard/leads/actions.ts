@@ -74,11 +74,36 @@ export async function addLead(payload: LeadPayload | FormData) {
   // إذا كان حسابه مربوطاً بشركة (وكيل) نستخدم ختم الشركة، وإذا لم يكن (لأنه هو المدير نفسه) نستخدم ختمه الشخصي.
   const targetCompanyId = profile?.company_id ? profile.company_id : user.id
 
-  const leadName = name || 'عميل جديد'
+  const leadName = String(name || 'عميل جديد').trim()
+  const normalizedPhone = String(phone ?? '').replace(/\s+/g, '').trim()
+  const normalizedEmail = String(email ?? '').trim().toLowerCase()
+  const duplicateWindow = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+
+  let duplicateQuery = supabase
+    .from('leads')
+    .select('id')
+    .eq('company_id', targetCompanyId)
+    .gte('created_at', duplicateWindow)
+    .limit(1)
+
+  if (normalizedPhone) {
+    duplicateQuery = duplicateQuery.eq('phone', normalizedPhone)
+  } else if (normalizedEmail) {
+    duplicateQuery = duplicateQuery.eq('email', normalizedEmail)
+  } else {
+    duplicateQuery = duplicateQuery.eq('client_name', leadName)
+  }
+
+  const { data: duplicateLead } = await duplicateQuery.maybeSingle()
+  if (duplicateLead?.id) {
+    revalidatePath('/dashboard/leads')
+    return { success: true, duplicate: true }
+  }
+
   const { data: inserted, error } = await supabase.from('leads').insert({
     client_name: leadName,
-    phone: phone || null,
-    email: email || null,
+    phone: normalizedPhone || null,
+    email: normalizedEmail || null,
     property_type: property_type || 'غير محدد',
     expected_value: expected_value || 0,
     status: 'Fresh Leads',

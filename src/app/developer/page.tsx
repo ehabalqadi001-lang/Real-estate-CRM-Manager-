@@ -191,7 +191,7 @@ export default async function DeveloperPortalPage() {
 
         <BentoGrid>
           <BentoKpiCard title="المشاريع" value={<AnimatedCount value={projects.length} />} hint="مرتبطة بالحساب" icon={<Building2 className="size-5" />} />
-          <BentoKpiCard title="وحدات متاحة" value={<AnimatedCount value={availableUnits} />} hint={`${reservedUnits} محجوزة / محتجزة`} icon={<PackageCheck className="size-5" />} />
+          <BentoKpiCard title="وحدات متاحة" value={<AnimatedCount value={availableUnits} />} hint={`${reservedUnits} محجوزة / ${soldUnits} مباعة`} icon={<PackageCheck className="size-5" />} />
           <BentoKpiCard title="اهتمام العملاء" value={<AnimatedCount value={totalInterest} />} hint="مشاهدات وتفاعلات" icon={<Eye className="size-5" />} />
           <BentoKpiCard title="اجتماعات نشطة" value={<AnimatedCount value={bookedMeetings} />} hint="مجدولة أو مؤكدة" icon={<CalendarClock className="size-5" />} />
         </BentoGrid>

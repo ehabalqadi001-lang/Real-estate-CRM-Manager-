@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import AddDealButton from '@/components/deals/AddDealButton'
 import { AnimatedCount } from '@/components/design-system/animated-count'
 import { BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
@@ -58,6 +59,9 @@ const STAGE_CONFIG: Record<string, { label: string; color: string; bg: string }>
 
 export default async function DealsPage({ searchParams }: PageProps) {
   const session = await requireSession()
+  if (session.profile.role === 'broker' || session.profile.role === 'freelancer') {
+    redirect('/broker-portal/sales')
+  }
   const supabase = await createServerSupabaseClient()
   const companyContext = await getActiveCompanyContext(session)
   const params = await searchParams
@@ -168,7 +172,7 @@ export default async function DealsPage({ searchParams }: PageProps) {
           <Briefcase size={48} className="mx-auto mb-4 text-[var(--fi-line)]" aria-hidden="true" />
           <h3 className="text-xl font-black text-[var(--fi-ink)]">لا توجد صفقات موثقة حتى الآن</h3>
           <p className="mt-2 font-medium leading-7 text-[var(--fi-muted)]">
-            اضغط على "توثيق صفقة جديدة" لتحويل عميل إلى مشتري فعلي وحساب العمولة.
+            اضغط على &quot;توثيق صفقة جديدة&quot; لتحويل عميل إلى مشتري فعلي وحساب العمولة.
           </p>
         </section>
       ) : (

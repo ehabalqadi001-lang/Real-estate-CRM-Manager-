@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function POST(request: NextRequest) {
+async function logout(request: NextRequest) {
   const response = NextResponse.redirect(new URL('/login', request.url), { status: 303 })
 
   const supabase = createServerClient(
@@ -22,8 +22,15 @@ export async function POST(request: NextRequest) {
   )
 
   await supabase.auth.signOut()
-  response.cookies.delete('user_role')
+  response.cookies.set('user_role', '', { path: '/', maxAge: 0 })
 
   return response
 }
 
+export async function POST(request: NextRequest) {
+  return logout(request)
+}
+
+export async function GET(request: NextRequest) {
+  return logout(request)
+}

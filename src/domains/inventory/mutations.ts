@@ -49,9 +49,9 @@ export async function createBulkInventoryUnits(input: BulkInventoryUnitInput): P
   }
 
   const payload = input.rows.map((unit) => ({
-    unit_name: textValue(unit['اسم الوحدة'] ?? unit['Unit Name'] ?? unit['Ø§Ø³Ù… Ø§Ù„ÙˆØ­Ø¯Ø©'], 'وحدة غير مسماة'),
-    unit_type: textValue(unit['النوع'] ?? unit['Type'] ?? unit['Ø§Ù„Ù†ÙˆØ¹'], 'غير محدد'),
-    price: priceValue(unit['السعر'] ?? unit['Price'] ?? unit['Ø§Ù„Ø³Ø¹Ø±']),
+    unit_name: textValue(unit['اسم الوحدة'] ?? unit['Unit Name'], 'وحدة غير مسماة'),
+    unit_type: textValue(unit['النوع'] ?? unit['Type'], 'غير محدد'),
+    price: priceValue(unit['السعر'] ?? unit['Price']),
     status: 'available',
     developer_id: input.developer_id,
   }))

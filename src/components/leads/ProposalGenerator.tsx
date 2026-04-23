@@ -31,7 +31,7 @@ export default function ProposalGenerator({ lead, property }: { lead: ProposalLe
 
     // إعدادات التصميم (Branding)
     const companyName = "FAST INVESTMENT"
-    const teamName = "EHAB & ESLAM TEAM"
+    const teamName = "FAST INVESTMENT"
     const date = new Date().toLocaleDateString('ar-EG')
 
     // 1. تصميم الهيدر (Header)

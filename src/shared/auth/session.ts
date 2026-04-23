@@ -25,6 +25,7 @@ const ROLE_ALIASES: Record<string, AppRole> = {
   hr_staff: 'hr_staff',
   hr_officer: 'hr_officer',
   broker: 'broker',
+  account_manager: 'account_manager',
   team_leader: 'branch_manager',
   agent: 'agent',
   individual: 'individual',

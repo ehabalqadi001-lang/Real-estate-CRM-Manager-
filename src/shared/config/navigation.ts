@@ -63,6 +63,7 @@ export const dashboardNavigation: NavigationGroup[] = [
   {
     title: 'الشركاء والفريق',
     items: [
+      { title: 'إدارة علاقات الشركاء', href: '/dashboard/partners', permission: 'broker.manage', icon: Handshake },
       { title: 'إدارة الوسطاء', href: '/dashboard/brokers', permission: 'broker.view.company', icon: ShieldCheck },
       { title: 'الفريق', href: '/dashboard/team', permission: 'team.view', icon: ClipboardCheck },
       { title: 'خلايا العمل', href: '/dashboard/cells', permission: 'team.manage', icon: Network },

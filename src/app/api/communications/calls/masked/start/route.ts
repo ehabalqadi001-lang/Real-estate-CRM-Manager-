@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     let providerStatus = call.status
     let providerCallSid: string | null = null
-    let providerReady = isTwilioVoiceConfigured()
+    const providerReady = isTwilioVoiceConfigured()
 
     if (providerReady) {
       const baseUrl = getPublicAppUrl(request.url)

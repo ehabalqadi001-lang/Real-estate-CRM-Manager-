@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState } from 'react'
 import { UserPlus, ShieldCheck } from 'lucide-react'
 import { createEmployeeAction, type HrActionState } from './actions'
 
@@ -31,11 +31,6 @@ const roleOptions = [
 
 export function AddEmployeeForm({ departments }: { departments: DepartmentOption[] }) {
   const [state, action, pending] = useActionState(createEmployeeAction, initialState)
-  const [username, setUsername] = useState('')
-
-  useEffect(() => {
-    if (state.ok) setUsername('')
-  }, [state.ok])
 
   return (
     <section className="ds-card ds-card-hover p-5" dir="rtl">
@@ -62,17 +57,18 @@ export function AddEmployeeForm({ departments }: { departments: DepartmentOption
         </div>
       ) : null}
 
-      <form action={action} className="grid gap-4 md:grid-cols-2" noValidate>
+      <form key={state.ok ? state.message : 'employee-form'} action={action} className="grid gap-4 md:grid-cols-2" noValidate>
         <Field label="اسم الموظف بالكامل">
-          <input name="fullName" required className={inputClass} placeholder="مثال: EHAB MOHAMED ALQADI" />
+          <input name="fullName" required className={inputClass} placeholder="مثال: أحمد محمد" />
         </Field>
 
         <Field label="اسم المستخدم">
           <input
             name="username"
             required
-            value={username}
-            onChange={(event) => setUsername(event.target.value.replace(/\s+/g, '').toLowerCase())}
+            onInput={(event) => {
+              event.currentTarget.value = event.currentTarget.value.replace(/\s+/g, '').toLowerCase()
+            }}
             className={inputClass}
             placeholder="ehab.alqadi"
           />

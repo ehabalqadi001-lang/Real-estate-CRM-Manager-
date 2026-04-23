@@ -10,13 +10,6 @@ type RouteContext = {
   params: Promise<{ batchId: string }>
 }
 
-type BatchRow = {
-  id: string
-  developer_id: string | null
-  company_id: string | null
-  source_type: 'api' | 'excel' | 'csv' | 'manual'
-}
-
 type IngestionRow = {
   id: string
   row_number: number
