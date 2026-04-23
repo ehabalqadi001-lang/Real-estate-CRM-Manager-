@@ -39,10 +39,10 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#DDE6E4] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-[#DDE6E4] bg-white/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/marketplace" className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-[#17375E] text-white">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-[#17375E] text-white shadow-sm">
             <Building2 className="size-5" />
           </span>
           <span className="min-w-0">
@@ -54,7 +54,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
         <nav className="hidden items-center gap-6 text-sm font-bold text-[#4B6175] md:flex">
           <Link href="/marketplace" className="text-[#17375E]">السوق</Link>
           <Link href="/marketplace#developers" className="transition hover:text-[#17375E]">المطورون</Link>
-          <Link href="/marketplace/buy-points" className="transition hover:text-[#27AE60]">Buy Points</Link>
+          <Link href="/marketplace/buy-points" className="transition hover:text-[#27AE60]">شراء نقاط</Link>
           <Link href="/marketplace/add-property" className="transition hover:text-[#17375E]">أضف وحدتك</Link>
         </nav>
 
@@ -64,7 +64,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <Button
                 type="button"
                 onClick={() => router.push('/marketplace/add-property')}
-                className="hidden bg-[#17375E] text-white hover:bg-[#102033] sm:inline-flex"
+                className="hidden rounded-xl bg-[#17375E] text-white hover:bg-[#102033] sm:inline-flex"
               >
                 <Plus className="ms-1 size-4" />
                 أضف وحدة
@@ -73,7 +73,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <MarketplaceNotificationBell />
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-[#0F8F83]/30">
+                <DropdownMenuTrigger className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-[#0F8F83]/30">
                   <Avatar className="size-10 border border-[#DDE6E4]">
                     <AvatarFallback className="bg-[#EEF6F5] text-sm font-black text-[#17375E]">
                       {getInitial(user.name)}
@@ -92,19 +92,19 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/marketplace/profile')}>
+                  <DropdownMenuItem onSelect={() => router.push('/marketplace/profile')}>
                     <UserRound className="ms-2 size-4" />
                     الملف الشخصي
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/marketplace/add-property')}>
+                  <DropdownMenuItem onSelect={() => router.push('/marketplace/add-property')}>
                     <Plus className="ms-2 size-4" />
                     إضافة وحدة
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/marketplace/buy-points')}>
+                  <DropdownMenuItem onSelect={() => router.push('/marketplace/buy-points')}>
                     <Coins className="ms-2 size-4" />
-                    Buy Points
+                    شراء نقاط
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/marketplace/chat')}>
+                  <DropdownMenuItem onSelect={() => router.push('/marketplace/chat')}>
                     <MessageCircle className="ms-2 size-4" />
                     المحادثات والدعم
                   </DropdownMenuItem>
@@ -118,20 +118,20 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
             </>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => router.push('/login')} className="text-[#17375E]">
+              <Button variant="ghost" onClick={() => router.push('/login')} className="rounded-xl text-[#17375E]">
                 <LogIn className="ms-1 size-4" />
                 دخول
               </Button>
               <Button
                 onClick={() => router.push('/register?role=client')}
-                className="bg-[#17375E] text-white hover:bg-[#102033]"
+                className="rounded-xl bg-[#17375E] text-white hover:bg-[#102033]"
               >
                 <UserRound className="ms-1 size-4" />
-                تسجيل عملاء جداد
+                تسجيل عميل
               </Button>
               <Button
                 onClick={() => router.push('/register?role=partner')}
-                className="hidden bg-[#C9964A] text-white hover:bg-[#b07e36] sm:inline-flex"
+                className="hidden rounded-xl bg-[#C9964A] text-white hover:bg-[#b07e36] sm:inline-flex"
               >
                 <Handshake className="ms-1 size-4" />
                 FAST PARTNERS

@@ -39,7 +39,7 @@ export default function MarketplaceFilters() {
   }
 
   return (
-    <section className="mb-8 rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
+    <section className="mb-8 rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export default function MarketplaceFilters() {
             <h2 className="text-xl font-black text-[#102033]">فلترة العقارات</h2>
             {activeCount > 0 && <Badge className="bg-[#EEF6F5] text-[#0F8F83]">{activeCount} نشط</Badge>}
           </div>
-          <p className="mt-1 text-sm font-semibold text-[#64748B]">الفلاتر الحالية واجهة جاهزة للربط باستعلامات Supabase.</p>
+          <p className="mt-1 text-sm font-semibold text-[#64748B]">استخدم الفلاتر للوصول السريع لأفضل الوحدات المناسبة لك.</p>
         </div>
         {activeCount > 0 && (
           <Button variant="outline" onClick={() => setFilters(initialFilters)} className="border-[#DDE6E4]">

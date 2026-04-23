@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, Lock, Mail, TrendingUp } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, Lock, Mail, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { loginAction } from './actions'
 
@@ -31,47 +31,48 @@ export default function LoginPage() {
 
   return (
     <main
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--fi-bg)] px-4 py-12 text-[var(--fi-ink)]"
+      className="min-h-screen bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F7FAF8_50%,#FFFFFF_100%)] px-4 py-10 text-[#102033]"
       dir="rtl"
     >
-      {/* Subtle brand gradient */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(39,174,96,0.08),transparent_60%)]" aria-hidden="true" />
-
-      <div className="relative w-full max-w-md">
-        {/* Brand header */}
-        <div className="mb-8 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--fi-soft)] px-4 py-1.5 text-xs font-black uppercase tracking-widest text-[var(--fi-emerald)]">
-            <TrendingUp className="size-3.5" aria-hidden="true" />
+      <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="rounded-3xl border border-[#DDE6E4] bg-white/85 p-6 shadow-lg backdrop-blur sm:p-8 lg:p-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C9964A]/30 bg-[#FFF6E8] px-4 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#A0712A]">
+            <TrendingUp className="size-3.5" />
             FAST INVESTMENT
-          </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight">تسجيل الدخول</h1>
-          <p className="mt-2 text-sm font-medium text-[var(--fi-muted)]">ادخل إلى حسابك في Enterprise CRM Marketplace.</p>
-        </div>
-
-        {/* Error message */}
-        {errorState && (
-          <div
-            role="alert"
-            className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4"
-          >
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" aria-hidden="true" />
-            <div>
-              <p className="text-sm font-bold text-red-700">{errorState.message}</p>
-              <p className="mt-0.5 text-xs font-medium text-red-500" dir="ltr">{errorState.details}</p>
-            </div>
           </div>
-        )}
+          <h1 className="mt-5 text-4xl font-black leading-tight text-[#102033]">
+            تسجيل الدخول
+            <span className="block text-[#0F8F83]">إلى منصة السوق والـ CRM</span>
+          </h1>
+          <p className="mt-4 max-w-xl text-base font-semibold leading-8 text-[#5B7284]">
+            تحكم كامل في الصفقات، الإعلانات، والمتابعة مع تجربة موحدة لفريقك وعملائك.
+          </p>
 
-        {/* Form card */}
-        <div className="fi-card rounded-2xl p-6 sm:p-8">
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Email */}
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <Stat value="24/7" label="تشغيل مستمر" />
+            <Stat value="BRM" label="متابعة شركاء" />
+            <Stat value="Live" label="بيانات فورية" />
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-[#DDE6E4] bg-white p-6 shadow-lg sm:p-8">
+          {errorState && (
+            <div role="alert" className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />
+              <div>
+                <p className="text-sm font-bold text-red-700">{errorState.message}</p>
+                <p className="mt-0.5 text-xs font-medium text-red-500" dir="ltr">{errorState.details}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <div>
-              <label htmlFor="login-email" className="mb-1.5 block text-sm font-bold text-[var(--fi-ink)]">
+              <label htmlFor="login-email" className="mb-1.5 block text-sm font-black text-[#102033]">
                 البريد الإلكتروني
               </label>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" aria-hidden="true" />
+                <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#64748B]" />
                 <input
                   id="login-email"
                   name="email"
@@ -79,27 +80,23 @@ export default function LoginPage() {
                   required
                   dir="ltr"
                   autoComplete="email"
-                  className="h-11 w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-bg)] px-3 pl-10 text-left text-sm font-medium text-[var(--fi-ink)] placeholder:text-[var(--fi-muted)] outline-none transition-colors focus:border-[var(--fi-emerald)] focus:ring-2 focus:ring-[var(--fi-emerald)]/20"
+                  className="h-11 w-full rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 pl-10 text-left text-sm font-semibold text-[#102033] outline-none transition focus:border-[#0F8F83] focus:ring-3 focus:ring-[#0F8F83]/20"
                   placeholder="you@example.com"
                 />
               </div>
             </div>
 
-            {/* Password */}
-            <div className="mt-4">
-              <label htmlFor="login-password" className="mb-1.5 block text-sm font-bold text-[var(--fi-ink)]">
-                كلمة المرور
-              </label>
-              <div className="-mt-1 mb-2 text-left">
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-black text-[var(--fi-emerald)] transition-opacity hover:opacity-80"
-                >
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="login-password" className="text-sm font-black text-[#102033]">
+                  كلمة المرور
+                </label>
+                <Link href="/forgot-password" className="text-xs font-black text-[#0F8F83] hover:underline">
                   نسيت كلمة المرور؟
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" aria-hidden="true" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#64748B]" />
                 <input
                   id="login-password"
                   name="password"
@@ -107,51 +104,44 @@ export default function LoginPage() {
                   required
                   dir="ltr"
                   autoComplete="current-password"
-                  className="h-11 w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-bg)] px-3 pl-10 text-left text-sm font-medium text-[var(--fi-ink)] outline-none transition-colors focus:border-[var(--fi-emerald)] focus:ring-2 focus:ring-[var(--fi-emerald)]/20"
-                  placeholder="••••••••"
+                  className="h-11 w-full rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 pl-10 text-left text-sm font-semibold text-[#102033] outline-none transition focus:border-[#0F8F83] focus:ring-3 focus:ring-[#0F8F83]/20"
+                  placeholder="********"
                 />
               </div>
             </div>
 
-            {/* Submit */}
             <Button
               type="submit"
               disabled={loading}
-              className="mt-6 h-11 w-full rounded-xl fi-primary-button text-sm font-bold transition-opacity disabled:opacity-60"
+              className="h-11 w-full rounded-xl bg-[#17375E] text-sm font-black text-white hover:bg-[#102033] disabled:opacity-60"
               aria-busy={loading}
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
-                  جاري الدخول...
-                </span>
-              ) : 'دخول'}
+              {loading ? 'جاري تسجيل الدخول...' : 'دخول'}
             </Button>
           </form>
 
-          {/* Links */}
-          <div className="mt-5 space-y-2 text-center text-sm">
-            <Link
-              href="/register?role=client"
-              className="block font-bold text-[var(--fi-ink)] hover:text-[var(--fi-emerald)] transition-colors"
-            >
+          <div className="mt-6 space-y-2 text-center text-sm font-bold">
+            <Link href="/register?role=client" className="block text-[#102033] transition hover:text-[#0F8F83]">
               تسجيل عملاء جدد
             </Link>
-            <Link
-              href="/register?role=partner"
-              className="block font-bold text-[#C9964A] hover:opacity-80 transition-opacity"
-            >
-              FAST PARTNERS — انضم كشريك
-            </Link>
-            <Link
-              href="/forgot-password"
-              className="block font-bold text-[var(--fi-muted)] transition-colors hover:text-[var(--fi-emerald)]"
-            >
-              استعادة كلمة المرور لكل الحسابات
+            <Link href="/register?role=partner" className="block text-[#A0712A] transition hover:text-[#8A601F]">
+              FAST PARTNERS - انضم كشريك
             </Link>
           </div>
-        </div>
+        </section>
       </div>
     </main>
+  )
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-xl border border-[#DDE6E4] bg-white p-3">
+      <div className="flex items-center justify-between">
+        <p className="text-lg font-black text-[#17375E]">{value}</p>
+        <ArrowUpRight className="size-4 text-[#0F8F83]" />
+      </div>
+      <p className="mt-1 text-xs font-bold text-[#64748B]">{label}</p>
+    </div>
   )
 }

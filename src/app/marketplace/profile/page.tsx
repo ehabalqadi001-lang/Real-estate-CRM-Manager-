@@ -12,7 +12,14 @@ export default async function ClientProfilePage() {
 
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: listings }] = await Promise.all([
+  const [
+    { data: profile },
+    { data: listings },
+    { data: wallet },
+    { data: transactions },
+    { data: supportTickets },
+    { data: packages },
+  ] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name, email, phone, region, preferred_contact, client_notes, role, status')
@@ -24,6 +31,29 @@ export default async function ClientProfilePage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(8),
+    supabase
+      .from('user_wallets')
+      .select('points_balance, lifetime_points_earned, lifetime_points_spent')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('wallet_transactions')
+      .select('id, type, points_delta, balance_after, money_amount, currency, reason, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('support_tickets')
+      .select('id, title, status, priority, category, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('point_packages')
+      .select('id, name, amount_egp, currency, points_amount')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(3),
   ])
 
   const profileData = {
@@ -48,7 +78,14 @@ export default async function ClientProfilePage() {
     <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="rtl">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <ClientProfileDashboard profile={profileData} listings={listings ?? []} />
+        <ClientProfileDashboard
+          profile={profileData}
+          listings={listings ?? []}
+          wallet={wallet ?? null}
+          transactions={transactions ?? []}
+          supportTickets={supportTickets ?? []}
+          pointPackages={packages ?? []}
+        />
       </main>
     </div>
   )

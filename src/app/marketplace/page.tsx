@@ -26,7 +26,7 @@ export default async function MarketplacePage() {
       : Promise.resolve({ data: null }),
     supabase
       .from('ads')
-      .select(`id,title,description,price,currency,property_type,location,area_sqm,bedrooms,bathrooms,images,is_featured,is_urgent,listing_type,status,views_count,created_at,user_id`)
+      .select('id,title,description,price,currency,property_type,location,area_sqm,bedrooms,bathrooms,images,is_featured,is_urgent,listing_type,status,views_count,created_at,user_id')
       .eq('status', 'approved')
       .order('listing_type', { ascending: false })
       .order('created_at', { ascending: false })
@@ -56,48 +56,44 @@ export default async function MarketplacePage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-[var(--color-market-paper)] text-[var(--color-market-ink)]">
+    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]">
       <MarketplaceHeader user={currentUser} />
 
       <main>
-        {/* Hero */}
-        <section className="border-b border-[var(--color-market-line)] bg-[var(--color-market-sand)]">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1.05fr_0.95fr] md:items-center lg:py-14">
+        <section className="border-b border-[#DDE6E4] bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F5EFE4_55%,#FBFCFA_100%)]">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1.08fr_0.92fr] md:items-center lg:py-14">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-market-gold)]/40 bg-white/70 px-3 py-1 text-sm font-bold text-[var(--color-market-navy)]">
-                <ShieldCheck className="size-3.5 text-[var(--color-market-teal)]" aria-hidden="true" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#C9964A]/40 bg-white/80 px-3 py-1 text-sm font-bold text-[#17375E]">
+                <ShieldCheck className="size-3.5 text-[#0F8F83]" />
                 سوق عقاري موثق بإدارة FAST INVESTMENT
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight text-[var(--color-market-ink)] md:text-5xl">
-                عقارات للبيع والاستثمار في مصر
-                <span className="block text-[var(--color-market-teal)]">بدون إظهار أرقام الهاتف</span>
+              <h1 className="max-w-3xl text-4xl font-black leading-tight text-[#102033] md:text-5xl">
+                عقارات للبيع والاستثمار
+                <span className="block text-[#0F8F83]">بتجربة سوق حديثة وآمنة</span>
               </h1>
 
               <p className="max-w-2xl text-base font-medium leading-8 text-[#4B6175] md:text-lg">
                 تصفح عقارات أولية وإعادة بيع، قارن المطورين والبائعين الموثقين، وابدأ محادثة آمنة داخل النظام.
               </p>
 
-              {/* Stats */}
               <div className="grid max-w-xl grid-cols-3 gap-3 text-center">
                 <Metric value={`${properties.length}+`} label="إعلان نشط" icon={Building2} />
                 <Metric value={`${featuredCount}`} label="مميز" icon={Star} />
                 <Metric value={formatCompactPrice(averagePrice)} label="متوسط السعر" icon={TrendingUp} />
               </div>
 
-              {/* Trust badges */}
-              <div className="flex flex-wrap gap-3 text-sm font-bold text-[var(--color-market-teal)]">
-                <span className="flex items-center gap-1.5 rounded-full bg-[var(--color-market-mist)] px-3 py-1">
-                  <MessageCircle className="size-3.5" aria-hidden="true" /> تواصل آمن داخل النظام
+              <div className="flex flex-wrap gap-3 text-sm font-bold text-[#0F8F83]">
+                <span className="flex items-center gap-1.5 rounded-full bg-[#EEF6F5] px-3 py-1">
+                  <MessageCircle className="size-3.5" /> تواصل آمن داخل النظام
                 </span>
-                <span className="flex items-center gap-1.5 rounded-full bg-[var(--color-market-mist)] px-3 py-1">
-                  <ShieldCheck className="size-3.5" aria-hidden="true" /> مراجعة قبل النشر
+                <span className="flex items-center gap-1.5 rounded-full bg-[#EEF6F5] px-3 py-1">
+                  <ShieldCheck className="size-3.5" /> مراجعة قبل النشر
                 </span>
               </div>
             </div>
 
-            {/* Hero image */}
-            <div className="overflow-hidden rounded-2xl border border-[var(--color-market-line)] bg-white shadow-xl">
+            <div className="overflow-hidden rounded-3xl border border-[#DDE6E4] bg-white shadow-xl">
               <Image
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1100&q=80"
                 alt="وحدة عقارية فاخرة في مصر"
@@ -106,37 +102,35 @@ export default async function MarketplacePage() {
                 priority
                 className="aspect-[4/3] w-full object-cover"
               />
-              <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[var(--color-market-line)] bg-white">
+              <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#DDE6E4] bg-white">
                 <div className="p-4">
-                  <p className="text-xs font-bold text-[var(--color-market-slate)]">نظام التواصل</p>
-                  <p className="mt-1 text-base font-black text-[var(--color-market-teal)]">محادثة داخلية آمنة</p>
+                  <p className="text-xs font-bold text-[#64748B]">نظام التواصل</p>
+                  <p className="mt-1 text-base font-black text-[#0F8F83]">محادثة داخلية آمنة</p>
                 </div>
                 <div className="p-4">
-                  <p className="text-xs font-bold text-[var(--color-market-slate)]">ظهور الإعلانات</p>
-                  <p className="mt-1 text-base font-black text-[var(--color-market-gold)]">بعد موافقة الفريق</p>
+                  <p className="text-xs font-bold text-[#64748B]">ظهور الإعلانات</p>
+                  <p className="mt-1 text-base font-black text-[#C9964A]">بعد موافقة الفريق</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Listings */}
         <section className="mx-auto max-w-7xl px-4 py-8">
           <MarketplaceFilters />
           <PropertyGrid properties={properties} user={currentUser} />
         </section>
 
-        {/* Packages */}
-        <section className="border-y border-[var(--color-market-line)] bg-[var(--color-market-mist)]">
+        <section id="developers" className="border-y border-[#DDE6E4] bg-[#EEF6F5]">
           <div className="mx-auto max-w-7xl px-4 py-10">
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-black text-[var(--color-market-teal)]">نظام النقاط والإعلانات</p>
-                <h2 className="mt-2 text-3xl font-black text-[var(--color-market-ink)]">
+                <p className="text-sm font-black text-[#0F8F83]">نظام النقاط والإعلانات</p>
+                <h2 className="mt-2 text-3xl font-black text-[#102033]">
                   باقات واضحة للأفراد والشركات
                 </h2>
               </div>
-              <p className="max-w-2xl text-sm font-medium leading-7 text-[var(--color-market-slate)]">
+              <p className="max-w-2xl text-sm font-medium leading-7 text-[#64748B]">
                 كل فرد يحصل على إعلان مجاني واحد. الإعلانات الإضافية والظهور المميز تتم عبر نقاط ومحفظة مدفوعة.
               </p>
             </div>
@@ -144,18 +138,18 @@ export default async function MarketplacePage() {
               {marketplacePackages.map((plan) => (
                 <div
                   key={plan.id}
-                  className="fi-card-hover rounded-xl border border-[var(--color-market-line)] bg-white p-5 shadow-sm"
+                  className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <p className="text-sm font-black text-[var(--color-market-navy)]">{plan.name}</p>
-                  <p className="fi-tabular mt-3 text-2xl font-black text-[var(--color-market-ink)]">
+                  <p className="text-sm font-black text-[#17375E]">{plan.name}</p>
+                  <p className="fi-tabular mt-3 text-2xl font-black text-[#102033]">
                     {plan.price.toLocaleString('ar-EG')} ج.م
                   </p>
-                  <div className="mt-4 space-y-2 text-sm font-medium text-[var(--color-market-slate)]">
+                  <div className="mt-4 space-y-2 text-sm font-medium text-[#64748B]">
                     <p>{plan.adsIncluded} إعلان</p>
                     <p>{plan.featuredAds} إعلان مميز</p>
                     {plan.verifiedBadge && (
-                      <p className="flex items-center gap-1 text-[var(--color-market-teal)]">
-                        <ShieldCheck className="size-3.5" aria-hidden="true" /> شارة موثق للشركات
+                      <p className="flex items-center gap-1 text-[#0F8F83]">
+                        <ShieldCheck className="size-3.5" /> شارة موثق للشركات
                       </p>
                     )}
                   </div>
@@ -171,10 +165,10 @@ export default async function MarketplacePage() {
 
 function Metric({ value, label, icon: Icon }: { value: string; label: string; icon: React.ElementType }) {
   return (
-    <div className="rounded-xl border border-[var(--color-market-line)] bg-white/80 p-3">
-      <Icon className="mx-auto mb-1 size-4 text-[var(--color-market-teal)]" aria-hidden="true" />
-      <p className="fi-tabular text-xl font-black text-[var(--color-market-navy)]">{value}</p>
-      <p className="mt-0.5 text-xs font-bold text-[var(--color-market-slate)]">{label}</p>
+    <div className="rounded-xl border border-[#DDE6E4] bg-white/80 p-3">
+      <Icon className="mx-auto mb-1 size-4 text-[#0F8F83]" />
+      <p className="fi-tabular text-xl font-black text-[#17375E]">{value}</p>
+      <p className="mt-0.5 text-xs font-bold text-[#64748B]">{label}</p>
     </div>
   )
 }

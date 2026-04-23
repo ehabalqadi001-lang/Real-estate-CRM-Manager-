@@ -47,6 +47,7 @@ export default function ListingForm({ projects, developers }: Props) {
   const [step, setStep] = useState(0)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [aiNotice, setAiNotice] = useState<string | null>(null)
   const [generatingAI, setGeneratingAI] = useState(false)
 
   const [images, setImages] = useState<File[]>([])
@@ -85,6 +86,7 @@ export default function ListingForm({ projects, developers }: Props) {
   async function generateMarketing() {
     setGeneratingAI(true)
     setError(null)
+    setAiNotice(null)
     try {
       const selectedProject = projects.find((p) => p.id === projectId)
       const selectedDeveloper = developers.find((d) => d.id === developerId)
@@ -119,6 +121,7 @@ export default function ListingForm({ projects, developers }: Props) {
         setError(data.error ?? 'فشل إنشاء المحتوى التسويقي')
       } else {
         setMarketingDesc(data.description)
+        setAiNotice(data.warning ?? null)
       }
     } catch {
       setError('فشل الاتصال بخدمة Gemini')
@@ -189,6 +192,11 @@ export default function ListingForm({ projects, developers }: Props) {
       {error && (
         <div className="mb-5 rounded-lg border border-[#B54747]/25 bg-[#B54747]/10 px-4 py-3 text-sm font-black text-[#B54747]">
           {error}
+        </div>
+      )}
+      {aiNotice && (
+        <div className="mb-5 rounded-lg border border-[#C9964A]/30 bg-[#FFF8EC] px-4 py-3 text-sm font-black text-[#7C531B]">
+          {aiNotice}
         </div>
       )}
 
