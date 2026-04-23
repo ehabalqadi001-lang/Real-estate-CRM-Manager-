@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
   AlertTriangle,
+  BadgeCheck,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
@@ -14,6 +15,7 @@ import {
   LockKeyhole,
   Mail,
   Phone,
+  ShieldCheck,
   Upload,
   User,
   UsersRound,
@@ -68,7 +70,7 @@ export default function RegisterPage() {
       const redirect = err as { digest?: string; message?: string }
       if (redirect.digest?.startsWith('NEXT_REDIRECT') || redirect.message === 'NEXT_REDIRECT') throw err
       setErrorState({
-        message: 'خطأ في الاتصال بالخادم',
+        message: 'تعذر الاتصال بالخادم',
         details: redirect.message ?? 'خطأ غير معروف',
       })
       setLoading(false)
@@ -76,31 +78,35 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F7FAF8_52%,#FFFFFF_100%)] px-4 py-8 text-[#102033]" dir="rtl">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="rounded-3xl border border-[#DDE6E4] bg-[#102033] p-6 text-white shadow-lg lg:sticky lg:top-6 lg:h-fit">
-          <p className="text-xs font-black tracking-[0.24em] text-[#C9964A]">{copy.eyebrow}</p>
-          <h1 className="mt-4 text-4xl font-black leading-tight">{copy.title}</h1>
-          <p className="mt-4 text-sm font-bold leading-7 text-white/75">{copy.subtitle}</p>
+    <main className="min-h-screen bg-[#F5F8F6] px-4 py-6 text-market-ink sm:py-8" dir="rtl">
+      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[390px_minmax(0,1fr)]">
+        <aside className="overflow-hidden rounded-3xl border border-white/10 bg-[#0D1B2E] p-6 text-white shadow-[0_24px_80px_rgba(16,32,51,0.16)] lg:sticky lg:top-6 lg:h-fit">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-[#E8C488]">
+            <BadgeCheck className="size-4" />
+            {copy.eyebrow}
+          </div>
+          <h1 className="text-4xl font-black leading-tight">{copy.title}</h1>
+          <p className="mt-4 text-sm font-bold leading-7 text-white/72">{copy.subtitle}</p>
 
-          <div className="mt-6 grid gap-3">
-            <InfoCard title="BRM FLOW" text="تسجيل، مراجعة مستندات، اعتماد، ثم تفعيل بوابة المبيعات." />
-            <InfoCard title="FAST INVESTMENT" text="كل طلب يرتبط تلقائيا بإدارة علاقات الشركاء." />
+          <div className="mt-7 grid gap-3">
+            <InfoCard icon={ShieldCheck} title="مراجعة واعتماد" text="مراجعة المستندات وتفعيل الحساب بعد التأكد من صحة البيانات." />
+            <InfoCard icon={BriefcaseBusiness} title="BRM Flow" text="ربط تلقائي بإدارة علاقات الشركاء ومراحل المبيعات والعمولات." />
+            <InfoCard icon={CheckCircle2} title="FAST INVESTMENT" text="كل حساب يرتبط بسياق الشركة والصلاحيات المناسبة له." />
           </div>
         </aside>
 
         <div className="space-y-4">
           {errorState && (
-            <div className="rounded-xl border border-[#B54747]/25 bg-[#B54747]/10 p-4">
+            <div className="rounded-2xl border border-[#B54747]/25 bg-[#B54747]/10 p-4">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 size-5 text-[#B54747]" />
+                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[#B54747]" />
                 <div className="min-w-0">
                   <p className="text-sm font-black text-[#B54747]">{errorState.message}</p>
-                  <p className="mt-1 text-xs font-semibold text-[#64748B]" dir="ltr">{errorState.details}</p>
+                  <p className="mt-1 break-words text-xs font-semibold text-market-slate" dir="ltr">{errorState.details}</p>
                   {isAlreadyRegistered && (
                     <Link
                       href="/forgot-password"
-                      className="mt-3 inline-flex h-10 items-center justify-center rounded-lg bg-[#17375E] px-4 text-sm font-black text-white transition hover:bg-[#102033]"
+                      className="mt-3 inline-flex h-10 items-center justify-center rounded-xl bg-market-navy px-4 text-sm font-black text-white transition hover:bg-market-ink"
                     >
                       استعادة كلمة المرور
                     </Link>
@@ -110,15 +116,18 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="rounded-3xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-7" encType="multipart/form-data">
+          <form onSubmit={handleSubmit} className="rounded-3xl border border-market-line bg-white p-5 shadow-[0_20px_60px_rgba(16,32,51,0.08)] sm:p-7" encType="multipart/form-data">
             <input type="hidden" name="registrationMode" value={mode} />
             <input type="hidden" name="accountType" value={mode === 'client' ? 'client' : accountType} />
 
             {mode === 'partner' && (
-              <div className="mb-7 rounded-2xl border border-[#DDE6E4] bg-[#FBFCFA] p-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <p className="text-xs font-black text-[#64748B]">نوع حساب الشريك</p>
-                  <span className="rounded-full bg-[#EEF6F5] px-2.5 py-1 text-[11px] font-black text-[#0F8F83]">اختيار إلزامي</span>
+              <div className="mb-7 rounded-3xl border border-market-line bg-market-paper p-4">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-black text-market-gold">ACCOUNT TYPE</p>
+                    <h2 className="mt-1 text-xl font-black text-market-ink">نوع حساب الشريك</h2>
+                  </div>
+                  <span className="rounded-full bg-market-mist px-3 py-1.5 text-xs font-black text-market-teal">اختيار إلزامي</span>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
                   <ChoiceButton
@@ -148,52 +157,56 @@ export default function RegisterPage() {
             )}
 
             <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-[#17375E] text-white shadow-sm hover:bg-[#102033]">
+              <Button type="submit" disabled={loading} className="h-12 w-full rounded-2xl bg-market-navy text-white shadow-sm hover:bg-market-ink disabled:opacity-60">
                 {loading ? 'جاري المعالجة...' : copy.button}
               </Button>
-              <div className="inline-flex items-center justify-center rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-xs font-bold text-[#64748B]">
-                <CheckCircle2 className="ml-1 size-4 text-[#0F8F83]" />
+              <div className="inline-flex items-center justify-center rounded-2xl border border-market-line bg-market-paper px-4 py-3 text-xs font-bold text-market-slate">
+                <CheckCircle2 className="ml-2 size-4 text-market-teal" />
                 حماية وتدقيق للملفات
               </div>
             </div>
 
-            <p className="mt-5 text-center text-sm font-semibold text-[#64748B]">
-              لديك حساب بالفعل؟ <Link href="/login" className="font-black text-[#17375E]">تسجيل الدخول</Link>
-            </p>
-            <p className="mt-2 text-center text-sm font-semibold text-[#64748B]">
-              نسيت كلمة المرور؟ <Link href="/forgot-password" className="font-black text-[#17375E]">استعادة الحساب</Link>
-            </p>
+            <div className="mt-6 grid gap-2 text-center text-sm font-semibold text-market-slate sm:grid-cols-2">
+              <p>
+                لديك حساب بالفعل؟ <Link href="/login" className="font-black text-market-navy hover:underline">تسجيل الدخول</Link>
+              </p>
+              <p>
+                نسيت كلمة المرور؟ <Link href="/forgot-password" className="font-black text-market-navy hover:underline">استعادة الحساب</Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
 
       <style jsx>{`
         .field-input {
-          height: 46px;
+          height: 48px;
           width: 100%;
-          border-radius: 10px;
+          border-radius: 16px;
           border: 1px solid #dde6e4;
-          background: #ffffff;
-          padding: 0 40px 0 12px;
+          background: #fbfcfa;
+          padding: 0 42px 0 12px;
           font-size: 14px;
           font-weight: 700;
           outline: none;
-          transition: border-color 140ms ease, box-shadow 140ms ease;
+          transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
         }
         .field-input:focus {
           border-color: #0f8f83;
-          box-shadow: 0 0 0 3px rgb(15 143 131 / 16%);
+          background: #ffffff;
+          box-shadow: 0 0 0 4px rgb(15 143 131 / 14%);
         }
       `}</style>
     </main>
   )
 }
 
-function InfoCard({ title, text }: { title: string; text: string }) {
+function InfoCard({ icon: Icon, title, text }: { icon: ElementType; title: string; text: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <p className="text-xs font-black text-[#C9964A]">{title}</p>
-      <p className="mt-1 text-sm font-bold text-white/85">{text}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+      <Icon className="mb-3 size-5 text-[#E8C488]" />
+      <p className="text-sm font-black text-white">{title}</p>
+      <p className="mt-1 text-xs font-semibold leading-5 text-white/62">{text}</p>
     </div>
   )
 }
@@ -302,9 +315,9 @@ function ChoiceButton({ active, icon: Icon, title, description, onClick }: {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border p-4 text-right transition ${active ? 'border-[#0F8F83] bg-[#EEF6F5] text-[#17375E] shadow-sm' : 'border-[#DDE6E4] bg-white text-[#64748B] hover:border-[#0F8F83]'}`}
+      className={`rounded-2xl border p-4 text-right transition ${active ? 'border-market-teal bg-market-mist text-market-navy shadow-sm' : 'border-market-line bg-white text-market-slate hover:border-market-teal'}`}
     >
-      <Icon className="mb-2 size-5" />
+      <Icon className="mb-3 size-5" />
       <span className="block text-sm font-black">{title}</span>
       <span className="mt-1 block text-xs font-semibold leading-5">{description}</span>
     </button>
@@ -314,9 +327,9 @@ function ChoiceButton({ active, icon: Icon, title, description, onClick }: {
 function Field({ label, icon: Icon, children }: { label: string; icon: ElementType; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-black text-[#102033]">{label}</span>
+      <span className="mb-2 block text-sm font-black text-market-ink">{label}</span>
       <span className="relative block">
-        <Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#64748B]" />
+        <Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-market-slate" />
         {children}
       </span>
     </label>
@@ -325,16 +338,16 @@ function Field({ label, icon: Icon, children }: { label: string; icon: ElementTy
 
 function UploadBox({ name, label, required, multiple }: { name: string; label: string; required?: boolean; multiple?: boolean }) {
   return (
-    <label className="relative block min-h-36 rounded-xl border-2 border-dashed border-[#DDE6E4] bg-white p-4 text-center transition hover:border-[#0F8F83] hover:bg-[#EEF6F5]">
+    <label className="relative block min-h-36 rounded-2xl border-2 border-dashed border-market-line bg-market-paper p-4 text-center transition hover:border-market-teal hover:bg-market-mist">
       {name.includes('Id') || name.includes('id') ? (
-        <IdCard className="mx-auto mb-2 size-5 text-[#17375E]" />
+        <IdCard className="mx-auto mb-3 size-6 text-market-navy" />
       ) : name.includes('commercial') ? (
-        <FileArchive className="mx-auto mb-2 size-5 text-[#17375E]" />
+        <FileArchive className="mx-auto mb-3 size-6 text-market-navy" />
       ) : (
-        <Upload className="mx-auto mb-2 size-5 text-[#17375E]" />
+        <Upload className="mx-auto mb-3 size-6 text-market-navy" />
       )}
-      <span className="block text-sm font-black text-[#102033]">{label}</span>
-      <span className="mt-1 block text-xs font-semibold text-[#64748B]">PDF أو صورة</span>
+      <span className="block text-sm font-black text-market-ink">{label}</span>
+      <span className="mt-1 block text-xs font-semibold text-market-slate">PDF أو صورة</span>
       <input name={name} type="file" required={required} multiple={multiple} accept="image/*,.pdf" className="absolute inset-0 cursor-pointer opacity-0" />
     </label>
   )
