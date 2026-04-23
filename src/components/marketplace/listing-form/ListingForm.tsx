@@ -186,16 +186,16 @@ export default function ListingForm({ projects, developers }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
       <StepBar current={step} />
 
       {error && (
-        <div className="mb-5 rounded-lg border border-[#B54747]/25 bg-[#B54747]/10 px-4 py-3 text-sm font-black text-[#B54747]">
+        <div className="mb-5 rounded-xl border border-[#B54747]/25 bg-[#B54747]/10 px-4 py-3 text-sm font-black text-[#B54747]">
           {error}
         </div>
       )}
       {aiNotice && (
-        <div className="mb-5 rounded-lg border border-[#C9964A]/30 bg-[#FFF8EC] px-4 py-3 text-sm font-black text-[#7C531B]">
+        <div className="mb-5 rounded-xl border border-[#C9964A]/30 bg-[#FFF8EC] px-4 py-3 text-sm font-black text-[#7C531B]">
           {aiNotice}
         </div>
       )}
@@ -283,7 +283,7 @@ export default function ListingForm({ projects, developers }: Props) {
       {step === 2 && (
         <div className="space-y-5">
           <SectionTitle>المحتوى التسويقي بالذكاء الاصطناعي</SectionTitle>
-          <div className="rounded-lg border border-[#C9964A]/40 bg-[#FFF8EC] p-4">
+          <div className="rounded-2xl border border-[#C9964A]/40 bg-[#FFF8EC] p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="font-black text-[#102033]">إنشاء وصف احترافي للوحدة</p>
@@ -353,7 +353,7 @@ export default function ListingForm({ projects, developers }: Props) {
         </div>
       )}
 
-      <div className="mt-8 flex items-center justify-between gap-3 border-t border-[#DDE6E4] pt-5">
+      <div className="mt-8 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-[#DDE6E4] pt-5 sm:flex-row sm:items-center">
         <Button type="button" variant="outline" className="border-[#DDE6E4]" onClick={() => { setError(null); setStep((s) => Math.max(0, s - 1)) }} disabled={step === 0}>السابق</Button>
         {step < STEPS.length - 1 ? (
           <Button type="button" disabled={!canAdvance()} onClick={() => { setError(null); setStep((s) => s + 1) }} className="bg-[#17375E] text-white hover:bg-[#102033] disabled:opacity-40">التالي</Button>

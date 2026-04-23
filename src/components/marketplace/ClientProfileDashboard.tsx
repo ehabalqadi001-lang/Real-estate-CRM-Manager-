@@ -113,7 +113,7 @@ export default function ClientProfileDashboard({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex size-16 items-center justify-center rounded-full bg-[#EEF6F5] text-[#17375E]">
@@ -137,7 +137,7 @@ export default function ClientProfileDashboard({
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           icon={<WalletCards className="size-5" />}
           label="رصيد النقاط"
@@ -166,7 +166,7 @@ export default function ClientProfileDashboard({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black text-[#102033]">البيانات الشخصية</h2>
             <form action={updateProfile} className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="الاسم الكامل">
@@ -213,7 +213,7 @@ export default function ClientProfileDashboard({
             </form>
           </section>
 
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="flex items-center gap-2 text-xl font-black text-[#102033]">
               <TicketCheck className="size-5 text-[#17375E]" />
               طلب دعم جديد
@@ -254,7 +254,7 @@ export default function ClientProfileDashboard({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-black text-[#102033]">نظام الدفع والنقاط</h2>
@@ -265,7 +265,7 @@ export default function ClientProfileDashboard({
               </Link>
             </div>
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-[#DDE6E4] p-4">
+              <div className="rounded-2xl border border-[#DDE6E4] p-4">
                 <p className="text-sm font-black text-[#102033]">آخر عمليات المحفظة</p>
                 <div className="mt-3 space-y-2">
                   {transactions.length === 0 ? (
@@ -283,7 +283,7 @@ export default function ClientProfileDashboard({
                   ))}
                 </div>
               </div>
-              <div className="rounded-lg border border-[#DDE6E4] p-4">
+              <div className="rounded-2xl border border-[#DDE6E4] p-4">
                 <p className="text-sm font-black text-[#102033]">باقات مقترحة</p>
                 <div className="mt-3 space-y-2">
                   {pointPackages.map((pack) => (
@@ -297,7 +297,7 @@ export default function ClientProfileDashboard({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="flex items-center gap-2 text-xl font-black text-[#102033]">
               <Lock className="size-5 text-[#17375E]" />
               الأمان
@@ -320,7 +320,7 @@ export default function ClientProfileDashboard({
         </div>
 
         <aside className="space-y-6">
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black text-[#102033]">مركز خدمة العملاء</h2>
             <div className="mt-5 grid gap-3">
               <a href="tel:01101160208" className="flex items-center justify-between rounded-lg border border-[#DDE6E4] px-4 py-3 font-black text-[#17375E] transition hover:bg-[#EEF6F5]">
@@ -338,7 +338,7 @@ export default function ClientProfileDashboard({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black text-[#102033]">وحداتي</h2>
             <div className="mt-4 space-y-3">
               {listings.length === 0 ? (

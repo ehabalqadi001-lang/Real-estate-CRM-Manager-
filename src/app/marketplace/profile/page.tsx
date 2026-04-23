@@ -75,9 +75,9 @@ export default async function ClientProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="rtl">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F7FAF8_52%,#FBFCFA_100%)] text-[#102033]" dir="rtl">
       <MarketplaceHeader user={currentUser} />
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <ClientProfileDashboard
           profile={profileData}
           listings={listings ?? []}
