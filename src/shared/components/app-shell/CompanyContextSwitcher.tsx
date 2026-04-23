@@ -32,7 +32,9 @@ export function CompanyContextSwitcher({ activeCompanyId, companies }: CompanyCo
             if (!result.success && result.error) window.alert(result.error)
           })
         }}
-        className="min-w-0 flex-1 bg-transparent text-left outline-none disabled:cursor-wait"
+        dir="auto"
+        className="min-w-0 flex-1 bg-transparent outline-none disabled:cursor-wait"
+        style={{ fontFamily: 'Cairo, var(--font-cairo), system-ui, sans-serif', unicodeBidi: 'plaintext' }}
         aria-label="Choose active company"
       >
         <option value="" disabled>

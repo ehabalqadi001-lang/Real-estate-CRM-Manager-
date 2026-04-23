@@ -19,7 +19,7 @@ export default async function DashboardRoot() {
   ])
 
   return (
-    <main className="space-y-4 px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+    <main className="space-y-4 px-3 py-4 sm:px-4 lg:px-6" dir="ltr">
       <BentoDashboardLayout
         main={(
           <DashboardKPIs

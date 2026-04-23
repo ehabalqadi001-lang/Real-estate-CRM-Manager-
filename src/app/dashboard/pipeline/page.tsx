@@ -21,7 +21,7 @@ export default async function PipelinePage() {
   ])
 
   return (
-    <main className="sales-command px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+    <main className="sales-command px-3 py-4 sm:px-4 lg:px-6" dir="ltr">
       <PipelineBoard
         initialDeals={deals}
         leads={leads}

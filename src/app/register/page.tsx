@@ -3,25 +3,14 @@
 import { useMemo, useState, type ElementType, type FormEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  AlertTriangle,
-  BadgeCheck,
-  BriefcaseBusiness,
-  Building2,
-  CheckCircle2,
-  FileArchive,
-  FileText,
-  IdCard,
-  LockKeyhole,
-  Mail,
-  Phone,
-  ShieldCheck,
-  Upload,
-  User,
-  UsersRound,
+  AlertTriangle, ArrowRight, BadgeCheck, BriefcaseBusiness,
+  Building2, CheckCircle2, FileArchive, FileText, IdCard,
+  LockKeyhole, Mail, Phone, ShieldCheck, Upload, User, UsersRound,
 } from 'lucide-react'
 import { registerAction } from '@/app/login/actions'
-import { Button } from '@/components/ui/button'
+import { stagger, fadeUp, slideInLeft, slideInRight, buttonMotion, scaleIn, cardMotion } from '@/lib/motion'
 
 type PartnerAccountType = 'broker_freelancer' | 'company'
 
@@ -34,20 +23,19 @@ export default function RegisterPage() {
   const isAlreadyRegistered = `${errorState?.message ?? ''} ${errorState?.details ?? ''}`.toLowerCase().includes('registered')
 
   const copy = useMemo(() => {
-    if (mode === 'partner') {
-      return {
-        eyebrow: 'FAST INVESTMENT PARTNERS',
-        title: 'تسجيل حساب شريك',
-        subtitle: 'بوابة اعتماد الوسطاء والشركات وربطهم بنظام Broker Relationship Management.',
-        button: 'إرسال طلب الشراكة',
-      }
+    if (mode === 'partner') return {
+      eyebrow: 'FAST PARTNERS NETWORK',
+      title: 'Join Our Elite Broker & Company Network',
+      subtitle: 'Get access to exclusive inventory, priority leads, and a dedicated account manager.',
+      button: 'Submit Partnership Application',
+      accentColor: '#f59e0b',
     }
-
     return {
       eyebrow: 'FAST INVESTMENT',
-      title: 'تسجيل عميل جديد',
-      subtitle: 'حساب عميل مخصص لإدارة الطلبات والمحادثات والدعم داخل النظام.',
-      button: 'إنشاء حساب عميل',
+      title: 'Start Your Investment Journey',
+      subtitle: 'Create a client account to track your property search, communicate securely, and receive expert guidance.',
+      button: 'Create Client Account',
+      accentColor: '#10b981',
     }
   }, [mode])
 
@@ -55,11 +43,9 @@ export default function RegisterPage() {
     event.preventDefault()
     setLoading(true)
     setErrorState(null)
-
     const formData = new FormData(event.currentTarget)
     formData.set('registrationMode', mode)
     formData.set('accountType', mode === 'client' ? 'client' : accountType)
-
     try {
       const result = await registerAction(formData)
       if (result && !result.success) {
@@ -69,85 +55,162 @@ export default function RegisterPage() {
     } catch (err: unknown) {
       const redirect = err as { digest?: string; message?: string }
       if (redirect.digest?.startsWith('NEXT_REDIRECT') || redirect.message === 'NEXT_REDIRECT') throw err
-      setErrorState({
-        message: 'تعذر الاتصال بالخادم',
-        details: redirect.message ?? 'خطأ غير معروف',
-      })
+      setErrorState({ message: 'Connection error — please try again', details: redirect.message ?? 'Unknown error' })
       setLoading(false)
     }
   }
 
   return (
-    <main className="nextora-market min-h-screen px-4 py-6 text-market-ink sm:py-8" dir="rtl">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[390px_minmax(0,1fr)]">
-        <aside className="nextora-card overflow-hidden rounded-3xl p-6 text-white lg:sticky lg:top-6 lg:h-fit">
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-[#E8C488]">
-            <BadgeCheck className="size-4" />
-            {copy.eyebrow}
-          </div>
-          <h1 className="text-4xl font-black leading-tight">{copy.title}</h1>
-          <p className="mt-4 text-sm font-bold leading-7 text-white/72">{copy.subtitle}</p>
+    <div className="fi-login-root min-h-screen" dir="ltr">
+      {/* Background orbs */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <motion.div
+          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -right-40 -top-40 h-[700px] w-[700px] rounded-full opacity-20"
+          style={{ background: `radial-gradient(circle, ${copy.accentColor}44 0%, transparent 65%)` }}
+        />
+        <motion.div
+          animate={{ x: [0, -25, 0], y: [0, 30, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+          className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #2563eb44 0%, transparent 65%)' }}
+        />
+      </div>
 
-          <div className="mt-7 grid gap-3">
-            <InfoCard icon={ShieldCheck} title="مراجعة واعتماد" text="مراجعة المستندات وتفعيل الحساب بعد التأكد من صحة البيانات." />
-            <InfoCard icon={BriefcaseBusiness} title="BRM Flow" text="ربط تلقائي بإدارة علاقات الشركاء ومراحل المبيعات والعمولات." />
-            <InfoCard icon={CheckCircle2} title="FAST INVESTMENT" text="كل حساب يرتبط بسياق الشركة والصلاحيات المناسبة له." />
-          </div>
-        </aside>
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:py-12">
 
-        <div className="space-y-4">
-          {errorState && (
-            <div className="rounded-2xl border border-[#B54747]/25 bg-[#B54747]/10 p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[#B54747]" />
-                <div className="min-w-0">
-                  <p className="text-sm font-black text-[#B54747]">{errorState.message}</p>
-                  <p className="mt-1 break-words text-xs font-semibold text-market-slate" dir="ltr">{errorState.details}</p>
-                  {isAlreadyRegistered && (
-                    <Link
-                      href="/forgot-password"
-                      className="mt-3 inline-flex h-10 items-center justify-center rounded-xl bg-market-navy px-4 text-sm font-black text-white transition hover:bg-market-ink"
-                    >
-                      استعادة كلمة المرور
-                    </Link>
-                  )}
+        {/* ── LEFT HERO SIDEBAR ─────────────────────────────── */}
+        <motion.aside
+          variants={slideInLeft}
+          initial="hidden"
+          animate="show"
+          className="fi-register-hero overflow-hidden rounded-3xl p-7 text-white lg:sticky lg:top-8"
+        >
+          {/* Grid pattern */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '36px 36px' }} />
+
+          <div className="relative z-10">
+            {/* Eyebrow badge */}
+            <motion.div variants={fadeUp} initial="hidden" animate="show"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em]"
+              style={{ color: copy.accentColor }}>
+              <BadgeCheck className="size-3.5" />
+              {copy.eyebrow}
+            </motion.div>
+
+            <motion.h1 variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.07 }}
+              className="mt-5 text-3xl font-black leading-tight">
+              {copy.title}
+            </motion.h1>
+
+            <motion.p variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.12 }}
+              className="mt-4 text-sm font-semibold leading-7 text-white/65">
+              {copy.subtitle}
+            </motion.p>
+
+            {/* Info cards */}
+            <motion.div variants={stagger} initial="hidden" animate="show" transition={{ delay: 0.18 }}
+              className="mt-7 space-y-3">
+              {mode === 'partner' ? (
+                <>
+                  <InfoCard icon={ShieldCheck} title="Verified & Approved" text="Documents reviewed by our team within 24 hours before account activation." color={copy.accentColor} />
+                  <InfoCard icon={BriefcaseBusiness} title="BRM Integration" text="Automatic connection to Broker Relationship Management, commissions, and pipeline stages." color={copy.accentColor} />
+                  <InfoCard icon={CheckCircle2} title="Dedicated Account Manager" text="Every partner gets a named account manager for priority support and deal flow." color={copy.accentColor} />
+                </>
+              ) : (
+                <>
+                  <InfoCard icon={ShieldCheck} title="Secure & Private" text="Your data is encrypted and shared only with your assigned advisor." color={copy.accentColor} />
+                  <InfoCard icon={Building2} title="Premium Inventory" text="Access off-market listings and exclusive developer offers." color={copy.accentColor} />
+                  <InfoCard icon={CheckCircle2} title="Expert Guidance" text="Matched with a sales specialist based on your investment profile." color={copy.accentColor} />
+                </>
+              )}
+            </motion.div>
+
+            {/* Trust signals */}
+            <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.4 }}
+              className="mt-7 flex flex-wrap gap-2 border-t border-white/10 pt-5">
+              {['🔒 SSL Secured', '✓ Reviewed in 24h', '🏆 200+ Active Partners'].map((trust) => (
+                <span key={trust} className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1 text-[11px] font-bold text-white/60">{trust}</span>
+              ))}
+            </motion.div>
+          </div>
+        </motion.aside>
+
+        {/* ── RIGHT FORM AREA ───────────────────────────────── */}
+        <motion.div variants={slideInRight} initial="hidden" animate="show" className="space-y-4">
+          {/* Error */}
+          <AnimatePresence>
+            {errorState && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                className="rounded-2xl border border-red-200 bg-red-50 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 size-5 shrink-0 text-red-500" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-red-700">{errorState.message}</p>
+                    <p className="mt-1 break-words text-xs font-semibold text-red-400" dir="ltr">{errorState.details}</p>
+                    {isAlreadyRegistered && (
+                      <Link href="/forgot-password" className="mt-3 inline-flex h-9 items-center rounded-xl bg-red-600 px-4 text-xs font-black text-white hover:bg-red-700">
+                        Recover Password →
+                      </Link>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <form onSubmit={handleSubmit} className="nextora-glass rounded-3xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.34)] sm:p-7" encType="multipart/form-data">
+          {/* Form card */}
+          <motion.form
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 260, damping: 22 }}
+            onSubmit={handleSubmit}
+            className="fi-login-card rounded-3xl p-7"
+            encType="multipart/form-data"
+          >
             <input type="hidden" name="registrationMode" value={mode} />
             <input type="hidden" name="accountType" value={mode === 'client' ? 'client' : accountType} />
 
+            {/* Account type toggle (partner only) */}
             {mode === 'partner' && (
-              <div className="mb-7 rounded-3xl border border-market-line bg-market-paper p-4">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="text-xs font-black text-market-gold">ACCOUNT TYPE</p>
-                    <h2 className="mt-1 text-xl font-black text-market-ink">نوع حساب الشريك</h2>
-                  </div>
-                  <span className="rounded-full bg-market-mist px-3 py-1.5 text-xs font-black text-market-teal">اختيار إلزامي</span>
-                </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <ChoiceButton
+              <div className="mb-7">
+                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">Account Type</p>
+                <h2 className="mb-4 text-xl font-black text-slate-900">Choose your partner type</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ChoiceCard
                     active={accountType === 'broker_freelancer'}
                     icon={UsersRound}
                     title="Broker / Freelancer"
-                    description="وسيط فردي يرفع مبيعاته ومستنداته وعمولاته."
+                    description="Individual broker — manage your own listings, commissions, and client relationships."
                     onClick={() => setAccountType('broker_freelancer')}
+                    color="#2563eb"
                   />
-                  <ChoiceButton
+                  <ChoiceCard
                     active={accountType === 'company'}
                     icon={BriefcaseBusiness}
-                    title="حساب شركات"
-                    description="شركة وساطة لها مدير وملفات اعتماد ومتابعة مع Account Manager."
+                    title="Company Account"
+                    description="Brokerage company with a manager, multiple agents, and full accreditation files."
                     onClick={() => setAccountType('company')}
+                    color="#f59e0b"
                   />
                 </div>
               </div>
             )}
 
+            {/* Form section header */}
+            <div className="mb-6 border-b border-slate-100 pb-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                {mode === 'partner' ? 'Your Details' : 'Personal Information'}
+              </p>
+              <h3 className="mt-1 text-lg font-black text-slate-900">
+                {mode === 'partner'
+                  ? accountType === 'broker_freelancer' ? 'Broker Information' : 'Company Information'
+                  : 'Create Your Client Account'}
+              </h3>
+            </div>
+
+            {/* Field sections */}
             {mode === 'client' ? (
               <ClientFields />
             ) : accountType === 'broker_freelancer' ? (
@@ -156,199 +219,218 @@ export default function RegisterPage() {
               <CompanyFields />
             )}
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <Button type="submit" disabled={loading} className="nextora-button h-12 w-full rounded-2xl shadow-sm disabled:opacity-60">
-                {loading ? 'جاري المعالجة...' : copy.button}
-              </Button>
-              <div className="inline-flex items-center justify-center rounded-2xl border border-market-line bg-market-paper px-4 py-3 text-xs font-bold text-market-slate">
-                <CheckCircle2 className="ml-2 size-4 text-market-teal" />
-                حماية وتدقيق للملفات
+            {/* Submit */}
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <motion.button
+                type="submit"
+                disabled={loading}
+                {...buttonMotion}
+                className="fi-cta-btn flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl text-sm font-black text-white disabled:opacity-60"
+              >
+                {loading ? (
+                  <>
+                    <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                      className="size-4 rounded-full border-2 border-white/30 border-t-white" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    {copy.button}
+                    <ArrowRight className="size-4" />
+                  </>
+                )}
+              </motion.button>
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500">
+                <CheckCircle2 className="size-4 text-emerald-500" />
+                File-secure upload
               </div>
             </div>
 
-            <div className="mt-6 grid gap-2 text-center text-sm font-semibold text-market-slate sm:grid-cols-2">
-              <p>
-                لديك حساب بالفعل؟ <Link href="/login" className="font-black text-market-navy hover:underline">تسجيل الدخول</Link>
+            <div className="mt-5 grid gap-2 text-center text-sm font-semibold text-slate-500 sm:grid-cols-2">
+              <p>Already have an account?{' '}
+                <Link href="/login" className="font-black text-blue-600 hover:underline">Sign In</Link>
               </p>
-              <p>
-                نسيت كلمة المرور؟ <Link href="/forgot-password" className="font-black text-market-navy hover:underline">استعادة الحساب</Link>
+              <p>Forgot password?{' '}
+                <Link href="/forgot-password" className="font-black text-blue-600 hover:underline">Recover Account</Link>
               </p>
             </div>
-          </form>
-        </div>
-      </div>
-
-      <style jsx>{`
-        .field-input {
-          height: 48px;
-          width: 100%;
-          border-radius: 16px;
-          border: 1px solid #2d2d2d;
-          background: #111111;
-          padding: 0 42px 0 12px;
-          font-size: 14px;
-          font-weight: 700;
-          outline: none;
-          transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
-        }
-        .field-input:focus {
-          border-color: #8ab4ff;
-          background: #111111;
-          box-shadow: 0 0 0 4px rgb(138 180 255 / 18%);
-        }
-      `}</style>
-    </main>
-  )
-}
-
-function InfoCard({ icon: Icon, title, text }: { icon: ElementType; title: string; text: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-      <Icon className="mb-3 size-5 text-[#E8C488]" />
-      <p className="text-sm font-black text-white">{title}</p>
-      <p className="mt-1 text-xs font-semibold leading-5 text-white/62">{text}</p>
-    </div>
-  )
-}
-
-function ClientFields() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Field label="اسم العميل بالكامل" icon={User}>
-        <input name="fullName" required className="field-input" />
-      </Field>
-      <Field label="رقم الهاتف" icon={Phone}>
-        <input name="phone" required className="field-input text-left" dir="ltr" placeholder="01X XXXX XXXX" />
-      </Field>
-      <Field label="المنطقة / المحافظة" icon={Building2}>
-        <input name="region" required className="field-input" />
-      </Field>
-      <Field label="البريد الإلكتروني" icon={Mail}>
-        <input name="email" type="email" required className="field-input text-left" dir="ltr" placeholder="name@example.com" />
-      </Field>
-      <Field label="كلمة المرور" icon={LockKeyhole}>
-        <input name="password" type="password" required minLength={8} className="field-input text-left" dir="ltr" />
-      </Field>
-    </div>
-  )
-}
-
-function BrokerFields() {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="الاسم الأول" icon={User}>
-          <input name="firstName" required className="field-input" />
-        </Field>
-        <Field label="الاسم الثاني" icon={User}>
-          <input name="lastName" required className="field-input" />
-        </Field>
-        <Field label="البريد الإلكتروني" icon={Mail}>
-          <input name="email" type="email" required className="field-input text-left" dir="ltr" placeholder="name@example.com" />
-        </Field>
-        <Field label="الرقم" icon={Phone}>
-          <input name="phone" required className="field-input text-left" dir="ltr" placeholder="01X XXXX XXXX" />
-        </Field>
-        <Field label="إنشاء باسورد" icon={LockKeyhole}>
-          <input name="password" type="password" required minLength={8} className="field-input text-left" dir="ltr" />
-        </Field>
-        <Field label="تأكيد الباسورد" icon={LockKeyhole}>
-          <input name="confirmPassword" type="password" required minLength={8} className="field-input text-left" dir="ltr" />
-        </Field>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <UploadBox name="idFront" label="صورة البطاقة - وجه" required />
-        <UploadBox name="idBack" label="صورة البطاقة - ظهر" required />
+          </motion.form>
+        </motion.div>
       </div>
     </div>
   )
 }
 
-function CompanyFields() {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="اسم الشركة" icon={Building2}>
-          <input name="companyName" required className="field-input" />
-        </Field>
-        <Field label="اسم مدير الشركة" icon={User}>
-          <input name="managerName" required className="field-input" />
-        </Field>
-        <Field label="رقم تواصل مدير الشركة" icon={Phone}>
-          <input name="managerPhone" required className="field-input text-left" dir="ltr" />
-        </Field>
-        <Field label="رقم تواصل صاحب الشركة" icon={Phone}>
-          <input name="ownerPhone" required className="field-input text-left" dir="ltr" />
-        </Field>
-        <Field label="البريد الإلكتروني" icon={Mail}>
-          <input name="email" type="email" required className="field-input text-left" dir="ltr" placeholder="company@example.com" />
-        </Field>
-        <Field label="لينك الفيس بوك" icon={FileText}>
-          <input name="facebookUrl" type="url" className="field-input text-left" dir="ltr" placeholder="https://facebook.com/..." />
-        </Field>
-        <Field label="إنشاء باسورد" icon={LockKeyhole}>
-          <input name="password" type="password" required minLength={8} className="field-input text-left" dir="ltr" />
-        </Field>
-        <Field label="تأكيد الباسورد" icon={LockKeyhole}>
-          <input name="confirmPassword" type="password" required minLength={8} className="field-input text-left" dir="ltr" />
-        </Field>
-      </div>
+/* ─── Sub-components ─────────────────────────────────────── */
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <UploadBox name="commercialRegisterFiles" label="السجل التجاري - حتى 3 ملفات" required multiple />
-        <UploadBox name="taxCardImage" label="صورة البطاقة الضريبية" required />
-        <UploadBox name="ownerIdImage" label="صورة بطاقة صاحب الشركة" required />
-        <UploadBox name="vatCertificate" label="شهادة القيمة المضافة إن وجدت" />
+function InfoCard({ icon: Icon, title, text, color }: { icon: ElementType; title: string; text: string; color: string }) {
+  return (
+    <motion.div variants={fadeUp} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl" style={{ background: `${color}25` }}>
+        <Icon className="size-4" style={{ color }} />
+      </span>
+      <div>
+        <p className="text-sm font-black text-white">{title}</p>
+        <p className="mt-0.5 text-xs font-semibold leading-5 text-white/55">{text}</p>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
-function ChoiceButton({ active, icon: Icon, title, description, onClick }: {
-  active: boolean
-  icon: ElementType
-  title: string
-  description: string
-  onClick: () => void
+function ChoiceCard({ active, icon: Icon, title, description, onClick, color }: {
+  active: boolean; icon: ElementType; title: string; description: string; onClick: () => void; color: string
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl border p-4 text-right transition ${active ? 'border-market-teal bg-market-mist text-market-navy shadow-sm' : 'border-market-line bg-white text-market-slate hover:border-market-teal'}`}
+      variants={cardMotion}
+      initial="rest"
+      whileHover="hover"
+      whileTap={{ scale: 0.98 }}
+      className={`rounded-2xl border-2 p-4 text-left transition-colors ${
+        active
+          ? 'border-blue-400 bg-blue-50 shadow-sm shadow-blue-100'
+          : 'border-slate-200 bg-white hover:border-slate-300'
+      }`}
     >
-      <Icon className="mb-3 size-5" />
-      <span className="block text-sm font-black">{title}</span>
-      <span className="mt-1 block text-xs font-semibold leading-5">{description}</span>
-    </button>
+      <div className={`mb-3 flex size-9 items-center justify-center rounded-xl ${active ? 'bg-blue-100' : 'bg-slate-100'}`}>
+        <Icon className="size-4" style={{ color: active ? color : '#64748b' }} />
+      </div>
+      <p className="text-sm font-black text-slate-900">{title}</p>
+      <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{description}</p>
+      {active && (
+        <motion.div variants={scaleIn} initial="hidden" animate="show"
+          className="mt-2 flex items-center gap-1 text-[11px] font-black text-blue-600">
+          <CheckCircle2 className="size-3.5" /> Selected
+        </motion.div>
+      )}
+    </motion.button>
   )
 }
 
+/* ─── Field wrapper ────────────────────────────────────── */
 function Field({ label, icon: Icon, children }: { label: string; icon: ElementType; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-black text-market-ink">{label}</span>
-      <span className="relative block">
-        <Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-market-slate" />
+      <span className="mb-1.5 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</span>
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         {children}
-      </span>
+      </div>
     </label>
   )
 }
 
-function UploadBox({ name, label, required, multiple }: { name: string; label: string; required?: boolean; multiple?: boolean }) {
+const inputCls = 'h-12 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-400/12'
+
+/* ─── Client fields ─────────────────────────────────────── */
+function ClientFields() {
   return (
-    <label className="relative block min-h-36 rounded-2xl border-2 border-dashed border-market-line bg-market-paper p-4 text-center transition hover:border-market-teal hover:bg-market-mist">
-      {name.includes('Id') || name.includes('id') ? (
-        <IdCard className="mx-auto mb-3 size-6 text-market-navy" />
-      ) : name.includes('commercial') ? (
-        <FileArchive className="mx-auto mb-3 size-6 text-market-navy" />
-      ) : (
-        <Upload className="mx-auto mb-3 size-6 text-market-navy" />
-      )}
-      <span className="block text-sm font-black text-market-ink">{label}</span>
-      <span className="mt-1 block text-xs font-semibold text-market-slate">PDF أو صورة</span>
-      <input name={name} type="file" required={required} multiple={multiple} accept="image/*,.pdf" className="absolute inset-0 cursor-pointer opacity-0" />
-    </label>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Field label="Full Name" icon={User}><input name="fullName" required placeholder="Your full name" className={inputCls} /></Field>
+      <Field label="Phone Number" icon={Phone}><input name="phone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
+      <Field label="Region / Governorate" icon={Building2}><input name="region" required placeholder="e.g. Cairo, Giza" className={inputCls} /></Field>
+      <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="you@example.com" className={inputCls} /></Field>
+      <div className="sm:col-span-2">
+        <Field label="Password (min. 8 characters)" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Broker fields ─────────────────────────────────────── */
+function BrokerFields() {
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="First Name" icon={User}><input name="firstName" required placeholder="First" className={inputCls} /></Field>
+        <Field label="Last Name" icon={User}><input name="lastName" required placeholder="Last" className={inputCls} /></Field>
+        <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="you@example.com" className={inputCls} /></Field>
+        <Field label="Phone Number" icon={Phone}><input name="phone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
+        <Field label="Password" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+        <Field label="Confirm Password" icon={LockKeyhole}><input name="confirmPassword" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+      </div>
+      <div>
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Identity Documents</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <UploadBox name="idFront" label="National ID — Front" icon={IdCard} required />
+          <UploadBox name="idBack" label="National ID — Back" icon={IdCard} required />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Company fields ─────────────────────────────────────── */
+function CompanyFields() {
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Company Name" icon={Building2}><input name="companyName" required placeholder="Legal company name" className={inputCls} /></Field>
+        <Field label="Manager Name" icon={User}><input name="managerName" required placeholder="Full name" className={inputCls} /></Field>
+        <Field label="Manager Phone" icon={Phone}><input name="managerPhone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
+        <Field label="Owner Phone" icon={Phone}><input name="ownerPhone" required dir="ltr" className={inputCls} /></Field>
+        <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="company@example.com" className={inputCls} /></Field>
+        <Field label="Facebook Page URL" icon={FileText}><input name="facebookUrl" type="url" dir="ltr" placeholder="https://facebook.com/…" className={inputCls} /></Field>
+        <Field label="Password" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+        <Field label="Confirm Password" icon={LockKeyhole}><input name="confirmPassword" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+      </div>
+      <div>
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Company Documents</p>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <UploadBox name="commercialRegisterFiles" label="Commercial Register (up to 3)" icon={FileArchive} required multiple />
+          <UploadBox name="taxCardImage" label="Tax Card" icon={FileText} required />
+          <UploadBox name="ownerIdImage" label="Owner National ID" icon={IdCard} required />
+          <UploadBox name="vatCertificate" label="VAT Certificate (if applicable)" icon={Upload} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Upload zone ────────────────────────────────────────── */
+function UploadBox({ name, label, icon: Icon, required, multiple }: {
+  name: string; label: string; icon: ElementType; required?: boolean; multiple?: boolean
+}) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [fileName, setFileName] = useState<string | null>(null)
+
+  return (
+    <motion.label
+      className={`fi-upload-zone relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-4 text-center transition-colors ${
+        isDragging ? 'border-blue-400 bg-blue-50' : fileName ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/50'
+      }`}
+      onDragEnter={() => setIsDragging(true)}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={() => setIsDragging(false)}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+    >
+      <AnimatePresence mode="wait">
+        {fileName ? (
+          <motion.div key="done" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="flex flex-col items-center">
+            <CheckCircle2 className="mb-2 size-6 text-emerald-500" />
+            <span className="text-xs font-black text-emerald-700 line-clamp-2">{fileName}</span>
+          </motion.div>
+        ) : (
+          <motion.div key="empty" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="flex flex-col items-center">
+            <Icon className="mb-2 size-6 text-slate-400" />
+            <span className="text-xs font-black text-slate-600">{label}</span>
+            <span className="mt-1 text-[11px] font-semibold text-slate-400">PDF or image · Click or drag</span>
+            {required && <span className="mt-1 text-[10px] font-black uppercase text-blue-500">Required</span>}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <input
+        name={name}
+        type="file"
+        required={required}
+        multiple={multiple}
+        accept="image/*,.pdf"
+        className="absolute inset-0 cursor-pointer opacity-0"
+        onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+      />
+    </motion.label>
   )
 }
