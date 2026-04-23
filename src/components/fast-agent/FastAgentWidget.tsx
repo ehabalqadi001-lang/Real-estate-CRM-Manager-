@@ -15,6 +15,7 @@ type FastResponse = {
   mode: 'ai' | 'fallback'
   role: string
   tools: string[]
+  conversationId: string | null
 }
 
 const welcomeMessage: FastMessage = {
@@ -28,6 +29,7 @@ export default function FastAgentWidget() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState<FastMessage[]>([welcomeMessage])
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const [meta, setMeta] = useState<Pick<FastResponse, 'mode' | 'role' | 'tools'> | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -47,10 +49,11 @@ export default function FastAgentWidget() {
       const response = await fetch('/api/fast-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({ messages: nextMessages, conversationId }),
       })
       const payload = await response.json() as FastResponse
       setMessages((current) => [...current, { role: 'assistant', content: payload.reply }])
+      setConversationId(payload.conversationId ?? conversationId)
       setMeta({ mode: payload.mode, role: payload.role, tools: payload.tools })
     } catch (error) {
       console.error('FAST widget failed', error)
