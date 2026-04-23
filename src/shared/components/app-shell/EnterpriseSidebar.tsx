@@ -33,8 +33,8 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
 
   const platformGroup = hasPermission(profile.role, 'admin.view')
     ? [{
-      title: 'نظام المنصة',
-      items: [{ title: 'لوحة مالك المنصة', href: '/admin', permission: 'admin.view' as const, icon: Settings }],
+      title: 'Platform',
+      items: [{ title: 'Platform Owner Console', href: '/admin', permission: 'admin.view' as const, icon: Settings }],
     }]
     : []
 
@@ -52,7 +52,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
 
   return (
     <>
-      <aside className="hidden h-screen w-[292px] shrink-0 p-4 lg:block" dir="rtl">
+      <aside className="hidden h-screen w-[292px] shrink-0 p-4 lg:block" dir="ltr">
         <div className="fi-glass flex h-full flex-col overflow-hidden rounded-lg border border-[var(--fi-line)]">
           <div className="border-b border-[var(--fi-line)] p-4">
             <Link href="/dashboard" className="flex items-center gap-3">
@@ -61,7 +61,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-black tracking-wide text-[var(--fi-ink)]">{tenantName}</span>
-                <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">لوحة CRM</span>
+                <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--fi-muted)]">CRM Workspace</span>
               </span>
             </Link>
           </div>
@@ -78,7 +78,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             </div>
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-[11px] font-bold text-[var(--fi-emerald)]">
               <Crown className="size-3.5" aria-hidden="true" />
-              مساحة عمل {tenantName}
+              Workspace: {tenantName}
             </div>
           </div>
 
@@ -101,7 +101,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             <form action="/auth/logout" method="post">
               <button className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-red-50 hover:text-[var(--fi-danger)]">
                 <LogOut className="size-4" aria-hidden="true" />
-                تسجيل الخروج
+                Sign Out
               </button>
             </form>
           </div>
@@ -109,15 +109,15 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       </aside>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden" dir="rtl">
+        <div className="fixed inset-0 z-[60] lg:hidden" dir="ltr">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden="true" />
           <aside className="absolute inset-y-0 end-0 flex w-[280px] flex-col bg-[var(--fi-paper)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--fi-line)] p-4">
-              <span className="text-sm font-black text-[var(--fi-ink)]">القائمة الرئيسية</span>
+              <span className="text-sm font-black text-[var(--fi-ink)]">Main Navigation</span>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                aria-label="إغلاق القائمة"
+                aria-label="Close navigation"
                 className="flex size-9 items-center justify-center rounded-lg text-[var(--fi-muted)] hover:bg-[var(--fi-soft)]"
               >
                 <X className="size-4" />
@@ -142,7 +142,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               <form action="/auth/logout" method="post">
                 <button className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-red-50 hover:text-[var(--fi-danger)]">
                   <LogOut className="size-4" aria-hidden="true" />
-                  تسجيل الخروج
+                  Sign Out
                 </button>
               </form>
             </div>
@@ -150,7 +150,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         </div>
       )}
 
-      <nav className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-lg p-1 lg:hidden" dir="rtl">
+      <nav className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 rounded-lg p-1 lg:hidden" dir="ltr">
         {mobileItems.map((item) => {
           const Icon = item.icon
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -241,24 +241,24 @@ function normalizeLogoUrl(url: string | null | undefined) {
 
 function labelRole(role: string) {
   const labels: Record<string, string> = {
-    super_admin: 'مدير النظام',
-    platform_admin: 'مدير المنصة',
-    company_owner: 'مالك شركة',
-    company_admin: 'مدير شركة',
-    branch_manager: 'مدير فرع',
-    senior_agent: 'وكيل أول',
-    hr_manager: 'مدير موارد بشرية',
-    hr_staff: 'موظف موارد بشرية',
-    hr_officer: 'مسؤول موارد بشرية',
-    admin: 'مدير',
-    company: 'شركة',
-    broker: 'وسيط عقاري',
-    agent: 'وسيط عقاري',
-    customer_support: 'خدمة العملاء',
-    finance_officer: 'المالية',
-    finance_manager: 'مدير مالي',
-    CLIENT: 'عميل',
-    client: 'عميل',
+    super_admin: 'System Administrator',
+    platform_admin: 'Platform Administrator',
+    company_owner: 'Company Owner',
+    company_admin: 'Company Administrator',
+    branch_manager: 'Branch Manager',
+    senior_agent: 'Senior Agent',
+    hr_manager: 'HR Manager',
+    hr_staff: 'HR Specialist',
+    hr_officer: 'HR Officer',
+    admin: 'Administrator',
+    company: 'Company',
+    broker: 'Broker',
+    agent: 'Agent',
+    customer_support: 'Customer Support',
+    finance_officer: 'Finance Officer',
+    finance_manager: 'Finance Manager',
+    CLIENT: 'Client',
+    client: 'Client',
   }
 
   return labels[role] ?? role

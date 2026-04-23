@@ -55,27 +55,27 @@ export function NotificationCenter({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full overflow-hidden bg-white p-0 sm:max-w-md" dir="rtl">
+      <SheetContent side="left" className="w-full overflow-hidden bg-white p-0 sm:max-w-md" dir="ltr">
         <SheetHeader className="border-b border-[var(--fi-line)] p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <SheetTitle className="text-right text-xl font-black text-[var(--fi-ink)]">مركز الإشعارات</SheetTitle>
-              <SheetDescription className="text-right font-semibold text-[var(--fi-muted)]">
-                آخر التنبيهات والمهام المهمة
+              <SheetTitle className="text-left text-xl font-black text-[var(--fi-ink)]">Notifications</SheetTitle>
+              <SheetDescription className="text-left font-semibold text-[var(--fi-muted)]">
+                Important alerts, tasks, and real-time activity.
               </SheetDescription>
             </div>
-            <Button type="button" variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} aria-label="إغلاق">
+            <Button type="button" variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} aria-label="Close notifications">
               <X className="size-4" />
             </Button>
           </div>
           <div className="mt-3 flex gap-2">
             <Button type="button" variant="outline" className="flex-1 gap-2 bg-white" onClick={() => void onMarkAllRead()}>
               <CheckCheck className="size-4" />
-              تحديد الكل كمقروء
+              Mark all as read
             </Button>
             <Button type="button" variant="destructive" className="gap-2" onClick={() => void onDeleteAll()}>
               <Trash2 className="size-4" />
-              حذف الكل
+              Clear all
             </Button>
           </div>
         </SheetHeader>
@@ -90,8 +90,8 @@ export function NotificationCenter({
           ) : notifications.length === 0 ? (
             <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] text-center">
               <Bell className="size-9 text-[var(--fi-muted)]" />
-              <p className="mt-3 text-sm font-black text-[var(--fi-ink)]">لا توجد إشعارات</p>
-              <p className="mt-1 text-xs font-semibold text-[var(--fi-muted)]">ستظهر التنبيهات المهمة هنا فور وصولها.</p>
+              <p className="mt-3 text-sm font-black text-[var(--fi-ink)]">No notifications yet</p>
+              <p className="mt-1 text-xs font-semibold text-[var(--fi-muted)]">New system alerts and reminders will appear here.</p>
             </div>
           ) : (
             <div className="space-y-5">
@@ -105,7 +105,7 @@ export function NotificationCenter({
                         key={item.id}
                         type="button"
                         onClick={() => void openNotification(item)}
-                        className={`w-full rounded-lg border p-3 text-right transition hover:border-[var(--fi-emerald)] ${item.isRead ? 'border-[var(--fi-line)] bg-white' : 'border-[var(--fi-emerald)] bg-[var(--fi-soft)]'}`}
+                        className={`w-full rounded-lg border p-3 text-left transition hover:border-[var(--fi-emerald)] ${item.isRead ? 'border-[var(--fi-line)] bg-white' : 'border-[var(--fi-emerald)] bg-[var(--fi-soft)]'}`}
                       >
                         <div className="flex gap-3">
                           <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--fi-emerald)]">
@@ -117,7 +117,7 @@ export function NotificationCenter({
                               {!item.isRead && <span className="mt-1 size-2 shrink-0 rounded-full bg-red-500" />}
                             </div>
                             {item.body && <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-[var(--fi-muted)]">{item.body}</p>}
-                            <p className="mt-2 text-[11px] font-bold text-[var(--fi-muted)]">{relativeArabic(item.createdAt)}</p>
+                            <p className="mt-2 text-[11px] font-bold text-[var(--fi-muted)]">{relativeTime(item.createdAt)}</p>
                           </div>
                         </div>
                       </button>
@@ -126,7 +126,7 @@ export function NotificationCenter({
                 </section>
               ))}
               <div ref={sentinelRef} className="h-10">
-                {isLoadingMore && <p className="text-center text-xs font-bold text-[var(--fi-muted)]">جاري تحميل المزيد...</p>}
+                {isLoadingMore && <p className="text-center text-xs font-bold text-[var(--fi-muted)]">Loading more notifications...</p>}
               </div>
             </div>
           )}
@@ -138,10 +138,10 @@ export function NotificationCenter({
 
 function groupNotifications(items: AppNotificationItem[]) {
   const groups = [
-    { label: 'اليوم', items: [] as AppNotificationItem[] },
-    { label: 'أمس', items: [] as AppNotificationItem[] },
-    { label: 'هذا الأسبوع', items: [] as AppNotificationItem[] },
-    { label: 'أقدم', items: [] as AppNotificationItem[] },
+    { label: 'Today', items: [] as AppNotificationItem[] },
+    { label: 'Yesterday', items: [] as AppNotificationItem[] },
+    { label: 'This Week', items: [] as AppNotificationItem[] },
+    { label: 'Earlier', items: [] as AppNotificationItem[] },
   ]
 
   const now = new Date()
@@ -168,13 +168,13 @@ function iconForType(type: NotificationType) {
   return Bell
 }
 
-function relativeArabic(value: string) {
+function relativeTime(value: string) {
   const diff = Date.now() - new Date(value).getTime()
   const minutes = Math.max(0, Math.floor(diff / 60000))
-  if (minutes < 1) return 'الآن'
-  if (minutes < 60) return `منذ ${minutes.toLocaleString('ar-EG')} دقائق`
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes.toLocaleString('en-US')} min ago`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `منذ ${hours.toLocaleString('ar-EG')} ساعة`
+  if (hours < 24) return `${hours.toLocaleString('en-US')} hr ago`
   const days = Math.floor(hours / 24)
-  return `منذ ${days.toLocaleString('ar-EG')} يوم`
+  return `${days.toLocaleString('en-US')} day${days === 1 ? '' : 's'} ago`
 }

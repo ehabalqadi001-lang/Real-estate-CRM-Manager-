@@ -25,14 +25,14 @@ export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: Ap
           <button
             type="button"
             onClick={openSidebar}
-            aria-label="فتح القائمة الرئيسية"
+            aria-label="Open primary navigation"
             className="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)] transition hover:bg-[var(--fi-soft)]/80 lg:hidden"
           >
             <Menu className="size-5" aria-hidden="true" />
           </button>
           <div className="min-w-0">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">{tenantName}</p>
-            <h1 className="mt-1 truncate text-sm font-black text-[var(--fi-ink)] sm:text-lg">مركز القيادة العقاري</h1>
+            <h1 className="mt-1 truncate text-sm font-black text-[var(--fi-ink)] sm:text-lg">Real Estate Command Center</h1>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: Ap
           >
             <span className="flex min-w-0 items-center gap-2">
               <Search className="size-4 shrink-0 text-[var(--fi-emerald)]" aria-hidden="true" />
-              <span className="truncate">ابحث عن عميل، صفقة، وحدة، أو أمر</span>
+              <span className="truncate">Search clients, deals, units, or commands</span>
             </span>
             <span className="rounded-md border border-[var(--fi-line)] bg-[var(--fi-soft)] px-2 py-1 text-[10px] text-[var(--fi-muted)]">Ctrl K</span>
           </button>
@@ -58,7 +58,7 @@ export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: Ap
             type="button"
             onClick={openCommandPalette}
             className="flex size-10 items-center justify-center rounded-lg border border-[var(--fi-line)] bg-white text-[var(--fi-emerald)] dark:bg-white/5 md:hidden"
-            aria-label="فتح البحث"
+            aria-label="Open search"
           >
             <Search className="size-4" aria-hidden="true" />
           </button>
@@ -71,7 +71,7 @@ export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: Ap
             onClick={openCommandPalette}
             className="flex size-10 items-center justify-center rounded-lg text-white shadow-sm transition hover:scale-[1.03]"
             style={{ background: 'var(--fi-gradient-primary)' }}
-            aria-label="فتح لوحة الأوامر"
+            aria-label="Open command palette"
           >
             <Sparkles className="size-4" aria-hidden="true" />
           </button>
@@ -83,24 +83,24 @@ export function EnterpriseTopbar({ profile, companyOptions = [] }: { profile: Ap
 
 function labelRole(role: string) {
   const labels: Record<string, string> = {
-    super_admin: 'مدير النظام',
-    platform_admin: 'مدير المنصة',
-    company_owner: 'مالك شركة',
-    company_admin: 'مدير شركة',
-    branch_manager: 'مدير فرع',
-    senior_agent: 'وكيل أول',
-    hr_manager: 'مدير موارد بشرية',
-    hr_staff: 'موظف موارد بشرية',
-    hr_officer: 'مسؤول موارد بشرية',
-    admin: 'مدير',
-    company: 'شركة',
-    broker: 'وسيط',
-    agent: 'وسيط',
-    customer_support: 'الدعم',
-    finance_officer: 'المالية',
-    finance_manager: 'مدير مالي',
-    CLIENT: 'عميل',
-    client: 'عميل',
+    super_admin: 'System Administrator',
+    platform_admin: 'Platform Administrator',
+    company_owner: 'Company Owner',
+    company_admin: 'Company Administrator',
+    branch_manager: 'Branch Manager',
+    senior_agent: 'Senior Agent',
+    hr_manager: 'HR Manager',
+    hr_staff: 'HR Specialist',
+    hr_officer: 'HR Officer',
+    admin: 'Administrator',
+    company: 'Company',
+    broker: 'Broker',
+    agent: 'Agent',
+    customer_support: 'Customer Support',
+    finance_officer: 'Finance Officer',
+    finance_manager: 'Finance Manager',
+    CLIENT: 'Client',
+    client: 'Client',
   }
 
   return labels[role] ?? role

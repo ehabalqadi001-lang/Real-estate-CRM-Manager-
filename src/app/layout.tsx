@@ -27,7 +27,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'FAST INVESTMENT | Enterprise CRM',
-  description: 'نظام إدارة علاقات العملاء للإدارة العليا',
+  description: 'Enterprise CRM and sales command platform for FAST INVESTMENT.',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Fast CRM' },
   other: { 'mobile-web-app-capable': 'yes' },
@@ -43,8 +43,8 @@ export default async function RootLayout({
 
   return (
     <html
-      lang={locale}
-      dir={locale === 'en' ? 'ltr' : 'rtl'}
+      lang="en"
+      dir="ltr"
       className={cn(cairo.variable, inter.variable, geist.variable, 'font-cairo')}
       suppressHydrationWarning
     >

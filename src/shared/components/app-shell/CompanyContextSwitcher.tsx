@@ -20,7 +20,7 @@ export function CompanyContextSwitcher({ activeCompanyId, companies }: CompanyCo
   return (
     <label className="hidden min-w-[210px] items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-3 py-2 text-xs font-black text-[var(--fi-ink)] dark:bg-white/5 lg:flex">
       <Building2 className="size-4 shrink-0 text-[var(--fi-emerald)]" aria-hidden="true" />
-      <span className="sr-only">الشركة النشطة</span>
+      <span className="sr-only">Active company</span>
       <select
         value={activeCompanyId ?? ''}
         disabled={isPending}
@@ -32,11 +32,11 @@ export function CompanyContextSwitcher({ activeCompanyId, companies }: CompanyCo
             if (!result.success && result.error) window.alert(result.error)
           })
         }}
-        className="min-w-0 flex-1 bg-transparent text-right outline-none disabled:cursor-wait"
-        aria-label="اختيار الشركة النشطة"
+        className="min-w-0 flex-1 bg-transparent text-left outline-none disabled:cursor-wait"
+        aria-label="Choose active company"
       >
         <option value="" disabled>
-          اختر شركة
+          Choose company
         </option>
         {companies.map((company) => (
           <option key={company.id} value={company.id}>

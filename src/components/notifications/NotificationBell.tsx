@@ -50,7 +50,7 @@ export function NotificationBell({ userId: providedUserId }: { userId?: string }
 
   if (!userId) {
     return (
-      <Button type="button" variant="outline" size="icon-lg" className="relative bg-white" aria-label="الإشعارات" disabled>
+      <Button type="button" variant="outline" size="icon-lg" className="relative bg-white" aria-label="Notifications" disabled>
         <Bell className="size-5 text-[var(--fi-emerald)]" />
       </Button>
     )
@@ -63,7 +63,7 @@ export function NotificationBell({ userId: providedUserId }: { userId?: string }
         variant="outline"
         size="icon-lg"
         className="relative bg-white"
-        aria-label={open ? 'إغلاق الإشعارات' : 'فتح الإشعارات'}
+        aria-label={open ? 'Close notifications' : 'Open notifications'}
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
@@ -77,7 +77,7 @@ export function NotificationBell({ userId: providedUserId }: { userId?: string }
               transition={{ duration: 0.35 }}
               className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white ring-2 ring-white"
             >
-              {unreadCount > 99 ? '99+' : unreadCount.toLocaleString('ar-EG')}
+              {unreadCount > 99 ? '99+' : unreadCount.toLocaleString('en-US')}
             </motion.span>
           )}
         </AnimatePresence>

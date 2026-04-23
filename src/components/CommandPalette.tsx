@@ -18,7 +18,7 @@ import {
   Users,
 } from 'lucide-react'
 
-type CommandGroup = 'فتح صفحة' | 'إجراءات سريعة' | 'بحث'
+type CommandGroup = 'Open Pages' | 'Quick Actions' | 'Search'
 
 type AppCommand = {
   id: string
@@ -33,88 +33,88 @@ type AppCommand = {
 const COMMANDS: AppCommand[] = [
   {
     id: 'open-dashboard',
-    label: 'فتح لوحة التحكم',
-    description: 'المؤشرات والتنبيهات والأنشطة',
+    label: 'Open Dashboard',
+    description: 'KPIs, alerts, and activity feed',
     href: '/dashboard',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: BarChart3,
-    keywords: ['dashboard', 'kpi', 'لوحة'],
+    keywords: ['dashboard', 'kpi', 'home'],
   },
   {
     id: 'open-pipeline',
-    label: 'فتح خط المبيعات',
-    description: 'Kanban الصفقات والمراحل',
+    label: 'Open Sales Pipeline',
+    description: 'Deal stages and Kanban flow',
     href: '/dashboard/pipeline',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: Target,
-    keywords: ['pipeline', 'deals', 'صفقات'],
+    keywords: ['pipeline', 'deals', 'sales'],
   },
   {
     id: 'open-clients',
-    label: 'فتح العملاء',
-    description: 'قائمة العملاء والمتابعات',
+    label: 'Open Clients',
+    description: 'Clients, leads, and follow-ups',
     href: '/dashboard/clients',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: Users,
-    keywords: ['clients', 'leads', 'عملاء'],
+    keywords: ['clients', 'leads', 'buyers'],
   },
   {
     id: 'open-inventory',
-    label: 'فتح المخزون العقاري',
-    description: 'الوحدات والمشروعات والمطورون',
+    label: 'Open Inventory',
+    description: 'Units, projects, and developers',
     href: '/dashboard/inventory',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: Building2,
-    keywords: ['inventory', 'units', 'properties', 'وحدات'],
+    keywords: ['inventory', 'units', 'properties'],
   },
   {
     id: 'open-tasks',
-    label: 'فتح مهام اليوم',
-    description: 'المواعيد والمتابعات',
+    label: 'Open Activities',
+    description: 'Today agenda and follow-up queue',
     href: '/dashboard/activities',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: Calendar,
-    keywords: ['tasks', 'activities', 'مهام'],
+    keywords: ['tasks', 'activities', 'agenda'],
   },
   {
     id: 'add-client',
-    label: 'إضافة عميل',
-    description: 'تسجيل عميل محتمل جديد',
+    label: 'Add Lead',
+    description: 'Create a new lead record',
     href: '/dashboard/leads/new',
-    group: 'إجراءات سريعة',
+    group: 'Quick Actions',
     icon: Plus,
-    keywords: ['new client', 'lead', 'عميل جديد'],
+    keywords: ['new client', 'lead', 'add lead'],
   },
   {
     id: 'search-unit',
-    label: 'بحث عن وحدة',
-    description: 'افتح البحث داخل المخزون',
+    label: 'Search Units',
+    description: 'Open inventory unit search',
     href: '/dashboard/inventory/units',
-    group: 'بحث',
+    group: 'Search',
     icon: Search,
-    keywords: ['search unit', 'property search', 'بحث وحدة'],
+    keywords: ['search unit', 'property search', 'unit finder'],
   },
   {
     id: 'send-message',
-    label: 'إرسال رسالة',
-    description: 'فتح مركز واتساب للرسائل والقوالب',
+    label: 'Send Message',
+    description: 'Open WhatsApp messaging center',
     href: '/dashboard/whatsapp',
-    group: 'إجراءات سريعة',
+    group: 'Quick Actions',
     icon: Send,
-    keywords: ['whatsapp', 'message', 'sms', 'رسالة'],
+    keywords: ['whatsapp', 'message', 'send'],
   },
   {
     id: 'whatsapp',
-    label: 'رسائل واتساب',
-    description: 'المحادثات والقوالب وسجل التواصل',
+    label: 'WhatsApp Center',
+    description: 'Conversations, templates, and communication logs',
     href: '/dashboard/whatsapp',
-    group: 'فتح صفحة',
+    group: 'Open Pages',
     icon: MessageCircle,
-    keywords: ['whatsapp', 'conversation', 'واتساب'],
+    keywords: ['whatsapp', 'conversation', 'templates'],
   },
 ]
 
-const GROUPS: CommandGroup[] = ['فتح صفحة', 'إجراءات سريعة', 'بحث']
+const GROUPS: CommandGroup[] = ['Open Pages', 'Quick Actions', 'Search']
 
 export default function CommandPalette() {
   const [open, setOpen] = useState(false)
@@ -160,8 +160,8 @@ export default function CommandPalette() {
         <Command.Dialog
           open={open}
           onOpenChange={setOpen}
-          label="لوحة الأوامر"
-          dir="rtl"
+          label="Command Palette"
+          dir="ltr"
           shouldFilter
           value={query}
           onValueChange={setQuery}
@@ -185,7 +185,7 @@ export default function CommandPalette() {
                 <Search className="size-5 text-[var(--color-brand-emerald)]" aria-hidden="true" />
                 <Command.Input
                   autoFocus
-                  placeholder="اكتب أمراً أو اسم صفحة..."
+                  placeholder="Type a command or page name..."
                   className="min-w-0 flex-1 bg-transparent text-base font-bold text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)]"
                 />
                 <kbd className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2 py-1 text-xs font-black text-[var(--color-text-muted)]">
@@ -195,7 +195,7 @@ export default function CommandPalette() {
 
               <Command.List className="max-h-[420px] overflow-y-auto p-2">
                 <Command.Empty className="px-4 py-10 text-center text-sm font-bold text-[var(--color-text-muted)]">
-                  لا توجد أوامر مطابقة.
+                  No matching commands found.
                 </Command.Empty>
 
                 {groupedCommands.map(({ group, items }) => (
@@ -211,7 +211,7 @@ export default function CommandPalette() {
                           key={command.id}
                           value={`${command.label} ${command.description} ${command.keywords.join(' ')}`}
                           onSelect={() => run(command)}
-                          className="group mt-1 flex min-h-14 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-right outline-none data-[selected=true]:bg-[var(--color-surface-muted)]"
+                          className="group mt-1 flex min-h-14 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left outline-none data-[selected=true]:bg-[var(--color-surface-muted)]"
                         >
                           <span className="flex size-9 items-center justify-center rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-brand-emerald)] group-data-[selected=true]:bg-[var(--color-brand-emerald)] group-data-[selected=true]:text-white">
                             <Icon className="size-4" aria-hidden="true" />
@@ -227,8 +227,8 @@ export default function CommandPalette() {
                 ))}
 
                 <div className="mt-2 border-t border-[var(--color-border)] px-4 py-3 text-xs font-bold text-[var(--color-text-muted)]">
-                  <Home className="ml-1 inline size-3" aria-hidden="true" />
-                  استخدم الأسهم للتنقل و Enter للتنفيذ.
+                  <Home className="mr-1 inline size-3" aria-hidden="true" />
+                  Use arrow keys to navigate and press Enter to run.
                 </div>
               </Command.List>
             </motion.div>
