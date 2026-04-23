@@ -21,7 +21,7 @@ export const marketplaceSampleProperties: MarketplaceProperty[] = [
     status: 'approved',
     viewsCount: 1280,
     seller: {
-      name: 'EHAB & ESLAM TEAM',
+      name: 'FAST INVESTMENT',
       type: 'broker',
       rating: 4.9,
       verified: true,

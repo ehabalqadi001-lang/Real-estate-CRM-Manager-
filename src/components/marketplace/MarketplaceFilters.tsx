@@ -39,18 +39,20 @@ export default function MarketplaceFilters() {
   }
 
   return (
-    <section className="mb-8 rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm sm:p-5">
+    <section className="mb-8 rounded-3xl border border-market-line bg-white p-4 shadow-[0_18px_50px_rgba(16,32,51,0.06)] sm:p-5">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Filter className="size-5 text-[#17375E]" />
-            <h2 className="text-xl font-black text-[#102033]">فلترة العقارات</h2>
-            {activeCount > 0 && <Badge className="bg-[#EEF6F5] text-[#0F8F83]">{activeCount} نشط</Badge>}
+            <Filter className="size-5 text-market-navy" />
+            <h2 className="text-xl font-black text-market-ink">فلترة العقارات</h2>
+            {activeCount > 0 && <Badge className="bg-market-mist text-market-teal">{activeCount} نشط</Badge>}
           </div>
-          <p className="mt-1 text-sm font-semibold text-[#64748B]">استخدم الفلاتر للوصول السريع لأفضل الوحدات المناسبة لك.</p>
+          <p className="mt-1 text-sm font-semibold text-market-slate">
+            استخدم الفلاتر للوصول السريع إلى أفضل الوحدات المناسبة لك.
+          </p>
         </div>
         {activeCount > 0 && (
-          <Button variant="outline" onClick={() => setFilters(initialFilters)} className="border-[#DDE6E4]">
+          <Button variant="outline" onClick={() => setFilters(initialFilters)} className="rounded-2xl border-market-line">
             <X className="ms-1 size-4" />
             مسح الفلاتر
           </Button>
@@ -61,13 +63,13 @@ export default function MarketplaceFilters() {
         <div className="space-y-2">
           <Label htmlFor="market-search">بحث</Label>
           <div className="relative">
-            <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#64748B]" />
+            <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-market-slate" />
             <Input
               id="market-search"
               value={filters.query}
               onChange={(event) => updateFilter('query', event.target.value)}
               placeholder="اسم الكمبوند، المنطقة، نوع الوحدة"
-              className="h-10 border-[#DDE6E4] pr-10"
+              className="h-11 rounded-2xl border-market-line bg-market-paper pr-10 font-semibold"
             />
           </div>
         </div>
@@ -135,7 +137,7 @@ export default function MarketplaceFilters() {
             value={filters.minPrice}
             onChange={(event) => updateFilter('minPrice', event.target.value)}
             placeholder="مثال: 1500000"
-            className="h-10 border-[#DDE6E4]"
+            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
         <div className="space-y-2">
@@ -146,7 +148,7 @@ export default function MarketplaceFilters() {
             value={filters.maxPrice}
             onChange={(event) => updateFilter('maxPrice', event.target.value)}
             placeholder="مثال: 8000000"
-            className="h-10 border-[#DDE6E4]"
+            className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
       </div>
@@ -171,7 +173,7 @@ function FilterSelect({
     <div className="space-y-2">
       <Label>{label}</Label>
       <Select value={value} onValueChange={(nextValue) => onValueChange(nextValue ?? 'all')}>
-        <SelectTrigger className="h-10 border-[#DDE6E4]">
+        <SelectTrigger className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold">
           <span className="flex items-center gap-2">
             {icon}
             <SelectValue />

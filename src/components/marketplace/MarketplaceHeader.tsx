@@ -39,23 +39,23 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#DDE6E4] bg-white/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-market-line bg-white/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/marketplace" className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-[#17375E] text-white shadow-sm">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-market-navy text-white shadow-sm">
             <Building2 className="size-5" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-base font-black text-[#102033]">FAST INVESTMENT</span>
-            <span className="block truncate text-xs font-bold text-[#64748B]">Enterprise CRM Marketplace</span>
+            <span className="block truncate text-base font-black text-market-ink">FAST INVESTMENT</span>
+            <span className="block truncate text-xs font-bold text-market-slate">Enterprise CRM Marketplace</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-bold text-[#4B6175] md:flex">
-          <Link href="/marketplace" className="text-[#17375E]">السوق</Link>
-          <Link href="/marketplace#developers" className="transition hover:text-[#17375E]">المطورون</Link>
-          <Link href="/marketplace/buy-points" className="transition hover:text-[#27AE60]">شراء نقاط</Link>
-          <Link href="/marketplace/add-property" className="transition hover:text-[#17375E]">أضف وحدتك</Link>
+        <nav className="hidden items-center gap-6 text-sm font-bold text-market-slate md:flex">
+          <Link href="/marketplace" className="text-market-navy">السوق</Link>
+          <Link href="/marketplace#developers" className="transition hover:text-market-navy">المطورون</Link>
+          <Link href="/marketplace/buy-points" className="transition hover:text-market-teal">شراء نقاط</Link>
+          <Link href="/marketplace/add-property" className="transition hover:text-market-navy">أضف وحدتك</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <Button
                 type="button"
                 onClick={() => router.push('/marketplace/add-property')}
-                className="hidden rounded-xl bg-[#17375E] text-white hover:bg-[#102033] sm:inline-flex"
+                className="hidden rounded-2xl bg-market-navy text-white hover:bg-market-ink sm:inline-flex"
               >
                 <Plus className="ms-1 size-4" />
                 أضف وحدة
@@ -73,9 +73,9 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <MarketplaceNotificationBell />
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-[#0F8F83]/30">
-                  <Avatar className="size-10 border border-[#DDE6E4]">
-                    <AvatarFallback className="bg-[#EEF6F5] text-sm font-black text-[#17375E]">
+                <DropdownMenuTrigger className="rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-market-teal/30">
+                  <Avatar className="size-10 border border-market-line">
+                    <AvatarFallback className="bg-market-mist text-sm font-black text-market-navy">
                       {getInitial(user.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -83,9 +83,9 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 <DropdownMenuContent align="end" className="w-64">
                   <DropdownMenuLabel>
                     <div className="space-y-2 text-right">
-                      <p className="font-black text-[#102033]">{user.name}</p>
+                      <p className="font-black text-market-ink">{user.name}</p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
-                      <Badge className="bg-[#EEF6F5] text-[#0F8F83]">
+                      <Badge className="bg-market-mist text-market-teal">
                         <ShieldCheck className="me-1 size-3" />
                         {user.role === 'CLIENT' || user.role === 'client' ? 'عميل' : user.role ?? 'مستخدم'}
                       </Badge>
@@ -109,7 +109,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                     المحادثات والدعم
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-[#B54747]" onClick={handleLogout}>
+                  <DropdownMenuItem className="text-market-rose" onClick={handleLogout}>
                     <LogOut className="ms-2 size-4" />
                     تسجيل الخروج
                   </DropdownMenuItem>
@@ -118,20 +118,20 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
             </>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => router.push('/login')} className="rounded-xl text-[#17375E]">
+              <Button variant="ghost" onClick={() => router.push('/login')} className="rounded-2xl text-market-navy">
                 <LogIn className="ms-1 size-4" />
                 دخول
               </Button>
               <Button
                 onClick={() => router.push('/register?role=client')}
-                className="rounded-xl bg-[#17375E] text-white hover:bg-[#102033]"
+                className="rounded-2xl bg-market-navy text-white hover:bg-market-ink"
               >
                 <UserRound className="ms-1 size-4" />
                 تسجيل عميل
               </Button>
               <Button
                 onClick={() => router.push('/register?role=partner')}
-                className="hidden rounded-xl bg-[#C9964A] text-white hover:bg-[#b07e36] sm:inline-flex"
+                className="hidden rounded-2xl bg-market-gold text-white hover:bg-[#b07e36] sm:inline-flex"
               >
                 <Handshake className="ms-1 size-4" />
                 FAST PARTNERS

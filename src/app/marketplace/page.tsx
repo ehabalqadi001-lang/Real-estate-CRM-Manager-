@@ -56,44 +56,44 @@ export default async function MarketplacePage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]">
+    <div className="min-h-screen bg-[#F5F8F6] text-market-ink">
       <MarketplaceHeader user={currentUser} />
 
       <main>
-        <section className="border-b border-[#DDE6E4] bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F5EFE4_55%,#FBFCFA_100%)]">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1.08fr_0.92fr] md:items-center lg:py-14">
+        <section className="border-b border-market-line bg-[#F5F8F6]">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[1.02fr_0.98fr] md:items-center lg:py-12">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#C9964A]/40 bg-white/80 px-3 py-1 text-sm font-bold text-[#17375E]">
-                <ShieldCheck className="size-3.5 text-[#0F8F83]" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-market-gold/35 bg-white px-4 py-2 text-sm font-black text-market-navy shadow-sm">
+                <ShieldCheck className="size-4 text-market-teal" />
                 سوق عقاري موثق بإدارة FAST INVESTMENT
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight text-[#102033] md:text-5xl">
+              <h1 className="max-w-3xl text-4xl font-black leading-tight text-market-ink md:text-6xl">
                 عقارات للبيع والاستثمار
-                <span className="block text-[#0F8F83]">بتجربة سوق حديثة وآمنة</span>
+                <span className="block text-market-teal">بتجربة سوق حديثة وآمنة</span>
               </h1>
 
-              <p className="max-w-2xl text-base font-medium leading-8 text-[#4B6175] md:text-lg">
-                تصفح عقارات أولية وإعادة بيع، قارن المطورين والبائعين الموثقين، وابدأ محادثة آمنة داخل النظام.
+              <p className="max-w-2xl text-base font-bold leading-8 text-market-slate md:text-lg">
+                تصفح وحدات أولية وإعادة بيع، قارن المطورين والبائعين الموثقين، وابدأ محادثة آمنة داخل النظام.
               </p>
 
-              <div className="grid max-w-xl grid-cols-3 gap-3 text-center">
+              <div className="grid max-w-2xl grid-cols-3 gap-3 text-center">
                 <Metric value={`${properties.length}+`} label="إعلان نشط" icon={Building2} />
-                <Metric value={`${featuredCount}`} label="مميز" icon={Star} />
+                <Metric value={`${featuredCount}`} label="إعلان مميز" icon={Star} />
                 <Metric value={formatCompactPrice(averagePrice)} label="متوسط السعر" icon={TrendingUp} />
               </div>
 
-              <div className="flex flex-wrap gap-3 text-sm font-bold text-[#0F8F83]">
-                <span className="flex items-center gap-1.5 rounded-full bg-[#EEF6F5] px-3 py-1">
-                  <MessageCircle className="size-3.5" /> تواصل آمن داخل النظام
+              <div className="flex flex-wrap gap-3 text-sm font-black text-market-teal">
+                <span className="flex items-center gap-2 rounded-full border border-market-line bg-white px-4 py-2">
+                  <MessageCircle className="size-4" /> تواصل آمن داخل النظام
                 </span>
-                <span className="flex items-center gap-1.5 rounded-full bg-[#EEF6F5] px-3 py-1">
-                  <ShieldCheck className="size-3.5" /> مراجعة قبل النشر
+                <span className="flex items-center gap-2 rounded-full border border-market-line bg-white px-4 py-2">
+                  <ShieldCheck className="size-4" /> مراجعة قبل النشر
                 </span>
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-[#DDE6E4] bg-white shadow-xl">
+            <div className="overflow-hidden rounded-3xl border border-market-line bg-white shadow-[0_24px_80px_rgba(16,32,51,0.12)]">
               <Image
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1100&q=80"
                 alt="وحدة عقارية فاخرة في مصر"
@@ -102,14 +102,14 @@ export default async function MarketplacePage() {
                 priority
                 className="aspect-[4/3] w-full object-cover"
               />
-              <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#DDE6E4] bg-white">
+              <div className="grid grid-cols-2 divide-x divide-x-reverse divide-market-line bg-white">
                 <div className="p-4">
-                  <p className="text-xs font-bold text-[#64748B]">نظام التواصل</p>
-                  <p className="mt-1 text-base font-black text-[#0F8F83]">محادثة داخلية آمنة</p>
+                  <p className="text-xs font-bold text-market-slate">نظام التواصل</p>
+                  <p className="mt-1 text-base font-black text-market-teal">محادثة داخلية آمنة</p>
                 </div>
                 <div className="p-4">
-                  <p className="text-xs font-bold text-[#64748B]">ظهور الإعلانات</p>
-                  <p className="mt-1 text-base font-black text-[#C9964A]">بعد موافقة الفريق</p>
+                  <p className="text-xs font-bold text-market-slate">ظهور الإعلانات</p>
+                  <p className="mt-1 text-base font-black text-market-gold">بعد موافقة الفريق</p>
                 </div>
               </div>
             </div>
@@ -121,16 +121,16 @@ export default async function MarketplacePage() {
           <PropertyGrid properties={properties} user={currentUser} />
         </section>
 
-        <section id="developers" className="border-y border-[#DDE6E4] bg-[#EEF6F5]">
+        <section id="developers" className="border-y border-market-line bg-white">
           <div className="mx-auto max-w-7xl px-4 py-10">
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-black text-[#0F8F83]">نظام النقاط والإعلانات</p>
-                <h2 className="mt-2 text-3xl font-black text-[#102033]">
+                <p className="text-sm font-black text-market-teal">نظام النقاط والإعلانات</p>
+                <h2 className="mt-2 text-3xl font-black text-market-ink">
                   باقات واضحة للأفراد والشركات
                 </h2>
               </div>
-              <p className="max-w-2xl text-sm font-medium leading-7 text-[#64748B]">
+              <p className="max-w-2xl text-sm font-bold leading-7 text-market-slate">
                 كل فرد يحصل على إعلان مجاني واحد. الإعلانات الإضافية والظهور المميز تتم عبر نقاط ومحفظة مدفوعة.
               </p>
             </div>
@@ -138,18 +138,18 @@ export default async function MarketplacePage() {
               {marketplacePackages.map((plan) => (
                 <div
                   key={plan.id}
-                  className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="rounded-2xl border border-market-line bg-market-paper p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
                 >
-                  <p className="text-sm font-black text-[#17375E]">{plan.name}</p>
-                  <p className="fi-tabular mt-3 text-2xl font-black text-[#102033]">
+                  <p className="text-sm font-black text-market-navy">{plan.name}</p>
+                  <p className="fi-tabular mt-3 text-2xl font-black text-market-ink">
                     {plan.price.toLocaleString('ar-EG')} ج.م
                   </p>
-                  <div className="mt-4 space-y-2 text-sm font-medium text-[#64748B]">
+                  <div className="mt-4 space-y-2 text-sm font-bold text-market-slate">
                     <p>{plan.adsIncluded} إعلان</p>
                     <p>{plan.featuredAds} إعلان مميز</p>
                     {plan.verifiedBadge && (
-                      <p className="flex items-center gap-1 text-[#0F8F83]">
-                        <ShieldCheck className="size-3.5" /> شارة موثق للشركات
+                      <p className="flex items-center gap-1 text-market-teal">
+                        <ShieldCheck className="size-4" /> شارة موثق للشركات
                       </p>
                     )}
                   </div>
@@ -165,10 +165,10 @@ export default async function MarketplacePage() {
 
 function Metric({ value, label, icon: Icon }: { value: string; label: string; icon: React.ElementType }) {
   return (
-    <div className="rounded-xl border border-[#DDE6E4] bg-white/80 p-3">
-      <Icon className="mx-auto mb-1 size-4 text-[#0F8F83]" />
-      <p className="fi-tabular text-xl font-black text-[#17375E]">{value}</p>
-      <p className="mt-0.5 text-xs font-bold text-[#64748B]">{label}</p>
+    <div className="rounded-2xl border border-market-line bg-white p-4 shadow-sm">
+      <Icon className="mx-auto mb-2 size-5 text-market-teal" />
+      <p className="fi-tabular text-xl font-black text-market-navy">{value}</p>
+      <p className="mt-1 text-xs font-bold text-market-slate">{label}</p>
     </div>
   )
 }
