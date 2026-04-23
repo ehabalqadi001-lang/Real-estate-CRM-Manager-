@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bell,
+  Bot,
   Briefcase,
   Building2,
   CircleDollarSign,
@@ -44,6 +45,7 @@ export const dashboardNavigation: NavigationGroup[] = [
   {
     title: 'مركز القيادة',
     items: [
+      { title: 'FAST AI Memory', href: '/dashboard/fast-agent', permission: 'broker.manage', icon: Bot },
       { title: 'اللوحة التنفيذية', href: '/dashboard', permission: 'dashboard.view.own', icon: LayoutDashboard },
       { title: 'سياق الشركة', href: '/dashboard/company-context', permission: 'platform.manage', icon: Building2 },
       { title: 'التحليلات والتقارير', href: '/dashboard/reports', permission: 'report.view.own', icon: BarChart3 },
