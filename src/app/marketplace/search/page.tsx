@@ -59,7 +59,7 @@ export default async function MarketplaceSearchPage({ searchParams }: { searchPa
   const cities = Array.from(new Set(properties.map((property) => property.city))).filter(Boolean)
 
   return (
-    <main className="min-h-screen bg-[var(--fi-bg)] p-4 sm:p-6" dir="rtl">
+    <main className="nextora-market min-h-screen p-4 sm:p-6" dir="rtl">
       <section className="mx-auto max-w-7xl space-y-6">
         <div className="ds-card p-5 sm:p-6">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT MARKETPLACE</p>

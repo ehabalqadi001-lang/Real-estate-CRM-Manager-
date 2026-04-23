@@ -34,12 +34,12 @@ export default function LoginPage() {
 
   return (
     <main
-      className="min-h-screen bg-[#F5F8F6] px-4 py-6 text-market-ink sm:py-8"
+      className="nextora-market min-h-screen px-4 py-6 text-market-ink sm:py-8"
       dir="rtl"
     >
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <section className="relative overflow-hidden rounded-3xl border border-market-line bg-[#0D1B2E] p-6 text-white shadow-[0_24px_80px_rgba(16,32,51,0.16)] sm:p-8 lg:p-10">
-          <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#0F8F83,#C9964A,#17375E)]" />
+        <section className="nextora-card relative overflow-hidden rounded-3xl p-6 text-white sm:p-8 lg:p-10">
+          <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#FFFFFF,transparent)]" />
           <div className="relative flex h-full flex-col justify-between gap-10">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-[#E8C488]">
@@ -69,7 +69,7 @@ export default function LoginPage() {
         </section>
 
         <section className="flex items-center">
-          <div className="w-full rounded-3xl border border-market-line bg-white p-5 shadow-[0_24px_70px_rgba(16,32,51,0.10)] sm:p-7">
+          <div className="nextora-glass w-full rounded-3xl p-5 shadow-[0_24px_70px_rgba(0,0,0,0.36)] sm:p-7">
             <div className="mb-6">
               <p className="text-xs font-black text-market-gold">SECURE ACCESS</p>
               <h2 className="mt-2 text-3xl font-black text-market-ink">تسجيل الدخول</h2>
@@ -135,7 +135,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-2xl bg-market-navy text-sm font-black text-white shadow-sm transition hover:bg-market-ink disabled:opacity-60"
+                className="nextora-button h-12 w-full rounded-2xl text-sm font-black shadow-sm disabled:opacity-60"
                 aria-busy={loading}
               >
                 {loading ? 'جاري تسجيل الدخول...' : 'دخول'}
@@ -146,7 +146,7 @@ export default function LoginPage() {
               <Link href="/register?role=client" className="rounded-2xl border border-market-line bg-market-paper px-4 py-3 text-market-ink transition hover:border-market-teal hover:text-market-teal">
                 تسجيل عميل جديد
               </Link>
-              <Link href="/register?role=partner" className="rounded-2xl border border-market-gold/35 bg-[#FFF8EC] px-4 py-3 text-[#9C6B21] transition hover:border-market-gold">
+              <Link href="/register?role=partner" className="rounded-2xl border border-market-line bg-white/5 px-4 py-3 text-white transition hover:border-market-teal">
                 انضم كشريك
               </Link>
             </div>

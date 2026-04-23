@@ -78,9 +78,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F5F8F6] px-4 py-6 text-market-ink sm:py-8" dir="rtl">
+    <main className="nextora-market min-h-screen px-4 py-6 text-market-ink sm:py-8" dir="rtl">
       <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[390px_minmax(0,1fr)]">
-        <aside className="overflow-hidden rounded-3xl border border-white/10 bg-[#0D1B2E] p-6 text-white shadow-[0_24px_80px_rgba(16,32,51,0.16)] lg:sticky lg:top-6 lg:h-fit">
+        <aside className="nextora-card overflow-hidden rounded-3xl p-6 text-white lg:sticky lg:top-6 lg:h-fit">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-[#E8C488]">
             <BadgeCheck className="size-4" />
             {copy.eyebrow}
@@ -116,7 +116,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="rounded-3xl border border-market-line bg-white p-5 shadow-[0_20px_60px_rgba(16,32,51,0.08)] sm:p-7" encType="multipart/form-data">
+          <form onSubmit={handleSubmit} className="nextora-glass rounded-3xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.34)] sm:p-7" encType="multipart/form-data">
             <input type="hidden" name="registrationMode" value={mode} />
             <input type="hidden" name="accountType" value={mode === 'client' ? 'client' : accountType} />
 
@@ -157,7 +157,7 @@ export default function RegisterPage() {
             )}
 
             <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <Button type="submit" disabled={loading} className="h-12 w-full rounded-2xl bg-market-navy text-white shadow-sm hover:bg-market-ink disabled:opacity-60">
+              <Button type="submit" disabled={loading} className="nextora-button h-12 w-full rounded-2xl shadow-sm disabled:opacity-60">
                 {loading ? 'جاري المعالجة...' : copy.button}
               </Button>
               <div className="inline-flex items-center justify-center rounded-2xl border border-market-line bg-market-paper px-4 py-3 text-xs font-bold text-market-slate">
@@ -183,8 +183,8 @@ export default function RegisterPage() {
           height: 48px;
           width: 100%;
           border-radius: 16px;
-          border: 1px solid #dde6e4;
-          background: #fbfcfa;
+          border: 1px solid #2d2d2d;
+          background: #111111;
           padding: 0 42px 0 12px;
           font-size: 14px;
           font-weight: 700;
@@ -192,9 +192,9 @@ export default function RegisterPage() {
           transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
         }
         .field-input:focus {
-          border-color: #0f8f83;
-          background: #ffffff;
-          box-shadow: 0 0 0 4px rgb(15 143 131 / 14%);
+          border-color: #8ab4ff;
+          background: #111111;
+          box-shadow: 0 0 0 4px rgb(138 180 255 / 18%);
         }
       `}</style>
     </main>

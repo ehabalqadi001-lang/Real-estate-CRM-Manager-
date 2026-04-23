@@ -438,3 +438,102 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Nextora-inspired premium marketplace surface. Scoped to avoid touching CRM dashboards. */
+.nextora-market {
+  --color-market-ink: #ffffff;
+  --color-market-navy: #ffffff;
+  --color-market-teal: #8ab4ff;
+  --color-market-gold: #ffffff;
+  --color-market-sand: #161616;
+  --color-market-mist: #1a1a1a;
+  --color-market-rose: #ff6b6b;
+  --color-market-slate: #a1a1aa;
+  --color-market-line: #2d2d2d;
+  --color-market-paper: #1a1a1a;
+  background:
+    linear-gradient(180deg, rgba(138, 180, 255, 0.08), transparent 360px),
+    radial-gradient(circle at 78% 8%, rgba(255, 255, 255, 0.08), transparent 28rem),
+    #0d0d0d;
+  color: #ffffff;
+}
+
+.nextora-market .bg-white,
+.nextora-market .bg-\[\#FBFCFA\],
+.nextora-market .bg-\[\#F5F8F6\],
+.nextora-market .bg-\[\#EEF6F5\],
+.nextora-market .bg-\[\#FFF8EC\] {
+  background-color: #1a1a1a !important;
+}
+
+.nextora-market .border-market-line,
+.nextora-market .border-\[\#DDE6E4\] {
+  border-color: #2d2d2d !important;
+}
+
+.nextora-market .text-\[\#102033\],
+.nextora-market .text-\[\#17375E\],
+.nextora-market .text-market-ink,
+.nextora-market .text-market-navy {
+  color: #ffffff !important;
+}
+
+.nextora-market .text-\[\#64748B\],
+.nextora-market .text-market-slate {
+  color: #a1a1aa !important;
+}
+
+.nextora-market .text-market-teal,
+.nextora-market .text-\[\#0F8F83\],
+.nextora-market .text-\[\#C9964A\] {
+  color: #8ab4ff !important;
+}
+
+.nextora-market .shadow-sm,
+.nextora-market .shadow-md,
+.nextora-market .shadow-lg {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36) !important;
+}
+
+.nextora-market input,
+.nextora-market textarea,
+.nextora-market [role="combobox"] {
+  background-color: #111111 !important;
+  border-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.nextora-market input::placeholder,
+.nextora-market textarea::placeholder {
+  color: #71717a !important;
+}
+
+.nextora-market input:focus,
+.nextora-market textarea:focus,
+.nextora-market [role="combobox"]:focus {
+  border-color: #8ab4ff !important;
+  box-shadow: 0 0 0 4px rgba(138, 180, 255, 0.18) !important;
+}
+
+.nextora-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)), #1a1a1a;
+  border: 1px solid #2d2d2d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+}
+
+.nextora-glass {
+  background: rgba(13, 13, 13, 0.72);
+  border: 1px solid #2d2d2d;
+  backdrop-filter: blur(20px);
+}
+
+.nextora-button {
+  background: #ffffff;
+  color: #0d0d0d;
+  transition: transform 180ms ease, opacity 180ms ease, background 180ms ease;
+}
+
+.nextora-button:hover {
+  transform: translateY(-1px);
+  background: #e8f0ff;
+}

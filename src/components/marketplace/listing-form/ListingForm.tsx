@@ -186,7 +186,7 @@ export default function ListingForm({ projects, developers }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm sm:p-6">
+    <div className="nextora-card rounded-2xl p-5 sm:p-6">
       <StepBar current={step} />
 
       {error && (
@@ -283,13 +283,13 @@ export default function ListingForm({ projects, developers }: Props) {
       {step === 2 && (
         <div className="space-y-5">
           <SectionTitle>المحتوى التسويقي بالذكاء الاصطناعي</SectionTitle>
-          <div className="rounded-2xl border border-[#C9964A]/40 bg-[#FFF8EC] p-4">
+          <div className="rounded-2xl border border-market-line bg-white/5 p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="font-black text-[#102033]">إنشاء وصف احترافي للوحدة</p>
                 <p className="mt-1 text-xs font-bold leading-5 text-[#64748B]">يعتمد Gemini على بيانات الوحدة التي أدخلتها ويمكنك تعديل النص قبل الإرسال.</p>
               </div>
-              <Button type="button" onClick={generateMarketing} disabled={generatingAI} className="bg-[#C9964A] text-white hover:bg-[#b07e36]">
+              <Button type="button" onClick={generateMarketing} disabled={generatingAI} className="nextora-button">
                 {generatingAI ? <Loader2 className="ms-1 size-4 animate-spin" /> : <Sparkles className="ms-1 size-4" />}
                 {generatingAI ? 'جاري الإنشاء...' : 'إنشاء محتوى تسويقي بـ Gemini'}
               </Button>
@@ -354,11 +354,11 @@ export default function ListingForm({ projects, developers }: Props) {
       )}
 
       <div className="mt-8 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-[#DDE6E4] pt-5 sm:flex-row sm:items-center">
-        <Button type="button" variant="outline" className="border-[#DDE6E4]" onClick={() => { setError(null); setStep((s) => Math.max(0, s - 1)) }} disabled={step === 0}>السابق</Button>
+        <Button type="button" variant="outline" className="border-[#2D2D2D] bg-transparent text-white hover:bg-white/10" onClick={() => { setError(null); setStep((s) => Math.max(0, s - 1)) }} disabled={step === 0}>السابق</Button>
         {step < STEPS.length - 1 ? (
-          <Button type="button" disabled={!canAdvance()} onClick={() => { setError(null); setStep((s) => s + 1) }} className="bg-[#17375E] text-white hover:bg-[#102033] disabled:opacity-40">التالي</Button>
+          <Button type="button" disabled={!canAdvance()} onClick={() => { setError(null); setStep((s) => s + 1) }} className="nextora-button disabled:opacity-40">التالي</Button>
         ) : (
-          <Button type="button" onClick={handleSubmit} disabled={pending || !canAdvance()} className="bg-[#17375E] text-white hover:bg-[#102033]">
+          <Button type="button" onClick={handleSubmit} disabled={pending || !canAdvance()} className="nextora-button">
             {pending ? <Loader2 className="ms-1 size-4 animate-spin" /> : <FileCheck2 className="ms-1 size-4" />}
             {pending ? 'جاري الإرسال...' : 'إرسال للمراجعة'}
           </Button>

@@ -39,10 +39,10 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-market-line bg-white/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-market-line bg-[#0D0D0D]/82 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/marketplace" className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-market-navy text-white shadow-sm">
+          <span className="flex size-10 items-center justify-center rounded-2xl border border-market-line bg-white text-[#0D0D0D] shadow-sm">
             <Building2 className="size-5" />
           </span>
           <span className="min-w-0">
@@ -52,10 +52,10 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-bold text-market-slate md:flex">
-          <Link href="/marketplace" className="text-market-navy">السوق</Link>
-          <Link href="/marketplace#developers" className="transition hover:text-market-navy">المطورون</Link>
+          <Link href="/marketplace" className="text-white">السوق</Link>
+          <Link href="/marketplace#developers" className="transition hover:text-white">المطورون</Link>
           <Link href="/marketplace/buy-points" className="transition hover:text-market-teal">شراء نقاط</Link>
-          <Link href="/marketplace/add-property" className="transition hover:text-market-navy">أضف وحدتك</Link>
+          <Link href="/marketplace/add-property" className="transition hover:text-white">أضف وحدتك</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <Button
                 type="button"
                 onClick={() => router.push('/marketplace/add-property')}
-                className="hidden rounded-2xl bg-market-navy text-white hover:bg-market-ink sm:inline-flex"
+                className="nextora-button hidden rounded-2xl sm:inline-flex"
               >
                 <Plus className="ms-1 size-4" />
                 أضف وحدة
@@ -75,7 +75,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
               <DropdownMenu>
                 <DropdownMenuTrigger className="rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-market-teal/30">
                   <Avatar className="size-10 border border-market-line">
-                    <AvatarFallback className="bg-market-mist text-sm font-black text-market-navy">
+                    <AvatarFallback className="bg-market-mist text-sm font-black text-white">
                       {getInitial(user.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -118,20 +118,20 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
             </>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => router.push('/login')} className="rounded-2xl text-market-navy">
+              <Button variant="ghost" onClick={() => router.push('/login')} className="rounded-2xl text-white hover:bg-white/10">
                 <LogIn className="ms-1 size-4" />
                 دخول
               </Button>
               <Button
                 onClick={() => router.push('/register?role=client')}
-                className="rounded-2xl bg-market-navy text-white hover:bg-market-ink"
+                className="nextora-button rounded-2xl"
               >
                 <UserRound className="ms-1 size-4" />
                 تسجيل عميل
               </Button>
               <Button
                 onClick={() => router.push('/register?role=partner')}
-                className="hidden rounded-2xl bg-market-gold text-white hover:bg-[#b07e36] sm:inline-flex"
+                className="hidden rounded-2xl border border-market-line bg-white/8 text-white hover:bg-white/14 sm:inline-flex"
               >
                 <Handshake className="ms-1 size-4" />
                 FAST PARTNERS

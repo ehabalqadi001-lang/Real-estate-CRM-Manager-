@@ -31,10 +31,10 @@ export default async function BuyPointsPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="ltr">
+    <div className="nextora-market min-h-screen text-[#102033]" dir="ltr">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8">
-        <section className="rounded-lg border border-[#DDE6E4] bg-white p-6 shadow-sm">
+        <section className="nextora-card rounded-lg p-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
               <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-[#27AE60]">
@@ -86,7 +86,7 @@ export default async function BuyPointsPage({
 
 function InfoCard({ icon: Icon, title, body }: { icon: typeof Wallet; title: string; body: string }) {
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+    <div className="nextora-card rounded-lg p-5">
       <Icon className="size-5 text-[#27AE60]" />
       <p className="mt-3 font-black">{title}</p>
       <p className="mt-2 text-sm font-semibold leading-6 text-[#64748B]">{body}</p>
