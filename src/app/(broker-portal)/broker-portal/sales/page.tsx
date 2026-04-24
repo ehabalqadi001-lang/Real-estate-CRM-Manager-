@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
 import { submitBrokerSale } from '@/app/dashboard/partners/actions'
 import { SaleFormFields } from './SaleFormFields'
+import { BrokerSubmitButton } from './BrokerSubmitButton'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'رفع المبيعات | FAST INVESTMENT' }
@@ -172,7 +173,7 @@ export default async function BrokerSalesPage() {
             </label>
 
             <textarea name="notes" rows={3} placeholder="ملاحظات إضافية" className="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm font-semibold outline-none dark:border-gray-800 dark:bg-gray-950" />
-            <button className="w-full rounded-lg bg-[var(--fi-emerald)] px-4 py-3 text-sm font-black text-white">رفع البيع للمراجعة</button>
+            <BrokerSubmitButton />
           </fieldset>
         </form>
 

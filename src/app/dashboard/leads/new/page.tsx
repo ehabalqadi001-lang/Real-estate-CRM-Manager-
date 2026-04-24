@@ -3,6 +3,7 @@ import { ArrowRight, Building2, DollarSign, Mail, Phone, User } from 'lucide-rea
 import Link from 'next/link'
 import { addLead } from '../actions'
 import SubmitLeadButton from './SubmitLeadButton'
+import { NewLeadForm } from './NewLeadForm'
 
 async function createLeadAction(formData: FormData) {
   'use server'
@@ -42,7 +43,7 @@ export default async function NewLeadPage({ searchParams }: PageProps) {
             </div>
           )}
 
-          <form action={createLeadAction} className="space-y-5">
+          <NewLeadForm action={createLeadAction}>
             <div className="space-y-1.5">
               <label className="flex items-center gap-2 text-sm font-black text-slate-700">
                 <User size={16} /> اسم العميل
@@ -112,7 +113,7 @@ export default async function NewLeadPage({ searchParams }: PageProps) {
             <div className="border-t border-slate-100 pt-5">
               <SubmitLeadButton />
             </div>
-          </form>
+          </NewLeadForm>
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ import {
   Settings,
   ShieldCheck,
   Ticket,
+  UserCheck,
   UserCog,
   Users,
   Vault,
@@ -69,6 +70,8 @@ export const dashboardNavigation: NavigationGroup[] = [
     items: [
       { title: 'Partner Relationship Management', href: '/dashboard/partners', permission: 'broker.manage', icon: Handshake },
       { title: 'Broker Management', href: '/dashboard/brokers', permission: 'broker.view.company', icon: ShieldCheck },
+      { title: 'Account Manager Portal', href: '/dashboard/account-manager', permission: 'account_manager.view_portfolio', icon: UserCheck },
+      { title: 'تعيين Account Managers', href: '/dashboard/hr/assign-managers', permission: 'broker.assign_manager', icon: UserCog },
       { title: 'Team', href: '/dashboard/team', permission: 'team.view', icon: ClipboardCheck },
       { title: 'Work Cells', href: '/dashboard/cells', permission: 'team.manage', icon: Network },
     ],

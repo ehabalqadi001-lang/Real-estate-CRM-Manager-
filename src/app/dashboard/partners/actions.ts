@@ -422,25 +422,48 @@ export async function reviewBrokerSale(formData: FormData) {
     return
   }
 
+  // Create deal record so the sale appears in /dashboard/deals and /dashboard/contracts
+  const dealStage = sale.stage === 'contract' ? 'Contracted' : 'Won'
+  const { data: deal } = await service.from('deals').insert({
+    title: `شريك - ${sale.client_name} - ${sale.project_name}`,
+    client_name: sale.client_name,
+    lead_id: null,
+    unit_id: null,
+    agent_id: sale.broker_user_id,
+    company_id: sale.company_id,
+    final_price: sale.deal_value,
+    unit_value: sale.deal_value,
+    value: sale.deal_value,
+    amount: sale.deal_value,
+    discount: 0,
+    stage: dealStage,
+    status: 'won',
+    contract_signed_at: new Date().toISOString(),
+  }).select('id').maybeSingle()
+
   const { data: commission, error: commissionError } = await service.from('commissions').insert({
+    deal_id: deal?.id ?? null,
     agent_id: sale.broker_user_id,
     company_id: sale.company_id,
     amount: sale.broker_commission_amount,
     total_amount: sale.gross_commission,
+    deal_value: sale.deal_value,
+    percentage: sale.broker_commission_rate,
+    commission_rate: sale.broker_commission_rate,
     gross_deal_value: sale.deal_value,
     gross_commission: sale.gross_commission,
     agent_amount: sale.broker_commission_amount,
-    company_amount: sale.company_commission_amount,
-    commission_rate: sale.broker_commission_rate,
+    company_amount: sale.company_commission_amount ?? 0,
     commission_type: 'broker_partner',
     status: 'approved',
     lifecycle_stage: 'approved',
     broker_sale_submission_id: saleId,
     beneficiary_name: sale.client_name,
     bank_details: JSON.stringify(sale.bank_details ?? {}),
-    notes: `BRM sale ${sale.project_name} - ${sale.stage}`,
+    notes: `BRM ${sale.project_name} - ${sale.stage}`,
     approved_by: session.user.id,
     approved_at: new Date().toISOString(),
+    country_code: 'EG',
   }).select('id').single()
 
   if (commissionError) throw new Error(commissionError.message)
@@ -462,6 +485,8 @@ export async function reviewBrokerSale(formData: FormData) {
     type: 'success',
   })
   revalidatePath('/dashboard/partners')
+  revalidatePath('/dashboard/deals')
+  revalidatePath('/dashboard/contracts')
   revalidatePath('/dashboard/commissions')
   revalidatePath('/broker-portal/sales')
   revalidatePath('/broker-portal/commissions')

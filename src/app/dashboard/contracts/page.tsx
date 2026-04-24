@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { FileText, Plus, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react'
+import { ExternalLink, FileText, Plus, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,7 +118,10 @@ export default async function ContractsPage() {
                   return (
                     <tr key={deal.id} className="hover:bg-[var(--fi-soft)] transition-colors">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-[var(--fi-ink)]">{deal.title ?? 'عقد'}</p>
+                        <Link href={`/dashboard/deals/${deal.id}`} className="group flex items-center gap-1.5">
+                          <p className="font-semibold text-[var(--fi-ink)] group-hover:text-[var(--fi-emerald)]">{deal.title ?? 'عقد'}</p>
+                          <ExternalLink size={12} className="shrink-0 text-[var(--fi-muted)] opacity-0 group-hover:opacity-100" />
+                        </Link>
                         <p className="text-xs text-[var(--fi-muted)]">{deal.id.slice(0, 8)}...</p>
                       </td>
                       <td className="px-4 py-3 text-[var(--fi-muted)]">{deal.client_name ?? '—'}</td>
