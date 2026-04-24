@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 
-type Developer = { id: string; name: string; name_ar: string | null }
+type Developer = { id: string; name: string; name_ar: string | null; region: string | null }
 type Project = { id: string; name: string; developer_id: string }
 type CommissionRate = {
   developer_id: string | null
@@ -81,7 +81,9 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
         >
           <option value="">اختر المطور…</option>
           {developers.map((d) => (
-            <option key={d.id} value={d.id}>{d.name_ar ?? d.name}</option>
+            <option key={d.id} value={d.id}>
+              {d.name_ar ?? d.name}{d.region && d.region !== 'متعدد المناطق' ? ` — ${d.region}` : ''}
+            </option>
           ))}
         </select>
       </label>

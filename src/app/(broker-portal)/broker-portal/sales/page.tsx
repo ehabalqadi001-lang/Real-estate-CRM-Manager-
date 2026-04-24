@@ -56,7 +56,7 @@ export default async function BrokerSalesPage() {
       .eq('broker_user_id', session.user.id)
       .order('created_at', { ascending: false })
       .limit(100),
-    service.from('developers').select('id, name, name_ar').eq('active', true).order('name'),
+    service.from('developers').select('id, name, name_ar, region').eq('active', true).order('name'),
     service.from('projects').select('id, name, developer_id').eq('status', 'active').order('name'),
     service.from('commission_rates').select('developer_id, project_id, rate_percentage, agent_share_percentage').order('project_id', { ascending: false }),
     service
@@ -126,7 +126,7 @@ export default async function BrokerSalesPage() {
 
               {/* Developer + Project dependent selects with commission preview */}
               <SaleFormFields
-                developers={developers ?? []}
+                developers={(developers ?? []) as { id: string; name: string; name_ar: string | null; region: string | null }[]}
                 projects={projects ?? []}
                 rates={(rates ?? []) as { developer_id: string | null; project_id: string | null; rate_percentage: number; agent_share_percentage: number }[]}
                 exception={null}

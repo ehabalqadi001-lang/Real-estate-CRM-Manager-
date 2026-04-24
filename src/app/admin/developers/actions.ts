@@ -10,6 +10,7 @@ export async function saveDeveloper(formData: FormData) {
   await requirePermission('admin.view')
   const id = String(formData.get('id') ?? '')
   const supabase = await createRawClient()
+  const regions = formData.getAll('regions').map(String).filter(Boolean)
   const payload = {
     name: String(formData.get('name') ?? ''),
     name_ar: String(formData.get('name_ar') ?? ''),
@@ -18,6 +19,7 @@ export async function saveDeveloper(formData: FormData) {
     website: String(formData.get('website') ?? '') || null,
     tier: String(formData.get('tier') ?? 'standard'),
     active: formData.get('active') === 'on',
+    region: regions.length > 0 ? regions.join(', ') : 'متعدد المناطق',
   }
   if (id) await supabase.from('developers').update(payload).eq('id', id)
   else await supabase.from('developers').insert(payload)

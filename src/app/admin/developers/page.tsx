@@ -8,6 +8,20 @@ import { deletePartnerCommissionException, saveCommissionRate, saveDeveloper, sa
 
 export const dynamic = 'force-dynamic'
 
+const AREAS = [
+  'NEW CAPITAL',
+  'NEW CAIRO',
+  '6TH OF OCTOBER',
+  'ZAYED',
+  'NEW ZAYED',
+  'NORTH COAST',
+  'AIN SOKHNA',
+  'SHEROUK',
+  'HELIOPOLIS',
+  'NEW HELIOPOLIS',
+  'AL OBOUR CITY',
+] as const
+
 export default async function AdminDevelopersPage() {
   await requirePermission('admin.view')
   const service = createServiceRoleClient()
@@ -19,7 +33,7 @@ export default async function AdminDevelopersPage() {
     { data: exceptions },
     { data: partners },
   ] = await Promise.all([
-    service.from('developers').select('id, name, name_ar, email, phone, tier, active').order('name'),
+    service.from('developers').select('id, name, name_ar, email, phone, tier, active, region').order('name'),
     service.from('projects').select('id, name, developer_id').order('name'),
     service.from('commission_rates').select('*').order('created_at', { ascending: false }),
     service
@@ -59,6 +73,20 @@ export default async function AdminDevelopersPage() {
                 <option value="standard">Standard</option>
                 <option value="basic">Basic</option>
               </select>
+
+              {/* Regions */}
+              <div className="space-y-1.5">
+                <Label>المناطق الجغرافية</Label>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border bg-muted/30 p-3">
+                  {AREAS.map((area) => (
+                    <label key={area} className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
+                      <input type="checkbox" name="regions" value={area} className="accent-emerald-600" />
+                      {area}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <label className="flex items-center gap-2 text-sm">
                 <input name="active" type="checkbox" defaultChecked /> نشط
               </label>
@@ -152,14 +180,23 @@ export default async function AdminDevelopersPage() {
           <CardHeader><CardTitle>المطورون ({developers?.length ?? 0})</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {developers?.map((d) => (
-              <div key={d.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <p className="font-black">{d.name_ar ?? d.name}</p>
-                  <p className="text-xs text-muted-foreground">{d.email ?? d.phone ?? '—'} · {d.tier}</p>
+              <div key={d.id} className="rounded-lg border p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-black">{d.name_ar ?? d.name}</p>
+                    <p className="text-xs text-muted-foreground">{d.email ?? d.phone ?? '—'} · {d.tier}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${d.active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {d.active ? 'نشط' : 'معطل'}
+                  </span>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${d.active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {d.active ? 'نشط' : 'معطل'}
-                </span>
+                {d.region && d.region !== 'متعدد المناطق' && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {d.region.split(',').map((r: string) => r.trim()).filter(Boolean).map((r: string) => (
+                      <span key={r} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-blue-700">{r}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </CardContent>
