@@ -30,7 +30,3 @@ async function logout(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return logout(request)
 }
-
-export async function GET(request: NextRequest) {
-  return logout(request)
-}

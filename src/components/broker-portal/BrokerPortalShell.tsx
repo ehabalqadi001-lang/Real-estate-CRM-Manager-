@@ -115,13 +115,12 @@ export default function BrokerPortalShell({ profile, children }: Props) {
               الانتقال للوحة الرئيسية
             </Link>
           )}
-          <Link
-            href="/auth/logout"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            تسجيل الخروج
-          </Link>
+          <form action="/auth/logout" method="post">
+            <button type="submit" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full">
+              <LogOut className="w-4 h-4" />
+              تسجيل الخروج
+            </button>
+          </form>
         </div>
       </aside>
 
