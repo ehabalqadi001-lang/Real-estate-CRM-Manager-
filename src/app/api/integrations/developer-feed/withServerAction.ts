@@ -47,7 +47,7 @@ export function withServerAction<TInput, TOutput>(
       
       const parsed = schema.safeParse(inputData)
       if (!parsed.success) {
-        return { success: false, error: parsed.error.errors[0].message }
+        return { success: false, error: parsed.error.issues[0]?.message ?? 'Validation error' }
       }
 
       // 3. Execute Handler
