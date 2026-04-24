@@ -1,4 +1,4 @@
-import { IngestionService } from './IngestionService'
+import { IngestionService } from '@/domains/inventory/services/IngestionService'
 
 export class ExcelParserService {
   /**
