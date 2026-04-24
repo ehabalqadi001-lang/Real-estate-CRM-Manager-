@@ -98,17 +98,24 @@ Dashboards
 
 ## 5. Database Schema
 
-هذا schema يكمّل الجداول الموجودة حالياً. الجداول في `public` يجب أن يكون عليها RLS. الجداول الحساسة المرتبطة بالمفاتيح والـ secrets لا تخزن secret خام؛ يتم تخزين `secret_ref` فقط.
+هذا schema يكمّل الجداول الموجودة حالياً. الجداول في `public` يجب أن يكون عليها RLS. الجداول الحساسة المرتبطة بالمفاتيح والـ secrets لا تخزن secret خام؛ يتم تخزين `secret_ref` فقط (يُفضل استخدام Supabase Vault).
+
+**ملاحظات هندسية إضافية:**
+- يجب إنشاء فهارس (Indexes) على كافة الـ Foreign Keys.
+- يفضل إضافة حقل `updated_at` مدعوم بـ Database Trigger لمعظم الجداول الأساسية.
+- تم استبدال بعض `on delete cascade` بالاعتماد على Soft Deletes لحماية البيانات التاريخية للمبيعات.
 
 ```sql
 -- Developers and stakeholder access.
 create table if not exists public.developer_accounts (
   id uuid primary key default gen_random_uuid(),
-  developer_id uuid not null references public.developers(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  developer_id uuid not null references public.developers(id) on delete restrict,
+  user_id uuid not null references auth.users(id) on delete restrict,
   role text not null check (role in ('developer_admin','developer_sales','developer_manager','content_manager','viewer')),
   status text not null default 'active' check (status in ('active','suspended','pending')),
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
   unique (developer_id, user_id)
 );
 
@@ -127,7 +134,7 @@ create table if not exists public.developer_projects_access (
 -- API Gateway registry.
 create table if not exists public.developer_api_clients (
   id uuid primary key default gen_random_uuid(),
-  developer_id uuid not null references public.developers(id) on delete cascade,
+  developer_id uuid not null references public.developers(id) on delete restrict,
   company_id uuid references public.companies(id) on delete cascade,
   name text not null,
   client_key text not null unique,
@@ -183,7 +190,8 @@ alter table public.units
   add column if not exists media_urls text[] not null default '{}'::text[],
   add column if not exists video_url text,
   add column if not exists floorplan_config jsonb not null default '{}'::jsonb,
-  add column if not exists inventory_hash text;
+  add column if not exists inventory_hash text,
+  add column if not exists deleted_at timestamptz;
 
 create table if not exists public.unit_price_history (
   id uuid primary key default gen_random_uuid(),
@@ -232,7 +240,7 @@ create table if not exists public.masked_call_sessions (
   company_id uuid references public.companies(id) on delete cascade,
   developer_id uuid references public.developers(id) on delete set null,
   project_id uuid references public.projects(id) on delete set null,
-  lead_id uuid references public.leads(id) on delete cascade,
+  lead_id uuid references public.leads(id) on delete restrict,
   agent_id uuid references auth.users(id) on delete set null,
   developer_user_id uuid references auth.users(id) on delete set null,
   from_masked_number text not null,
@@ -256,7 +264,7 @@ create table if not exists public.realtime_chat_threads (
   developer_id uuid references public.developers(id) on delete set null,
   project_id uuid references public.projects(id) on delete set null,
   unit_id uuid references public.units(id) on delete set null,
-  lead_id uuid references public.leads(id) on delete cascade,
+  lead_id uuid references public.leads(id) on delete restrict,
   assigned_agent_id uuid references auth.users(id) on delete set null,
   assigned_developer_user_id uuid references auth.users(id) on delete set null,
   status text not null default 'open' check (status in ('open','waiting','closed','archived')),
@@ -296,7 +304,7 @@ create table if not exists public.meeting_bookings (
   company_id uuid references public.companies(id) on delete cascade,
   developer_id uuid references public.developers(id) on delete set null,
   project_id uuid references public.projects(id) on delete set null,
-  lead_id uuid references public.leads(id) on delete cascade,
+  lead_id uuid references public.leads(id) on delete restrict,
   agent_id uuid references auth.users(id) on delete set null,
   developer_user_id uuid references auth.users(id) on delete set null,
   channel text not null default 'office' check (channel in ('office','phone','zoom','site_visit')),
@@ -388,8 +396,8 @@ on public.masked_call_sessions
 for select
 to authenticated
 using (
-  public.current_user_role() in ('super_admin','platform_admin')
-  or company_id = public.current_company_id()
+  (select auth.jwt() -> 'app_metadata' ->> 'role') in ('super_admin','platform_admin')
+  or company_id = (select auth.jwt() -> 'app_metadata' ->> 'company_id')::uuid
   or agent_id = auth.uid()
   or developer_user_id = auth.uid()
 );

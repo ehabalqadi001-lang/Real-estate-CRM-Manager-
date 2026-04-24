@@ -26,9 +26,33 @@ interface Props {
 }
 
 export function SaleFormFields({ developers, projects, rates, allExceptions }: Props) {
+  const [region, setRegion] = useState('')
+  const [devSearch, setDevSearch] = useState('')
   const [developerId, setDeveloperId] = useState('')
   const [projectId, setProjectId] = useState('')
   const [dealValue, setDealValue] = useState(0)
+
+  const regions = useMemo(() => {
+    const seen = new Set<string>()
+    const result: string[] = []
+    for (const d of developers) {
+      if (d.region && !seen.has(d.region)) {
+        seen.add(d.region)
+        result.push(d.region)
+      }
+    }
+    return result.sort()
+  }, [developers])
+
+  const visibleDevelopers = useMemo(() => {
+    let list = developers
+    if (region) list = list.filter((d) => d.region === region)
+    if (devSearch.trim()) {
+      const q = devSearch.trim().toLowerCase()
+      list = list.filter((d) => (d.name_ar ?? d.name).toLowerCase().includes(q) || d.name.toLowerCase().includes(q))
+    }
+    return list
+  }, [developers, region, devSearch])
 
   const filteredProjects = useMemo(
     () => (developerId ? projects.filter((p) => p.developer_id === developerId) : []),
@@ -69,23 +93,49 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
 
   return (
     <>
-      {/* Developer select */}
+      {/* Region filter */}
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">المنطقة</span>
+        <select
+          value={region}
+          onChange={(e) => { setRegion(e.target.value); setDeveloperId(''); setProjectId(''); setDevSearch('') }}
+          className="field"
+        >
+          <option value="">كل المناطق</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </label>
+
+      {/* Developer search + select */}
       <label className="block">
         <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">المطور</span>
+        <input
+          type="search"
+          placeholder="ابحث عن مطور…"
+          value={devSearch}
+          onChange={(e) => { setDevSearch(e.target.value); setDeveloperId(''); setProjectId('') }}
+          className="field mb-1.5"
+        />
         <select
           name="developerId"
           required
           value={developerId}
           onChange={(e) => { setDeveloperId(e.target.value); setProjectId('') }}
           className="field"
+          size={visibleDevelopers.length > 0 && (region || devSearch) ? Math.min(visibleDevelopers.length + 1, 6) : 1}
         >
           <option value="">اختر المطور…</option>
-          {developers.map((d) => (
+          {visibleDevelopers.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name_ar ?? d.name}{d.region && d.region !== 'متعدد المناطق' ? ` — ${d.region}` : ''}
             </option>
           ))}
         </select>
+        {(region || devSearch) && visibleDevelopers.length === 0 && (
+          <p className="mt-1 text-xs font-semibold text-red-500">لا يوجد مطور مطابق</p>
+        )}
       </label>
 
       {/* Project select — filtered by developer */}

@@ -10,6 +10,8 @@ import {
   Megaphone,
   ShieldCheck,
   Users,
+  UserCog,
+  Briefcase,
 } from 'lucide-react'
 import { requirePermission } from '@/shared/rbac/require-permission'
 
@@ -94,6 +96,14 @@ const adminGroups = [
     items: [
       { href: '/admin/financials', label: 'الماليات', icon: CircleDollarSign },
       { href: '/admin/super-dashboard', label: 'SaaS Tenants', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Account Managers & HR',
+    items: [
+      { href: '/dashboard/account-manager', label: 'لوحة Account Managers', icon: Briefcase },
+      { href: '/dashboard/hr/assign-managers', label: 'تعيين AMs (HR)', icon: UserCog },
+      { href: '/dashboard/partners', label: 'إدارة الشركاء', icon: Users },
     ],
   },
 ]
