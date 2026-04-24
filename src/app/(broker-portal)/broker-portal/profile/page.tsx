@@ -1,169 +1,370 @@
-import { createServerClient } from '@/lib/supabase/server'
+import {
+  User, Shield, Building2, CheckCircle, XCircle, Clock,
+  Phone, Mail, MessageSquare, Camera, CreditCard, FileText,
+  Upload, Headphones,
+} from 'lucide-react'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
-import { User, Shield, Building2, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { updateBrokerProfile } from './actions'
 
-async function getBrokerProfile(userId: string) {
-  const supabase = await createServerClient()
-  const { data } = await supabase
-    .from('broker_profiles')
-    .select('*, broker_documents ( id, type, name, status, created_at )')
-    .eq('profile_id', userId)
-    .maybeSingle()
-  return data
-}
+export const dynamic = 'force-dynamic'
+export const metadata = { title: 'ملفي الشخصي | FAST INVESTMENT' }
 
-const VERIFICATION_STATUS: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  pending:      { label: 'في انتظار المراجعة', color: 'text-yellow-600', icon: Clock },
-  under_review: { label: 'قيد المراجعة',       color: 'text-blue-600',   icon: Clock },
-  verified:     { label: 'موثّق ✓',             color: 'text-[var(--fi-emerald)]',  icon: CheckCircle },
-  rejected:     { label: 'مرفوض',               color: 'text-red-600',    icon: XCircle },
-  suspended:    { label: 'موقوف',               color: 'text-orange-600', icon: XCircle },
+const VERIFICATION_STATUS: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
+  pending:      { label: 'في انتظار المراجعة', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200', icon: Clock },
+  under_review: { label: 'قيد المراجعة',       color: 'text-blue-700',   bg: 'bg-blue-50 border-blue-200',   icon: Clock },
+  verified:     { label: 'موثّق ومعتمد ✓',     color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200', icon: CheckCircle },
+  rejected:     { label: 'مرفوض',              color: 'text-red-700',    bg: 'bg-red-50 border-red-200',     icon: XCircle },
+  suspended:    { label: 'موقوف',              color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200', icon: XCircle },
 }
 
 export default async function BrokerProfilePage() {
   const session = await requireSession()
-  const brokerProfile = await getBrokerProfile(session.user.id)
+  const service = createServiceRoleClient()
+
+  const [{ data: brokerProfile }, { data: userProfileData }] = await Promise.all([
+    service
+      .from('broker_profiles')
+      .select('*, broker_documents(id, type, name, status, created_at)')
+      .eq('profile_id', session.user.id)
+      .maybeSingle(),
+    service
+      .from('user_profiles')
+      .select('account_manager_id')
+      .eq('id', session.user.id)
+      .maybeSingle(),
+  ])
+
+  let accountManager: { full_name: string | null; email: string | null; phone?: string | null } | null = null
+  const amId = userProfileData?.account_manager_id
+    ?? (await service.from('partner_applications').select('assigned_account_manager_id').eq('profile_id', session.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle()).data?.assigned_account_manager_id
+
+  if (amId) {
+    const { data: am } = await service
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', amId)
+      .maybeSingle()
+    accountManager = am ?? null
+  }
 
   const status = brokerProfile?.verification_status ?? 'pending'
   const statusCfg = VERIFICATION_STATUS[status] ?? VERIFICATION_STATUS.pending
   const StatusIcon = statusCfg.icon
 
   const completionItems = [
-    { label: 'الاسم الكامل',        done: !!session.profile.full_name },
-    { label: 'رقم الهاتف',          done: true },
-    { label: 'صورة شخصية',          done: !!brokerProfile?.photo_url },
-    { label: 'رقم البطاقة الوطنية', done: !!brokerProfile?.national_id },
-    { label: 'صورة البطاقة',        done: !!brokerProfile?.national_id_url },
-    { label: 'الكارت الضريبي',      done: !!brokerProfile?.tax_card_url },
+    { label: 'الاسم الكامل',         done: !!session.profile.full_name },
+    { label: 'رقم الهاتف',           done: true },
+    { label: 'صورة شخصية',           done: !!brokerProfile?.photo_url },
+    { label: 'رقم البطاقة الوطنية',  done: !!brokerProfile?.national_id },
+    { label: 'صورة البطاقة',         done: !!brokerProfile?.national_id_url },
+    { label: 'الكارت الضريبي',       done: !!brokerProfile?.tax_card_url },
     { label: 'بيانات الحساب البنكي', done: !!brokerProfile?.bank_account_number },
   ]
-  const completionPct = Math.round(
-    (completionItems.filter(i => i.done).length / completionItems.length) * 100
-  )
+  const completionPct = Math.round((completionItems.filter(i => i.done).length / completionItems.length) * 100)
+  const initials = session.profile.full_name?.split(' ').map(w => w[0]).slice(0, 2).join('') || 'و'
 
   return (
-    <div className="space-y-6 max-w-2xl" dir="rtl">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">ملفي الشخصي</h1>
-        <p className="text-gray-500 text-sm mt-1">بياناتك الشخصية ووثائق التوثيق</p>
-      </div>
+    <div className="space-y-5 max-w-2xl" dir="rtl">
 
-      {/* Verification Status Banner */}
-      <div className={`rounded-xl border p-4 flex items-center gap-3 ${
-        status === 'verified'
-          ? 'bg-[var(--fi-soft)] border-green-200 dark:border-green-800'
-          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-      }`}>
-        <StatusIcon className={`w-5 h-5 ${statusCfg.color}`} />
-        <div>
-          <p className={`font-medium text-sm ${statusCfg.color}`}>{statusCfg.label}</p>
-          {brokerProfile?.rejection_reason && (
-            <p className="text-xs text-red-600 mt-0.5">{brokerProfile.rejection_reason}</p>
-          )}
+      {/* ── Header ── */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-xl select-none">
+              {brokerProfile?.photo_url ? (
+                <span className="text-xs font-black text-emerald-600">✓ صورة</span>
+              ) : initials}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">{session.profile.full_name ?? '—'}</h1>
+            <p className="text-sm text-gray-500 truncate">{session.profile.email ?? '—'}</p>
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold ${statusCfg.bg} ${statusCfg.color}`}>
+            <StatusIcon className="w-3.5 h-3.5" />
+            {statusCfg.label}
+          </div>
         </div>
+        {brokerProfile?.rejection_reason && (
+          <p className="mt-3 text-xs font-semibold text-red-600 bg-red-50 rounded-lg px-3 py-2">{brokerProfile.rejection_reason}</p>
+        )}
       </div>
 
-      {/* Profile Completion */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+      {/* ── Completion ── */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[var(--fi-emerald)]" />
+          <span className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+            <Shield className="w-4 h-4 text-emerald-500" />
             اكتمال الملف الشخصي
-          </h2>
-          <span className="text-2xl font-bold text-[var(--fi-emerald)]">{completionPct}%</span>
+          </span>
+          <span className="text-2xl font-black text-emerald-600">{completionPct}%</span>
         </div>
-        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
-          <div
-            className="h-full bg-green-500 rounded-full transition-all"
-            style={{ width: `${completionPct}%` }}
-          />
+        <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
+          <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${completionPct}%` }} />
         </div>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-y-2 gap-x-4">
           {completionItems.map(({ label, done }) => (
             <div key={label} className="flex items-center gap-2 text-sm">
               {done
-                ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                : <XCircle className="w-4 h-4 text-gray-300 shrink-0" />
-              }
+                ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                : <XCircle className="w-3.5 h-3.5 text-gray-300 shrink-0" />}
               <span className={done ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>
                 {label}
               </span>
-              {!done && (
-                <span className="text-xs text-yellow-600 font-medium">مطلوب</span>
-              )}
+              {!done && <span className="text-[10px] font-black text-amber-600">مطلوب</span>}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Personal Info */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <User className="w-4 h-4 text-[var(--fi-emerald)]" />
-          البيانات الشخصية
+      {/* ── Edit Form ── */}
+      <form
+        action={updateBrokerProfile}
+        encType="multipart/form-data"
+        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-5"
+      >
+        <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <User className="w-4 h-4 text-emerald-500" />
+          تحديث البيانات الشخصية
         </h2>
-        <div className="grid grid-cols-1 gap-3">
-          {[
-            { label: 'الاسم الكامل',   value: session.profile.full_name ?? '—' },
-            { label: 'البريد الإلكتروني', value: session.profile.email ?? '—' },
-            { label: 'رقم الهاتف',    value: '—' },
-            { label: 'الرقم القومي',  value: brokerProfile?.national_id ?? '—' },
-            { label: 'رقم الكارت الضريبي', value: brokerProfile?.tax_card_number ?? '—' },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
-              <span className="text-sm text-gray-500">{label}</span>
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Bank Info */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-[var(--fi-emerald)]" />
-          بيانات الحساب البنكي
+        {/* Photo upload */}
+        <Section title="الصورة الشخصية" icon={Camera}>
+          <FileField
+            name="photo"
+            label="رفع صورة شخصية"
+            hint="JPG أو PNG — الحد الأقصى 5 ميجا"
+            accept="image/*"
+            uploaded={!!brokerProfile?.photo_url}
+          />
+        </Section>
+
+        {/* Identity */}
+        <Section title="بيانات الهوية" icon={CreditCard}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="رقم البطاقة الوطنية">
+              <input
+                name="nationalId"
+                defaultValue={brokerProfile?.national_id ?? ''}
+                placeholder="14 رقم"
+                className="pf-input"
+                dir="ltr"
+              />
+            </Field>
+            <Field label="رقم الكارت الضريبي">
+              <input
+                name="taxCardNumber"
+                defaultValue={brokerProfile?.tax_card_number ?? ''}
+                className="pf-input"
+                dir="ltr"
+              />
+            </Field>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 mt-3">
+            <FileField
+              name="nationalIdFile"
+              label="رفع صورة البطاقة"
+              hint="JPG / PDF"
+              accept="image/*,.pdf"
+              uploaded={!!brokerProfile?.national_id_url}
+            />
+            <FileField
+              name="taxCardFile"
+              label="رفع الكارت الضريبي"
+              hint="JPG / PDF"
+              accept="image/*,.pdf"
+              uploaded={!!brokerProfile?.tax_card_url}
+            />
+          </div>
+        </Section>
+
+        {/* Bank */}
+        <Section title="بيانات الحساب البنكي" icon={Building2}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="اسم البنك">
+              <input name="bankName" defaultValue={brokerProfile?.bank_name ?? ''} className="pf-input" />
+            </Field>
+            <Field label="اسم صاحب الحساب">
+              <input name="bankAccountName" defaultValue={brokerProfile?.bank_account_name ?? ''} className="pf-input" />
+            </Field>
+            <Field label="رقم الحساب">
+              <input name="bankAccountNumber" defaultValue={brokerProfile?.bank_account_number ?? ''} className="pf-input" dir="ltr" />
+            </Field>
+            <Field label="رقم الـ IBAN">
+              <input name="bankIban" defaultValue={brokerProfile?.bank_iban ?? ''} placeholder="EG..." className="pf-input" dir="ltr" />
+            </Field>
+          </div>
+        </Section>
+
+        <button
+          type="submit"
+          className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 text-sm transition-colors"
+        >
+          حفظ التغييرات
+        </button>
+      </form>
+
+      {/* ── Account Manager Card ── */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+          <Headphones className="w-4 h-4 text-emerald-500" />
+          Account Manager المسؤول عنك
         </h2>
-        <div className="grid grid-cols-1 gap-3">
-          {[
-            { label: 'البنك',               value: brokerProfile?.bank_name ?? '—' },
-            { label: 'اسم صاحب الحساب',    value: brokerProfile?.bank_account_name ?? '—' },
-            { label: 'رقم الحساب',          value: brokerProfile?.bank_account_number
-              ? '•••••' + brokerProfile.bank_account_number.slice(-4)
-              : '—' },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
-              <span className="text-sm text-gray-500">{label}</span>
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{value}</span>
+        {accountManager ? (
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-lg shrink-0">
+              {accountManager.full_name?.charAt(0) ?? 'م'}
             </div>
-          ))}
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-900 dark:text-white">{accountManager.full_name ?? '—'}</p>
+              <div className="mt-2 space-y-1.5">
+                {accountManager.email && (
+                  <a
+                    href={`mailto:${accountManager.email}`}
+                    className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                    {accountManager.email}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Headphones className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-400">لم يتم تعيين Account Manager بعد</p>
+            <p className="text-xs text-gray-400 mt-1">سيتم التواصل معك بعد مراجعة طلبك</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Contact Us ── */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+          <MessageSquare className="w-4 h-4 text-emerald-500" />
+          تواصل معنا
+        </h2>
+
+        <div className="space-y-3">
+          {/* Hotline */}
+          <ContactRow icon={Phone} label="خط الدعم" value="+20 100 000 0000" href="tel:+201000000000" />
+          {/* WhatsApp */}
+          <ContactRow icon={Phone} label="واتساب" value="+20 100 000 0000" href="https://wa.me/201000000000" />
+          {/* Email */}
+          <ContactRow icon={Mail} label="البريد الإلكتروني الرسمي" value="partners@fastinvestment.com" href="mailto:partners@fastinvestment.com" />
+          {/* Support note */}
+          <div className="mt-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 p-4">
+            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+              <MessageSquare className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>
+                يمكنك التواصل مع فريق الدعم عبر أي من القنوات أعلاه.
+                ساعات العمل: الأحد — الخميس | ٩ص — ٥م.
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Documents */}
-      {brokerProfile?.broker_documents && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">الوثائق المرفوعة</h2>
-          {brokerProfile.broker_documents.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">لم يتم رفع أي وثائق بعد</p>
-          ) : (
-            <div className="space-y-2">
-              {(brokerProfile.broker_documents as Array<{id:string; name:string; type:string; status:string; created_at:string}>).map(doc => (
+      {/* ── Documents list ── */}
+      {brokerProfile?.broker_documents && (brokerProfile.broker_documents as unknown[]).length > 0 && (
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+          <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+            <FileText className="w-4 h-4 text-emerald-500" />
+            الوثائق المرفوعة
+          </h2>
+          <div className="space-y-2">
+            {(brokerProfile.broker_documents as Array<{ id: string; name: string; type: string; status: string; created_at: string }>)
+              .map(doc => (
                 <div key={doc.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{doc.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    doc.status === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' :
-                    doc.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' :
-                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30'
+                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{doc.name}</span>
+                  <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-black shrink-0 ml-2 ${
+                    doc.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                    doc.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                    'bg-amber-100 text-amber-700'
                   }`}>
                     {doc.status === 'approved' ? 'مقبول' : doc.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
                   </span>
                 </div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       )}
+
+      <style>{`
+        .pf-input {
+          display: block; width: 100%; height: 40px;
+          border-radius: 8px; border: 1px solid rgb(229 231 235);
+          background: rgb(249 250 251); padding: 0 12px;
+          font-size: 14px; font-weight: 600; outline: none;
+        }
+        .pf-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgb(16 185 129 / 14%); }
+        @media (prefers-color-scheme: dark) {
+          .pf-input { background: rgb(17 24 39); border-color: rgb(55 65 81); color: white; }
+        }
+      `}</style>
     </div>
+  )
+}
+
+function Section({ title, icon: Icon, children }: { title: string; icon: typeof User; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+        <Icon className="w-3.5 h-3.5" />
+        {title}
+      </p>
+      {children}
+    </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">{label}</span>
+      {children}
+    </label>
+  )
+}
+
+function FileField({ name, label, hint, accept, uploaded }: {
+  name: string; label: string; hint: string; accept: string; uploaded: boolean;
+}) {
+  return (
+    <label className={`flex items-center gap-3 rounded-xl border-2 border-dashed p-3 cursor-pointer transition-colors ${
+      uploaded
+        ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20'
+        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-950 hover:border-emerald-300'
+    }`}>
+      <Upload className={`w-4 h-4 shrink-0 ${uploaded ? 'text-emerald-500' : 'text-gray-400'}`} />
+      <div className="min-w-0">
+        <p className={`text-xs font-black ${uploaded ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'}`}>
+          {uploaded ? `✓ مرفوع — ${label}` : label}
+        </p>
+        <p className="text-[10px] text-gray-400 mt-0.5">{hint}</p>
+      </div>
+      <input name={name} type="file" accept={accept} className="sr-only" />
+    </label>
+  )
+}
+
+function ContactRow({ icon: Icon, label, value, href }: {
+  icon: typeof Phone; label: string; value: string; href: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+    >
+      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-emerald-600" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-emerald-600 transition-colors" dir="ltr">{value}</p>
+      </div>
+    </a>
   )
 }

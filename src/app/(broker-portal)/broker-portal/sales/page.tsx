@@ -46,12 +46,12 @@ export default async function BrokerSalesPage() {
   const [{ data: brokerProfile }, { data: sales }] = await Promise.all([
     service
       .from('broker_profiles')
-      .select('id, verification_status, bank_name, bank_account_name, bank_account_number, bank_iban')
+      .select('id, verification_status, bank_name, bank_account_name, bank_account_number, bank_iban, developer_commission_rate, broker_commission_rate')
       .eq('profile_id', session.user.id)
       .maybeSingle(),
     service
       .from('broker_sales_submissions')
-      .select('id, client_name, project_name, developer_name, unit_code, deal_value, broker_commission_amount, stage, status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, created_at')
+      .select('id, client_name, project_name, developer_name, unit_code, deal_value, broker_commission_amount, broker_commission_rate, stage, status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, created_at')
       .eq('broker_user_id', session.user.id)
       .order('created_at', { ascending: false })
       .limit(100),
@@ -137,12 +137,6 @@ export default async function BrokerSalesPage() {
               <Field label="قيمة البيع">
                 <input name="dealValue" required type="number" min={0} className="field text-left" dir="ltr" />
               </Field>
-              <Field label="نسبة عمولة المطور %">
-                <input name="developerCommissionRate" type="number" min={0} step="0.01" defaultValue={4} className="field text-left" dir="ltr" />
-              </Field>
-              <Field label="نسبة عمولة الشريك %">
-                <input name="brokerCommissionRate" type="number" min={0} step="0.01" defaultValue={2} className="field text-left" dir="ltr" />
-              </Field>
               <Field label="طريقة الصرف">
                 <select name="payoutMethod" className="field">
                   <option value="bank_transfer">تحويل بنكي</option>
@@ -196,6 +190,7 @@ export default async function BrokerSalesPage() {
                     <span>العميل: {sale.client_name}</span>
                     <span>الوحدة: {sale.unit_code || 'غير محدد'}</span>
                     <span>قيمة البيع: {money(sale.deal_value)} ج.م</span>
+                    <span>نسبة عمولتك: {sale.broker_commission_rate ?? 2}%</span>
                     <span>عمولتك: {money(sale.broker_commission_amount)} ج.م</span>
                     {sale.broker_payout_due_date && <span>موعد الصرف: {sale.broker_payout_due_date}</span>}
                   </div>

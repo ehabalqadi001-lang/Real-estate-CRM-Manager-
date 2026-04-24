@@ -247,7 +247,7 @@ export async function submitBrokerSale(formData: FormData) {
 
   const { data: brokerProfile, error: brokerError } = await service
     .from('broker_profiles')
-    .select('id, profile_id, company_id, verification_status, bank_name, bank_account_name, bank_account_number, bank_iban')
+    .select('id, profile_id, company_id, verification_status, bank_name, bank_account_name, bank_account_number, bank_iban, developer_commission_rate, broker_commission_rate')
     .eq('profile_id', session.user.id)
     .maybeSingle()
 
@@ -264,8 +264,8 @@ export async function submitBrokerSale(formData: FormData) {
     .maybeSingle()
 
   const dealValue = numberValue(formData, 'dealValue')
-  const developerRate = numberValue(formData, 'developerCommissionRate')
-  const brokerRate = numberValue(formData, 'brokerCommissionRate')
+  const developerRate = Number(brokerProfile.developer_commission_rate ?? 4)
+  const brokerRate = Number(brokerProfile.broker_commission_rate ?? 2)
   const grossCommission = Math.round(dealValue * (developerRate / 100))
   const brokerCommission = Math.round(dealValue * (brokerRate / 100))
   const companyCommission = Math.max(grossCommission - brokerCommission, 0)
