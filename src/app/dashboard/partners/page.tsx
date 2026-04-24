@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Banknote, CheckCircle2, Clock, Download, ExternalLink, FileCheck2, FileSpreadsheet, Handshake, UserCheck, XCircle, type LucideIcon } from 'lucide-react'
-import { createServiceRoleClient } from '@/lib/supabase/service'
+import { Banknote, CheckCircle2, Clock, Download, ExternalLink, FileCheck2, FileSpreadsheet, Handshake, UserCheck, XCircle, ChevronRight, ChevronLeft, type LucideIcon } from 'lucide-react'
+import { createServerClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { isManagerRole, isSuperAdmin } from '@/shared/auth/types'
 import {
@@ -14,14 +14,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'إدارة الشركاء | FAST INVESTMENT' }
 
 interface PageProps {
-  searchParams: Promise<{
-    status?: string
-    stage?: string
-    lifecycle?: string
-    developer?: string
-    accountManager?: string
-    payoutDate?: string
-  }>
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 const money = (value: number | null | undefined) =>
@@ -50,7 +43,7 @@ const lifecycleLabels: Record<string, string> = {
   rejected: 'مرفوض',
 }
 
-function exportHref(format: 'pdf' | 'excel', params: PageProps['searchParams'] extends Promise<infer T> ? T : never) {
+function exportHref(format: 'pdf' | 'excel', params: Record<string, string>) {
   const query = new URLSearchParams({ format })
   Object.entries(params).forEach(([key, value]) => {
     if (value) query.set(key, value)
@@ -79,6 +72,7 @@ function collectPartnerDocuments(value: unknown): PartnerDocument[] {
       name: String(record.name ?? label),
       path,
       type: String(record.type ?? label),
+      signedUrl: `/api/documents/download?path=${encodeURIComponent(path)}`
     })
   }
 
@@ -101,9 +95,21 @@ function collectPartnerDocuments(value: unknown): PartnerDocument[] {
 
 export default async function PartnersManagementPage({ searchParams }: PageProps) {
   const session = await requireSession()
-  const params = await searchParams
-  const pdfExportHref = exportHref('pdf', params)
-  const excelExportHref = exportHref('excel', params)
+  
+  const getParam = (val: string | string[] | undefined): string => Array.isArray(val) ? val[0] : val || ''
+  const currentParams: Record<string, string> = {
+    status: getParam(searchParams.status),
+    stage: getParam(searchParams.stage),
+    lifecycle: getParam(searchParams.lifecycle),
+    developer: getParam(searchParams.developer),
+    accountManager: getParam(searchParams.accountManager),
+    payoutDate: getParam(searchParams.payoutDate),
+    appPage: getParam(searchParams.appPage) || '1',
+    salePage: getParam(searchParams.salePage) || '1',
+  }
+
+  const pdfExportHref = exportHref('pdf', currentParams)
+  const excelExportHref = exportHref('excel', currentParams)
 
   if (!isManagerRole(session.profile.role) && !isSuperAdmin(session.profile.role) && session.profile.role !== 'account_manager') {
     return (
@@ -115,46 +121,68 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
     )
   }
 
-  const service = createServiceRoleClient()
-  let salesQuery = service
+  const supabase = await createServerClient()
+
+  const APP_PAGE_SIZE = 10
+  const SALE_PAGE_SIZE = 20
+  const appPage = parseInt(currentParams.appPage, 10)
+  const salePage = parseInt(currentParams.salePage, 10)
+
+  const applyFilters = (query: any) => {
+    let q = query
+    if (currentParams.status) q = q.eq('status', currentParams.status)
+    if (currentParams.stage) q = q.eq('stage', currentParams.stage)
+    if (currentParams.lifecycle) q = q.eq('commission_lifecycle_stage', currentParams.lifecycle)
+    if (currentParams.accountManager) q = q.eq('assigned_account_manager_id', currentParams.accountManager)
+    if (currentParams.payoutDate) q = q.eq('broker_payout_due_date', currentParams.payoutDate)
+    if (currentParams.developer) q = q.ilike('developer_name', `%${currentParams.developer}%`)
+    return q
+  }
+
+  let salesQuery = supabase
     .from('broker_sales_submissions')
-    .select('id, broker_user_id, client_name, client_phone, project_name, developer_name, unit_code, deal_value, gross_commission, broker_commission_amount, company_commission_amount, stage, status, documents_review_status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, commission_id, assigned_account_manager_id, created_at')
+    .select('id, broker_user_id, client_name, client_phone, project_name, developer_name, unit_code, deal_value, gross_commission, broker_commission_amount, company_commission_amount, stage, status, documents_review_status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, commission_id, assigned_account_manager_id, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(100)
+    .range((salePage - 1) * SALE_PAGE_SIZE, salePage * SALE_PAGE_SIZE - 1)
 
-  if (params.status) salesQuery = salesQuery.eq('status', params.status)
-  if (params.stage) salesQuery = salesQuery.eq('stage', params.stage)
-  if (params.lifecycle) salesQuery = salesQuery.eq('commission_lifecycle_stage', params.lifecycle)
-  if (params.accountManager) salesQuery = salesQuery.eq('assigned_account_manager_id', params.accountManager)
-  if (params.payoutDate) salesQuery = salesQuery.eq('broker_payout_due_date', params.payoutDate)
-  if (params.developer) salesQuery = salesQuery.ilike('developer_name', `%${params.developer}%`)
+  salesQuery = applyFilters(salesQuery)
+  const kpiSalesQuery = applyFilters(supabase.from('broker_sales_submissions').select('status, commission_lifecycle_stage, broker_commission_amount'))
 
-  const [{ data: applications }, { data: sales }, { data: accountManagers }] = await Promise.all([
-    service
+  const [
+    { data: applications, count: applicationsCount },
+    { data: sales, count: salesCount },
+    { data: accountManagers },
+    { data: kpiSales },
+    { count: pendingApplicationsCount }
+  ] = await Promise.all([
+    supabase
       .from('partner_applications')
-      .select('id, profile_id, applicant_type, status, full_name, email, phone, company_name, manager_name, manager_phone, owner_phone, facebook_url, review_reason, assigned_account_manager_id, documents, created_at')
+      .select('id, profile_id, applicant_type, status, full_name, email, phone, company_name, manager_name, manager_phone, owner_phone, facebook_url, review_reason, assigned_account_manager_id, documents, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
-      .limit(100),
+      .range((appPage - 1) * APP_PAGE_SIZE, appPage * APP_PAGE_SIZE - 1),
     salesQuery,
-    service
+    supabase
       .from('profiles')
       .select('id, full_name, email, role')
-      .in('role', ['account_manager', 'users_am', 'am_supervisor', 'company_admin', 'branch_manager'])
-      .limit(200),
+      .in('role', ['account_manager', 'users_am', 'am_supervisor', 'company_admin', 'branch_manager']),
+    kpiSalesQuery,
+    supabase.from('partner_applications').select('id', { count: 'exact', head: true }).in('status', ['pending', 'needs_info'])
   ])
 
-  const appRows = await Promise.all((applications ?? []).map(async (application) => {
-    const documents = await Promise.all(collectPartnerDocuments(application.documents).map(async (document) => {
-      const { data } = await service.storage.from('documents').createSignedUrl(document.path, 60 * 10)
-      return { ...document, signedUrl: data?.signedUrl ?? null }
-    }))
-    return { ...application, reviewDocuments: documents }
+  const managerById = new Map((accountManagers ?? []).map((m) => [m.id, m.full_name || m.email || 'Account Manager']))
+
+  const appRows = (applications ?? []).map((application) => ({
+    ...application,
+    reviewDocuments: collectPartnerDocuments(application.documents),
+    assignedManagerName: application.assigned_account_manager_id
+      ? (managerById.get(application.assigned_account_manager_id) ?? null)
+      : null,
   }))
   const saleRows = sales ?? []
-  const pendingApplications = appRows.filter((item) => item.status === 'pending' || item.status === 'needs_info').length
-  const submittedSales = saleRows.filter((item) => item.status === 'submitted' || item.status === 'under_review').length
-  const approvedSales = saleRows.filter((item) => item.status === 'approved').length
-  const payable = saleRows
+  const pendingApplications = pendingApplicationsCount ?? 0
+  const submittedSales = (kpiSales ?? []).filter((item) => item.status === 'submitted' || item.status === 'under_review').length
+  const approvedSales = (kpiSales ?? []).filter((item) => item.status === 'approved').length
+  const payable = (kpiSales ?? [])
     .filter((item) => item.commission_lifecycle_stage === 'broker_payout_scheduled')
     .reduce((sum, item) => sum + Number(item.broker_commission_amount ?? 0), 0)
 
@@ -173,6 +201,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
             Every approved claim moves revenue forward.
           </div>
         </div>
+        <PaginationControls total={applicationsCount ?? 0} page={appPage} pageSize={APP_PAGE_SIZE} paramName="appPage" searchParams={currentParams} />
       </section>
 
       <section className="sales-card rounded-3xl border border-[var(--fi-line)] bg-white p-5 shadow-sm">
@@ -188,6 +217,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
             FAST INVESTMENT
           </div>
         </div>
+        <PaginationControls total={salesCount ?? 0} page={salePage} pageSize={SALE_PAGE_SIZE} paramName="salePage" searchParams={currentParams} />
       </section>
 
       <section className="grid gap-3 md:grid-cols-4">
@@ -222,8 +252,12 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                 <div className="mt-2 grid gap-2 text-xs font-semibold text-[var(--fi-muted)] md:grid-cols-2">
                   <span>الإيميل: {application.email}</span>
                   <span>الهاتف: {application.phone || application.manager_phone || 'غير محدد'}</span>
-                  <span>المدير: {application.manager_name || 'غير محدد'}</span>
+                  <span>مدير الشركة: {application.manager_name || 'غير محدد'}</span>
                   <span>المالك: {application.owner_phone || 'غير محدد'}</span>
+                  <span className={`col-span-2 flex items-center gap-1 ${application.assignedManagerName ? 'text-[var(--fi-emerald)]' : ''}`}>
+                    Account Manager:{' '}
+                    <strong>{application.assignedManagerName ?? 'غير مُعيَّن'}</strong>
+                  </span>
                 </div>
                 {application.review_reason && (
                   <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs font-bold text-amber-700">{application.review_reason}</p>
@@ -287,19 +321,19 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
             </div>
           </div>
           <form className="mt-4 grid gap-2 md:grid-cols-6" action="/dashboard/partners">
-            <select name="status" defaultValue={params.status ?? ''} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
+            <select name="status" defaultValue={currentParams.status} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل الحالات</option>
               <option value="submitted">قيد المراجعة</option>
               <option value="approved">معتمد</option>
               <option value="rejected">مرفوض</option>
             </select>
-            <select name="stage" defaultValue={params.stage ?? ''} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
+            <select name="stage" defaultValue={currentParams.stage} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل المراحل</option>
               <option value="eoi">EOI</option>
               <option value="reservation">Reservation</option>
               <option value="contract">Contract</option>
             </select>
-            <select name="lifecycle" defaultValue={params.lifecycle ?? ''} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
+            <select name="lifecycle" defaultValue={currentParams.lifecycle} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل دورات العمولة</option>
               <option value="sale_approved">اعتماد البيع</option>
               <option value="claim_submitted_to_developer">مطالبة المطور</option>
@@ -307,15 +341,15 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
               <option value="broker_payout_scheduled">موعد صرف</option>
               <option value="broker_paid">مصروف</option>
             </select>
-            <select name="accountManager" defaultValue={params.accountManager ?? ''} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
+            <select name="accountManager" defaultValue={currentParams.accountManager} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل Account Managers</option>
               {(accountManagers ?? []).map((manager) => (
                 <option key={manager.id} value={manager.id}>{manager.full_name || manager.email}</option>
               ))}
             </select>
-            <input name="developer" defaultValue={params.developer ?? ''} placeholder="بحث بالمطور" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
+            <input name="developer" defaultValue={currentParams.developer} placeholder="بحث بالمطور" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
             <div className="grid grid-cols-[1fr_auto] gap-2">
-              <input name="payoutDate" defaultValue={params.payoutDate ?? ''} type="date" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
+              <input name="payoutDate" defaultValue={currentParams.payoutDate} type="date" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
               <button className="sales-primary h-10 rounded-xl px-3 text-xs font-black text-white">فلترة</button>
             </div>
           </form>
@@ -358,6 +392,29 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
         </div>
       </section>
     </main>
+  )
+}
+
+function PaginationControls({ total, page, pageSize, paramName, searchParams }: { total: number, page: number, pageSize: number, paramName: string, searchParams: Record<string, string> }) {
+  const totalPages = Math.ceil(total / pageSize)
+  if (totalPages <= 1) return null
+
+  const buildUrl = (p: number) => {
+    const query = new URLSearchParams(searchParams)
+    query.set(paramName, p.toString())
+    return `?${query.toString()}`
+  }
+
+  return (
+    <div className="flex items-center justify-between border-t border-[var(--fi-line)] p-4 bg-white rounded-b-3xl">
+      <p className="text-xs text-[var(--fi-muted)] font-bold">
+        عرض {((page - 1) * pageSize) + 1} إلى {Math.min(page * pageSize, total)} من {total}
+      </p>
+      <div className="flex gap-2">
+        {page > 1 && <Link href={buildUrl(page - 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]"><ChevronRight className="size-4 ml-1" /> السابق</Link>}
+        {page < totalPages && <Link href={buildUrl(page + 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">التالي <ChevronLeft className="size-4 mr-1" /></Link>}
+      </div>
+    </div>
   )
 }
 

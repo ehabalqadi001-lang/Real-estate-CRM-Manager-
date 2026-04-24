@@ -203,18 +203,24 @@ async function assignPartnerAccountManagerCore(formData: FormData): Promise<Part
   if (!manager) throw new Error('Account Manager غير موجود')
   if (!applicationId || !accountManagerId) throw new Error('بيانات التعيين غير مكتملة')
 
-  const { error } = await service
-    .from('partner_applications')
-    .update({ assigned_account_manager_id: accountManagerId })
-    .eq('id', applicationId)
+  const [{ error }, { error: profileError }, { error: salesError }] = await Promise.all([
+    service
+      .from('partner_applications')
+      .update({ assigned_account_manager_id: accountManagerId })
+      .eq('id', applicationId),
+    service
+      .from('user_profiles')
+      .update({ account_manager_id: accountManagerId })
+      .eq('id', application.profile_id),
+    service
+      .from('broker_sales_submissions')
+      .update({ assigned_account_manager_id: accountManagerId })
+      .eq('broker_user_id', application.profile_id)
+      .in('status', ['draft', 'submitted', 'under_review', 'approved']),
+  ])
 
   if (error) throw new Error(error.message)
-  const { error: salesError } = await service
-    .from('broker_sales_submissions')
-    .update({ assigned_account_manager_id: accountManagerId })
-    .eq('broker_user_id', application.profile_id)
-    .in('status', ['draft', 'submitted', 'under_review', 'approved'])
-
+  if (profileError) throw new Error(profileError.message)
   if (salesError) throw new Error(salesError.message)
   await createServiceNotification({
     userId: accountManagerId,
