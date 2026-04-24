@@ -1,11 +1,11 @@
 import {
-  User, Shield, Building2, CheckCircle, XCircle, Clock,
-  Phone, Mail, MessageSquare, Camera, CreditCard, FileText,
-  Upload, Headphones,
+  Shield, CheckCircle, XCircle, Clock,
+  Phone, Mail, MessageSquare, FileText,
+  Headphones,
 } from 'lucide-react'
 import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
-import { updateBrokerProfile } from './actions'
+import { BrokerProfileForm } from './BrokerProfileForm'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'ملفي الشخصي | FAST INVESTMENT' }
@@ -119,91 +119,7 @@ export default async function BrokerProfilePage() {
       </div>
 
       {/* ── Edit Form ── */}
-      <form
-        action={updateBrokerProfile}
-        encType="multipart/form-data"
-        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-5"
-      >
-        <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <User className="w-4 h-4 text-emerald-500" />
-          تحديث البيانات الشخصية
-        </h2>
-
-        {/* Photo upload */}
-        <Section title="الصورة الشخصية" icon={Camera}>
-          <FileField
-            name="photo"
-            label="رفع صورة شخصية"
-            hint="JPG أو PNG — الحد الأقصى 5 ميجا"
-            accept="image/*"
-            uploaded={!!brokerProfile?.photo_url}
-          />
-        </Section>
-
-        {/* Identity */}
-        <Section title="بيانات الهوية" icon={CreditCard}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="رقم البطاقة الوطنية">
-              <input
-                name="nationalId"
-                defaultValue={brokerProfile?.national_id ?? ''}
-                placeholder="14 رقم"
-                className="pf-input"
-                dir="ltr"
-              />
-            </Field>
-            <Field label="رقم الكارت الضريبي">
-              <input
-                name="taxCardNumber"
-                defaultValue={brokerProfile?.tax_card_number ?? ''}
-                className="pf-input"
-                dir="ltr"
-              />
-            </Field>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 mt-3">
-            <FileField
-              name="nationalIdFile"
-              label="رفع صورة البطاقة"
-              hint="JPG / PDF"
-              accept="image/*,.pdf"
-              uploaded={!!brokerProfile?.national_id_url}
-            />
-            <FileField
-              name="taxCardFile"
-              label="رفع الكارت الضريبي"
-              hint="JPG / PDF"
-              accept="image/*,.pdf"
-              uploaded={!!brokerProfile?.tax_card_url}
-            />
-          </div>
-        </Section>
-
-        {/* Bank */}
-        <Section title="بيانات الحساب البنكي" icon={Building2}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="اسم البنك">
-              <input name="bankName" defaultValue={brokerProfile?.bank_name ?? ''} className="pf-input" />
-            </Field>
-            <Field label="اسم صاحب الحساب">
-              <input name="bankAccountName" defaultValue={brokerProfile?.bank_account_name ?? ''} className="pf-input" />
-            </Field>
-            <Field label="رقم الحساب">
-              <input name="bankAccountNumber" defaultValue={brokerProfile?.bank_account_number ?? ''} className="pf-input" dir="ltr" />
-            </Field>
-            <Field label="رقم الـ IBAN">
-              <input name="bankIban" defaultValue={brokerProfile?.bank_iban ?? ''} placeholder="EG..." className="pf-input" dir="ltr" />
-            </Field>
-          </div>
-        </Section>
-
-        <button
-          type="submit"
-          className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 text-sm transition-colors"
-        >
-          حفظ التغييرات
-        </button>
-      </form>
+      <BrokerProfileForm uid={session.user.id} brokerProfile={brokerProfile} />
 
       {/* ── Account Manager Card ── */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
@@ -292,61 +208,7 @@ export default async function BrokerProfilePage() {
         </div>
       )}
 
-      <style>{`
-        .pf-input {
-          display: block; width: 100%; height: 40px;
-          border-radius: 8px; border: 1px solid rgb(229 231 235);
-          background: rgb(249 250 251); padding: 0 12px;
-          font-size: 14px; font-weight: 600; outline: none;
-        }
-        .pf-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgb(16 185 129 / 14%); }
-        @media (prefers-color-scheme: dark) {
-          .pf-input { background: rgb(17 24 39); border-color: rgb(55 65 81); color: white; }
-        }
-      `}</style>
     </div>
-  )
-}
-
-function Section({ title, icon: Icon, children }: { title: string; icon: typeof User; children: React.ReactNode }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5" />
-        {title}
-      </p>
-      {children}
-    </div>
-  )
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">{label}</span>
-      {children}
-    </label>
-  )
-}
-
-function FileField({ name, label, hint, accept, uploaded }: {
-  name: string; label: string; hint: string; accept: string; uploaded: boolean;
-}) {
-  return (
-    <label className={`flex items-center gap-3 rounded-xl border-2 border-dashed p-3 cursor-pointer transition-colors ${
-      uploaded
-        ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20'
-        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-950 hover:border-emerald-300'
-    }`}>
-      <Upload className={`w-4 h-4 shrink-0 ${uploaded ? 'text-emerald-500' : 'text-gray-400'}`} />
-      <div className="min-w-0">
-        <p className={`text-xs font-black ${uploaded ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'}`}>
-          {uploaded ? `✓ مرفوع — ${label}` : label}
-        </p>
-        <p className="text-[10px] text-gray-400 mt-0.5">{hint}</p>
-      </div>
-      <input name={name} type="file" accept={accept} className="sr-only" />
-    </label>
   )
 }
 

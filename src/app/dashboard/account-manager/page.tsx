@@ -39,7 +39,7 @@ const statusColors: Record<string, string> = {
 export default async function AccountManagerDashboard({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const session = await requireSession()
 
@@ -51,7 +51,7 @@ export default async function AccountManagerDashboard({
   const amId = session.user.id
   const isAdmin = session.profile.role === 'super_admin' || session.profile.role === 'company_admin' || session.profile.role === 'platform_admin'
 
-  const sp = searchParams as Record<string, string>
+  const sp = (await searchParams) as Record<string, string>
   const filterStatus = sp.status ?? ''
   const filterLifecycle = sp.lifecycle ?? ''
 

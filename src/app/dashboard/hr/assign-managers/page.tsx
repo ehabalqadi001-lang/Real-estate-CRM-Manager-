@@ -28,7 +28,7 @@ type AccountManagerOption = {
 export default async function HrAssignManagersPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const session = await requireSession()
 
@@ -37,7 +37,7 @@ export default async function HrAssignManagersPage({
   }
 
   const service = createServiceRoleClient()
-  const sp = searchParams as Record<string, string>
+  const sp = (await searchParams) as Record<string, string>
   const filterAm = sp.am ?? ''
   const filterStatus = sp.status ?? ''
   const filterSearch = sp.search ?? ''
