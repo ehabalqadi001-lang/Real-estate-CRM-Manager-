@@ -180,11 +180,11 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
   }))
   const saleRows = sales ?? []
   const pendingApplications = pendingApplicationsCount ?? 0
-  const submittedSales = (kpiSales ?? []).filter((item) => item.status === 'submitted' || item.status === 'under_review').length
-  const approvedSales = (kpiSales ?? []).filter((item) => item.status === 'approved').length
+  const submittedSales = (kpiSales ?? []).filter((item: { status: string | null }) => item.status === 'submitted' || item.status === 'under_review').length
+  const approvedSales = (kpiSales ?? []).filter((item: { status: string | null }) => item.status === 'approved').length
   const payable = (kpiSales ?? [])
-    .filter((item) => item.commission_lifecycle_stage === 'broker_payout_scheduled')
-    .reduce((sum, item) => sum + Number(item.broker_commission_amount ?? 0), 0)
+    .filter((item: { commission_lifecycle_stage: string | null }) => item.commission_lifecycle_stage === 'broker_payout_scheduled')
+    .reduce((sum: number, item: { broker_commission_amount: number | null }) => sum + Number(item.broker_commission_amount ?? 0), 0)
 
   return (
     <main className="sales-command space-y-5 p-4 sm:p-6" dir="rtl">
