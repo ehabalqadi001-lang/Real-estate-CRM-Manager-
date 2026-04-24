@@ -2,6 +2,7 @@ import { Banknote, FileUp, Handshake, Landmark, UploadCloud, type LucideIcon } f
 import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
 import { submitBrokerSale } from '@/app/dashboard/partners/actions'
+import { SaleFormFields } from './SaleFormFields'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'رفع المبيعات | FAST INVESTMENT' }
@@ -43,7 +44,7 @@ export default async function BrokerSalesPage() {
   const session = await requireSession()
   const service = createServiceRoleClient()
 
-  const [{ data: brokerProfile }, { data: sales }] = await Promise.all([
+  const [{ data: brokerProfile }, { data: sales }, { data: developers }, { data: projects }, { data: rates }, { data: myExceptions }] = await Promise.all([
     service
       .from('broker_profiles')
       .select('id, verification_status, bank_name, bank_account_name, bank_account_number, bank_iban, developer_commission_rate, broker_commission_rate')
@@ -55,6 +56,13 @@ export default async function BrokerSalesPage() {
       .eq('broker_user_id', session.user.id)
       .order('created_at', { ascending: false })
       .limit(100),
+    service.from('developers').select('id, name, name_ar').eq('active', true).order('name'),
+    service.from('projects').select('id, name, developer_id').eq('status', 'active').order('name'),
+    service.from('commission_rates').select('developer_id, project_id, rate_percentage, agent_share_percentage').order('project_id', { ascending: false }),
+    service
+      .from('partner_commission_exceptions')
+      .select('developer_id, project_id, developer_commission_rate, broker_commission_rate')
+      .eq('profile_id', session.user.id),
   ])
 
   const rows = sales ?? []
@@ -115,12 +123,16 @@ export default async function BrokerSalesPage() {
               <Field label="رقم العميل">
                 <input name="clientPhone" className="field text-left" dir="ltr" />
               </Field>
-              <Field label="المشروع">
-                <input name="projectName" required className="field" />
-              </Field>
-              <Field label="المطور">
-                <input name="developerName" className="field" />
-              </Field>
+
+              {/* Developer + Project dependent selects with commission preview */}
+              <SaleFormFields
+                developers={developers ?? []}
+                projects={projects ?? []}
+                rates={(rates ?? []) as { developer_id: string | null; project_id: string | null; rate_percentage: number; agent_share_percentage: number }[]}
+                exception={null}
+                allExceptions={(myExceptions ?? []) as { developer_id: string; project_id: string | null; developer_commission_rate: number; broker_commission_rate: number }[]}
+              />
+
               <Field label="كود الوحدة">
                 <input name="unitCode" className="field" />
               </Field>
@@ -133,9 +145,6 @@ export default async function BrokerSalesPage() {
                   <option value="reservation">Reservation</option>
                   <option value="contract">Contract</option>
                 </select>
-              </Field>
-              <Field label="قيمة البيع">
-                <input name="dealValue" required type="number" min={0} className="field text-left" dir="ltr" />
               </Field>
               <Field label="طريقة الصرف">
                 <select name="payoutMethod" className="field">

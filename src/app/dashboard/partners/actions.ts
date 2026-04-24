@@ -263,9 +263,54 @@ export async function submitBrokerSale(formData: FormData) {
     .limit(1)
     .maybeSingle()
 
+  const developerId = text(formData, 'developerId') || null
+  const projectId = text(formData, 'projectId') || null
   const dealValue = numberValue(formData, 'dealValue')
-  const developerRate = Number(brokerProfile.developer_commission_rate ?? 4)
-  const brokerRate = Number(brokerProfile.broker_commission_rate ?? 2)
+
+  // Commission lookup priority:
+  // 1. Partner exception — project-specific
+  // 2. Partner exception — developer-wide
+  // 3. Standard commission_rates — project-specific
+  // 4. Standard commission_rates — developer-wide
+  // 5. broker_profiles fallback rates
+  let developerRate = Number(brokerProfile.developer_commission_rate ?? 4)
+  let brokerRate = Number(brokerProfile.broker_commission_rate ?? 2)
+
+  if (developerId) {
+    // Check partner exceptions first
+    const { data: exceptions } = await service
+      .from('partner_commission_exceptions')
+      .select('developer_commission_rate, broker_commission_rate, project_id')
+      .eq('profile_id', session.user.id)
+      .eq('developer_id', developerId)
+
+    const projectEx = exceptions?.find((e) => e.project_id === projectId && projectId)
+    const devEx = exceptions?.find((e) => !e.project_id)
+    const ex = projectEx ?? devEx
+
+    if (ex) {
+      developerRate = Number(ex.developer_commission_rate)
+      brokerRate = Number(ex.broker_commission_rate)
+    } else {
+      // Check standard commission_rates
+      const { data: stdRates } = await service
+        .from('commission_rates')
+        .select('rate_percentage, agent_share_percentage, project_id')
+        .eq('developer_id', developerId)
+        .or(`project_id.eq.${projectId ?? 'null'},project_id.is.null`)
+        .lte('min_value', dealValue)
+        .or('max_value.is.null,max_value.gte.' + dealValue)
+        .order('project_id', { ascending: false })
+        .limit(1)
+
+      const rate = stdRates?.[0]
+      if (rate) {
+        developerRate = Number(rate.rate_percentage)
+        brokerRate = +(Number(rate.rate_percentage) * (Number(rate.agent_share_percentage) / 100)).toFixed(4)
+      }
+    }
+  }
+
   const grossCommission = Math.round(dealValue * (developerRate / 100))
   const brokerCommission = Math.round(dealValue * (brokerRate / 100))
   const companyCommission = Math.max(grossCommission - brokerCommission, 0)
@@ -280,6 +325,8 @@ export async function submitBrokerSale(formData: FormData) {
     client_phone: text(formData, 'clientPhone') || null,
     project_name: text(formData, 'projectName'),
     developer_name: text(formData, 'developerName') || null,
+    developer_id: developerId,
+    project_id: projectId,
     unit_code: text(formData, 'unitCode') || null,
     unit_type: text(formData, 'unitType') || null,
     deal_value: dealValue,
