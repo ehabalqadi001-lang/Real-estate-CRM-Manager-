@@ -1,6 +1,11 @@
-import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation'
+import { getCurrentSession } from '@/shared/auth/session'
+import { isBrokerRole } from '@/shared/auth/types'
 
-export default function RootPage() {
-  // توجيه الزائر فوراً للداشبورد بمجرد فتح الموقع
-  redirect('/dashboard');
+export default async function RootPage() {
+  const session = await getCurrentSession()
+  if (session && isBrokerRole(session.profile.role)) {
+    redirect('/broker-portal')
+  }
+  redirect('/dashboard')
 }

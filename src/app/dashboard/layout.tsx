@@ -1,9 +1,12 @@
+import { redirect } from 'next/navigation'
 import { requireSession } from '@/shared/auth/session'
+import { isBrokerRole } from '@/shared/auth/types'
 import { DashboardShell } from '@/shared/components/app-shell/DashboardShell'
 import { getActiveCompanyContext } from '@/shared/company-context/server'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession()
+  if (isBrokerRole(session.profile.role)) redirect('/broker-portal')
   const companyContext = await getActiveCompanyContext(session)
   const profile = {
     ...session.profile,

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import type { AppProfile } from '@/shared/auth/types'
+import { isBrokerRole } from '@/shared/auth/types'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -105,13 +106,15 @@ export default function BrokerPortalShell({ profile, children }: Props) {
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-1">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            الانتقال للوحة الرئيسية
-          </Link>
+          {!isBrokerRole(profile.role) && (
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              الانتقال للوحة الرئيسية
+            </Link>
+          )}
           <Link
             href="/auth/logout"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

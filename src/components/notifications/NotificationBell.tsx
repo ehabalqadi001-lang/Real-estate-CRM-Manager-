@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NotificationCenter } from './NotificationCenter'
@@ -9,8 +9,8 @@ import { useNotifications } from './useNotifications'
 
 export function NotificationBell({ userId: providedUserId }: { userId?: string }) {
   const [open, setOpen] = useState(false)
-  const [clientUserId, setClientUserId] = useState('')
-  const userId = useMemo(() => providedUserId?.trim() || clientUserId, [clientUserId, providedUserId])
+  const [clientUserId, setClientUserId] = useState(providedUserId ?? '')
+  const userId = providedUserId?.trim() || clientUserId
 
   useEffect(() => {
     if (providedUserId) return

@@ -96,7 +96,7 @@ export async function reviewPartnerApplication(formData: FormData) {
 
   const { data: application, error: appError } = await service
     .from('partner_applications')
-    .select('id, profile_id, applicant_type')
+    .select('id, profile_id, applicant_type, company_id, full_name, company_name')
     .eq('id', applicationId)
     .maybeSingle()
 
@@ -129,12 +129,16 @@ export async function reviewPartnerApplication(formData: FormData) {
     service.from('user_profiles').update({
       status: profileStatus,
     }).eq('id', application.profile_id),
-    service.from('broker_profiles').update({
+    service.from('broker_profiles').upsert({
+      profile_id: application.profile_id,
+      company_id: application.company_id ?? null,
+      display_name: application.full_name || application.company_name || null,
       verification_status: verificationStatus,
       verified_by: approved ? session.user.id : null,
       verified_at: approved ? new Date().toISOString() : null,
       rejection_reason: rejected ? reason || 'تم رفض الطلب' : null,
-    }).eq('profile_id', application.profile_id),
+      onboarding_completed: approved,
+    }, { onConflict: 'profile_id' }),
   ])
 
   if (profileUpdate.error) throw new Error(profileUpdate.error.message)
