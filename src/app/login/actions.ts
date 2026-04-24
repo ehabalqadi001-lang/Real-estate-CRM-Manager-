@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createServiceRoleClient } from '@/lib/supabase/service'
+import { sendWelcomeEmail } from '@/lib/email'
 
 async function getSupabaseClient() {
   const cookieStore = await cookies()
@@ -360,6 +361,12 @@ export async function registerAction(formData: FormData) {
           console.error('Failed to send registration WhatsApp welcome message', error)
         }
       }
+
+      void sendWelcomeEmail({
+        to: email,
+        name: fullName,
+        accountType: isClientRegistration ? 'client' : isCompanyPartner ? 'company' : 'individual',
+      })
     }
   } catch (err: unknown) {
     if (err instanceof Error && (err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err
