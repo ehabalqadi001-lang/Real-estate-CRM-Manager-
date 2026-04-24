@@ -2,15 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { hasPermission, normalizeRole } from '@/lib/permissions'
 import { createClient } from '@/utils/supabase/middleware'
 
-const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/company', '/team', '/commissions']
+const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/company', '/team', '/commissions', '/broker-portal']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  if (!PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next()
 
+  // Always refresh session cookies on every non-static request
   const { supabase, getResponse } = createClient(request)
-
   const { data: { user } } = await supabase.auth.getUser()
+
+  if (!PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return getResponse()
+
   if (!user) return redirect(request, '/login')
 
   const { data: userProfile } = await supabase
@@ -52,7 +54,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/company/:path*', '/team/:path*', '/commissions/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
+  ],
 }
 
 function redirect(request: NextRequest, path: string) {
