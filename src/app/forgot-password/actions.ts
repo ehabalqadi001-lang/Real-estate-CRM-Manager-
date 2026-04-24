@@ -127,30 +127,65 @@ function recoveryEmailHtml(link: string) {
   return `
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
-      </head>
-      <body style="margin:0;padding:0;background:#f7faf8;font-family:Arial,'Tahoma',sans-serif;direction:rtl">
-        <div style="max-width:560px;margin:32px auto;background:#ffffff;border:1px solid #e4ece7;border-radius:16px;overflow:hidden">
-          <div style="background:#17375e;padding:28px 32px">
-            <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:900">Fast Investment CRM</h1>
-            <p style="margin:6px 0 0;color:#dbeafe;font-size:13px">استعادة كلمة المرور</p>
-          </div>
-          <div style="padding:30px 32px;color:#17202a">
-            <h2 style="margin:0 0 12px;font-size:22px;font-weight:900">تعيين كلمة مرور جديدة</h2>
-            <p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.9">
-              وصلنا طلب لاستعادة كلمة المرور لحسابك. اضغط على الزر التالي واختر كلمة مرور جديدة. إذا لم تطلب هذا الإجراء، تجاهل هذه الرسالة.
-            </p>
-            <a href="${link}" style="display:inline-block;background:#27ae60;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:900">
-              استعادة كلمة المرور
-            </a>
-            <p style="margin:24px 0 0;color:#94a3b8;font-size:12px;line-height:1.7;direction:ltr;text-align:left;word-break:break-all">
-              ${link}
-            </p>
-          </div>
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width" />
+    </head>
+    <body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl">
+      <div style="max-width:600px;margin:36px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.10)">
+
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#17375e 100%);padding:32px 36px">
+          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:900;letter-spacing:.5px">FAST INVESTMENT</h1>
+          <p style="margin:5px 0 0;color:rgba(255,255,255,.60);font-size:12px;letter-spacing:.5px">بوابتك الذكية لمستقبل العقارات</p>
         </div>
-      </body>
+
+        <!-- Icon row -->
+        <div style="padding:32px 36px 0">
+          <div style="width:56px;height:56px;background:#fef3c7;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px">
+            <span style="font-size:28px;line-height:1">🔐</span>
+          </div>
+
+          <h2 style="margin:0 0 8px;color:#0f172a;font-size:22px;font-weight:900">استعادة كلمة المرور</h2>
+          <p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.9">
+            تلقّينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في منظومة <strong style="color:#0f172a">FAST INVESTMENT</strong>.
+            اضغط على الزر أدناه لتحديد كلمة مرور جديدة آمنة.
+          </p>
+
+          <!-- Security notice box -->
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px 20px;margin-bottom:28px">
+            <p style="margin:0;color:#92400e;font-size:13px;line-height:1.8">
+              ⚠️ <strong>لم تطلب هذا الإجراء؟</strong> تجاهل هذه الرسالة تماماً — لن يحدث أي تغيير لحسابك.
+              ينتهي هذا الرابط خلال <strong>ساعة واحدة</strong>.
+            </p>
+          </div>
+
+          <!-- CTA Button -->
+          <a href="${link}"
+             style="display:inline-block;background:linear-gradient(135deg,#059669 0%,#047857 100%);color:#fff;text-decoration:none;padding:16px 36px;border-radius:12px;font-size:16px;font-weight:900;letter-spacing:.3px;box-shadow:0 4px 12px rgba(5,150,105,.35)">
+            إعادة تعيين كلمة المرور ←
+          </a>
+
+          <p style="margin:28px 0 0;color:#94a3b8;font-size:12px;line-height:1.7">
+            إذا لم يعمل الزر، انسخ الرابط التالي والصقه في متصفحك:
+          </p>
+          <p style="margin:6px 0 0;color:#64748b;font-size:11px;line-height:1.7;direction:ltr;text-align:left;word-break:break-all;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0">
+            ${link}
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:24px 36px;margin-top:32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center">
+          <p style="margin:0;color:#94a3b8;font-size:11px">
+            مع خالص التحيات، <strong style="color:#64748b">فريق FAST INVESTMENT</strong>
+          </p>
+          <p style="margin:4px 0 0;color:#cbd5e1;font-size:10px">
+            هذا البريد أُرسل تلقائياً — يرجى عدم الرد عليه
+          </p>
+        </div>
+
+      </div>
+    </body>
     </html>
   `
 }
