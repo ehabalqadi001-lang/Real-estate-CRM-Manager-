@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Mail, Star, CheckCircle, XCircle, Search } from 'lucide-react'
+import Link from 'next/link'
+import { Phone, Mail, Star, CheckCircle, XCircle, Search, ExternalLink } from 'lucide-react'
 
 interface Broker {
   id: string
@@ -174,6 +175,11 @@ export default function BrokersList({ brokers }: Props) {
                       ))}
                     </div>
                   )}
+
+                  <Link href={`/dashboard/brokers/${broker.id}`}
+                    className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 py-1.5 text-xs font-bold text-slate-500 transition hover:border-[#00C27C]/40 hover:bg-[#00C27C]/5 hover:text-[#00C27C]">
+                    <ExternalLink size={12} /> عرض الملف الكامل
+                  </Link>
                 </div>
               </div>
             )
@@ -227,6 +233,11 @@ export default function BrokersList({ brokers }: Props) {
                             <Mail size={12} />
                           </a>
                         )}
+                        <Link href={`/dashboard/brokers/${broker.id}`}
+                          className="p-1.5 bg-slate-100 rounded-lg hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-slate-500"
+                          title="عرض الملف الكامل">
+                          <ExternalLink size={12} />
+                        </Link>
                       </div>
                     </td>
                   </tr>
