@@ -454,7 +454,7 @@ export async function reviewBrokerSale(formData: FormData) {
     gross_commission: sale.gross_commission,
     agent_amount: sale.broker_commission_amount,
     company_amount: sale.company_commission_amount ?? 0,
-    commission_type: 'broker_partner',
+    commission_type: 'agent',
     status: 'approved',
     lifecycle_stage: 'approved',
     broker_sale_submission_id: saleId,
