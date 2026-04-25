@@ -28,6 +28,7 @@ export default async function BrokersPage() {
   const { data: brokers = [], error } = await service
     .from('broker_profiles')
     .select('id, profile_id, full_name, display_name, phone, email, tier, status, verification_status, total_sales, total_deals, commission_rate, join_date, specialties, profile_image')
+    .is('deleted_at', null)
     .order('total_sales', { ascending: false })
     .limit(500)
 

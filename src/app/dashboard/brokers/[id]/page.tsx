@@ -108,6 +108,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
     .from('broker_profiles')
     .select('*')
     .eq('id', id)
+    .is('deleted_at', null)
     .maybeSingle()
 
   if (error || !broker) notFound()
