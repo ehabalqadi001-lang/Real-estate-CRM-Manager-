@@ -10,7 +10,7 @@ import { MessageCircle, ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-export default async function MarketplaceDetailPage({ params }: PageProps<'/marketplace/[id]'>) {
+export default async function MarketplaceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()

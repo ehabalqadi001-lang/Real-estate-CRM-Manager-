@@ -20,7 +20,7 @@ export const scaleIn: Variants = {
   show:   { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 320, damping: 25 } },
 }
 
-export const cardHover = {
+export const cardHover: Variants = {
   rest:  { y: 0, scale: 1 },
   hover: { y: -4, scale: 1.015, transition: { type: 'spring', stiffness: 400, damping: 20 } },
 }

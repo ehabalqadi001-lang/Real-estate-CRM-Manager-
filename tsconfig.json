@@ -31,5 +31,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "ai-gateway", "supabase/functions", "mobile"]
+  "exclude": ["node_modules", "ai-gateway", "supabase/functions", "mobile", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
 }
