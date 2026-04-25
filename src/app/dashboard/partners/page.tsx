@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'إدارة الشركاء | FAST INVESTMENT' }
 
 interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 const money = (value: number | null | undefined) =>
@@ -41,6 +41,27 @@ const lifecycleLabels: Record<string, string> = {
   broker_payout_scheduled: 'تم تحديد موعد صرف الشريك',
   broker_paid: 'تم صرف عمولة الشريك',
   rejected: 'مرفوض',
+}
+
+const saleStatusArabic: Record<string, string> = {
+  submitted: 'قيد المراجعة',
+  under_review: 'جارٍ المراجعة',
+  approved: 'معتمدة',
+  rejected: 'مرفوضة',
+}
+
+const saleStatusColors: Record<string, string> = {
+  submitted: 'border-amber-200 bg-amber-50 text-amber-700',
+  under_review: 'border-blue-200 bg-blue-50 text-blue-700',
+  approved: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  rejected: 'border-red-200 bg-red-50 text-red-600',
+}
+
+const docsStatusArabic: Record<string, string> = {
+  pending: 'مستندات: قيد المراجعة',
+  approved: 'مستندات: معتمدة',
+  rejected: 'مستندات: مرفوضة',
+  partially_approved: 'مستندات: معتمدة جزئياً',
 }
 
 function exportHref(format: 'pdf' | 'excel', params: Record<string, string>) {
@@ -95,17 +116,18 @@ function collectPartnerDocuments(value: unknown): PartnerDocument[] {
 
 export default async function PartnersManagementPage({ searchParams }: PageProps) {
   const session = await requireSession()
-  
+  const sp = await searchParams
+
   const getParam = (val: string | string[] | undefined): string => Array.isArray(val) ? val[0] : val || ''
   const currentParams: Record<string, string> = {
-    status: getParam(searchParams.status),
-    stage: getParam(searchParams.stage),
-    lifecycle: getParam(searchParams.lifecycle),
-    developer: getParam(searchParams.developer),
-    accountManager: getParam(searchParams.accountManager),
-    payoutDate: getParam(searchParams.payoutDate),
-    appPage: getParam(searchParams.appPage) || '1',
-    salePage: getParam(searchParams.salePage) || '1',
+    status: getParam(sp.status),
+    stage: getParam(sp.stage),
+    lifecycle: getParam(sp.lifecycle),
+    developer: getParam(sp.developer),
+    accountManager: getParam(sp.accountManager),
+    payoutDate: getParam(sp.payoutDate),
+    appPage: getParam(sp.appPage) || '1',
+    salePage: getParam(sp.salePage) || '1',
   }
 
   const pdfExportHref = exportHref('pdf', currentParams)
@@ -141,12 +163,12 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
 
   let salesQuery = supabase
     .from('broker_sales_submissions')
-    .select('id, broker_user_id, client_name, client_phone, project_name, developer_name, unit_code, deal_value, gross_commission, broker_commission_amount, company_commission_amount, stage, status, documents_review_status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, commission_id, assigned_account_manager_id, created_at', { count: 'exact' })
+    .select('id, broker_user_id, client_name, client_phone, project_name, developer_name, unit_code, deal_value, gross_commission, broker_commission_amount, company_commission_amount, stage, status, documents_review_status, commission_lifecycle_stage, rejection_reason, broker_payout_due_date, commission_id, assigned_account_manager_id, notes, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range((salePage - 1) * SALE_PAGE_SIZE, salePage * SALE_PAGE_SIZE - 1)
 
   salesQuery = applyFilters(salesQuery)
-  const kpiSalesQuery = applyFilters(supabase.from('broker_sales_submissions').select('status, commission_lifecycle_stage, broker_commission_amount'))
+  const kpiSalesQuery = applyFilters(supabase.from('broker_sales_submissions').select('status, commission_lifecycle_stage, broker_commission_amount').limit(5000))
 
   const [
     { data: applications, count: applicationsCount },
@@ -170,6 +192,13 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
   ])
 
   const managerById = new Map((accountManagers ?? []).map((m) => [m.id, m.full_name || m.email || 'Account Manager']))
+
+  // Fetch broker display names for all sale rows
+  const brokerUserIds = [...new Set((sales ?? []).map(s => s.broker_user_id).filter(Boolean))]
+  const { data: brokerNames } = brokerUserIds.length
+    ? await supabase.from('broker_profiles').select('profile_id, display_name').in('profile_id', brokerUserIds)
+    : { data: [] }
+  const brokerNameById = new Map((brokerNames ?? []).map(b => [b.profile_id, b.display_name]))
 
   const appRows = (applications ?? []).map((application) => ({
     ...application,
@@ -324,6 +353,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
             <select name="status" defaultValue={currentParams.status} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل الحالات</option>
               <option value="submitted">قيد المراجعة</option>
+              <option value="under_review">جارٍ المراجعة</option>
               <option value="approved">معتمد</option>
               <option value="rejected">مرفوض</option>
             </select>
@@ -365,11 +395,17 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                   <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
                     {lifecycleLabels[sale.commission_lifecycle_stage ?? 'sale_submitted']}
                   </span>
-                  <span className="rounded-full border border-[var(--fi-line)] px-3 py-1 text-xs font-black text-[var(--fi-muted)]">{sale.status}</span>
-                  <span className="rounded-full border border-[var(--fi-line)] px-3 py-1 text-xs font-black text-[var(--fi-muted)]">المستندات: {sale.documents_review_status ?? 'pending'}</span>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-black ${saleStatusColors[sale.status ?? 'submitted'] ?? 'border-gray-200 bg-gray-50 text-gray-600'}`}>
+                    {saleStatusArabic[sale.status ?? ''] ?? sale.status}
+                  </span>
+                  <span className="rounded-full border border-[var(--fi-line)] px-3 py-1 text-xs font-black text-[var(--fi-muted)]">
+                    {docsStatusArabic[sale.documents_review_status ?? 'pending'] ?? sale.documents_review_status}
+                  </span>
                 </div>
                 <h3 className="mt-3 text-base font-black text-[var(--fi-ink)]">{sale.project_name}</h3>
                 <div className="mt-2 grid gap-2 text-xs font-semibold text-[var(--fi-muted)] md:grid-cols-2">
+                  <span>الشريك: <strong className="text-[var(--fi-ink)]">{brokerNameById.get(sale.broker_user_id ?? '') ?? 'غير محدد'}</strong></span>
+                  <span>Account Manager: <strong className="text-[var(--fi-ink)]">{sale.assigned_account_manager_id ? (managerById.get(sale.assigned_account_manager_id) ?? 'غير معروف') : 'غير مُعيَّن'}</strong></span>
                   <span>العميل: {sale.client_name}</span>
                   <span>المطور: {sale.developer_name || 'غير محدد'}</span>
                   <span>الوحدة: {sale.unit_code || 'غير محدد'}</span>
@@ -377,6 +413,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                   <span>إجمالي العمولة: {money(sale.gross_commission)} ج.م</span>
                   <span>عمولة الشريك: {money(sale.broker_commission_amount)} ج.م</span>
                 </div>
+                {sale.notes && <p className="mt-3 rounded-lg bg-slate-50 border border-slate-100 p-3 text-xs font-semibold text-slate-600">{sale.notes}</p>}
                 {sale.rejection_reason && <p className="mt-3 rounded-lg bg-red-50 p-3 text-xs font-bold text-red-700">{sale.rejection_reason}</p>}
                 <Link href={`/dashboard/partners/sales/${sale.id}`} className="mt-3 inline-flex h-9 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">
                   تفاصيل ومراجعة المستندات

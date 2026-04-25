@@ -1,10 +1,13 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { createServiceRoleClient } from '@/lib/supabase/service'
+import { requireSession } from '@/shared/auth/session'
+import { hasPermission } from '@/shared/rbac/permissions'
 import BrokersList from './BrokersList'
 import AddBrokerButton from './AddBrokerButton'
 import { Star, TrendingUp, Users, Award, DollarSign } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'إدارة الوسطاء | FAST INVESTMENT' }
 
 const TIER_CONFIG = {
   platinum: { label: 'بلاتينيوم', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', min: 10_000_000 },
@@ -14,20 +17,24 @@ const TIER_CONFIG = {
 }
 
 export default async function BrokersPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll() { return cookieStore.getAll() } } }
-  )
+  const session = await requireSession()
 
-  const { data: brokers = [], error } = await supabase
+  if (!hasPermission(session.profile.role, 'broker.view.company') && !hasPermission(session.profile.role, 'broker.manage')) {
+    redirect('/dashboard')
+  }
+
+  const service = createServiceRoleClient()
+
+  const { data: brokers = [], error } = await service
     .from('broker_profiles')
-    .select('*')
+    .select('id, profile_id, full_name, display_name, phone, email, tier, status, verification_status, total_sales, total_deals, commission_rate, join_date, specialties, profile_image')
     .order('total_sales', { ascending: false })
+    .limit(500)
 
   const totalBrokers  = brokers?.length ?? 0
-  const activeBrokers = brokers?.filter(b => b.status === 'active').length ?? 0
+  const activeBrokers = brokers?.filter(b =>
+    b.status === 'active' || b.verification_status === 'verified'
+  ).length ?? 0
   const totalSales    = brokers?.reduce((s, b) => s + Number(b.total_sales || 0), 0) ?? 0
   const totalDeals    = brokers?.reduce((s, b) => s + Number(b.total_deals || 0), 0) ?? 0
 
@@ -38,6 +45,12 @@ export default async function BrokersPage() {
 
   const fmt = (n: number) =>
     new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
+
+  // Normalise rows so BrokersList always has `full_name`
+  const normalisedBrokers = (brokers ?? []).map(b => ({
+    ...b,
+    full_name: b.full_name ?? b.display_name ?? '—',
+  }))
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
@@ -50,7 +63,7 @@ export default async function BrokersPage() {
           </h1>
           <p className="text-sm text-slate-500 mt-1">تتبع أداء الوسطاء، مستوياتهم، وعمولاتهم</p>
         </div>
-        <AddBrokerButton />
+        {hasPermission(session.profile.role, 'broker.manage') && <AddBrokerButton />}
       </div>
 
       {error && (
@@ -62,7 +75,7 @@ export default async function BrokersPage() {
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'إجمالي الوسطاء', value: totalBrokers, sub: `${activeBrokers} نشط`, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+          { label: 'إجمالي الوسطاء', value: totalBrokers, sub: `${activeBrokers} نشط / معتمد`, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
           { label: 'الصفقات المنجزة', value: totalDeals, sub: 'صفقة', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
           { label: 'إجمالي المبيعات', value: fmt(totalSales), sub: 'ج.م', icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
           { label: 'وسطاء بلاتينيوم', value: tierCounts.platinum + tierCounts.gold, sub: 'بلاتينيوم + ذهبي', icon: Award, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
@@ -93,8 +106,14 @@ export default async function BrokersPage() {
         ))}
       </div>
 
+      {totalBrokers >= 500 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-700">
+          يُعرض أول 500 وسيط — استخدم البحث للوصول لوسيط بعينه
+        </div>
+      )}
+
       {/* Brokers list */}
-      <BrokersList brokers={brokers ?? []} />
+      <BrokersList brokers={normalisedBrokers ?? []} />
     </div>
   )
 }
