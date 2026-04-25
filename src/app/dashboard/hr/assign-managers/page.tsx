@@ -52,9 +52,11 @@ export default async function HrAssignManagersPage({
   if (filterStatus) bpQuery = bpQuery.eq('verification_status', filterStatus)
   if (filterAm === '__none__') bpQuery = bpQuery.is('account_manager_id', null)
   else if (filterAm) bpQuery = bpQuery.eq('account_manager_id', filterAm)
+  // DB-side search on display_name (avoids JS-only filtering of first 200 rows)
+  if (filterSearch) bpQuery = bpQuery.ilike('display_name', `%${filterSearch}%`)
 
   const [{ data: brokerProfiles }, { data: accountManagers }, { data: allProfiles }] = await Promise.all([
-    bpQuery.limit(200),
+    bpQuery.limit(1000),
     service
       .from('profiles')
       .select('id, full_name, email, role')
@@ -63,7 +65,7 @@ export default async function HrAssignManagersPage({
     service
       .from('profiles')
       .select('id, full_name, email')
-      .limit(500),
+      .limit(2000),
   ])
 
   // Build lookup maps
@@ -82,10 +84,6 @@ export default async function HrAssignManagersPage({
       am_name: am?.full_name ?? null,
       am_email: am?.email ?? null,
     }
-  }).filter((b) => {
-    if (!filterSearch) return true
-    const q = filterSearch.toLowerCase()
-    return (b.display_name ?? '').toLowerCase().includes(q) || (b.full_name ?? '').toLowerCase().includes(q)
   })
 
   const amOptions = (accountManagers ?? []) as AccountManagerOption[]
@@ -191,9 +189,16 @@ export default async function HrAssignManagersPage({
       <div className="rounded-2xl border border-[var(--fi-line)] bg-white shadow-sm dark:bg-gray-900 overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--fi-line)] px-5 py-4">
           <h2 className="font-black text-[var(--fi-ink)] dark:text-white">قائمة الشركاء</h2>
-          <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
-            {brokers.length} شريك
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
+              {brokers.length} شريك
+            </span>
+            {brokers.length === 1000 && (
+              <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-700">
+                يُعرض أول 1000 — استخدم الفلاتر للتضييق
+              </span>
+            )}
+          </div>
         </div>
 
         {brokers.length === 0 ? (

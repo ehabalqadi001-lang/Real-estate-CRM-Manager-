@@ -132,10 +132,15 @@ export async function removeAmFromBroker(
     await Promise.all([
       service.from('broker_profiles').update({ account_manager_id: null }).eq('profile_id', brokerProfileId),
       service.from('user_profiles').update({ account_manager_id: null }).eq('id', brokerProfileId),
+      service.from('broker_sales_submissions')
+        .update({ assigned_account_manager_id: null })
+        .eq('broker_user_id', brokerProfileId)
+        .in('status', ['draft', 'submitted', 'under_review']),
     ])
 
     revalidatePath('/dashboard/hr/assign-managers')
     revalidatePath('/dashboard/partners')
+    revalidatePath('/dashboard/account-manager')
 
     return { success: true, message: 'تم إلغاء تعيين Account Manager' }
   } catch (error) {

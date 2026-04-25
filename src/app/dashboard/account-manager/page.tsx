@@ -36,6 +36,13 @@ const statusColors: Record<string, string> = {
   rejected: 'bg-red-50 text-red-600',
 }
 
+const statusArabic: Record<string, string> = {
+  submitted: 'قيد المراجعة',
+  under_review: 'جارٍ المراجعة',
+  approved: 'معتمدة',
+  rejected: 'مرفوضة',
+}
+
 export default async function AccountManagerDashboard({
   searchParams,
 }: {
@@ -92,10 +99,11 @@ export default async function AccountManagerDashboard({
   if (filterStatus) salesQuery = salesQuery.eq('status', filterStatus)
   if (filterLifecycle) salesQuery = salesQuery.eq('commission_lifecycle_stage', filterLifecycle)
 
-  // 3. KPI query (unfiltered by status/lifecycle for totals)
+  // 3. KPI query (unfiltered by status/lifecycle for totals) — limit 5000 prevents full table scan
   let kpiQuery = service
     .from('broker_sales_submissions')
     .select('status, commission_lifecycle_stage, broker_commission_amount')
+    .limit(5000)
 
   if (!isAdmin) kpiQuery = kpiQuery.eq('assigned_account_manager_id', amId)
 
@@ -154,7 +162,7 @@ export default async function AccountManagerDashboard({
           <p className="p-6 text-sm font-semibold text-[var(--fi-muted)]">لا يوجد شركاء</p>
         ) : (
           <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(myBrokers ?? []).slice(0, 12).map((broker) => (
+            {(myBrokers ?? []).slice(0, 50).map((broker) => (
               <div key={broker.profile_id} className="flex items-center justify-between rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 py-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-[var(--fi-ink)] dark:text-white">
@@ -166,10 +174,10 @@ export default async function AccountManagerDashboard({
                 </span>
               </div>
             ))}
-            {(myBrokers ?? []).length > 12 && (
-              <p className="col-span-full text-center text-xs font-bold text-[var(--fi-muted)]">
-                + {(myBrokers ?? []).length - 12} شريك آخر
-              </p>
+            {(myBrokers ?? []).length > 50 && (
+              <Link href="/dashboard/partners" className="col-span-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--fi-line)] py-3 text-xs font-black text-[var(--fi-emerald)] hover:bg-[var(--fi-soft)]">
+                + {(myBrokers ?? []).length - 50} شريك آخر — عرض الكل <ExternalLink className="size-3" />
+              </Link>
             )}
           </div>
         )}
@@ -196,6 +204,7 @@ export default async function AccountManagerDashboard({
             <select name="status" defaultValue={filterStatus} className="h-9 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 text-xs font-semibold outline-none focus:border-[var(--fi-emerald)]">
               <option value="">كل الحالات</option>
               <option value="submitted">قيد المراجعة</option>
+              <option value="under_review">جارٍ المراجعة</option>
               <option value="approved">معتمد</option>
               <option value="rejected">مرفوض</option>
             </select>
@@ -231,7 +240,7 @@ export default async function AccountManagerDashboard({
                       {stageLabels[sale.stage ?? 'eoi']}
                     </span>
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${statusColors[sale.status ?? 'submitted'] ?? 'bg-gray-50 text-gray-500'}`}>
-                      {sale.status}
+                      {statusArabic[sale.status ?? ''] ?? sale.status}
                     </span>
                     <span className="rounded-full border border-[var(--fi-line)] px-2.5 py-1 text-[11px] font-black text-[var(--fi-muted)]">
                       {lifecycleLabels[sale.commission_lifecycle_stage ?? 'sale_submitted']}
