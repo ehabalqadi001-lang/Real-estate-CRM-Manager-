@@ -7,9 +7,28 @@ const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/company', '/team', '/commi
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Developer Feed API Gateway — HMAC header check (Section 9 of PropTech Service Mesh)
+  if (pathname.startsWith('/api/integrations/developer-feed') && request.method === 'POST') {
+    const clientKey = request.headers.get('x-fi-client-key')
+    const signature = request.headers.get('x-fi-signature')
+    const timestamp = request.headers.get('x-fi-timestamp')
+    if (!clientKey || !signature || !timestamp) {
+      return NextResponse.json(
+        { success: false, error: 'Missing Required API Security Headers (X-FI-Client-Key, X-FI-Signature, X-FI-Timestamp)' },
+        { status: 401 }
+      )
+    }
+  }
+
   // Always refresh session cookies on every non-static request
   const { supabase, getResponse } = createClient(request)
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirect logged-in users away from auth pages
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')
+  if (isAuthRoute && user) {
+    return redirect(request, '/dashboard')
+  }
 
   if (!PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return getResponse()
 
