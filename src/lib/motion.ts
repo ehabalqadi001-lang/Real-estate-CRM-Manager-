@@ -30,7 +30,7 @@ export const buttonTap = {
   whileTap:   { scale: 0.96 },
 }
 
-export const floatingLoop = {
+export const floatingLoop: Variants = {
   animate: {
     y: [0, -10, 0],
     transition: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' },
@@ -45,14 +45,14 @@ export const slideInLeft: Variants = {
 
 export const float = floatingLoop
 
-export const floatSlow = {
+export const floatSlow: Variants = {
   animate: {
     y: [0, -15, 0],
     transition: { duration: 5, repeat: Infinity, ease: 'easeInOut' },
   },
 }
 
-export const pulse = {
+export const pulse: Variants = {
   animate: {
     opacity: [0.4, 1, 0.4],
     scale: [0.8, 1, 0.8],
