@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, DollarSign, Handshake,
-  Building2, User, LogOut, Menu,
+  Building2, User, LogOut, Menu, FileUp,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { AppProfile } from '@/shared/auth/types'
@@ -19,7 +19,7 @@ interface Props {
 
 const NAV_ITEMS = [
   { href: '/broker-portal',              label: 'لوحة التحكم',    icon: LayoutDashboard },
-  { href: '/broker-portal/sales',        label: 'رفع المبيعات',    icon: Handshake },
+  { href: '/broker-portal/sales',        label: 'رفع المبيعات',    icon: FileUp },
   { href: '/broker-portal/commissions',  label: 'عمولاتي',        icon: DollarSign },
   { href: '/broker-portal/deals',        label: 'صفقاتي',         icon: Handshake },
   { href: '/broker-portal/inventory',    label: 'المخزون',        icon: Building2 },

@@ -71,9 +71,10 @@ export default async function BrokerProfilePage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-xl select-none">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-xl select-none overflow-hidden">
               {brokerProfile?.photo_url ? (
-                <span className="text-xs font-black text-emerald-600">✓ صورة</span>
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={brokerProfile.photo_url} alt="صورة شخصية" className="w-full h-full object-cover" />
               ) : initials}
             </div>
           </div>

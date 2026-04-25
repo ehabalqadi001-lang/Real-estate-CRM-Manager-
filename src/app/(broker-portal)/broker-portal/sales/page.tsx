@@ -193,7 +193,17 @@ export default async function BrokerSalesPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-black text-blue-700">{stageLabels[sale.stage ?? 'eoi']}</span>
                     <span className="rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-black text-green-700">{lifecycleLabels[sale.commission_lifecycle_stage ?? 'sale_submitted']}</span>
-                    <span className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-black text-gray-500">{sale.status}</span>
+                    <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${
+                      sale.status === 'approved' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+                      sale.status === 'rejected' ? 'border-red-200 bg-red-50 text-red-700' :
+                      sale.status === 'under_review' ? 'border-blue-200 bg-blue-50 text-blue-700' :
+                      'border-amber-200 bg-amber-50 text-amber-700'
+                    }`}>{
+                      sale.status === 'approved' ? 'معتمدة' :
+                      sale.status === 'rejected' ? 'مرفوضة' :
+                      sale.status === 'under_review' ? 'جارٍ المراجعة' :
+                      'قيد المراجعة'
+                    }</span>
                   </div>
                   <h3 className="mt-3 font-bold text-gray-900 dark:text-white">{sale.project_name}</h3>
                   <div className="mt-2 grid gap-1 text-xs text-gray-500 md:grid-cols-2">
