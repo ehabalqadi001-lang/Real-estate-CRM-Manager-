@@ -59,23 +59,34 @@ async function createServiceNotification(input: {
   }
 }
 
-async function uploadSalesDocuments(formData: FormData, folder: string) {
-  const files = formData
-    .getAll('documents')
-    .filter((file): file is File => file instanceof File && file.size > 0)
-    .slice(0, 10)
+const DOC_SLOT_LABELS: Record<string, string> = {
+  doc_eoi_form: 'استمارة EOI',
+  doc_reservation_form: 'استمارة الحجز',
+  doc_client_id: 'بطاقة العميل / جواز السفر / الإقامة',
+  doc_payment_agreement: 'نظام السداد المتفق عليه',
+  doc_contract_p1: 'الصفحة الأولى من العقد',
+  doc_contract_p2: 'الصفحة الثانية من العقد',
+  doc_contract_p3: 'الصفحة الثالثة من العقد',
+  doc_payment_plan: 'Payment Plan',
+  doc_layout: 'Layout',
+  doc_master_plan: 'Master Plan',
+}
 
+async function uploadNamedDocuments(formData: FormData, folder: string) {
   const service = createServiceRoleClient()
   const uploaded: UploadedDocument[] = []
 
-  for (const file of files) {
-    const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExtension(file)}`
+  for (const slot of Object.keys(DOC_SLOT_LABELS)) {
+    const file = formData.get(slot)
+    if (!(file instanceof File) || file.size === 0) continue
+
+    const path = `${folder}/${slot}_${Date.now()}.${fileExtension(file)}`
     const { data, error } = await service.storage.from('documents').upload(path, file, {
       contentType: file.type || 'application/octet-stream',
       upsert: false,
     })
-    if (error) throw new Error(`تعذر رفع المستند: ${error.message}`)
-    uploaded.push({ name: file.name, path: data.path, type: file.type, size: file.size })
+    if (error) throw new Error(`تعذر رفع المستند (${slot}): ${error.message}`)
+    uploaded.push({ name: DOC_SLOT_LABELS[slot] ?? file.name, path: data.path, type: file.type, size: file.size })
   }
 
   return uploaded
@@ -314,7 +325,16 @@ export async function submitBrokerSale(formData: FormData) {
   const grossCommission = Math.round(dealValue * (developerRate / 100))
   const brokerCommission = Math.round(dealValue * (brokerRate / 100))
   const companyCommission = Math.max(grossCommission - brokerCommission, 0)
-  const documents = await uploadSalesDocuments(formData, `broker-sales/${session.user.id}`)
+  const documents = await uploadNamedDocuments(formData, `broker-sales/${session.user.id}`)
+
+  const developerSalesName = text(formData, 'developerSalesName')
+  const developerSalesPhone = text(formData, 'developerSalesPhone')
+  const noteParts: string[] = []
+  if (developerSalesName || developerSalesPhone) {
+    noteParts.push(`سيلز المطور: ${developerSalesName || '—'} | ${developerSalesPhone || '—'}`)
+  }
+  const userNotes = text(formData, 'notes')
+  if (userNotes) noteParts.push(userNotes)
 
   const { data: sale, error } = await service.from('broker_sales_submissions').insert({
     broker_profile_id: brokerProfile.id,
@@ -340,12 +360,12 @@ export async function submitBrokerSale(formData: FormData) {
     documents,
     payout_method: text(formData, 'payoutMethod') || 'bank_transfer',
     bank_details: {
-      bankName: text(formData, 'bankName') || brokerProfile.bank_name,
-      accountName: text(formData, 'bankAccountName') || brokerProfile.bank_account_name,
-      accountNumber: text(formData, 'bankAccountNumber') || brokerProfile.bank_account_number,
-      iban: text(formData, 'bankIban') || brokerProfile.bank_iban,
+      bankName: brokerProfile.bank_name,
+      accountName: brokerProfile.bank_account_name,
+      accountNumber: brokerProfile.bank_account_number,
+      iban: brokerProfile.bank_iban,
     },
-    notes: text(formData, 'notes') || null,
+    notes: noteParts.length > 0 ? noteParts.join('\n') : null,
   }).select('id').single()
 
   if (error) throw new Error(error.message)

@@ -1,4 +1,4 @@
-import { Banknote, FileUp, Handshake, Landmark, UploadCloud, type LucideIcon } from 'lucide-react'
+import { Banknote, FileUp, Handshake, Landmark, type LucideIcon } from 'lucide-react'
 import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
 import { submitBrokerSale } from '@/app/dashboard/partners/actions'
@@ -140,13 +140,6 @@ export default async function BrokerSalesPage() {
               <Field label="نوع الوحدة">
                 <input name="unitType" className="field" />
               </Field>
-              <Field label="مرحلة التعاقد">
-                <select name="stage" className="field">
-                  <option value="eoi">EOI</option>
-                  <option value="reservation">Reservation</option>
-                  <option value="contract">Contract</option>
-                </select>
-              </Field>
               <Field label="طريقة الصرف">
                 <select name="payoutMethod" className="field">
                   <option value="bank_transfer">تحويل بنكي</option>
@@ -154,23 +147,7 @@ export default async function BrokerSalesPage() {
                   <option value="cheque">شيك</option>
                 </select>
               </Field>
-              <Field label="البنك">
-                <input name="bankName" defaultValue={brokerProfile?.bank_name ?? ''} className="field" />
-              </Field>
-              <Field label="اسم الحساب">
-                <input name="bankAccountName" defaultValue={brokerProfile?.bank_account_name ?? ''} className="field" />
-              </Field>
-              <Field label="رقم الحساب">
-                <input name="bankAccountNumber" defaultValue={brokerProfile?.bank_account_number ?? ''} className="field text-left" dir="ltr" />
-              </Field>
             </div>
-
-            <label className="block rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-4 text-center dark:border-gray-800 dark:bg-gray-950">
-              <UploadCloud className="mx-auto mb-2 size-5 text-[var(--fi-emerald)]" />
-              <span className="block text-sm font-black text-gray-900 dark:text-white">مستندات البيع</span>
-              <span className="mt-1 block text-xs text-gray-500">EOI أو Reservation أو Contract أو صور التحويل</span>
-              <input name="documents" type="file" multiple accept="image/*,.pdf" className="absolute opacity-0" />
-            </label>
 
             <textarea name="notes" rows={3} placeholder="ملاحظات إضافية" className="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm font-semibold outline-none dark:border-gray-800 dark:bg-gray-950" />
             <BrokerSubmitButton />

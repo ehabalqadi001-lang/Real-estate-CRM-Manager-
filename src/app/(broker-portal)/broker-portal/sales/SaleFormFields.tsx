@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { UploadCloud, CheckCircle, FileText } from 'lucide-react'
 
 type Developer = { id: string; name: string; name_ar: string | null; region: string | null }
 type Project = { id: string; name: string; developer_id: string }
@@ -21,8 +22,35 @@ interface Props {
   developers: Developer[]
   projects: Project[]
   rates: CommissionRate[]
-  exception: Exception | null  // this broker's pre-loaded exceptions keyed by dev+proj
+  exception: Exception | null
   allExceptions: Exception[]
+}
+
+type DocSlot = { name: string; label: string; required: boolean }
+
+const STAGE_DOC_SLOTS: Record<string, DocSlot[]> = {
+  eoi: [
+    { name: 'doc_eoi_form', label: 'استمارة EOI', required: true },
+  ],
+  reservation: [
+    { name: 'doc_reservation_form', label: 'استمارة الحجز', required: true },
+    { name: 'doc_client_id', label: 'بطاقة العميل / جواز السفر / الإقامة', required: true },
+    { name: 'doc_payment_agreement', label: 'نظام السداد المتفق عليه', required: false },
+  ],
+  contract: [
+    { name: 'doc_contract_p1', label: 'الصفحة الأولى من العقد', required: true },
+    { name: 'doc_contract_p2', label: 'الصفحة الثانية من العقد', required: true },
+    { name: 'doc_contract_p3', label: 'الصفحة الثالثة من العقد', required: false },
+    { name: 'doc_payment_plan', label: 'Payment Plan', required: true },
+    { name: 'doc_layout', label: 'Layout', required: true },
+    { name: 'doc_master_plan', label: 'Master Plan', required: false },
+  ],
+}
+
+const STAGE_LABELS: Record<string, string> = {
+  eoi: 'EOI',
+  reservation: 'Reservation',
+  contract: 'Contract',
 }
 
 export function SaleFormFields({ developers, projects, rates, allExceptions }: Props) {
@@ -31,6 +59,8 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
   const [developerId, setDeveloperId] = useState('')
   const [projectId, setProjectId] = useState('')
   const [dealValue, setDealValue] = useState(0)
+  const [stage, setStage] = useState('eoi')
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, string>>({})
 
   const regions = useMemo(() => {
     const seen = new Set<string>()
@@ -59,24 +89,19 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
     [developerId, projects],
   )
 
-  // Commission lookup: exception (project-specific) > exception (dev-wide) > rate (project) > rate (dev) > defaults
   const commission = useMemo(() => {
     if (!developerId) return null
 
-    // 1. Partner exception — project-specific
     let ex = allExceptions.find(
       (e) => e.developer_id === developerId && e.project_id === projectId && projectId !== '',
     )
-    // 2. Partner exception — developer-wide
     if (!ex) ex = allExceptions.find((e) => e.developer_id === developerId && !e.project_id)
 
     if (ex) {
       return { devRate: ex.developer_commission_rate, brokerRate: ex.broker_commission_rate, source: 'exception' as const }
     }
 
-    // 3. Standard rate — project-specific
     let rate = rates.find((r) => r.developer_id === developerId && r.project_id === projectId && projectId !== '')
-    // 4. Standard rate — developer-wide
     if (!rate) rate = rates.find((r) => r.developer_id === developerId && !r.project_id)
 
     if (rate) {
@@ -91,8 +116,32 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
   const grossCommission = dealValue && commission ? Math.round(dealValue * (commission.devRate / 100)) : 0
   const brokerCommission = dealValue && commission ? Math.round(dealValue * (commission.brokerRate / 100)) : 0
 
+  const docSlots = STAGE_DOC_SLOTS[stage] ?? []
+
   return (
     <>
+      {/* Stage selector */}
+      <div className="col-span-2">
+        <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">مرحلة التعاقد</span>
+        <div className="grid grid-cols-3 gap-2">
+          {Object.entries(STAGE_LABELS).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => { setStage(value); setSelectedFiles({}) }}
+              className={`py-2.5 rounded-lg border text-sm font-black transition-all ${
+                stage === value
+                  ? 'bg-emerald-600 border-emerald-600 text-white shadow-md'
+                  : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <input type="hidden" name="stage" value={stage} />
+      </div>
+
       {/* Region filter */}
       <label className="block">
         <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">المنطقة</span>
@@ -138,7 +187,7 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
         )}
       </label>
 
-      {/* Project select — filtered by developer */}
+      {/* Project select */}
       <label className="block">
         <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">المشروع</span>
         <select
@@ -156,7 +205,7 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
         </select>
       </label>
 
-      {/* Hidden name fields for backward compatibility with the action */}
+      {/* Hidden name fields */}
       <input type="hidden" name="projectName" value={filteredProjects.find((p) => p.id === projectId)?.name ?? ''} />
       <input type="hidden" name="developerName" value={developers.find((d) => d.id === developerId)?.name_ar ?? developers.find((d) => d.id === developerId)?.name ?? ''} />
 
@@ -183,7 +232,7 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
         </div>
       )}
 
-      {/* Deal value — needs to update preview */}
+      {/* Deal value */}
       <label className="block">
         <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">قيمة البيع</span>
         <input
@@ -196,6 +245,67 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
           onChange={(e) => setDealValue(Number(e.target.value))}
         />
       </label>
+
+      {/* Developer sales person */}
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">اسم سيلز المطور</span>
+        <input name="developerSalesName" className="field" placeholder="اختياري" />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">رقم التواصل مع سيلز المطور</span>
+        <input name="developerSalesPhone" className="field text-left" dir="ltr" placeholder="اختياري" />
+      </label>
+
+      {/* Document upload slots */}
+      <div className="col-span-2 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-950 p-4 space-y-3">
+        <p className="text-xs font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-emerald-600" />
+          مستندات مرحلة {STAGE_LABELS[stage]}
+          <span className="text-gray-400 font-normal">— {docSlots.filter(s => s.required).length} مطلوب{docSlots.some(s => !s.required) ? ` + ${docSlots.filter(s => !s.required).length} اختياري` : ''}</span>
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {docSlots.map((slot) => {
+            const fileName = selectedFiles[slot.name]
+            return (
+              <label
+                key={slot.name}
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  fileName
+                    ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-900/20'
+                    : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 hover:border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/10'
+                }`}
+              >
+                <div className="shrink-0">
+                  {fileName
+                    ? <CheckCircle className="w-5 h-5 text-emerald-600" />
+                    : <UploadCloud className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-black text-gray-800 dark:text-gray-200 truncate leading-tight">
+                    {slot.label}
+                    {slot.required && <span className="mr-1 text-red-500">*</span>}
+                  </p>
+                  <p className={`text-[11px] mt-0.5 truncate ${fileName ? 'text-emerald-600 font-semibold' : 'text-gray-400'}`}>
+                    {fileName || (slot.required ? 'مطلوب — اضغط للرفع' : 'اختياري')}
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  name={slot.name}
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const name = e.target.files?.[0]?.name ?? ''
+                    setSelectedFiles(prev => ({ ...prev, [slot.name]: name }))
+                  }}
+                />
+              </label>
+            )
+          })}
+        </div>
+      </div>
     </>
   )
 }
