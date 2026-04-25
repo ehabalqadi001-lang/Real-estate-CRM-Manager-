@@ -75,6 +75,7 @@ export const INVESTMENT_TYPES = [
 
 export const INVESTMENT_LOCATIONS = [
   'القاهرة الجديدة',
+  'العاصمة الإدارية الجديدة',
   'مصر الجديدة',
   'مدينة نصر',
   'أكتوبر',

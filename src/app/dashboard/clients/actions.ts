@@ -2,8 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/domains/clients/mutations'
+import type { ActionResult } from '@/shared/types/action-result'
 
-export async function addClient(formData: FormData) {
+export async function addClient(formData: FormData): Promise<ActionResult> {
   const investmentTypes = formData.getAll('investment_types').map(String).filter(Boolean)
   const investmentLocations = formData.getAll('investment_locations').map(String).filter(Boolean)
   const budgetRaw = formData.get('investment_budget')
@@ -25,8 +26,9 @@ export async function addClient(formData: FormData) {
   })
 
   if (!result.ok) {
-    throw new Error(result.error)
+    return result
   }
 
   revalidatePath('/dashboard/clients')
+  return { ok: true, data: undefined }
 }

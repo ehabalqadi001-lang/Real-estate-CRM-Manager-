@@ -88,6 +88,21 @@ function CheckboxGroup({ name, options, label }: { name: string; options: readon
   )
 }
 
+function ScrollableCheckboxList({ name, options, label }: { name: string; options: readonly string[]; label: string }) {
+  return (
+    <Field label={label}>
+      <div className="max-h-44 overflow-y-auto rounded-lg border border-[var(--fi-line)] divide-y divide-[var(--fi-line)]">
+        {options.map((opt) => (
+          <label key={opt} className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--fi-emerald)]/5">
+            <input type="checkbox" name={name} value={opt} className="accent-[var(--fi-emerald)] size-4 shrink-0" />
+            <span className="text-sm font-semibold text-[var(--fi-ink)]">{opt}</span>
+          </label>
+        ))}
+      </div>
+    </Field>
+  )
+}
+
 const STEPS: { label: string; icon: React.ElementType }[] = [
   { label: 'البيانات الشخصية', icon: User },
   { label: 'بيانات التواصل', icon: Phone },
@@ -108,10 +123,15 @@ export default function AddClientButton() {
     setError(null)
     const formData = new FormData(e.currentTarget)
     try {
-      await addClient(formData)
+      const result = await addClient(formData)
+      if (!result.ok) {
+        setError(result.error ?? 'حدث خطأ أثناء الإضافة')
+        setLoading(false)
+        return
+      }
       close()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء الإضافة')
+    } catch {
+      setError('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى')
       setLoading(false)
     }
   }
@@ -212,7 +232,7 @@ export default function AddClientButton() {
                       </div>
                     </Field>
 
-                    <CheckboxGroup name="investment_locations" options={INVESTMENT_LOCATIONS} label="مكان الاستثمار المفضل" />
+                    <ScrollableCheckboxList name="investment_locations" options={INVESTMENT_LOCATIONS} label="مكان الاستثمار المفضل" />
                   </div>
                 )}
 
