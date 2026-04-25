@@ -55,10 +55,11 @@ export default async function AccountManagerDashboard({
   const filterStatus = sp.status ?? ''
   const filterLifecycle = sp.lifecycle ?? ''
 
-  // 1. Brokers assigned to this AM (or all if admin)
+  // 1. Brokers assigned to this AM (or all if admin) — exclude orphan rows with null profile_id
   let brokersQuery = service
     .from('broker_profiles')
     .select('profile_id, display_name, verification_status, account_manager_id')
+    .not('profile_id', 'is', null)
     .order('display_name')
 
   if (!isAdmin) brokersQuery = brokersQuery.eq('account_manager_id', amId)
@@ -157,7 +158,7 @@ export default async function AccountManagerDashboard({
               <div key={broker.profile_id} className="flex items-center justify-between rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 py-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-[var(--fi-ink)] dark:text-white">
-                    {broker.display_name ?? broker.profile_id.slice(0, 8)}
+                    {broker.display_name ?? broker.profile_id?.slice(0, 8) ?? '—'}
                   </p>
                 </div>
                 <span className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black ${broker.verification_status === 'verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>

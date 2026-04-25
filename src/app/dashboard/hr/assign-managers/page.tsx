@@ -42,10 +42,11 @@ export default async function HrAssignManagersPage({
   const filterStatus = sp.status ?? ''
   const filterSearch = sp.search ?? ''
 
-  // Fetch brokers with their AM assignments
+  // Fetch brokers with their AM assignments (exclude orphan rows with null profile_id)
   let bpQuery = service
     .from('broker_profiles')
     .select('profile_id, display_name, verification_status, account_manager_id')
+    .not('profile_id', 'is', null)
     .order('display_name')
 
   if (filterStatus) bpQuery = bpQuery.eq('verification_status', filterStatus)
@@ -212,13 +213,13 @@ export default async function HrAssignManagersPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-black text-[var(--fi-ink)] dark:text-white">
-                        {broker.display_name ?? broker.full_name ?? broker.profile_id.slice(0, 8)}
+                        {broker.display_name ?? broker.full_name ?? broker.profile_id?.slice(0, 8) ?? '—'}
                       </p>
                       <span className={`rounded-full border px-2 py-0.5 text-[11px] font-black ${verificationColors[broker.verification_status ?? 'pending'] ?? 'bg-gray-50 text-gray-500 border-gray-200'}`}>
                         {verificationLabels[broker.verification_status ?? 'pending'] ?? broker.verification_status}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs font-semibold text-[var(--fi-muted)]">ID: {broker.profile_id.slice(0, 8)}…</p>
+                    <p className="mt-0.5 text-xs font-semibold text-[var(--fi-muted)]">ID: {broker.profile_id?.slice(0, 8) ?? '—'}…</p>
                     <div className="mt-2 flex items-center gap-1.5">
                       {broker.account_manager_id ? (
                         <>
