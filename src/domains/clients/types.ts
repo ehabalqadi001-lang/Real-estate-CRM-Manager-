@@ -3,6 +3,10 @@ export interface ClientListItem {
   name: string | null
   full_name?: string | null
   phone: string | null
+  phone_country_code?: string | null
+  nationality?: string | null
+  investment_types?: string[] | null
+  investment_locations?: string[] | null
   status: string | null
   created_at: string | null
 }
@@ -17,10 +21,22 @@ export interface ClientDetail {
   name: string | null
   full_name: string | null
   phone: string | null
+  phone_country_code: string | null
+  secondary_phone: string | null
+  secondary_phone_country_code: string | null
+  email: string | null
   national_id: string | null
+  nationality: string | null
+  residence_country: string | null
   source: string | null
   address: string | null
   client_type: string | null
+  investment_types: string[] | null
+  investment_budget: number | null
+  payment_method: string | null
+  investment_locations: string[] | null
+  status: string | null
+  created_at: string | null
 }
 
 export interface ClientDealSummary {
@@ -64,5 +80,14 @@ export interface ClientDetailResult {
 export interface CreateClientInput {
   name: string
   phone: string
+  phone_country_code?: string
+  secondary_phone?: string | null
+  secondary_phone_country_code?: string
   email?: string | null
+  nationality?: string | null
+  residence_country?: string | null
+  investment_types?: string[]
+  investment_budget?: number | null
+  payment_method?: string | null
+  investment_locations?: string[]
 }

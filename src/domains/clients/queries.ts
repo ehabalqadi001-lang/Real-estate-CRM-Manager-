@@ -12,34 +12,32 @@ export async function getClientList(): Promise<ClientListResult> {
   try {
     let query = supabase
       .from('clients')
-      .select('id, name, full_name, phone, status, created_at')
+      .select('id, name, full_name, phone, phone_country_code, nationality, investment_types, investment_locations, status, created_at')
       .order('created_at', { ascending: false })
       .limit(500)
 
     if (companyId) query = query.eq('company_id', companyId)
 
     const { data, error } = await query
-
-    if (error) {
-      return { clients: [], error: error.message }
-    }
+    if (error) return { clients: [], error: error.message }
 
     return {
-      clients: (data ?? []).map((client) => ({
-        id: client.id,
-        name: client.name ?? client.full_name ?? 'عميل بدون اسم',
-        full_name: client.full_name,
-        phone: client.phone,
-        status: client.status ?? 'active',
-        created_at: client.created_at ?? new Date().toISOString(),
+      clients: (data ?? []).map((c) => ({
+        id: c.id,
+        name: c.name ?? c.full_name ?? 'عميل بدون اسم',
+        full_name: c.full_name,
+        phone: c.phone,
+        phone_country_code: c.phone_country_code,
+        nationality: c.nationality,
+        investment_types: c.investment_types,
+        investment_locations: c.investment_locations,
+        status: c.status ?? 'active',
+        created_at: c.created_at ?? new Date().toISOString(),
       })),
       error: null,
     }
   } catch {
-    return {
-      clients: [],
-      error: 'تعذر الاتصال بخادم قاعدة البيانات',
-    }
+    return { clients: [], error: 'تعذر الاتصال بخادم قاعدة البيانات' }
   }
 }
 
@@ -54,9 +52,7 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
       .eq('id', clientId)
       .single()
 
-    if (clientError) {
-      return { client: null, deals: [], calls: [], error: clientError.message }
-    }
+    if (clientError) return { client: null, deals: [], calls: [], error: clientError.message }
 
     const { data: dealsData, error: dealsError } = await supabase
       .from('deals')
@@ -65,16 +61,11 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
       .order('created_at', { ascending: false })
 
     if (dealsError) {
-      return {
-        client: clientData as ClientDetail,
-        deals: [],
-        calls: [],
-        error: dealsError.message,
-      }
+      return { client: clientData as ClientDetail, deals: [], calls: [], error: dealsError.message }
     }
 
     const deals = (dealsData ?? []) as ClientDealSummary[]
-    const leadIds = Array.from(new Set(deals.map((deal) => deal.lead_id).filter(Boolean))) as string[]
+    const leadIds = Array.from(new Set(deals.map((d) => d.lead_id).filter(Boolean))) as string[]
     const { data: callsData } = leadIds.length
       ? await supabase
           .from('masked_call_sessions')
@@ -91,11 +82,6 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
       error: null,
     }
   } catch {
-    return {
-      client: null,
-      deals: [],
-      calls: [],
-      error: 'تعذر الاتصال بخادم قاعدة البيانات',
-    }
+    return { client: null, deals: [], calls: [], error: 'تعذر الاتصال بخادم قاعدة البيانات' }
   }
 }

@@ -1,0 +1,90 @@
+export interface Country {
+  name: string
+  code: string
+  dialCode: string
+  flag: string
+}
+
+export const COUNTRIES: Country[] = [
+  // Arab world first
+  { name: 'مصر', code: 'EG', dialCode: '+20', flag: '🇪🇬' },
+  { name: 'السعودية', code: 'SA', dialCode: '+966', flag: '🇸🇦' },
+  { name: 'الإمارات', code: 'AE', dialCode: '+971', flag: '🇦🇪' },
+  { name: 'الكويت', code: 'KW', dialCode: '+965', flag: '🇰🇼' },
+  { name: 'قطر', code: 'QA', dialCode: '+974', flag: '🇶🇦' },
+  { name: 'البحرين', code: 'BH', dialCode: '+973', flag: '🇧🇭' },
+  { name: 'عُمان', code: 'OM', dialCode: '+968', flag: '🇴🇲' },
+  { name: 'الأردن', code: 'JO', dialCode: '+962', flag: '🇯🇴' },
+  { name: 'لبنان', code: 'LB', dialCode: '+961', flag: '🇱🇧' },
+  { name: 'سوريا', code: 'SY', dialCode: '+963', flag: '🇸🇾' },
+  { name: 'العراق', code: 'IQ', dialCode: '+964', flag: '🇮🇶' },
+  { name: 'ليبيا', code: 'LY', dialCode: '+218', flag: '🇱🇾' },
+  { name: 'تونس', code: 'TN', dialCode: '+216', flag: '🇹🇳' },
+  { name: 'الجزائر', code: 'DZ', dialCode: '+213', flag: '🇩🇿' },
+  { name: 'المغرب', code: 'MA', dialCode: '+212', flag: '🇲🇦' },
+  { name: 'السودان', code: 'SD', dialCode: '+249', flag: '🇸🇩' },
+  { name: 'اليمن', code: 'YE', dialCode: '+967', flag: '🇾🇪' },
+  { name: 'فلسطين', code: 'PS', dialCode: '+970', flag: '🇵🇸' },
+  // Major world countries
+  { name: 'الولايات المتحدة', code: 'US', dialCode: '+1', flag: '🇺🇸' },
+  { name: 'المملكة المتحدة', code: 'GB', dialCode: '+44', flag: '🇬🇧' },
+  { name: 'فرنسا', code: 'FR', dialCode: '+33', flag: '🇫🇷' },
+  { name: 'ألمانيا', code: 'DE', dialCode: '+49', flag: '🇩🇪' },
+  { name: 'إيطاليا', code: 'IT', dialCode: '+39', flag: '🇮🇹' },
+  { name: 'إسبانيا', code: 'ES', dialCode: '+34', flag: '🇪🇸' },
+  { name: 'تركيا', code: 'TR', dialCode: '+90', flag: '🇹🇷' },
+  { name: 'الهند', code: 'IN', dialCode: '+91', flag: '🇮🇳' },
+  { name: 'الصين', code: 'CN', dialCode: '+86', flag: '🇨🇳' },
+  { name: 'باكستان', code: 'PK', dialCode: '+92', flag: '🇵🇰' },
+  { name: 'روسيا', code: 'RU', dialCode: '+7', flag: '🇷🇺' },
+  { name: 'كندا', code: 'CA', dialCode: '+1', flag: '🇨🇦' },
+  { name: 'أستراليا', code: 'AU', dialCode: '+61', flag: '🇦🇺' },
+  { name: 'هولندا', code: 'NL', dialCode: '+31', flag: '🇳🇱' },
+  { name: 'بلجيكا', code: 'BE', dialCode: '+32', flag: '🇧🇪' },
+  { name: 'سويسرا', code: 'CH', dialCode: '+41', flag: '🇨🇭' },
+  { name: 'النمسا', code: 'AT', dialCode: '+43', flag: '🇦🇹' },
+  { name: 'السويد', code: 'SE', dialCode: '+46', flag: '🇸🇪' },
+  { name: 'النرويج', code: 'NO', dialCode: '+47', flag: '🇳🇴' },
+  { name: 'الدنمارك', code: 'DK', dialCode: '+45', flag: '🇩🇰' },
+  { name: 'اليونان', code: 'GR', dialCode: '+30', flag: '🇬🇷' },
+  { name: 'البرتغال', code: 'PT', dialCode: '+351', flag: '🇵🇹' },
+  { name: 'إيران', code: 'IR', dialCode: '+98', flag: '🇮🇷' },
+  { name: 'إثيوبيا', code: 'ET', dialCode: '+251', flag: '🇪🇹' },
+  { name: 'نيجيريا', code: 'NG', dialCode: '+234', flag: '🇳🇬' },
+  { name: 'جنوب أفريقيا', code: 'ZA', dialCode: '+27', flag: '🇿🇦' },
+  { name: 'كينيا', code: 'KE', dialCode: '+254', flag: '🇰🇪' },
+  { name: 'اليابان', code: 'JP', dialCode: '+81', flag: '🇯🇵' },
+  { name: 'كوريا الجنوبية', code: 'KR', dialCode: '+82', flag: '🇰🇷' },
+  { name: 'إندونيسيا', code: 'ID', dialCode: '+62', flag: '🇮🇩' },
+  { name: 'ماليزيا', code: 'MY', dialCode: '+60', flag: '🇲🇾' },
+  { name: 'سنغافورة', code: 'SG', dialCode: '+65', flag: '🇸🇬' },
+  { name: 'البرازيل', code: 'BR', dialCode: '+55', flag: '🇧🇷' },
+  { name: 'الأرجنتين', code: 'AR', dialCode: '+54', flag: '🇦🇷' },
+  { name: 'المكسيك', code: 'MX', dialCode: '+52', flag: '🇲🇽' },
+]
+
+export const INVESTMENT_TYPES = [
+  'سكني',
+  'تجاري',
+  'إداري',
+  'طبي',
+  'فندقي',
+  'أراضي',
+  'إنشاء محفظة عقارية',
+] as const
+
+export const INVESTMENT_LOCATIONS = [
+  'القاهرة الجديدة',
+  'مصر الجديدة',
+  'مدينة نصر',
+  'أكتوبر',
+  'زايد',
+  'زايد الجديدة',
+  'العبور',
+  'هيليوبليس الجديدة',
+  'الشروق',
+  'سفنكس',
+  'العالمين الجديدة',
+  'الساحل الشمالي',
+  'العين السخنة',
+] as const
