@@ -301,7 +301,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     <>
       {/* ── Desktop sidebar (collapsible) ── */}
       <motion.aside
-        initial={{ x: -16, opacity: 0 }}
+        initial={{ x: 16, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
         className="hidden h-screen shrink-0 overflow-hidden transition-[width,padding] duration-300 ease-in-out lg:block"
@@ -336,11 +336,11 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             />
             <motion.aside
               key="drawer"
-              initial={{ x: -268 }}
+              initial={{ x: 268 }}
               animate={{ x: 0 }}
-              exit={{ x: -268 }}
+              exit={{ x: 268 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="absolute inset-y-0 left-0 flex w-[268px] flex-col shadow-2xl"
+              className="absolute inset-y-0 right-0 flex w-[268px] flex-col shadow-2xl"
             >
               <SidebarInner onNavigate={() => setMobileOpen(false)} />
             </motion.aside>
@@ -352,7 +352,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               type="button"
               onClick={() => setMobileOpen(false)}
               aria-label="إغلاق القائمة"
-              className="absolute left-[280px] top-4 flex size-9 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20"
+              className="absolute right-[280px] top-4 flex size-9 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20"
             >
               <X className="size-4" />
             </motion.button>
@@ -445,7 +445,7 @@ function SidebarGroup({
                 const Icon = item.icon
                 const active = isActiveRoute(pathname, item.href)
                 return (
-                  <motion.div key={item.href} whileHover={{ x: 2 }}>
+                  <motion.div key={item.href} whileHover={{ x: -2 }}>
                     <Link
                       href={item.href}
                       onClick={onNavigate}
@@ -458,7 +458,7 @@ function SidebarGroup({
                       {active && (
                         <motion.span
                           layoutId="active-pill"
-                          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-400"
+                          className="absolute right-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-l-full bg-emerald-400"
                         />
                       )}
                       <Icon

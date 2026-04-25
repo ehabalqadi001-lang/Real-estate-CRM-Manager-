@@ -1,6 +1,6 @@
 export default function DashboardLoading() {
   return (
-    <div className="fi-shell-bg flex min-h-screen text-[var(--fi-ink)]" dir="ltr" aria-busy="true">
+    <div className="fi-shell-bg flex h-screen overflow-hidden text-[var(--fi-ink)]" dir="rtl" aria-busy="true">
       {/* Sidebar skeleton — left side, matches DashboardShell layout */}
       <div className="hidden lg:block" style={{ width: 268, padding: 12, flexShrink: 0 }}>
         <div className="h-full w-full overflow-hidden rounded-2xl shadow-[0_28px_80px_rgba(0,0,0,0.18)]"
