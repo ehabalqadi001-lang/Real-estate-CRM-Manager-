@@ -11,6 +11,9 @@ interface BeforeInstallPromptEvent extends Event {
 export default function PWAInstaller() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
+  const [pushDismissed, setPushDismissed] = useState(() =>
+    typeof window !== 'undefined' && !!sessionStorage.getItem('push-banner-dismissed')
+  )
   const [pushPermission, setPushPermission] = useState<NotificationPermission | 'unsupported'>(() => {
     if (typeof window === 'undefined') return 'default'
     return 'Notification' in window ? Notification.permission : 'unsupported'
@@ -62,11 +65,18 @@ export default function PWAInstaller() {
     setPushPermission(result)
   }
 
-  if (!showBanner && (pushPermission === 'granted' || pushPermission === 'unsupported')) return null
+  const showPushBanner = !pushDismissed && pushPermission !== 'granted' && pushPermission !== 'unsupported'
+
+  const dismissPush = () => {
+    setPushDismissed(true)
+    sessionStorage.setItem('push-banner-dismissed', '1')
+  }
+
+  if (!showBanner && !showPushBanner) return null
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex max-w-xs flex-col gap-2" dir="rtl">
-      {pushPermission !== 'granted' && pushPermission !== 'unsupported' && (
+      {showPushBanner && (
         <div className="flex items-start gap-3 rounded-2xl bg-slate-900 p-4 text-white shadow-2xl">
           <Bell size={18} className="mt-0.5 flex-shrink-0 text-blue-400" />
           <div className="min-w-0 flex-1">
@@ -85,6 +95,9 @@ export default function PWAInstaller() {
               </button>
             )}
           </div>
+          <button onClick={dismissPush} className="flex-shrink-0 text-slate-500 hover:text-slate-300">
+            <X size={15} />
+          </button>
         </div>
       )}
 
