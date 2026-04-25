@@ -1,52 +1,89 @@
 import { NextResponse } from 'next/server'
-import { webhookApi } from '@/shared/api/webhookApi'
-import { IngestionService } from '@/domains/inventory/services/IngestionService'
-import { createClient } from '@supabase/supabase-js'
+import { createServiceRoleClient } from '@/lib/supabase/service'
+import { verifyDeveloperSignature } from '@/lib/api-security'
 
-/**
- * POST /api/integrations/developer-feed
- * Handles incoming unit updates, price changes, and availability status from developers.
- */
-async function handler(req: Request) {
-  const idempotencyKey = req.headers.get('X-FI-Idempotency-Key')
-  const clientKey = req.headers.get('X-FI-Client-Key')
-  
-  const body = await req.json()
-  const payloadRows = Array.isArray(body) ? body : [body]
+export async function POST(request: Request) {
+  try {
+    // 1. استخراج الترويسات الأمنية (الـ Middleware يتأكد من وجودها، ولكن نستخرجها هنا للمعالجة)
+    const clientKey = request.headers.get('x-fi-client-key')
+    const signature = request.headers.get('x-fi-signature')
+    const timestamp = request.headers.get('x-fi-timestamp')
+    const idempotencyKey = request.headers.get('x-fi-idempotency-key') || `req_${Date.now()}`
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+    if (!clientKey || !signature || !timestamp) {
+      return NextResponse.json({ success: false, error: 'Missing security headers' }, { status: 401 })
+    }
 
-  // Create batch and queue rows
-  const batch = await IngestionService.createBatch(supabaseAdmin, {
-    developerId: '00000000-0000-0000-0000-000000000000', // Mocked until clientKey mapping is built
-    sourceType: 'api',
-    sourceName: `Webhook Feed - ${new Date().toISOString()}`,
-    totalRows: payloadRows.length
-  })
+    const rawBody = await request.text()
+    const service = createServiceRoleClient()
 
-  await IngestionService.queueRows(supabaseAdmin, batch.id, payloadRows)
+    // 2. التحقق من هوية المطور (حسب القسم 5 من الهيكل المعماري)
+    const { data: apiClient, error: clientError } = await service
+      .from('developer_api_clients')
+      .select('id, developer_id, company_id, secret_ref, active')
+      .eq('client_key', clientKey)
+      .single()
 
-  // Auto-Trigger background processor (Fire & Forget)
-  // This starts processing the rows we just queued immediately
-  const host = req.headers.get('host')
-  const protocol = host?.includes('localhost') ? 'http' : 'https'
-  const baseUrl = host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
-  
-  fetch(`${baseUrl}/api/inventory/process-batch`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ batchId: batch.id })
-  }).catch((err) => console.error('[AUTO_TRIGGER_ERROR]', err))
+    if (clientError || !apiClient || !apiClient.active) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or inactive Developer API client key' },
+        { status: 401 }
+      )
+    }
 
-  return NextResponse.json({
-    success: true,
-    message: 'Developer feed event received and queued successfully. Processing started.',
-    idempotencyKey,
-    batchId: batch.id
-  }, { status: 202 })
+    // 3. التحقق من التوقيع المشفّر (HMAC) لمنع التلاعب بالأسعار
+    const signatureCheck = verifyDeveloperSignature(rawBody, timestamp, signature, apiClient.secret_ref)
+    if (!signatureCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: `Signature verification failed: ${signatureCheck.reason}` },
+        { status: 401 }
+      )
+    }
+
+    // 4. معالجة البيانات الواردة (Payload Parsing)
+    const payload = JSON.parse(rawBody)
+    const items = Array.isArray(payload) ? payload : [payload]
+
+    // 5. إنشاء دفعة المعالجة (حسب القسم 10: Ingestion Flow)
+    const { data: batch, error: batchError } = await service
+      .from('inventory_ingestion_batches')
+      .insert({
+        developer_id: apiClient.developer_id,
+        company_id: apiClient.company_id,
+        source_type: 'api',
+        source_name: `API_Sync_${idempotencyKey}`,
+        status: 'pending',
+        total_rows: items.length,
+      })
+      .select('id')
+      .single()
+
+    if (batchError || !batch) throw new Error('Failed to initialize ingestion batch')
+
+    // 6. إدراج صفوف المخزون الواردة ليتم معالجتها لاحقاً (Background Processing)
+    const rowsToInsert = items.map((item, index) => ({
+      batch_id: batch.id,
+      row_number: index + 1,
+      raw_payload: item,
+      status: 'pending'
+    }))
+
+    const { error: rowsError } = await service.from('inventory_ingestion_rows').insert(rowsToInsert)
+    if (rowsError) throw new Error('Failed to queue inventory rows')
+
+    // 7. الرد بالقبول الناجح (202 Accepted)
+    return NextResponse.json({
+      success: true,
+      message: 'Inventory payload received and queued successfully',
+      batch_id: batch.id,
+      rows_queued: items.length
+    }, { status: 202 })
+
+  } catch (error: any) {
+    console.error('[API Gateway] Ingestion Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error during inventory ingestion' },
+      { status: 500 }
+    )
+  }
 }
-
-export const POST = webhookApi(handler)

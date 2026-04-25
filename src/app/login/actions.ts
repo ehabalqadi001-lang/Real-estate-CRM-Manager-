@@ -113,7 +113,7 @@ function fileExtension(file: File) {
   return file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
 }
 
-async function uploadPartnerFile(fieldName: string, folder: string, formData: FormData) {
+async function uploadPartnerFile(fieldName: string, folder: string, formData: FormData, rollbackList?: string[]) {
   const file = formData.get(fieldName)
   if (!(file instanceof File) || file.size === 0) return null
 
@@ -125,10 +125,11 @@ async function uploadPartnerFile(fieldName: string, folder: string, formData: Fo
   })
 
   if (error) throw new Error(`تعذر رفع ملف ${fieldName}: ${error.message}`)
+  if (rollbackList) rollbackList.push(data.path)
   return { name: file.name, path: data.path, type: file.type, size: file.size } satisfies UploadedDocument
 }
 
-async function uploadPartnerFiles(fieldName: string, folder: string, formData: FormData, limit = 3) {
+async function uploadPartnerFiles(fieldName: string, folder: string, formData: FormData, limit = 3, rollbackList?: string[]) {
   const service = createServiceRoleClient()
   const files = formData
     .getAll(fieldName)
@@ -142,7 +143,14 @@ async function uploadPartnerFiles(fieldName: string, folder: string, formData: F
       contentType: file.type || 'application/octet-stream',
       upsert: false,
     })
-    if (error) throw new Error(`تعذر رفع ملف ${fieldName}: ${error.message}`)
+    if (error) {
+      // Rollback: Clean up previously uploaded files in this loop to prevent orphans
+      if (uploaded.length > 0) {
+        await service.storage.from('documents').remove(uploaded.map((u) => u.path))
+      }
+      throw new Error(`تعذر رفع ملف ${fieldName}: ${error.message}`)
+    }
+    if (rollbackList) rollbackList.push(data.path)
     uploaded.push({ name: file.name, path: data.path, type: file.type, size: file.size })
   }
   return uploaded
@@ -216,19 +224,21 @@ export async function registerAction(formData: FormData) {
   }
 
   const accountType = isClientRegistration ? 'client' : isCompanyPartner ? 'company' : 'individual'
-  const role = isClientRegistration ? 'CLIENT' : isCompanyPartner ? 'company_admin' : 'broker'
+  const role = isClientRegistration ? 'viewer' : isCompanyPartner ? 'company_admin' : 'broker'
   const documentFolder = `partners/${slugify(email)}`
+
+  const rollbackPaths: string[] = []
 
   try {
     const documents = {
-      idFront: isBrokerPartner ? await uploadPartnerFile('idFront', `${documentFolder}/ids`, formData) : null,
-      idBack: isBrokerPartner ? await uploadPartnerFile('idBack', `${documentFolder}/ids`, formData) : null,
-      commercialRegister: isCompanyPartner ? await uploadPartnerFiles('commercialRegisterFiles', `${documentFolder}/commercial-register`, formData, 3) : [],
-      taxCard: isCompanyPartner ? await uploadPartnerFile('taxCardImage', `${documentFolder}/tax-card`, formData) : null,
-      ownerId: isCompanyPartner ? await uploadPartnerFile('ownerIdImage', `${documentFolder}/owner-id`, formData) : null,
-      vatCertificate: isCompanyPartner ? await uploadPartnerFile('vatCertificate', `${documentFolder}/vat`, formData) : null,
-      legacyId: !isClientRegistration ? await uploadPartnerFile('idDocument', `${documentFolder}/ids`, formData) : null,
-      legacyLicense: isCompanyPartner ? await uploadPartnerFile('licenseDocument', `${documentFolder}/licenses`, formData) : null,
+      idFront: isBrokerPartner ? await uploadPartnerFile('idFront', `${documentFolder}/ids`, formData, rollbackPaths) : null,
+      idBack: isBrokerPartner ? await uploadPartnerFile('idBack', `${documentFolder}/ids`, formData, rollbackPaths) : null,
+      commercialRegister: isCompanyPartner ? await uploadPartnerFiles('commercialRegisterFiles', `${documentFolder}/commercial-register`, formData, 3, rollbackPaths) : [],
+      taxCard: isCompanyPartner ? await uploadPartnerFile('taxCardImage', `${documentFolder}/tax-card`, formData, rollbackPaths) : null,
+      ownerId: isCompanyPartner ? await uploadPartnerFile('ownerIdImage', `${documentFolder}/owner-id`, formData, rollbackPaths) : null,
+      vatCertificate: isCompanyPartner ? await uploadPartnerFile('vatCertificate', `${documentFolder}/vat`, formData, rollbackPaths) : null,
+      legacyId: !isClientRegistration ? await uploadPartnerFile('idDocument', `${documentFolder}/ids`, formData, rollbackPaths) : null,
+      legacyLicense: isCompanyPartner ? await uploadPartnerFile('licenseDocument', `${documentFolder}/licenses`, formData, rollbackPaths) : null,
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -249,6 +259,10 @@ export async function registerAction(formData: FormData) {
     })
 
     if (error) {
+      if (rollbackPaths.length > 0) {
+        // Rollback: Clean up storage if Auth creation fails (e.g. weak password)
+        await service.storage.from('documents').remove(rollbackPaths)
+      }
       if (error.message.toLowerCase().includes('registered')) {
         return {
           success: false,
@@ -270,7 +284,7 @@ export async function registerAction(formData: FormData) {
         phone,
         region,
         account_type: accountType,
-        role,
+        role: role,
         status: isClientRegistration ? 'active' : 'pending',
         company_id: companyContextId,
         company_name: isCompanyPartner ? companyName || 'FAST INVESTMENT Partner' : null,
@@ -287,7 +301,7 @@ export async function registerAction(formData: FormData) {
         email,
         full_name: fullName,
         phone,
-        role: role === 'CLIENT' ? 'viewer' : role,
+        role: role,
         status: isClientRegistration ? 'active' : 'pending',
         account_type: accountType,
         company_id: companyContextId,
@@ -369,6 +383,10 @@ export async function registerAction(formData: FormData) {
       })
     }
   } catch (err: unknown) {
+    if (rollbackPaths.length > 0) {
+      // Global rollback: clean up storage if database transaction fails midway
+      await service.storage.from('documents').remove(rollbackPaths)
+    }
     if (err instanceof Error && (err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err
     return {
       success: false,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Menu, Search, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { AppProfile } from '@/shared/auth/types'
 import type { CompanyOption } from '@/shared/company-context/server'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
@@ -14,9 +15,9 @@ function useGreeting(firstName: string) {
   useEffect(() => {
     const hour = new Date().getHours()
     const salutation =
-      hour < 12 ? 'Good morning' :
-      hour < 17 ? 'Good afternoon' :
-                  'Good evening'
+      hour >= 5 && hour < 12 ? 'Good morning ☀️' :
+      hour >= 12 && hour < 18 ? 'Good afternoon 🌤' :
+                                'Good evening 🌙'
     setGreeting(`${salutation}, ${firstName}`)
   }, [firstName])
 
@@ -42,8 +43,23 @@ export function EnterpriseTopbar({
     window.dispatchEvent(new Event('fi:open-sidebar'))
   }
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        openCommandPalette()
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--fi-line)] bg-white/90 px-3 py-2.5 backdrop-blur-xl dark:bg-slate-950/90 sm:px-4">
+    <motion.header
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-40 border-b border-[var(--fi-line)] bg-white/90 px-3 py-2.5 backdrop-blur-xl dark:bg-slate-950/90 sm:px-4"
+    >
       <div className="grid min-w-0 grid-cols-[auto_1fr_auto] items-center gap-3">
 
         {/* Left: brand + mobile toggle */}
@@ -63,18 +79,22 @@ export function EnterpriseTopbar({
                 {tenantName}
               </span>
               <span className="hidden items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-600 sm:flex">
-                <TrendingUp className="size-2.5" />
+                <motion.span
+                  animate={{ opacity: [1, 0.4, 1], scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="size-1.5 rounded-full bg-emerald-500"
+                  aria-hidden="true"
+                />
                 Live
               </span>
             </div>
-            {greeting ? (
-              <p className="mt-0.5 truncate text-sm font-black text-[var(--fi-ink)] sm:text-base">
+            <h1 className="mt-0.5 truncate text-sm font-black text-[var(--fi-ink)] sm:text-base">
+              Real Estate Command Center
+            </h1>
+            {greeting && (
+              <p className="truncate text-xs font-bold text-[var(--fi-muted)]">
                 {greeting}
               </p>
-            ) : (
-              <h1 className="mt-0.5 truncate text-sm font-black text-[var(--fi-ink)] sm:text-base">
-                Real Estate Command Center
-              </h1>
             )}
           </div>
         </div>
@@ -122,18 +142,20 @@ export function EnterpriseTopbar({
           </div>
 
           {/* Command palette trigger */}
-          <button
+          <motion.button
             type="button"
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.95 }}
             onClick={openCommandPalette}
-            className="flex size-10 items-center justify-center rounded-xl text-white shadow-md shadow-emerald-500/20 transition hover:scale-[1.05]"
+            className="flex size-10 items-center justify-center rounded-xl text-white shadow-md shadow-emerald-500/20 transition-colors"
             style={{ background: 'linear-gradient(135deg, #00c27c, #0081cc)' }}
             aria-label="Open command palette"
           >
             <Sparkles className="size-4" aria-hidden="true" />
-          </button>
+          </motion.button>
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }
 

@@ -310,30 +310,43 @@ function ChoiceCard({ active, icon: Icon, title, description, onClick, color }: 
 }
 
 /* ─── Field wrapper ────────────────────────────────────── */
-function Field({ label, icon: Icon, children }: { label: string; icon: ElementType; children: ReactNode }) {
+function FloatField({
+  id, name, type = 'text', label, icon: Icon, required, minLength, dir,
+}: {
+  id: string; name: string; type?: string; label: string; icon: ElementType; required?: boolean; minLength?: number; dir?: string
+}) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</span>
-      <div className="relative">
-        <Icon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-        {children}
-      </div>
-    </label>
+    <div className="fi-float-wrap">
+      <span className="fi-float-icon">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        required={required}
+        minLength={minLength}
+        dir={dir}
+        placeholder=" "
+        className="fi-float-input"
+      />
+      <label htmlFor={id} className="fi-float-label">
+        {label}
+      </label>
+    </div>
   )
 }
-
-const inputCls = 'h-12 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-400/12'
 
 /* ─── Client fields ─────────────────────────────────────── */
 function ClientFields() {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Full Name" icon={User}><input name="fullName" required placeholder="Your full name" className={inputCls} /></Field>
-      <Field label="Phone Number" icon={Phone}><input name="phone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
-      <Field label="Region / Governorate" icon={Building2}><input name="region" required placeholder="e.g. Cairo, Giza" className={inputCls} /></Field>
-      <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="you@example.com" className={inputCls} /></Field>
+      <FloatField id="fullName" name="fullName" label="Full Name" icon={User} required />
+      <FloatField id="phone" name="phone" label="Phone Number" icon={Phone} required dir="ltr" />
+      <FloatField id="region" name="region" label="Region / Governorate" icon={Building2} required />
+      <FloatField id="email" name="email" type="email" label="Email Address" icon={Mail} required dir="ltr" />
       <div className="sm:col-span-2">
-        <Field label="Password (min. 8 characters)" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+        <FloatField id="password" name="password" type="password" label="Password (min. 8 characters)" icon={LockKeyhole} required minLength={8} dir="ltr" />
       </div>
     </div>
   )
@@ -344,12 +357,12 @@ function BrokerFields() {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="First Name" icon={User}><input name="firstName" required placeholder="First" className={inputCls} /></Field>
-        <Field label="Last Name" icon={User}><input name="lastName" required placeholder="Last" className={inputCls} /></Field>
-        <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="you@example.com" className={inputCls} /></Field>
-        <Field label="Phone Number" icon={Phone}><input name="phone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
-        <Field label="Password" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
-        <Field label="Confirm Password" icon={LockKeyhole}><input name="confirmPassword" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+        <FloatField id="firstName" name="firstName" label="First Name" icon={User} required />
+        <FloatField id="lastName" name="lastName" label="Last Name" icon={User} required />
+        <FloatField id="email" name="email" type="email" label="Email Address" icon={Mail} required dir="ltr" />
+        <FloatField id="phone" name="phone" label="Phone Number" icon={Phone} required dir="ltr" />
+        <FloatField id="password" name="password" type="password" label="Password" icon={LockKeyhole} required minLength={8} dir="ltr" />
+        <FloatField id="confirmPassword" name="confirmPassword" type="password" label="Confirm Password" icon={LockKeyhole} required minLength={8} dir="ltr" />
       </div>
       <div>
         <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Identity Documents</p>
@@ -367,14 +380,14 @@ function CompanyFields() {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Company Name" icon={Building2}><input name="companyName" required placeholder="Legal company name" className={inputCls} /></Field>
-        <Field label="Manager Name" icon={User}><input name="managerName" required placeholder="Full name" className={inputCls} /></Field>
-        <Field label="Manager Phone" icon={Phone}><input name="managerPhone" required dir="ltr" placeholder="01X XXXX XXXX" className={inputCls} /></Field>
-        <Field label="Owner Phone" icon={Phone}><input name="ownerPhone" required dir="ltr" className={inputCls} /></Field>
-        <Field label="Email Address" icon={Mail}><input name="email" type="email" required dir="ltr" placeholder="company@example.com" className={inputCls} /></Field>
-        <Field label="Facebook Page URL" icon={FileText}><input name="facebookUrl" type="url" dir="ltr" placeholder="https://facebook.com/…" className={inputCls} /></Field>
-        <Field label="Password" icon={LockKeyhole}><input name="password" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
-        <Field label="Confirm Password" icon={LockKeyhole}><input name="confirmPassword" type="password" required minLength={8} dir="ltr" className={inputCls} /></Field>
+        <FloatField id="companyName" name="companyName" label="Company Name" icon={Building2} required />
+        <FloatField id="managerName" name="managerName" label="Manager Name" icon={User} required />
+        <FloatField id="managerPhone" name="managerPhone" label="Manager Phone" icon={Phone} required dir="ltr" />
+        <FloatField id="ownerPhone" name="ownerPhone" label="Owner Phone" icon={Phone} required dir="ltr" />
+        <FloatField id="email" name="email" type="email" label="Email Address" icon={Mail} required dir="ltr" />
+        <FloatField id="facebookUrl" name="facebookUrl" type="url" label="Facebook Page URL" icon={FileText} dir="ltr" />
+        <FloatField id="password" name="password" type="password" label="Password" icon={LockKeyhole} required minLength={8} dir="ltr" />
+        <FloatField id="confirmPassword" name="confirmPassword" type="password" label="Confirm Password" icon={LockKeyhole} required minLength={8} dir="ltr" />
       </div>
       <div>
         <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Company Documents</p>

@@ -26,7 +26,9 @@ export function DashboardShell({ children, profile, companyOptions = [] }: Dashb
         <EnterpriseSidebar profile={profile} />
         <main className="min-w-0 flex-1 pb-24 lg:pb-0">
           <EnterpriseTopbar profile={profile} companyOptions={companyOptions} />
-          {children}
+          <div className="fi-page-enter">
+            {children}
+          </div>
         </main>
       </div>
     </div>

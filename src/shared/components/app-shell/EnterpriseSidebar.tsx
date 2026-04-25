@@ -86,7 +86,13 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             <span className="mt-0.5 block truncate text-[10px] font-bold text-white/30">Real Estate Command</span>
           </span>
         </Link>
-        <span className="flex items-center gap-1 rounded-md border border-emerald-400/20 bg-emerald-400/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-300">
+        <span className="flex items-center gap-1.5 rounded-md border border-emerald-400/20 bg-emerald-400/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-300">
+          <motion.span
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="size-1.5 rounded-full bg-emerald-400"
+            aria-hidden="true"
+          />
           <Zap className="size-2.5" />
           Live
         </span>
@@ -301,33 +307,34 @@ function SidebarGroup({
                 const Icon = item.icon
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={`group relative flex min-h-10 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-150 ${
-                      active
-                        ? 'bg-white/[0.08] text-white'
-                        : 'text-white/40 hover:bg-white/[0.05] hover:text-white/75'
-                    }`}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="sidebar-active-bar"
-                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-400"
-                      />
-                    )}
-                    <Icon
-                      className={`size-4 shrink-0 transition-colors ${
-                        active ? 'text-emerald-400' : 'text-white/25 group-hover:text-white/55'
+                  <motion.div key={item.href} whileHover={{ x: 2 }}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      className={`group relative flex min-h-10 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-150 ${
+                        active
+                          ? 'bg-white/[0.08] text-white'
+                          : 'text-white/40 hover:bg-white/[0.05] hover:text-white/75'
                       }`}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1 truncate leading-5">{item.title}</span>
-                    {active && (
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                    )}
-                  </Link>
+                    >
+                      {active && (
+                        <motion.span
+                          layoutId="active-pill"
+                          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-400"
+                        />
+                      )}
+                      <Icon
+                        className={`size-4 shrink-0 transition-colors ${
+                          active ? 'text-emerald-400' : 'text-white/25 group-hover:text-white/55'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate leading-5">{item.title}</span>
+                      {active && (
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                      )}
+                    </Link>
+                  </motion.div>
                 )
               })}
             </div>
