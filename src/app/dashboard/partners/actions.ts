@@ -423,8 +423,8 @@ export async function reviewBrokerSale(formData: FormData) {
   }
 
   // Create deal record so the sale appears in /dashboard/deals and /dashboard/contracts
-  const dealStage = sale.stage === 'contract' ? 'Contracted' : 'Won'
-  const { data: deal } = await service.from('deals').insert({
+  const dealStage = sale.stage === 'contract' ? 'Contracted' : 'closed_won'
+  const { data: deal, error: dealError } = await service.from('deals').insert({
     title: `شريك - ${sale.client_name} - ${sale.project_name}`,
     client_name: sale.client_name,
     lead_id: null,
@@ -440,6 +440,8 @@ export async function reviewBrokerSale(formData: FormData) {
     status: 'won',
     contract_signed_at: new Date().toISOString(),
   }).select('id').maybeSingle()
+
+  if (dealError) console.error('broker deal insert failed:', dealError.message)
 
   const { data: commission, error: commissionError } = await service.from('commissions').insert({
     deal_id: deal?.id ?? null,

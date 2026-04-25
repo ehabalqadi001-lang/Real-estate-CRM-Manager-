@@ -8,10 +8,12 @@ export const dynamic = 'force-dynamic'
 export default async function CommissionsPage() {
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
-  const companyId = session.profile.company_id ?? session.user.id
+  const isGlobalAdmin = ['super_admin', 'platform_admin'].includes(session.profile.role)
+  // Global admins see all commissions; others are scoped to their company
+  const companyId = isGlobalAdmin ? null : (session.profile.company_id ?? null)
 
   const [commissions, projects, rates, leads, agents] = await Promise.all([
-    getCommissions(supabase, companyId),
+    getCommissions(supabase, companyId, isGlobalAdmin ? null : session.user.id),
     getProjects(supabase),
     getRates(supabase),
     getLeads(supabase, companyId),
@@ -33,14 +35,21 @@ export default async function CommissionsPage() {
 
 type ServerSupabase = Awaited<ReturnType<typeof createServerSupabaseClient>>
 
-async function getCommissions(supabase: ServerSupabase, companyId: string | null): Promise<CommissionRow[]> {
+async function getCommissions(supabase: ServerSupabase, companyId: string | null, agentId: string | null): Promise<CommissionRow[]> {
   let query = supabase
     .from('commissions')
-    .select('id, deal_id, agent_id, company_id, amount, total_amount, gross_deal_value, gross_commission, agent_amount, company_amount, commission_rate, status, payment_method, payment_reference, payment_date, receipt_url, notes, created_at, paid_at')
+    .select('id, deal_id, agent_id, company_id, amount, total_amount, gross_deal_value, gross_commission, agent_amount, company_amount, commission_rate, status, payment_method, payment_reference, payment_date, receipt_url, notes, beneficiary_name, broker_sale_submission_id, created_at, paid_at')
     .order('created_at', { ascending: false })
     .limit(1000)
 
-  if (companyId) query = query.eq('company_id', companyId)
+  if (companyId) {
+    query = query.eq('company_id', companyId)
+  } else if (agentId) {
+    // Non-admin without company sees only their own commissions
+    query = query.eq('agent_id', agentId)
+  }
+  // null companyId + null agentId = global admin, no filter
+
   const { data } = await query
   const rows = (data ?? []) as Array<Record<string, unknown>>
   const dealIds = Array.from(new Set(rows.map((row) => row.deal_id).filter(Boolean))) as string[]
@@ -52,14 +61,18 @@ async function getCommissions(supabase: ServerSupabase, companyId: string | null
     const agent = typeof row.agent_id === 'string' ? agents.get(row.agent_id) : undefined
     const gross = Number(row.gross_commission ?? row.total_amount ?? row.amount ?? 0)
     const agentAmount = Number(row.agent_amount ?? row.amount ?? gross)
+    // For broker partner sales, deal_id may be null — use commission's own fields as fallback
+    const beneficiaryName = typeof row.beneficiary_name === 'string' ? row.beneficiary_name : null
+    const notesStr = typeof row.notes === 'string' ? row.notes : null
+    const projectFromNotes = notesStr ? notesStr.replace(/^BRM\s+/, '').split(' - ')[0] : null
     return {
       id: String(row.id),
       dealId: typeof row.deal_id === 'string' ? row.deal_id : null,
       agentId: typeof row.agent_id === 'string' ? row.agent_id : null,
       agentName: agent ?? 'غير محدد',
-      clientName: deal?.clientName ?? 'غير محدد',
-      dealTitle: deal?.title ?? 'صفقة غير محددة',
-      projectName: deal?.projectName ?? 'غير محدد',
+      clientName: deal?.clientName ?? beneficiaryName ?? 'غير محدد',
+      dealTitle: deal?.title ?? notesStr ?? 'صفقة شريك',
+      projectName: deal?.projectName ?? projectFromNotes ?? 'غير محدد',
       grossDealValue: Number(row.gross_deal_value ?? deal?.value ?? 0),
       commissionRate: Number(row.commission_rate ?? 0),
       grossCommission: gross,
