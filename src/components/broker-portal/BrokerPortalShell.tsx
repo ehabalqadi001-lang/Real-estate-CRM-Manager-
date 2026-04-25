@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, DollarSign, Handshake,
-  Building2, User, LogOut, Menu, Bell,
+  Building2, User, LogOut, Menu,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { AppProfile } from '@/shared/auth/types'
 import { isBrokerRole } from '@/shared/auth/types'
 import { cn } from '@/lib/utils'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 interface Props {
   profile: AppProfile
@@ -146,9 +147,7 @@ export default function BrokerPortalShell({ profile, children }: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
-              <Bell className="w-5 h-5" />
-            </button>
+            <NotificationBell userId={profile.id} />
           </div>
         </header>
 
