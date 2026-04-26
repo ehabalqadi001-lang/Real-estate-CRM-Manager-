@@ -133,14 +133,26 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
 
   // Fetch sales if needed (profile, sales, commission tabs)
   let sales: Record<string, unknown>[] = []
-  if (profileId && ['profile', 'sales', 'commission'].includes(tab)) {
-    const { data } = await service
+  if (['profile', 'sales', 'commission'].includes(tab)) {
+    const salesQuery = service
       .from('broker_sales_submissions')
-      .select('id, status, lifecycle_stage, client_name, client_phone, stage, deal_value, unit_value, agent_amount, commission_rate, project_id, developer_id, rejection_reason, documents, created_at')
-      .eq('broker_user_id', profileId)
+      .select('id, status, commission_lifecycle_stage, client_name, client_phone, stage, deal_value, broker_commission_amount, broker_commission_rate, project_id, developer_id, rejection_reason, documents, created_at')
       .order('created_at', { ascending: false })
       .limit(200)
-    sales = (data ?? []) as Record<string, unknown>[]
+
+    // Try matching by broker_profile_id first, fall back to broker_user_id
+    const { data: byProfile } = await salesQuery.eq('broker_profile_id', broker.id)
+    if (byProfile && byProfile.length > 0) {
+      sales = byProfile as Record<string, unknown>[]
+    } else if (profileId) {
+      const { data: byUser } = await service
+        .from('broker_sales_submissions')
+        .select('id, status, commission_lifecycle_stage, client_name, client_phone, stage, deal_value, broker_commission_amount, broker_commission_rate, project_id, developer_id, rejection_reason, documents, created_at')
+        .eq('broker_user_id', profileId)
+        .order('created_at', { ascending: false })
+        .limit(200)
+      sales = (byUser ?? []) as Record<string, unknown>[]
+    }
   }
 
   // Fetch documents if needed
@@ -155,9 +167,9 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
   }
 
   // KPI
-  const totalSales = sales.reduce((s, sale) => s + Number(sale.deal_value ?? sale.unit_value ?? 0), 0)
+  const totalSales = sales.reduce((s, sale) => s + Number(sale.deal_value ?? 0), 0)
   const approvedSales = sales.filter((s) => s.status === 'approved')
-  const pendingCommission = approvedSales.reduce((s, sale) => s + Number(sale.agent_amount ?? 0), 0)
+  const pendingCommission = approvedSales.reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0)
   const brokerTotalDeals = Number(broker.total_deals ?? 0)
   const brokerTotalSales = Number(broker.total_sales ?? 0)
 
@@ -266,6 +278,8 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
               <InfoItem label="نسبة العمولة" value={`${broker.broker_commission_rate ?? broker.commission_rate ?? 0}%`} />
               <InfoItem label="نسبة المطور" value={`${broker.developer_commission_rate ?? 0}%`} />
               <InfoItem label="البنك" value={broker.bank_name} />
+              <InfoItem label="اسم صاحب الحساب" value={broker.bank_account_name} />
+              <InfoItem label="رقم الحساب البنكي" value={broker.bank_account_number} dir="ltr" />
               <InfoItem label="IBAN" value={broker.bank_iban} dir="ltr" />
             </div>
             {broker.specialties?.length > 0 && (
@@ -298,7 +312,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                           <span className="text-xs text-[var(--fi-muted)]">{STAGE_LABELS[String(sale.stage)] ?? String(sale.stage)}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-sm font-black text-[var(--fi-ink)]">{fmtMoney(Number(sale.deal_value ?? sale.unit_value ?? 0))}</span>
+                          <span className="text-sm font-black text-[var(--fi-ink)]">{fmtMoney(Number(sale.deal_value ?? 0))}</span>
                           <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${st.cls}`}>{st.label}</span>
                         </div>
                       </div>
@@ -351,7 +365,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                     {sales.map((sale) => {
                       const saleCode = `SL-${String(sale.id).substring(0, 6).toUpperCase()}`
                       const st = SALE_STATUS[String(sale.status)] ?? { label: String(sale.status), cls: 'bg-slate-100 text-slate-500' }
-                      const lifecycle = LIFECYCLE_LABELS[String(sale.lifecycle_stage)] ?? String(sale.lifecycle_stage ?? '—')
+                      const lifecycle = LIFECYCLE_LABELS[String(sale.commission_lifecycle_stage)] ?? String(sale.commission_lifecycle_stage ?? '—')
                       return (
                         <tr key={String(sale.id)} className="hover:bg-[var(--fi-soft)] transition-colors">
                           <td className="px-4 py-3 font-black text-[var(--fi-emerald)]">{saleCode}</td>
@@ -360,8 +374,8 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                             {sale.client_phone ? <div className="text-xs text-[var(--fi-muted)]" dir="ltr">{String(sale.client_phone)}</div> : null}
                           </td>
                           <td className="px-4 py-3 text-[var(--fi-muted)]">{STAGE_LABELS[String(sale.stage)] ?? String(sale.stage ?? '—')}</td>
-                          <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{fmtMoney(Number(sale.deal_value ?? sale.unit_value ?? 0))}</td>
-                          <td className="px-4 py-3 font-bold text-[var(--fi-emerald)]">{fmtMoney(Number(sale.agent_amount ?? 0))}</td>
+                          <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{fmtMoney(Number(sale.deal_value ?? 0))}</td>
+                          <td className="px-4 py-3 font-bold text-[var(--fi-emerald)]">{fmtMoney(Number(sale.broker_commission_amount ?? 0))}</td>
                           <td className="px-4 py-3">
                             <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${st.cls}`}>{st.label}</span>
                           </td>
@@ -437,15 +451,15 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
               <>
                 <div className="mb-4 grid grid-cols-3 gap-3">
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
-                    <p className="text-lg font-black text-[var(--fi-emerald)]">{fmtMoney(approvedSales.reduce((s, sale) => s + Number(sale.agent_amount ?? 0), 0))}</p>
+                    <p className="text-lg font-black text-[var(--fi-emerald)]">{fmtMoney(approvedSales.reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
                     <p className="text-xs font-bold text-[var(--fi-muted)]">عمولة معتمدة</p>
                   </div>
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
-                    <p className="text-lg font-black text-amber-600">{fmtMoney(sales.filter(s => s.status === 'submitted' || s.status === 'under_review').reduce((s, sale) => s + Number(sale.agent_amount ?? 0), 0))}</p>
+                    <p className="text-lg font-black text-amber-600">{fmtMoney(sales.filter(s => s.status === 'submitted' || s.status === 'under_review').reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
                     <p className="text-xs font-bold text-[var(--fi-muted)]">عمولة معلقة</p>
                   </div>
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
-                    <p className="text-lg font-black text-[var(--fi-ink)]">{fmtMoney(sales.filter(s => s.lifecycle_stage === 'broker_paid').reduce((s, sale) => s + Number(sale.agent_amount ?? 0), 0))}</p>
+                    <p className="text-lg font-black text-[var(--fi-ink)]">{fmtMoney(sales.filter(s => s.commission_lifecycle_stage === 'broker_paid').reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
                     <p className="text-xs font-bold text-[var(--fi-muted)]">تم صرفها</p>
                   </div>
                 </div>
@@ -463,12 +477,12 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                         <tr key={String(sale.id)} className="hover:bg-[var(--fi-soft)]">
                           <td className="px-4 py-3 font-black text-[var(--fi-emerald)]">{`SL-${String(sale.id).substring(0, 6).toUpperCase()}`}</td>
                           <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{String(sale.client_name ?? '—')}</td>
-                          <td className="px-4 py-3">{fmtMoney(Number(sale.deal_value ?? sale.unit_value ?? 0))}</td>
-                          <td className="px-4 py-3">{String(Number(sale.commission_rate ?? 0))}%</td>
-                          <td className="px-4 py-3 font-bold text-[var(--fi-emerald)]">{fmtMoney(Number(sale.agent_amount ?? 0))}</td>
+                          <td className="px-4 py-3">{fmtMoney(Number(sale.deal_value ?? 0))}</td>
+                          <td className="px-4 py-3">{String(Number(sale.broker_commission_rate ?? 0))}%</td>
+                          <td className="px-4 py-3 font-bold text-[var(--fi-emerald)]">{fmtMoney(Number(sale.broker_commission_amount ?? 0))}</td>
                           <td className="px-4 py-3">
                             <span className="rounded-full bg-[var(--fi-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--fi-muted)]">
-                              {String(LIFECYCLE_LABELS[String(sale.lifecycle_stage)] ?? sale.lifecycle_stage ?? '—')}
+                              {String(LIFECYCLE_LABELS[String(sale.commission_lifecycle_stage)] ?? sale.commission_lifecycle_stage ?? '—')}
                             </span>
                           </td>
                         </tr>
