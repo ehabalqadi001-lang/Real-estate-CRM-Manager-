@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { User, Camera, CreditCard, Building2, Upload, Loader2, CheckCircle } from 'lucide-react'
+import { User, Camera, CreditCard, Building2, Upload, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
 import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { updateBrokerProfile } from './actions'
 
@@ -30,6 +30,9 @@ export function BrokerProfileForm({
     nationalIdFile: !!brokerProfile?.national_id_url,
     taxCardFile: !!brokerProfile?.tax_card_url,
   })
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const photoPathRef = useRef<HTMLInputElement>(null)
@@ -46,6 +49,7 @@ export function BrokerProfileForm({
   ) {
     const file = e.target.files?.[0]
     if (!file) return
+    setUploadError(null)
     setUploading(prev => ({ ...prev, [key]: true }))
     try {
       const ext = file.name.split('.').pop() ?? 'bin'
@@ -54,10 +58,13 @@ export function BrokerProfileForm({
         .from('documents')
         .upload(fullPath, file, { upsert: true })
       if (error) throw error
-      if (hiddenRef.current) hiddenRef.current.value = data.path
+      // Store the full public URL, not just the path
+      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path)
+      if (hiddenRef.current) hiddenRef.current.value = publicUrl
       setUploadedFlags(prev => ({ ...prev, [key]: true }))
-    } catch {
-      alert('فشل رفع الملف. يرجى المحاولة مجدداً.')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'فشل رفع الملف'
+      setUploadError(`فشل رفع الملف: ${msg}`)
     } finally {
       setUploading(prev => ({ ...prev, [key]: false }))
     }
@@ -65,11 +72,31 @@ export function BrokerProfileForm({
 
   const isUploading = Object.values(uploading).some(Boolean)
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setSaveError(null)
+    setSaveSuccess(false)
+    setSubmitting(true)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const result = await updateBrokerProfile(formData)
+      if (result && !result.ok) {
+        setSaveError(result.error)
+      } else {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      }
+    } catch {
+      setSaveError('حدث خطأ غير متوقع. يرجى المحاولة مجدداً.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <form
-      action={updateBrokerProfile}
+      onSubmit={handleSubmit}
       className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-5"
-      onSubmit={() => setSubmitting(true)}
     >
       {/* Hidden path fields — filled by client-side uploads */}
       <input type="hidden" name="photoPath" ref={photoPathRef} />
@@ -154,6 +181,27 @@ export function BrokerProfileForm({
           </FormField>
         </div>
       </Section>
+
+      {uploadError && (
+        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          {uploadError}
+        </div>
+      )}
+
+      {saveError && (
+        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          {saveError}
+        </div>
+      )}
+
+      {saveSuccess && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+          <CheckCircle className="w-4 h-4 shrink-0" />
+          تم حفظ البيانات بنجاح
+        </div>
+      )}
 
       <button
         type="submit"
