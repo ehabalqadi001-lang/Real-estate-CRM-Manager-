@@ -80,3 +80,4 @@ skills/
 supabase/.temp/
 
 .vercel
+.env*.local
