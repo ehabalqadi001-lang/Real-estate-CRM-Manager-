@@ -177,13 +177,16 @@ export async function loginAction(formData: FormData) {
       .eq('id', authData.user.id)
       .maybeSingle()
 
+    const normalizedRole = normalizeRole(profile?.role)
     const cookieStore = await cookies()
-    cookieStore.set('user_role', normalizeRole(profile?.role), {
+    cookieStore.set('user_role', normalizedRole, {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
     })
+
+    if (normalizedRole === 'viewer') redirect('/marketplace/profile')
   }
 
   redirect('/')

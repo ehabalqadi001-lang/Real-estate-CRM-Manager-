@@ -24,8 +24,7 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
 
   async function handleLogout() {
     await logout()
-    router.refresh()
-    router.push('/marketplace')
+    router.push('/login')
   }
 
   return (
