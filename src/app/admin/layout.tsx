@@ -5,10 +5,13 @@ import {
   ChevronDown,
   CircleDollarSign,
   Code2,
+  Coins,
   Headphones,
   LayoutDashboard,
   Megaphone,
+  ReceiptText,
   ShieldCheck,
+  Store,
   Users,
   UserCog,
   Briefcase,
@@ -104,6 +107,14 @@ const adminGroups = [
       { href: '/dashboard/account-manager', label: 'لوحة Account Managers', icon: Briefcase },
       { href: '/dashboard/hr/assign-managers', label: 'تعيين AMs (HR)', icon: UserCog },
       { href: '/dashboard/partners', label: 'إدارة الشركاء', icon: Users },
+    ],
+  },
+  {
+    title: 'السوق العقاري',
+    items: [
+      { href: '/admin/ad-approvals', label: 'مراجعة الإعلانات', icon: Store },
+      { href: '/admin/points', label: 'النقاط والمحافظ', icon: Coins },
+      { href: '/admin/finance-marketplace', label: 'إيرادات المنصة', icon: ReceiptText },
     ],
   },
 ]
