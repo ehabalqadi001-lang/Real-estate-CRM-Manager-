@@ -2,12 +2,16 @@ import 'server-only'
 
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
+import { isSuperAdmin } from '@/shared/auth/types'
+import { getActiveCompanyContext } from '@/shared/company-context/server'
 import type { ClientCallSummary, ClientDealSummary, ClientDetail, ClientDetailResult, ClientListResult } from './types'
 
 export async function getClientList(): Promise<ClientListResult> {
   const session = await requirePermission('client.view.assigned')
   const supabase = await createServerSupabaseClient()
-  const companyId = session.profile.company_id ?? null
+  const adminUser = isSuperAdmin(session.profile.role)
+  const companyContext = adminUser ? await getActiveCompanyContext(session) : null
+  const companyId = companyContext?.companyId ?? session.profile.company_id ?? null
 
   try {
     let query = supabase
@@ -16,7 +20,11 @@ export async function getClientList(): Promise<ClientListResult> {
       .order('created_at', { ascending: false })
       .limit(500)
 
-    if (companyId) query = query.eq('company_id', companyId)
+    if (adminUser && companyId) {
+      query = query.or(`company_id.eq.${companyId},company_id.is.null`)
+    } else if (!adminUser && companyId) {
+      query = query.eq('company_id', companyId)
+    }
 
     const { data, error } = await query
     if (error) return { clients: [], error: error.message }

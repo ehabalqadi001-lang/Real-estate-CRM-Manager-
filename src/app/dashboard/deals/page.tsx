@@ -7,6 +7,7 @@ import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { getActiveCompanyContext } from '@/shared/company-context/server'
 import { nullableUuid } from '@/lib/uuid'
+import { isSuperAdmin } from '@/shared/auth/types'
 import {
   Briefcase,
   Calendar,
@@ -69,36 +70,33 @@ export default async function DealsPage({ searchParams }: PageProps) {
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
   const targetCompanyId = nullableUuid(companyContext.companyId)
+  const adminUser = isSuperAdmin(session.profile.role)
+  const canQuery = adminUser || Boolean(targetCompanyId)
+
+  // Build a reusable company scope: super_admin sees selected company + orphaned (null) records;
+  // regular users see their company only.
+  const companyScope = adminUser
+    ? (targetCompanyId ? `company_id.eq.${targetCompanyId},company_id.is.null` : null)
+    : null
+
+  const leadsBase = supabase.from('leads').select('id, client_name').neq('status', 'Won').order('created_at', { ascending: false })
+  const teamBase  = supabase.from('profiles').select('id, full_name').in('role', ['agent', 'senior_agent', 'branch_manager', 'company_admin', 'company_owner', 'admin', 'company']).order('full_name')
+  const dealsBase = supabase.from('deals').select('id, stage, final_price, created_at, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to)
 
   const [
     { data: activeLeads },
     { data: teamMembers },
     { data: deals, count: totalDealsCount },
   ] = await Promise.all([
-    targetCompanyId
-      ? supabase
-        .from('leads')
-        .select('id, client_name')
-        .eq('company_id', targetCompanyId)
-        .neq('status', 'Won')
-        .order('created_at', { ascending: false })
-      : Promise.resolve({ data: [] }),
-    targetCompanyId
-      ? supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('company_id', targetCompanyId)
-        .in('role', ['agent', 'senior_agent', 'branch_manager', 'company_admin', 'company_owner', 'admin', 'company'])
-        .order('full_name')
-      : Promise.resolve({ data: [] }),
-    targetCompanyId
-      ? supabase
-        .from('deals')
-        .select('id, stage, final_price, created_at, leads(client_name), profiles!deals_agent_id_fkey(full_name), commissions(amount, status)', { count: 'exact' })
-        .eq('company_id', targetCompanyId)
-        .order('created_at', { ascending: false })
-        .range(from, to)
-      : Promise.resolve({ data: [], count: 0 }),
+    canQuery
+      ? (companyScope ? leadsBase.or(companyScope) : !adminUser ? leadsBase.eq('company_id', targetCompanyId!) : leadsBase)
+      : Promise.resolve({ data: [] as { id: string; client_name: string | null }[] }),
+    canQuery
+      ? (companyScope ? teamBase.or(companyScope) : !adminUser ? teamBase.eq('company_id', targetCompanyId!) : teamBase)
+      : Promise.resolve({ data: [] as { id: string; full_name: string | null }[] }),
+    canQuery
+      ? (companyScope ? dealsBase.or(companyScope) : !adminUser ? dealsBase.eq('company_id', targetCompanyId!) : dealsBase)
+      : Promise.resolve({ data: [] as DealRow[], count: 0 }),
   ])
 
   const safeLeads = ((activeLeads ?? []) as unknown as LeadOption[]).filter((lead) => lead.id)
