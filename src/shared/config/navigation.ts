@@ -7,6 +7,7 @@ import {
   Calendar,
   CircleDollarSign,
   ClipboardCheck,
+  Coins,
   FileText,
   Handshake,
   Home,
@@ -21,6 +22,7 @@ import {
   Settings,
   ShieldCheck,
   Shuffle,
+  Store,
   TrendingUp,
   UserCheck,
   UserCog,
@@ -115,6 +117,14 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'واتساب والمكالمات', href: '/dashboard/whatsapp', permission: 'messages.whatsapp', icon: MessageCircle },
       { title: 'سجل العمليات', href: '/dashboard/audit', permission: 'audit.view.company', icon: ClipboardCheck },
       { title: 'الإعدادات', href: '/dashboard/settings', permission: 'dashboard.view.own', icon: Settings },
+    ],
+  },
+  {
+    title: 'السوق العقاري',
+    items: [
+      { title: 'تصفح السوق', href: '/marketplace', permission: 'dashboard.view.own', icon: Store },
+      { title: 'ملفي في السوق', href: '/marketplace/profile', permission: 'dashboard.view.own', icon: UserCheck },
+      { title: 'شراء نقاط', href: '/marketplace/buy-points', permission: 'dashboard.view.own', icon: Coins },
     ],
   },
 ]

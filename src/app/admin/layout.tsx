@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {
   BarChart3,
+  Briefcase,
   Building2,
   ChevronDown,
   CircleDollarSign,
@@ -14,12 +15,33 @@ import {
   Store,
   Users,
   UserCog,
-  Briefcase,
 } from 'lucide-react'
 import { requirePermission } from '@/shared/rbac/require-permission'
+import { hasPermission, type Permission } from '@/shared/rbac/permissions'
+import type { AppRole } from '@/shared/auth/types'
+
+interface AdminNavItem {
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
+  permission: Permission
+}
+
+interface AdminNavGroup {
+  title: string
+  items: AdminNavItem[]
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await requirePermission('admin.view')
+  const role = session.profile.role as AppRole
+
+  const filteredGroups = adminGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => hasPermission(role, item.permission)),
+    }))
+    .filter((group) => group.items.length > 0)
 
   return (
     <div className="min-h-screen bg-[var(--fi-soft)]" dir="rtl">
@@ -38,7 +60,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
 
         <nav className="flex-1 space-y-3 overflow-y-auto p-3">
-          {adminGroups.map((group, index) => (
+          {filteredGroups.map((group, index) => (
             <details key={group.title} className="group" open={index < 2}>
               <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-xs font-black text-white/45 transition hover:bg-white/5 hover:text-white">
                 <span>{group.title}</span>
@@ -46,7 +68,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               </summary>
               <div className="mt-1 space-y-1">
                 {group.items.map((item) => (
-                  <Link key={item.href} href={item.href} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white">
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white"
+                  >
                     <item.icon className="size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   </Link>
@@ -77,44 +103,44 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   )
 }
 
-const adminGroups = [
+const adminGroups: AdminNavGroup[] = [
   {
     title: 'نظام عام',
     items: [
-      { href: '/admin', label: 'نظرة عامة', icon: LayoutDashboard },
-      { href: '/admin/companies', label: 'الشركات', icon: Building2 },
-      { href: '/admin/users', label: 'المستخدمون', icon: Users },
+      { href: '/admin', label: 'نظرة عامة', icon: LayoutDashboard, permission: 'admin.view' },
+      { href: '/admin/companies', label: 'الشركات', icon: Building2, permission: 'admin.view' },
+      { href: '/admin/users', label: 'المستخدمون', icon: Users, permission: 'admin.view' },
     ],
   },
   {
     title: 'التشغيل والمحتوى',
     items: [
-      { href: '/admin/developers', label: 'المطورون', icon: Code2 },
-      { href: '/admin/content', label: 'المحتوى والإعلانات', icon: Megaphone },
-      { href: '/admin/support', label: 'الدعم الفني', icon: Headphones },
+      { href: '/admin/developers', label: 'المطورون', icon: Code2, permission: 'admin.view' },
+      { href: '/admin/content', label: 'المحتوى والإعلانات', icon: Megaphone, permission: 'admin.view' },
+      { href: '/admin/support', label: 'الدعم الفني', icon: Headphones, permission: 'support.view' },
     ],
   },
   {
     title: 'المالية والمنصة',
     items: [
-      { href: '/admin/financials', label: 'الماليات', icon: CircleDollarSign },
-      { href: '/admin/super-dashboard', label: 'SaaS Tenants', icon: BarChart3 },
+      { href: '/admin/financials', label: 'الماليات', icon: CircleDollarSign, permission: 'finance.view' },
+      { href: '/admin/super-dashboard', label: 'SaaS Tenants', icon: BarChart3, permission: 'platform.manage' },
     ],
   },
   {
     title: 'Account Managers & HR',
     items: [
-      { href: '/dashboard/account-manager', label: 'لوحة Account Managers', icon: Briefcase },
-      { href: '/dashboard/hr/assign-managers', label: 'تعيين AMs (HR)', icon: UserCog },
-      { href: '/dashboard/partners', label: 'إدارة الشركاء', icon: Users },
+      { href: '/dashboard/account-manager', label: 'لوحة Account Managers', icon: Briefcase, permission: 'account_manager.view_portfolio' },
+      { href: '/dashboard/hr/assign-managers', label: 'تعيين AMs (HR)', icon: UserCog, permission: 'broker.assign_manager' },
+      { href: '/dashboard/partners', label: 'إدارة الشركاء', icon: Users, permission: 'broker.manage' },
     ],
   },
   {
     title: 'السوق العقاري',
     items: [
-      { href: '/admin/ad-approvals', label: 'مراجعة الإعلانات', icon: Store },
-      { href: '/admin/points', label: 'النقاط والمحافظ', icon: Coins },
-      { href: '/admin/finance-marketplace', label: 'إيرادات المنصة', icon: ReceiptText },
+      { href: '/admin/ad-approvals', label: 'مراجعة الإعلانات', icon: Store, permission: 'admin.view' },
+      { href: '/admin/points', label: 'النقاط والمحافظ', icon: Coins, permission: 'platform.manage' },
+      { href: '/admin/finance-marketplace', label: 'إيرادات المنصة', icon: ReceiptText, permission: 'finance.view' },
     ],
   },
 ]

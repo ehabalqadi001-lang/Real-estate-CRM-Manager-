@@ -28,7 +28,7 @@ const MOBILE_BOTTOM_HREFS = [
   '/dashboard',
   '/dashboard/leads',
   '/dashboard/deals',
-  '/dashboard/partners',
+  '/marketplace',
   '/dashboard/commissions',
 ]
 
@@ -60,7 +60,8 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       ...group,
       items: group.items.filter(
         (item) =>
-          item.href.startsWith('/dashboard') && hasPermission(profile.role, item.permission),
+          (item.href.startsWith('/dashboard') || item.href.startsWith('/marketplace')) &&
+          hasPermission(profile.role, item.permission),
       ),
     }))
     .filter((group) => group.items.length > 0)
