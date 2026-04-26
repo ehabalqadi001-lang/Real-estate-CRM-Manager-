@@ -200,9 +200,9 @@ export default async function ClientProfilePage({ params }: PageProps) {
                   <div key={deal.id} className="rounded-xl border border-[var(--fi-line)] p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-black text-[var(--fi-ink)]">{deal.title ?? deal.compound ?? 'صفقة'}</p>
+                        <p className="font-black text-[var(--fi-ink)]">{deal.title ?? 'صفقة'}</p>
                         <p className="mt-0.5 text-xs text-[var(--fi-muted)]">
-                          {deal.developer_name ?? deal.developer ?? '—'} · {deal.property_type ?? '—'}
+                          {deal.developer_name ?? '—'} · {deal.property_type ?? '—'}
                         </p>
                       </div>
                       <div className="text-left shrink-0">

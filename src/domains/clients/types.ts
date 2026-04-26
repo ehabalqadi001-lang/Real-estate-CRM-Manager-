@@ -43,8 +43,6 @@ export interface ClientDealSummary {
   id: string
   lead_id?: string | null
   title: string | null
-  compound: string | null
-  developer: string | null
   developer_name: string | null
   property_type: string | null
   unit_value: number | null

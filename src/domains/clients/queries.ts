@@ -64,7 +64,7 @@ export async function getClientDetail(clientId: string): Promise<ClientDetailRes
 
     const { data: dealsData, error: dealsError } = await supabase
       .from('deals')
-      .select('id, lead_id, title, compound, developer, developer_name, property_type, unit_value, amount, value, final_price, stage, status, created_at')
+      .select('id, lead_id, title, developer_name, property_type, unit_value, amount, value, final_price, stage, status, created_at')
       .eq('client_id', clientId)
       .order('created_at', { ascending: false })
 
