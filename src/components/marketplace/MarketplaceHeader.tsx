@@ -4,17 +4,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import MarketplaceNotificationBell from '@/components/marketplace/MarketplaceNotificationBell'
 import { useAuthStore } from '@/store/authStore'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
 import {
-  Building2, Coins, Handshake, LogIn, LogOut,
-  MessageCircle, Plus, ShieldCheck, UserRound, Sparkles,
+  Building2, Handshake, LogIn, LogOut,
+  Plus, Sparkles, UserRound,
 } from 'lucide-react'
 import { buttonMotion } from '@/lib/motion'
 
@@ -90,34 +85,24 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 Add Listing
               </motion.button>
               <MarketplaceNotificationBell />
-              <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-2xl outline-none">
-                  <Avatar className="size-10 border-2 border-blue-100 transition hover:border-blue-400">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-emerald-500 text-sm font-black text-white">
-                      {getInitial(user.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel>
-                    <div className="space-y-1">
-                      <p className="font-black text-slate-900">{user.name}</p>
-                      <p className="text-xs text-slate-500">{user.email}</p>
-                      <Badge className="bg-blue-50 text-blue-700">
-                        <ShieldCheck className="mr-1 size-3" />
-                        {user.role === 'CLIENT' || user.role === 'client' ? 'Client' : user.role ?? 'User'}
-                      </Badge>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => router.push('/marketplace/profile')}><UserRound className="mr-2 size-4" />My Profile</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => router.push('/marketplace/add-property')}><Plus className="mr-2 size-4" />Add Listing</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => router.push('/marketplace/buy-points')}><Coins className="mr-2 size-4" />Buy Points</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => router.push('/marketplace/chat')}><MessageCircle className="mr-2 size-4" />Messages</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600" onClick={handleLogout}><LogOut className="mr-2 size-4" />Sign Out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Profile avatar — direct link to profile page */}
+              <Link href="/marketplace/profile" className="rounded-2xl outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-blue-400">
+                <Avatar className="size-10 border-2 border-blue-100 transition hover:border-blue-400 hover:shadow-md">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-emerald-500 text-sm font-black text-white">
+                    {getInitial(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              {/* Sign out button */}
+              <motion.button
+                type="button"
+                onClick={handleLogout}
+                {...buttonMotion}
+                aria-label="Sign Out"
+                className="flex size-10 items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-red-500 transition hover:bg-red-100"
+              >
+                <LogOut className="size-4" />
+              </motion.button>
             </>
           ) : (
             <>
