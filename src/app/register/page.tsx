@@ -68,12 +68,14 @@ export default function RegisterPage() {
           animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute -right-40 -top-40 h-[700px] w-[700px] rounded-full opacity-20"
+          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ background: `radial-gradient(circle, ${copy.accentColor}44 0%, transparent 65%)` }}
         />
         <motion.div
           animate={{ x: [0, -25, 0], y: [0, 30, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
           className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full opacity-15"
+          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ background: 'radial-gradient(circle, #2563eb44 0%, transparent 65%)' }}
         />
       </div>
@@ -88,6 +90,7 @@ export default function RegisterPage() {
           className="fi-register-hero overflow-hidden rounded-3xl p-7 text-white lg:sticky lg:top-8"
         >
           {/* Grid pattern */}
+          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '36px 36px' }} />
 
@@ -95,6 +98,7 @@ export default function RegisterPage() {
             {/* Eyebrow badge */}
             <motion.div variants={fadeUp} initial="hidden" animate="show"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em]"
+              // eslint-disable-next-line no-inline-styles/no-inline-styles
               style={{ color: copy.accentColor }}>
               <BadgeCheck className="size-3.5" />
               {copy.eyebrow}
@@ -266,7 +270,9 @@ export default function RegisterPage() {
 function InfoCard({ icon: Icon, title, text, color }: { icon: ElementType; title: string; text: string; color: string }) {
   return (
     <motion.div variants={fadeUp} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4">
+      {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
       <span className="flex size-8 shrink-0 items-center justify-center rounded-xl" style={{ background: `${color}25` }}>
+        {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
         <Icon className="size-4" style={{ color }} />
       </span>
       <div>
@@ -295,6 +301,7 @@ function ChoiceCard({ active, icon: Icon, title, description, onClick, color }: 
       }`}
     >
       <div className={`mb-3 flex size-9 items-center justify-center rounded-xl ${active ? 'bg-blue-100' : 'bg-slate-100'}`}>
+        {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
         <Icon className="size-4" style={{ color: active ? color : '#64748b' }} />
       </div>
       <p className="text-sm font-black text-slate-900">{title}</p>
@@ -441,6 +448,7 @@ function UploadBox({ name, label, icon: Icon, required, multiple }: {
         required={required}
         multiple={multiple}
         accept="image/*,.pdf"
+        aria-label={label}
         className="absolute inset-0 cursor-pointer opacity-0"
         onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
       />

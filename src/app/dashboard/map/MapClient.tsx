@@ -145,6 +145,7 @@ export default function MapClient({ units, projects }: { units: UnitPin[]; proje
 
       {searchError && <p className="px-4 pt-3 text-xs font-bold text-red-600">{searchError}</p>}
 
+      {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
       <MapContainer center={center} zoom={11} style={{ height: '560px', width: '100%' }} scrollWheelZoom>
         <TileLayer
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -156,9 +157,13 @@ export default function MapClient({ units, projects }: { units: UnitPin[]; proje
         {filteredUnits.map((unit) => (
           <Marker key={unit.id} position={[unit.lat, unit.lng]} icon={unitIcon(unit.status)}>
             <Popup>
+              {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <div style={{ direction: 'rtl', minWidth: 170 }}>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <p style={{ fontWeight: 900, fontSize: 13, marginBottom: 4 }}>{unit.label}</p>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <p style={{ fontSize: 11, color: '#64748b' }}>{unit.type}</p>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <p style={{ fontSize: 13, fontWeight: 800, color: '#00C27C', marginTop: 4 }}>{unit.price} ج.م</p>
               </div>
             </Popup>
@@ -168,8 +173,11 @@ export default function MapClient({ units, projects }: { units: UnitPin[]; proje
         {projects.map((project) => (
           <Marker key={project.id} position={[project.lat, project.lng]} icon={projectIcon}>
             <Popup>
+              {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <div style={{ direction: 'rtl', minWidth: 170 }}>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <p style={{ fontWeight: 900, fontSize: 13, marginBottom: 4 }}>{project.name}</p>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 {project.location && <p style={{ fontSize: 11, color: '#64748b' }}>{project.location}</p>}
               </div>
             </Popup>

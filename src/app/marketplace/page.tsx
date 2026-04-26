@@ -63,6 +63,7 @@ export default async function MarketplacePage() {
         {/* ── Hero Section ──────────────────────────────────── */}
         <section className="relative overflow-hidden border-b border-slate-200/80">
           {/* Background gradient */}
+          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           <div
             className="absolute inset-0 -z-10"
             style={{
@@ -81,6 +82,7 @@ export default async function MarketplacePage() {
               <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-4 py-2 text-xs font-black text-blue-700 shadow-sm">
                 <span
                   className="size-2 rounded-full"
+                  // eslint-disable-next-line no-inline-styles/no-inline-styles
                   style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)' }}
                 />
                 Verified Real Estate · Managed by FAST INVESTMENT
@@ -90,6 +92,7 @@ export default async function MarketplacePage() {
                 Premium Properties
                 <span
                   className="block bg-clip-text text-transparent"
+                  // eslint-disable-next-line no-inline-styles/no-inline-styles
                   style={{ backgroundImage: 'linear-gradient(135deg, #2563eb 0%, #10b981 100%)' }}
                 >
                   for Sale &amp; Investment

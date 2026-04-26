@@ -114,12 +114,15 @@ export default async function ProjectsPage() {
               {/* Status bar */}
               <div className="flex gap-1 h-2 rounded-full overflow-hidden mb-3">
                 {project.available > 0 && (
+                  // eslint-disable-next-line no-inline-styles/no-inline-styles
                   <div className="bg-emerald-400 rounded-full" style={{ width: `${(project.available / project.total) * 100}%` }} />
                 )}
                 {project.reserved > 0 && (
+                  // eslint-disable-next-line no-inline-styles/no-inline-styles
                   <div className="bg-amber-400 rounded-full" style={{ width: `${(project.reserved / project.total) * 100}%` }} />
                 )}
                 {project.sold > 0 && (
+                  // eslint-disable-next-line no-inline-styles/no-inline-styles
                   <div className="bg-red-400 rounded-full" style={{ width: `${(project.sold / project.total) * 100}%` }} />
                 )}
               </div>

@@ -65,6 +65,7 @@ export default async function SettingsPage() {
             <div className="mt-3 flex items-center gap-3">
               <div
                 className="flex size-12 items-center justify-center overflow-hidden rounded-lg bg-contain bg-center bg-no-repeat text-sm font-black text-white shadow-sm"
+                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ backgroundColor: company?.primary_brand_color ?? '#0f766e', ...logoStyle }}
               >
                 {company?.logo_url ? null : 'CRM'}

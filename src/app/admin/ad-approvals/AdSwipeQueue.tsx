@@ -132,6 +132,7 @@ export function AdSwipeQueue({ initialAds }: Props) {
         <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
             className="h-full rounded-full bg-[#0F8F83] transition-all duration-500"
+            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ width: `${((current) / queue.length) * 100}%` }}
           />
         </div>

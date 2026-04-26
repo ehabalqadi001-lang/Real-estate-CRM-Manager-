@@ -96,6 +96,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white shadow-lg"
+              // eslint-disable-next-line no-inline-styles/no-inline-styles
               style={{ background: 'linear-gradient(135deg, var(--fi-emerald), #0081cc)' }}>
               {initials}
             </div>

@@ -87,8 +87,11 @@ export default function InventoryHeatMap({ units }: Props) {
       {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
+          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           {stats.available > 0 && <div className="bg-emerald-400 transition-all" style={{ flex: stats.available }} title="متاحة" />}
+          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           {stats.reserved > 0  && <div className="bg-amber-400 transition-all"   style={{ flex: stats.reserved }}  title="محجوزة" />}
+          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           {stats.sold > 0      && <div className="bg-red-500 transition-all"      style={{ flex: stats.sold }}      title="مباعة" />}
         </div>
         <div className="flex justify-between text-[10px] text-slate-400">

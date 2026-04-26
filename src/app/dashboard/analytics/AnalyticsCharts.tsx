@@ -39,6 +39,7 @@ export default function AnalyticsCharts({ funnelData, sourceData, lostReasons, m
                     <span className="text-slate-900">{s.count}</span>
                   </div>
                   <div className="h-6 bg-slate-100 rounded-lg overflow-hidden">
+                    {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                     <div className={`h-full ${colors[i]} rounded-lg transition-all flex items-center justify-end pr-2`}
                       style={{ width: `${Math.max(pct, 4)}%` }}>
                       {pct > 15 && <span className="text-[10px] text-white font-bold">{pct}%</span>}

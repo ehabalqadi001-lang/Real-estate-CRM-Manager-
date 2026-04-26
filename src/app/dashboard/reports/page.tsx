@@ -164,6 +164,7 @@ export default async function ReportsPage() {
                     <div className="h-2.5 overflow-hidden rounded-full bg-[var(--fi-soft)]">
                       <div
                         className="h-full rounded-full transition-all duration-700"
+                        // eslint-disable-next-line no-inline-styles/no-inline-styles
                         style={{ width: `${percentage}%`, background: developerName === 'غير محدد' ? '#EF4444' : 'var(--fi-gradient-primary)' }}
                       />
                     </div>

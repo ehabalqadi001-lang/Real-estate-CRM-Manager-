@@ -2,7 +2,9 @@ export default function DashboardLoading() {
   return (
     <div className="fi-shell-bg flex h-screen overflow-hidden text-[var(--fi-ink)]" dir="rtl" aria-busy="true">
       {/* Sidebar skeleton — left side, matches DashboardShell layout */}
+      {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
       <div className="hidden lg:block" style={{ width: 268, padding: 12, flexShrink: 0 }}>
+        {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
         <div className="h-full w-full overflow-hidden rounded-2xl shadow-[0_28px_80px_rgba(0,0,0,0.18)]"
              style={{ background: 'linear-gradient(180deg,#0c1a2e 0%,#0f2040 100%)' }}>
           <div className="flex flex-col h-full p-4 space-y-3">

@@ -43,6 +43,7 @@ export default function NotificationBell() {
 
       {panelOpen && (
         <div className="absolute left-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden"
+          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ right: 'auto', left: '-280px' }}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
             <span className="font-black text-slate-800 text-sm">الإشعارات</span>

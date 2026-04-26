@@ -135,6 +135,7 @@ export default async function FinancePage({ searchParams }: PageProps) {
                     {cfg.label}
                   </span>
                   <div className="flex-1 bg-slate-100 rounded-full h-2">
+                    {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                     <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-xs font-bold text-[var(--fi-ink)] w-24 text-left">

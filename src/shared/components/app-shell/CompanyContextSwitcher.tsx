@@ -37,7 +37,7 @@ export function CompanyContextSwitcher({ activeCompanyId, companies }: CompanyCo
         onClick={() => setOpen((v) => !v)}
         className="flex min-w-[210px] items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-3 py-2 text-xs font-black text-[var(--fi-ink)] transition hover:border-emerald-300 disabled:cursor-wait dark:bg-white/5"
         aria-haspopup="listbox"
-        aria-expanded={Boolean(open)}
+        aria-expanded={open}
         aria-label="Choose active company"
       >
         <Building2 className="size-4 shrink-0 text-[var(--fi-emerald)]" aria-hidden="true" />
@@ -62,7 +62,7 @@ export function CompanyContextSwitcher({ activeCompanyId, companies }: CompanyCo
                 <li
                   key={company.id}
                   role="option"
-                  aria-selected={Boolean(isActive)}
+                  aria-selected={isActive}
                   onClick={() => select(company.id)}
                   className="flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-[var(--fi-ink)] hover:bg-[var(--fi-soft)] aria-selected:bg-emerald-50 aria-selected:text-emerald-700 dark:hover:bg-white/5 dark:aria-selected:bg-emerald-900/30"
                 >

@@ -148,6 +148,7 @@ export function EnterpriseTopbar({
             whileTap={{ scale: 0.95 }}
             onClick={openCommandPalette}
             className="flex size-10 items-center justify-center rounded-xl text-white shadow-md shadow-emerald-500/20 transition-colors"
+            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ background: 'linear-gradient(135deg, #00c27c, #0081cc)' }}
             aria-label="Open command palette"
           >

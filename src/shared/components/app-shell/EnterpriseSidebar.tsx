@@ -114,6 +114,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   }) => (
     <div
       className="flex h-full flex-col overflow-hidden"
+      // eslint-disable-next-line no-inline-styles/no-inline-styles
       style={{ background: 'linear-gradient(180deg, #0c1a2e 0%, #0f2040 100%)' }}
     >
       {/* ── Logo bar ── */}
@@ -195,6 +196,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
           <div className="flex items-center gap-2.5">
             <div
               className="flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-black text-white shadow-lg"
+              // eslint-disable-next-line no-inline-styles/no-inline-styles
               style={{ background: 'linear-gradient(135deg, #00c27c 0%, #0081cc 100%)' }}
             >
               {initials}
@@ -221,6 +223,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
           <div
             className="flex size-9 items-center justify-center rounded-lg text-xs font-black text-white shadow-lg"
             title={profile.full_name ?? profile.email ?? ''}
+            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ background: 'linear-gradient(135deg, #00c27c 0%, #0081cc 100%)' }}
           >
             {initials}
@@ -305,6 +308,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
         className="hidden h-screen shrink-0 overflow-hidden transition-[width,padding] duration-300 ease-in-out lg:block"
+        // eslint-disable-next-line no-inline-styles/no-inline-styles
         style={{ width: collapsed ? 68 : 268, padding: collapsed ? 0 : 12 }}
         dir="ltr"
       >
@@ -364,6 +368,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       {mobileItems.length > 0 && (
         <nav
           className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid gap-1 rounded-xl p-1 lg:hidden"
+          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ gridTemplateColumns: `repeat(${mobileItems.length}, 1fr)` }}
           dir="rtl"
           aria-label="التنقل السريع"

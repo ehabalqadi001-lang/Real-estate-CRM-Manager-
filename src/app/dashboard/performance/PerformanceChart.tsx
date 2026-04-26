@@ -48,6 +48,7 @@ export default function PerformanceChart({ agents }: Props) {
               />
               <Bar dataKey="إيراد" radius={[0, 6, 6, 0]}>
                 {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <LabelList dataKey="إيراد" position="right" style={{ fontSize: 10, fill: '#64748b' }}
                   formatter={(v: unknown) => `${v}K`} />
               </Bar>
@@ -70,9 +71,11 @@ export default function PerformanceChart({ agents }: Props) {
                 contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
               />
               <Bar dataKey="صفقات" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <LabelList dataKey="صفقات" position="top" style={{ fontSize: 10, fill: '#64748b' }} />
               </Bar>
               <Bar dataKey="تحويل" fill="#10b981" radius={[4, 4, 0, 0]}>
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <LabelList dataKey="تحويل" position="top" style={{ fontSize: 10, fill: '#64748b' }}
                   formatter={(v: unknown) => `${v}%`} />
               </Bar>

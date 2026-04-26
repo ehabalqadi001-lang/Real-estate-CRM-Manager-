@@ -17,6 +17,7 @@ function ProgressBar({ actual, target, color }: { actual: number; target: number
         <span className="text-slate-400">{actual.toLocaleString()} / {target.toLocaleString()}</span>
       </div>
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
         <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>

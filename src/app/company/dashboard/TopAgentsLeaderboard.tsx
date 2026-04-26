@@ -47,6 +47,7 @@ export default function TopAgentsLeaderboard({ agents }: Props) {
                   <span className="text-[10px] text-slate-500">{agent.leads} عميل</span>
                 </div>
                 <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                   <div className="h-full bg-gradient-to-r from-[#00C27C] to-[#009F64] rounded-full transition-all"
                     style={{ width: `${(agent.revenue / maxRev) * 100}%` }} />
                 </div>

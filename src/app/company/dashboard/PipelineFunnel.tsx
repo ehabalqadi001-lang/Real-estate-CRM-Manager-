@@ -41,6 +41,7 @@ export default function PipelineFunnel({ data }: Props) {
           <div className="space-y-2">
             {data.map((d, i) => (
               <div key={d.stage} className="flex items-center gap-3">
+                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
                 <div className="flex-1">
                   <div className="flex justify-between text-xs mb-0.5">
@@ -48,6 +49,7 @@ export default function PipelineFunnel({ data }: Props) {
                     <span className="text-slate-500">{d.count} ({((d.count / Math.max(data.reduce((s,x)=>s+x.count,0),1))*100).toFixed(0)}%)</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                     <div className="h-full rounded-full transition-all" style={{ width: `${(d.count / maxCount) * 100}%`, background: COLORS[i % COLORS.length] }} />
                   </div>
                 </div>

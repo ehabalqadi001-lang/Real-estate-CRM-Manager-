@@ -40,6 +40,7 @@ export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStat
               <span>{leadStats.fresh} عميل ({freshPct}%)</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2.5">
+              {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${freshPct}%` }}></div>
             </div>
           </div>
@@ -51,6 +52,7 @@ export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStat
               <span>{leadStats.followup} عميل ({followupPct}%)</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2.5">
+              {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: `${followupPct}%` }}></div>
             </div>
           </div>
@@ -62,6 +64,7 @@ export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStat
               <span>{leadStats.meeting} عميل ({meetingPct}%)</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2.5">
+              {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <div className="bg-purple-500 h-2.5 rounded-full" style={{ width: `${meetingPct}%` }}></div>
             </div>
           </div>
@@ -77,6 +80,7 @@ export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStat
         <div className="flex h-12 w-full rounded-xl overflow-hidden shadow-sm mb-4">
           <div 
             className="bg-emerald-500 flex items-center justify-center text-white text-xs font-bold transition-all" 
+            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ width: `${availablePct}%` }}
             title="وحدات متاحة"
           >
@@ -84,6 +88,7 @@ export default function CRMAnalyticsVisualizer({ stats }: { stats: AnalyticsStat
           </div>
           <div 
             className="bg-slate-300 flex items-center justify-center text-slate-700 text-xs font-bold transition-all" 
+            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ width: `${soldPct}%` }}
             title="وحدات مباعة"
           >

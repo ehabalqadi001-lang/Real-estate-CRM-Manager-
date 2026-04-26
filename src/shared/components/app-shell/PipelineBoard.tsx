@@ -95,7 +95,7 @@ export function PipelineBoard() {
                   >
                     <div className="flex justify-between items-start mb-3">
                       <h4 className="font-bold text-sm text-slate-900 leading-tight">{deal.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal className="size-4" /></button>
+                      <button aria-label="More options" className="text-slate-400 hover:text-slate-600"><MoreHorizontal className="size-4" aria-hidden="true" /></button>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-xs font-semibold text-slate-600"><User className="size-3.5 text-slate-400" /> {deal.client}</div>
