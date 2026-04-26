@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   changeClientPasswordAction,
   createClientSupportTicketAction,
+  promoteAdAction,
   updateClientProfileAction,
 } from '@/app/marketplace/profile/actions'
 
@@ -74,6 +75,11 @@ type PointPackage = {
   points_amount: number | string
 }
 
+type AdCosts = {
+  regular_points_cost: number
+  premium_points_cost: number
+}
+
 type TabId = 'account' | 'wallet' | 'ads' | 'support' | 'about' | 'terms'
 
 const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
@@ -94,6 +100,7 @@ export default function ClientProfileDashboard({
   transactions,
   supportTickets,
   pointPackages,
+  adCosts,
 }: {
   profile: Profile
   listings: Listing[]
@@ -101,16 +108,19 @@ export default function ClientProfileDashboard({
   transactions: WalletTransaction[]
   supportTickets: SupportTicket[]
   pointPackages: PointPackage[]
+  adCosts?: AdCosts | null
 }) {
   const [activeTab, setActiveTab] = useState<TabId>('account')
 
   const [profilePending, startProfileTransition] = useTransition()
   const [passwordPending, startPasswordTransition] = useTransition()
   const [ticketPending, startTicketTransition] = useTransition()
+  const [promotePending, startPromoteTransition] = useTransition()
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [ticketMessage, setTicketMessage] = useState<string | null>(null)
+  const [promoteMessages, setPromoteMessages] = useState<Record<string, string>>({})
   const [preferredContact, setPreferredContact] = useState(profile.preferred_contact ?? 'whatsapp')
 
   function handleUpdateProfile(formData: FormData) {
@@ -132,6 +142,16 @@ export default function ClientProfileDashboard({
     startTicketTransition(async () => {
       const result = await createClientSupportTicketAction(formData)
       setTicketMessage(result.message)
+    })
+  }
+
+  function handlePromoteAd(adId: string, kind: 'regular' | 'premium') {
+    startPromoteTransition(async () => {
+      const fd = new FormData()
+      fd.set('ad_id', adId)
+      fd.set('kind', kind)
+      const result = await promoteAdAction(fd)
+      setPromoteMessages((prev) => ({ ...prev, [adId]: result.message }))
     })
   }
 
@@ -236,6 +256,11 @@ export default function ClientProfileDashboard({
           listings={listings}
           activeListings={activeListings}
           pendingListings={pendingListings}
+          balance={balance}
+          adCosts={adCosts}
+          promotePending={promotePending}
+          promoteMessages={promoteMessages}
+          onPromote={handlePromoteAd}
         />
       )}
 
@@ -483,11 +508,23 @@ function AdsTab({
   listings,
   activeListings,
   pendingListings,
+  balance,
+  adCosts,
+  promotePending,
+  promoteMessages,
+  onPromote,
 }: {
   listings: Listing[]
   activeListings: number
   pendingListings: number
+  balance: number
+  adCosts?: AdCosts | null
+  promotePending: boolean
+  promoteMessages: Record<string, string>
+  onPromote: (adId: string, kind: 'regular' | 'premium') => void
 }) {
+  const regularCost = adCosts?.regular_points_cost ?? 10
+  const premiumCost = adCosts?.premium_points_cost ?? 50
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -573,6 +610,33 @@ function AdsTab({
                     عرض <ExternalLink className="size-3" />
                   </Link>
                 </div>
+
+                {/* Promote buttons */}
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#DDE6E4] pt-3">
+                  <button
+                    type="button"
+                    disabled={promotePending || balance < regularCost}
+                    onClick={() => onPromote(listing.id, 'regular')}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-[#0F8F83]/30 bg-[#EEF6F5] py-2 text-xs font-black text-[#0F8F83] transition hover:bg-[#0F8F83] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    title={balance < regularCost ? `تحتاج ${regularCost} نقطة` : ''}
+                  >
+                    <Coins className="size-3.5" />
+                    Regular ({regularCost} نقطة)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={promotePending || balance < premiumCost}
+                    onClick={() => onPromote(listing.id, 'premium')}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-[#C9964A]/30 bg-[#FFF8EC] py-2 text-xs font-black text-[#C9964A] transition hover:bg-[#C9964A] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    title={balance < premiumCost ? `تحتاج ${premiumCost} نقطة` : ''}
+                  >
+                    <Coins className="size-3.5" />
+                    Premium ({premiumCost} نقطة)
+                  </button>
+                </div>
+                {promoteMessages[listing.id] && (
+                  <p className="mt-1 text-center text-xs font-bold text-[#0F8F83]">{promoteMessages[listing.id]}</p>
+                )}
               </div>
             )
           })}

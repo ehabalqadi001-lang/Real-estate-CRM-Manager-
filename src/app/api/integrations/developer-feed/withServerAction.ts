@@ -14,6 +14,8 @@ export type ActionState<T> = {
  * @param allowedRoles Array of roles allowed to execute this action (e.g., ['super_admin', 'company_admin']) or ['*'] for all authenticated.
  * @param schema Zod schema for input validation.
  * @param handler The actual action logic to execute.
+ * تم نقل هذا الملف إلى المسار المعماري الصحيح للوظائف المشتركة:
+ * src/shared/actions/withServerAction.ts
  */
 export function withServerAction<TInput, TOutput>(
   allowedRoles: string[],
@@ -59,3 +61,4 @@ export function withServerAction<TInput, TOutput>(
     }
   }
 }
+export const isMoved = true;

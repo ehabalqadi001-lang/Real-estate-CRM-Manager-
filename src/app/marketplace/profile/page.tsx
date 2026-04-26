@@ -19,6 +19,7 @@ export default async function ClientProfilePage() {
     { data: transactions },
     { data: supportTickets },
     { data: packages },
+    { data: adCosts },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -54,6 +55,11 @@ export default async function ClientProfilePage() {
       .eq('is_active', true)
       .order('sort_order')
       .limit(3),
+    supabase
+      .from('ad_cost_config')
+      .select('regular_points_cost, premium_points_cost')
+      .eq('id', true)
+      .maybeSingle(),
   ])
 
   const profileData = {
@@ -85,6 +91,7 @@ export default async function ClientProfilePage() {
           transactions={transactions ?? []}
           supportTickets={supportTickets ?? []}
           pointPackages={packages ?? []}
+          adCosts={adCosts ?? null}
         />
       </main>
     </div>

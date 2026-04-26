@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { Coins, ShieldCheck, Wallet } from 'lucide-react'
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader'
+import { CustomTopUp } from '@/components/marketplace/CustomTopUp'
 import { createServerClient } from '@/lib/supabase/server'
 import type { MarketplaceUser } from '@/domains/marketplace/types'
 import { TopUpCheckout } from './TopUpCheckout'
@@ -17,10 +18,11 @@ export default async function BuyPointsPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: wallet }, { data: packages }] = await Promise.all([
+  const [{ data: profile }, { data: wallet }, { data: packages }, { data: costConfig }] = await Promise.all([
     supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle(),
     supabase.from('user_wallets').select('points_balance, lifetime_points_earned, lifetime_points_spent').eq('user_id', user.id).maybeSingle(),
     supabase.from('point_packages').select('id, name, description, package_kind, amount_egp, currency, points_amount').eq('is_active', true).order('sort_order'),
+    supabase.from('ad_cost_config').select('points_per_egp').eq('id', true).maybeSingle(),
   ])
 
   const currentUser: MarketplaceUser = {
@@ -69,10 +71,16 @@ export default async function BuyPointsPage({
           </div>
         )}
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {(packages ?? []).map((pack) => (
-            <TopUpCheckout key={pack.id} pointPackage={pack} />
-          ))}
+        {/* Custom top-up */}
+        <section className="grid gap-4 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <CustomTopUp pointsPerEgp={Number(costConfig?.points_per_egp ?? 10)} />
+          </div>
+          <div className="grid gap-4 md:col-span-3 md:grid-cols-3">
+            {(packages ?? []).map((pack) => (
+              <TopUpCheckout key={pack.id} pointPackage={pack} />
+            ))}
+          </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-2">

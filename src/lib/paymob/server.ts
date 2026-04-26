@@ -1,6 +1,7 @@
 import 'server-only'
 
 import crypto from 'crypto'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 
 const PAYMOB_BASE_URL = 'https://accept.paymob.com/api'
 const CARD_IFRAME_BASE_URL = 'https://accept.paymob.com/api/acceptance/iframes'
@@ -30,6 +31,15 @@ type PaymobBillingData = {
   state: string
 }
 
+export type PaymobConfig = {
+  apiKey: string
+  hmacSecret: string
+  cardIntegrationId: number
+  walletIntegrationId: number
+  cardIframeId: string
+  pointsPerEgp: number
+}
+
 export function getPaymobConfig() {
   const apiKey = process.env.PAYMOB_API_KEY
   const hmacSecret = process.env.PAYMOB_HMAC_SECRET
@@ -44,14 +54,43 @@ export function getPaymobConfig() {
   return { apiKey, hmacSecret, publicKey, cardIntegrationId, walletIntegrationId }
 }
 
+export async function getPaymobConfigAsync(): Promise<PaymobConfig> {
+  const supabase = createServiceRoleClient()
+  const [{ data: settings }, { data: costConfig }] = await Promise.all([
+    supabase.from('paymob_settings').select('*').eq('id', true).maybeSingle(),
+    supabase.from('ad_cost_config').select('points_per_egp').eq('id', true).maybeSingle(),
+  ])
+
+  const apiKey = settings?.api_key || process.env.PAYMOB_API_KEY || ''
+  const hmacSecret = settings?.hmac_secret || process.env.PAYMOB_HMAC_SECRET || ''
+  const cardIntegrationId = settings?.card_integration_id
+    ? Number(settings.card_integration_id)
+    : Number(process.env.PAYMOB_CARD_INTEGRATION_ID ?? 0)
+  const walletIntegrationId = settings?.wallet_integration_id
+    ? Number(settings.wallet_integration_id)
+    : Number(process.env.PAYMOB_WALLET_INTEGRATION_ID ?? 0)
+  const cardIframeId = settings?.card_iframe_id
+    || process.env.PAYMOB_CARD_IFRAME_ID
+    || String(cardIntegrationId)
+
+  if (!apiKey || !hmacSecret) {
+    throw new Error('Missing Paymob live configuration — set credentials in Admin → Points or environment variables')
+  }
+
+  return {
+    apiKey,
+    hmacSecret,
+    cardIntegrationId,
+    walletIntegrationId,
+    cardIframeId,
+    pointsPerEgp: Number(costConfig?.points_per_egp ?? 10),
+  }
+}
+
 export function amountToCents(amountEgp: number) {
   return Math.round(amountEgp * 100)
 }
 
-export function getIntegrationId(method: PaymobPaymentMethod) {
-  const config = getPaymobConfig()
-  return method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
-}
 
 export async function authenticatePaymob() {
   const { apiKey } = getPaymobConfig()
@@ -144,8 +183,7 @@ export async function createPaymobPaymentKey({
   return data.token
 }
 
-export function buildCardCheckoutUrl(paymentToken: string) {
-  const iframeId = process.env.PAYMOB_CARD_IFRAME_ID ?? process.env.PAYMOB_CARD_INTEGRATION_ID
+export function buildCardCheckoutUrl(paymentToken: string, iframeId: string | number) {
   return `${CARD_IFRAME_BASE_URL}/${iframeId}?payment_token=${encodeURIComponent(paymentToken)}`
 }
 
@@ -156,16 +194,19 @@ export async function createPaymobCheckout(input: {
   userName: string
   phoneNumber?: string
   pointPackage: PaymobPackage
+  config?: PaymobConfig
 }) {
+  const config = input.config ?? await getPaymobConfigAsync()
   const amountCents = amountToCents(input.pointPackage.amountEgp)
   const merchantOrderId = `fi_${input.pointPackage.id}_${input.userId}_${Date.now()}`
   const authToken = await authenticatePaymob()
+  const integrationId = input.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
   const orderId = await createPaymobOrder({ authToken, merchantOrderId, amountCents })
   const paymentToken = await createPaymobPaymentKey({
     authToken,
     orderId,
     amountCents,
-    integrationId: getIntegrationId(input.method),
+    integrationId,
     billingData: createBillingData(input.userName, input.userEmail, input.phoneNumber),
     metadata: {
       user_id: input.userId,
@@ -179,13 +220,52 @@ export async function createPaymobCheckout(input: {
     orderId,
     merchantOrderId,
     paymentToken,
-    redirectUrl: input.method === 'card' ? buildCardCheckoutUrl(paymentToken) : null,
+    redirectUrl: input.method === 'card' ? buildCardCheckoutUrl(paymentToken, config.cardIframeId) : null,
   }
 }
 
-export function verifyPaymobHmac(payload: Record<string, unknown>, suppliedHmac: string | null) {
+export async function createCustomTopUpCheckout(input: {
+  method: PaymobPaymentMethod
+  userId: string
+  userEmail: string
+  userName: string
+  phoneNumber?: string
+  pointsAmount: number
+  amountEgp: number
+  config?: PaymobConfig
+}) {
+  const config = input.config ?? await getPaymobConfigAsync()
+  const amountCents = amountToCents(input.amountEgp)
+  const merchantOrderId = `fi_custom_${input.userId}_${input.pointsAmount}_${amountCents}_${Date.now()}`
+  const authToken = await authenticatePaymob()
+  const integrationId = input.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
+  const orderId = await createPaymobOrder({ authToken, merchantOrderId, amountCents })
+  const paymentToken = await createPaymobPaymentKey({
+    authToken,
+    orderId,
+    amountCents,
+    integrationId,
+    billingData: createBillingData(input.userName, input.userEmail, input.phoneNumber),
+    metadata: {
+      user_id: input.userId,
+      points_amount: String(input.pointsAmount),
+      amount_egp: String(input.amountEgp),
+      payment_method: input.method,
+      type: 'custom_topup',
+    },
+  })
+
+  return {
+    orderId,
+    merchantOrderId,
+    paymentToken,
+    redirectUrl: input.method === 'card' ? buildCardCheckoutUrl(paymentToken, config.cardIframeId) : null,
+  }
+}
+
+export function verifyPaymobHmac(payload: Record<string, unknown>, suppliedHmac: string | null, hmacSecretOverride?: string) {
   if (!suppliedHmac) return false
-  const { hmacSecret } = getPaymobConfig()
+  const hmacSecret = hmacSecretOverride || getPaymobConfig().hmacSecret
   const calculated = crypto
     .createHmac('sha512', hmacSecret)
     .update(buildPaymobHmacMessage(payload))

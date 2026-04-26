@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { verifyPaymobHmac } from '@/lib/paymob/server'
+import { verifyPaymobHmac, getPaymobConfigAsync } from '@/lib/paymob/server'
 import { createServiceRoleClient } from '@/lib/supabase/service'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,20 @@ export async function POST(request: Request) {
   const suppliedHmac = url.searchParams.get('hmac')
   const payload = await request.json().catch(() => null) as PaymobWebhookPayload | null
 
-  if (!payload || !verifyPaymobHmac(payload as Record<string, unknown>, suppliedHmac)) {
+  if (!payload) {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+  }
+
+  // Fetch HMAC secret from DB (with env var fallback)
+  let hmacSecret: string | undefined
+  try {
+    const config = await getPaymobConfigAsync()
+    hmacSecret = config.hmacSecret
+  } catch {
+    // fall back to env var via verifyPaymobHmac default path
+  }
+
+  if (!verifyPaymobHmac(payload as Record<string, unknown>, suppliedHmac, hmacSecret)) {
     return NextResponse.json({ error: 'Invalid Paymob signature' }, { status: 401 })
   }
 
@@ -24,12 +37,49 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing Paymob order metadata' }, { status: 400 })
   }
 
-  const parsed = parseMerchantOrderId(merchantOrderId)
+  const supabase = createServiceRoleClient()
+
+  // Custom top-up: fi_custom_{userId}_{pointsAmount}_{amountEgpCents}_{timestamp}
+  if (merchantOrderId.startsWith('fi_custom_')) {
+    const parsed = parseCustomOrderId(merchantOrderId)
+    if (!parsed) {
+      return NextResponse.json({ error: 'Invalid custom merchant order id' }, { status: 400 })
+    }
+
+    const amountEgp = parsed.amountEgpCents / 100
+    const { error } = await supabase.rpc('credit_wallet_points', {
+      p_user_id: parsed.userId,
+      p_package_id: null,
+      p_points: parsed.pointsAmount,
+      p_type: 'paymob_topup',
+      p_money_amount: amountEgp,
+      p_currency: 'EGP',
+      p_paymob_transaction_id: transactionId,
+      p_paymob_order_id: String(transaction.order?.id ?? ''),
+      p_paymob_integration_id: String(transaction.integration_id ?? ''),
+      p_reason: `شحن مخصص ${parsed.pointsAmount} نقطة مقابل ${amountEgp} ج.م`,
+      p_metadata: {
+        paymob_amount_cents: transaction.amount_cents,
+        paymob_merchant_order_id: merchantOrderId,
+        paymob_source_type: transaction.source_data?.type ?? null,
+        paymob_source_sub_type: transaction.source_data?.sub_type ?? null,
+        topup_type: 'custom',
+      },
+    })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ received: true, credited: true })
+  }
+
+  // Package top-up: fi_{packageId}_{userId}_{timestamp}
+  const parsed = parsePackageOrderId(merchantOrderId)
   if (!parsed) {
     return NextResponse.json({ error: 'Invalid merchant order id' }, { status: 400 })
   }
 
-  const supabase = createServiceRoleClient()
   const { data: pointPackage, error: packageError } = await supabase
     .from('point_packages')
     .select('id, name, points_amount, amount_egp, currency')
@@ -67,7 +117,18 @@ export async function POST(request: Request) {
   return NextResponse.json({ received: true, credited: true })
 }
 
-function parseMerchantOrderId(value: string) {
+function parseCustomOrderId(value: string) {
+  // fi_custom_{userId}_{pointsAmount}_{amountEgpCents}_{timestamp}
+  const parts = value.split('_')
+  if (parts.length < 6 || parts[0] !== 'fi' || parts[1] !== 'custom') return null
+  return {
+    userId: parts[2],
+    pointsAmount: Number(parts[3]),
+    amountEgpCents: Number(parts[4]),
+  }
+}
+
+function parsePackageOrderId(value: string) {
   const parts = value.split('_')
   if (parts.length < 4 || parts[0] !== 'fi') return null
   return {

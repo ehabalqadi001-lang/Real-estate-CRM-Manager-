@@ -87,6 +87,49 @@ export async function createClientSupportTicketAction(formData: FormData) {
   return { success: true, message: 'تم إرسال طلب الدعم وسيتم متابعته من خدمة العملاء' }
 }
 
+export async function promoteAdAction(formData: FormData) {
+  const supabase = await createRawClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, message: 'يجب تسجيل الدخول أولا' }
+
+  const adId = String(formData.get('ad_id') ?? '').trim()
+  const kind = String(formData.get('kind') ?? 'regular') as 'regular' | 'premium'
+
+  if (!adId) return { success: false, message: 'معرّف الإعلان مطلوب' }
+  if (!['regular', 'premium'].includes(kind)) return { success: false, message: 'نوع الترقية غير صالح' }
+
+  const listingType = kind === 'premium' ? 'PREMIUM' : 'REGULAR'
+
+  const { data: costs } = await supabase
+    .from('ad_cost_config')
+    .select('regular_points_cost, premium_points_cost')
+    .eq('id', true)
+    .maybeSingle()
+
+  const pointsCost = kind === 'premium'
+    ? Number(costs?.premium_points_cost ?? 50)
+    : Number(costs?.regular_points_cost ?? 10)
+
+  const { error } = await supabase.rpc('spend_points_for_marketplace_ad', {
+    p_user_id: user.id,
+    p_ad_id: adId,
+    p_listing_type: listingType,
+  })
+
+  if (error) {
+    if (error.message.includes('Insufficient')) return { success: false, message: 'رصيد النقاط غير كافٍ لترقية هذا الإعلان' }
+    return { success: false, message: error.message }
+  }
+
+  revalidatePath('/marketplace/profile')
+  return {
+    success: true,
+    message: kind === 'premium'
+      ? `تم ترقية الإعلان إلى Premium (${pointsCost} نقطة)`
+      : `تم تفعيل الإعلان Regular (${pointsCost} نقطة)`,
+  }
+}
+
 export async function changeClientPasswordAction(formData: FormData) {
   const supabase = await createRawClient()
   const { data: { user } } = await supabase.auth.getUser()

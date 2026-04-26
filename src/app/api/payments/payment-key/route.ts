@@ -3,7 +3,7 @@ import {
   amountToCents,
   authenticatePaymob,
   createPaymobPaymentKey,
-  getIntegrationId,
+  getPaymobConfigAsync,
   type PaymobPaymentMethod,
 } from '@/lib/paymob/server'
 import { createServerClient } from '@/lib/supabase/server'
@@ -44,12 +44,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    const config = await getPaymobConfigAsync()
     const authToken = await authenticatePaymob()
+    const integrationId = body.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
     const paymentToken = await createPaymobPaymentKey({
       authToken,
       orderId: body.order_id,
       amountCents: amountToCents(Number(pointPackage.amount_egp)),
-      integrationId: getIntegrationId(body.method),
+      integrationId,
       billingData: {
         first_name: profile?.full_name?.split(' ')[0] || 'FAST',
         last_name: profile?.full_name?.split(' ').slice(1).join(' ') || 'INVESTMENT',

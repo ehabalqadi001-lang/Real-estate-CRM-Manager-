@@ -4,6 +4,33 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/shared/rbac/require-permission'
 
+export async function updatePaymobSettings(formData: FormData) {
+  await requirePermission('platform.manage')
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const payload: Record<string, string | null | undefined> = {
+    updated_by: user.id,
+    updated_at: new Date().toISOString(),
+    card_integration_id: String(formData.get('card_integration_id') ?? '').trim() || null,
+    wallet_integration_id: String(formData.get('wallet_integration_id') ?? '').trim() || null,
+    card_iframe_id: String(formData.get('card_iframe_id') ?? '').trim() || null,
+  }
+
+  const apiKey = String(formData.get('api_key') ?? '').trim()
+  const hmacSecret = String(formData.get('hmac_secret') ?? '').trim()
+  if (apiKey) payload.api_key = apiKey
+  if (hmacSecret) payload.hmac_secret = hmacSecret
+
+  const { error } = await supabase
+    .from('paymob_settings')
+    .upsert({ id: true, ...payload }, { onConflict: 'id' })
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/points')
+}
+
 export async function updateAdCosts(formData: FormData) {
   await requirePermission('platform.manage')
   const supabase = await createServerClient()
@@ -18,6 +45,7 @@ export async function updateAdCosts(formData: FormData) {
       premium_points_cost: Number(formData.get('premium_points_cost') ?? 50),
       regular_duration_days: Number(formData.get('regular_duration_days') ?? 30),
       premium_duration_days: Number(formData.get('premium_duration_days') ?? 30),
+      points_per_egp: Number(formData.get('points_per_egp') ?? 10),
       updated_by: user.id,
     }, { onConflict: 'id' })
 

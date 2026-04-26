@@ -64,7 +64,10 @@
       "Bash(git rm *)",
       "Bash(node -e \"const pkg = require\\('./node_modules/@testing-library/react/package.json'\\); console.log\\(pkg.version\\)\")",
       "Bash(node -e \"const lib = require\\('@testing-library/react'\\); console.log\\(Object.keys\\(lib\\).includes\\('screen'\\), Object.keys\\(lib\\).includes\\('fireEvent'\\)\\)\")",
-      "mcp__plugin_vercel_vercel__list_teams"
+      "mcp__plugin_vercel_vercel__list_teams",
+      "Bash(node -e \"const pkg = require\\('c:/Users/ehaba/ehab-eslam-crm/node_modules/lucide-react/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(vercel inspect *)",
+      "Bash(npx eslint *)"
     ]
   }
 }
