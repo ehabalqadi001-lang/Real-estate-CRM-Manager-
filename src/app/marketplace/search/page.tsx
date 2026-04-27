@@ -2,6 +2,12 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Bath, BedDouble, Building2, MapPin, Search, TrendingUp } from 'lucide-react'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
+import nextDynamic from 'next/dynamic'
+
+const MarketplaceMap = nextDynamic(() => import('@/components/marketplace/MarketplaceMap'), {
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full animate-pulse rounded-lg bg-[var(--fi-soft)]" />
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +33,8 @@ type MarketplaceProperty = {
   monthly_installment: number | null
   scarcity_remaining_units: number | null
   social_proof_score: number | null
+  lat: number | null
+  lng: number | null
 }
 
 const propertyTypes = [
@@ -44,7 +52,7 @@ export default async function MarketplaceSearchPage({ searchParams }: { searchPa
 
   let query = supabase
     .from('marketplace_properties')
-    .select('id, title_ar, city, district, property_type, unit_type, area_sqm, bedrooms, bathrooms, list_price, down_payment, monthly_installment, scarcity_remaining_units, social_proof_score')
+    .select('id, title_ar, city, district, property_type, unit_type, area_sqm, bedrooms, bathrooms, list_price, down_payment, monthly_installment, scarcity_remaining_units, social_proof_score, lat, lng')
     .eq('listing_status', 'published')
     .order('social_proof_score', { ascending: false })
     .limit(36)
@@ -110,6 +118,10 @@ export default async function MarketplaceSearchPage({ searchParams }: { searchPa
             تعذر تحميل نتائج البحث: {error.message}
           </div>
         ) : null}
+
+        {properties.some((p) => p.lat && p.lng) && (
+          <MarketplaceMap properties={properties} />
+        )}
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {properties.map((property) => (
