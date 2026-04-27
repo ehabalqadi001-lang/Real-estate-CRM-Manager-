@@ -18,7 +18,7 @@ export default function LanguageToggle() {
     <button
       onClick={toggle}
       disabled={isPending}
-      className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full border border-white/20 hover:bg-white/10 transition-colors disabled:opacity-50"
+      className="flex w-full items-center justify-center gap-1 px-3 py-2 text-sm font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
       title="تبديل اللغة / Switch Language"
     >
       {isPending ? '...' : 'EN | ع'}

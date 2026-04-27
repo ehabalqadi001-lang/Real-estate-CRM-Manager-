@@ -22,6 +22,8 @@ import {
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { hasPermission, type Permission } from '@/shared/rbac/permissions'
 import type { AppRole } from '@/shared/auth/types'
+import { UserProfileDropdown } from '@/shared/components/app-shell/UserProfileDropdown'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 interface AdminNavItem {
   href: string
@@ -93,9 +95,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <p className="text-xs font-black text-[var(--fi-muted)]">Super Admin OS</p>
               <p className="truncate font-black text-[var(--fi-ink)]">تحكم مركزي في الشركات، الوكلاء، الإيرادات والدعم</p>
             </div>
-            <Link href="/dashboard" className="shrink-0 rounded-lg border border-[var(--fi-line)] px-3 py-2 text-sm font-bold text-[var(--fi-ink)]">
-              لوحة CRM
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard" className="hidden sm:flex shrink-0 rounded-lg border border-[var(--fi-line)] px-3 py-2 text-sm font-bold text-[var(--fi-ink)] transition hover:bg-[var(--fi-soft)]">
+                لوحة CRM
+              </Link>
+              <NotificationBell userId={session.profile.id} />
+              <UserProfileDropdown profile={session.profile} />
+            </div>
           </div>
         </header>
         <main className="min-w-0 overflow-x-hidden">
