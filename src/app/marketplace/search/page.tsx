@@ -2,12 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Bath, BedDouble, Building2, MapPin, Search, TrendingUp } from 'lucide-react'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
-import nextDynamic from 'next/dynamic'
-
-const MarketplaceMap = nextDynamic(() => import('@/components/marketplace/MarketplaceMap'), {
-  ssr: false,
-  loading: () => <div className="h-[400px] w-full animate-pulse rounded-lg bg-[var(--fi-soft)]" />
-})
+import MarketplaceMap from '@/components/marketplace/MarketplaceMapDynamic'
 
 export const dynamic = 'force-dynamic'
 

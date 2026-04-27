@@ -52,6 +52,8 @@ export default function ListingForm({ projects, developers }: Props) {
 
   const [images, setImages] = useState<File[]>([])
   const [areaLocation, setAreaLocation] = useState('')
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
   const [projectId, setProjectId] = useState('')
   const [developerId, setDeveloperId] = useState('')
   const [detailedAddress, setDetailedAddress] = useState('')
@@ -71,6 +73,8 @@ export default function ListingForm({ projects, developers }: Props) {
   const [rentalValue, setRentalValue] = useState('')
   const [specialNotes, setSpecialNotes] = useState('')
   const [marketingDesc, setMarketingDesc] = useState('')
+  const [virtualTourUrl, setVirtualTourUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
 
   const [pricingStrategy, setPricingStrategy] = useState('')
   const [listingType, setListingType] = useState<'REGULAR' | 'PREMIUM'>('REGULAR')
@@ -158,6 +162,10 @@ export default function ListingForm({ projects, developers }: Props) {
     fd.set('down_payment', downPayment)
     fd.set('installment_amount', installmentAmount)
     fd.set('total_cash_price', totalCashPrice)
+    fd.set('lat', lat)
+    fd.set('lng', lng)
+    fd.set('virtual_tour_url', virtualTourUrl)
+    fd.set('video_url', videoUrl)
     if (contractFile) fd.set('contract_file', contractFile)
     if (paymentPlanFile) fd.set('payment_plan_file', paymentPlanFile)
     if (poaFile) fd.set('poa_file', poaFile)
@@ -229,6 +237,24 @@ export default function ListingForm({ projects, developers }: Props) {
           <Field label="العنوان التفصيلي">
             <TextArea value={detailedAddress} onChange={setDetailedAddress} rows={3} placeholder="الطابق، الدور، البرج، أقرب علامة..." />
           </Field>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="خط العرض (Latitude)">
+              <Input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} placeholder="مثال: 30.0444" className="h-10 border-[#DDE6E4]" />
+            </Field>
+            <Field label="خط الطول (Longitude)">
+              <Input type="number" step="any" value={lng} onChange={(e) => setLng(e.target.value)} placeholder="مثال: 31.2357" className="h-10 border-[#DDE6E4]" />
+            </Field>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="رابط الجولة الافتراضية (VR 360)">
+              <Input type="url" value={virtualTourUrl} onChange={(e) => setVirtualTourUrl(e.target.value)} placeholder="https://my.matterport.com/show/?m=..." className="h-10 border-[#DDE6E4] text-left" dir="ltr" />
+            </Field>
+            <Field label="رابط فيديو يوتيوب / ڤيميو">
+              <Input type="url" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="h-10 border-[#DDE6E4] text-left" dir="ltr" />
+            </Field>
+          </div>
         </div>
       )}
 

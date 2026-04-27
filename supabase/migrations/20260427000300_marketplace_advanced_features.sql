@@ -5,31 +5,31 @@
 BEGIN;
 
 -- 1. Enable PostGIS Extension (if not already enabled)
-CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+SET LOCAL search_path = public, extensions;
 
 -- 2. Extend ads table with GIS, VR, and advanced filtering columns
-ALTER TABLE public.ads
-  ADD COLUMN IF NOT EXISTS lat numeric(10,8),
-  ADD COLUMN IF NOT EXISTS lng numeric(11,8),
-  ADD COLUMN IF NOT EXISTS geom public.geography(Point, 4326),
+ALTER TABLE public.marketplace_properties
+  ADD COLUMN IF NOT EXISTS geom geography(Point, 4326),
   ADD COLUMN IF NOT EXISTS virtual_tour_url text,
   ADD COLUMN IF NOT EXISTS video_url text,
   ADD COLUMN IF NOT EXISTS amenities text[] DEFAULT '{}'::text[],
   ADD COLUMN IF NOT EXISTS payment_options text[] DEFAULT '{}'::text[];
 
 -- Update geom based on existing lat/lng if available (though they are new here)
-UPDATE public.ads
-SET geom = public.ST_SetSRID(public.ST_MakePoint(lng::double precision, lat::double precision), 4326)::public.geography
-WHERE lat IS NOT NULL AND lng IS NOT NULL AND geom IS NULL;
+UPDATE public.marketplace_properties
+SET geom = ST_SetSRID(ST_MakePoint(longitude::double precision, latitude::double precision), 4326)::geography
+WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND geom IS NULL;
 
 -- 3. Create index for spatial searches
-CREATE INDEX IF NOT EXISTS idx_ads_geom ON public.ads USING GIST (geom);
+CREATE INDEX IF NOT EXISTS idx_marketplace_properties_geom ON public.marketplace_properties USING GIST (geom);
 
 -- 4. Customer Control Panel: Saved Properties
 CREATE TABLE IF NOT EXISTS public.saved_properties (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  ad_id uuid NOT NULL REFERENCES public.ads(id) ON DELETE CASCADE,
+  ad_id uuid NOT NULL REFERENCES public.marketplace_properties(id) ON DELETE CASCADE,
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(user_id, ad_id)
 );
@@ -62,12 +62,19 @@ CREATE TRIGGER trg_saved_searches_updated_at
 -- 6. Advanced Chat System: Conversations Threads
 CREATE TABLE IF NOT EXISTS public.chat_conversations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  ad_id uuid NOT NULL REFERENCES public.ads(id) ON DELETE CASCADE,
+  ad_id uuid NOT NULL REFERENCES public.marketplace_properties(id) ON DELETE CASCADE,
   client_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   last_message_at timestamptz DEFAULT now(),
   created_at timestamptz DEFAULT now(),
   UNIQUE(ad_id, client_id, owner_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  content text,
+  created_at timestamptz DEFAULT now()
 );
 
 -- Extend existing chat_messages to support conversation threads

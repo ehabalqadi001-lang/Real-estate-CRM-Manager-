@@ -1,2 +1,2 @@
-alter table public.broker_profiles
-  add constraint broker_profiles_profile_id_unique unique (profile_id);
+--ALTER TABLE "public"."broker_profiles"
+  --ADD CONSTRAINT "broker_profiles_profile_id_unique" UNIQUE ("profile_id");

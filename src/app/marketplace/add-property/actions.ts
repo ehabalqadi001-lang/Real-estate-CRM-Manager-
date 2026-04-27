@@ -33,6 +33,10 @@ const listingSchema = z.object({
   down_payment: z.number().min(0).optional(),
   installment_amount: z.number().min(0).optional(),
   total_cash_price: z.number().min(1, 'السعر الإجمالي مطلوب'),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  virtual_tour_url: z.string().url().optional().or(z.literal('')),
+  video_url: z.string().url().optional().or(z.literal('')),
 }).superRefine((value, ctx) => {
   if (value.unit_type === 'تجاري' && (!value.internal_area_sqm || !value.external_area_sqm)) {
     ctx.addIssue({ code: 'custom', message: 'المساحة الداخلية والخارجية مطلوبة للوحدات التجارية' })
@@ -131,6 +135,10 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
       down_payment: optionalNumber(formData, 'down_payment'),
       installment_amount: optionalNumber(formData, 'installment_amount'),
       total_cash_price: optionalNumber(formData, 'total_cash_price'),
+      lat: optionalNumber(formData, 'lat'),
+      lng: optionalNumber(formData, 'lng'),
+      virtual_tour_url: optionalString(formData, 'virtual_tour_url') ?? '',
+      video_url: optionalString(formData, 'video_url') ?? '',
     })
 
     const imageUrls: string[] = []
@@ -200,6 +208,10 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
       pricing_strategy: payload.pricing_strategy,
       down_payment: payload.pricing_strategy === 'كاش' ? null : payload.down_payment,
       installment_amount: payload.pricing_strategy === 'كاش' ? null : payload.installment_amount,
+      lat: payload.lat ?? null,
+      lng: payload.lng ?? null,
+      virtual_tour_url: payload.virtual_tour_url || null,
+      video_url: payload.video_url || null,
       images: imageUrls,
       documents: docFiles,
       doc_files: docFiles,

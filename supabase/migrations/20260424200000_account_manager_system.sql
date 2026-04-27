@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_am_assignments_am     ON public.am_broker_assignm
 -- RLS: only authenticated users with service role or manager role can read
 ALTER TABLE public.am_broker_assignments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "am_assignments_service_all"
+CREATE POLICY  "am_assignments_service_all"
   ON public.am_broker_assignments
   FOR ALL
   USING (true)

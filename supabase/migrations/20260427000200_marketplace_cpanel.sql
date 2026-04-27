@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.marketplace_ticker (
 -- ── 2. Ad review logs table ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.ad_review_logs (
   id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  ad_id           uuid        NOT NULL REFERENCES public.ads(id) ON DELETE CASCADE,
+  ad_id           uuid        NOT NULL REFERENCES public.marketplace_properties(id) ON DELETE CASCADE,
   action          text        NOT NULL CHECK (action IN (
     'approved','rejected','edit_requested',
     'featured','unfeatured','pinned','unpinned',
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.ad_review_logs (
 );
 
 -- ── 3. Extend ads table with admin-control columns ───────────
-ALTER TABLE public.ads
+ALTER TABLE public.marketplace_properties
   ADD COLUMN IF NOT EXISTS rejection_reason     text,
   ADD COLUMN IF NOT EXISTS edit_request_notes   text,
   ADD COLUMN IF NOT EXISTS reviewed_by          uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -78,17 +78,17 @@ CREATE POLICY "review_logs_admin_all" ON public.ad_review_logs
 CREATE INDEX IF NOT EXISTS idx_marketplace_ticker_order
   ON public.marketplace_ticker(is_active, display_order);
 
-CREATE INDEX IF NOT EXISTS idx_ad_review_logs_ad
+CREATE INDEX IF NOT EXISTS idx_ad_review_logs_property
   ON public.ad_review_logs(ad_id, created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_ads_is_pinned
-  ON public.ads(is_pinned) WHERE is_pinned = true;
+CREATE INDEX IF NOT EXISTS idx_marketplace_properties_is_pinned
+  ON public.marketplace_properties(is_pinned) WHERE is_pinned = true;
 
-CREATE INDEX IF NOT EXISTS idx_ads_is_hidden_admin
-  ON public.ads(is_hidden_admin) WHERE is_hidden_admin = true;
+CREATE INDEX IF NOT EXISTS idx_marketplace_properties_is_hidden_admin
+  ON public.marketplace_properties(is_hidden_admin) WHERE is_hidden_admin = true;
 
-CREATE INDEX IF NOT EXISTS idx_ads_is_featured_admin
-  ON public.ads(is_featured_admin) WHERE is_featured_admin = true;
+CREATE INDEX IF NOT EXISTS idx_marketplace_properties_is_featured_admin
+  ON public.marketplace_properties(is_featured_admin) WHERE is_featured_admin = true;
 
 -- ── 6. Seed: one default ticker welcome item ─────────────────
 INSERT INTO public.marketplace_ticker (type, content, display_order)

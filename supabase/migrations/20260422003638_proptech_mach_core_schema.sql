@@ -1,6 +1,28 @@
 -- FAST INVESTMENT PropTech MACH Core Schema
 -- Hybrid Marketplace + CRM for Primary and Resale operations.
 
+-- ==============================================================================
+-- 0. DEFENSIVE TABLES CREATION
+-- حماية لضمان وجود الجداول الأساسية لمنع أخطاء (relation does not exist)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.companies (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.developers (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.projects (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.units (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.leads (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.deals (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.commissions (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+CREATE TABLE IF NOT EXISTS public.user_profiles (id uuid PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS public.roles (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
+
+-- إضافة حقول Roles لتجنب أي أخطاء أثناء الإدراج (Insert)
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS is_system boolean;
+DO $$ BEGIN ALTER TABLE public.roles ADD CONSTRAINT roles_slug_key UNIQUE (slug); EXCEPTION WHEN duplicate_table OR duplicate_object THEN END $$;
+
+
 create schema if not exists app_private;
 
 create or replace function app_private.current_role()
