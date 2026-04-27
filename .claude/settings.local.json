@@ -68,7 +68,9 @@
       "Bash(node -e \"const pkg = require\\('c:/Users/ehaba/ehab-eslam-crm/node_modules/lucide-react/package.json'\\); console.log\\(pkg.version\\)\")",
       "Bash(vercel inspect *)",
       "Bash(npx eslint *)",
-      "mcp__plugin_vercel_vercel__get_project"
+      "mcp__plugin_vercel_vercel__get_project",
+      "Bash(ls src/app/dashboard/marketplace)",
+      "Bash(ls src/components/dashboard/)"
     ]
   }
 }
