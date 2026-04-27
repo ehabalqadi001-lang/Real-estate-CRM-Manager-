@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader'
+import { MarketplaceTicker } from '@/components/marketplace/MarketplaceTicker'
 import MarketplaceFilters from '@/components/marketplace/MarketplaceFilters'
 import PropertyGrid from '@/components/marketplace/PropertyGrid'
 import { marketplacePackages, marketplaceSampleProperties } from '@/domains/marketplace/sample-data'
@@ -58,6 +59,7 @@ export default async function MarketplacePage() {
   return (
     <div className="min-h-screen bg-[#f5f8ff] text-slate-900" dir="ltr">
       <MarketplaceHeader user={currentUser} />
+      <MarketplaceTicker />
 
       <main>
         {/* ── Hero Section ──────────────────────────────────── */}

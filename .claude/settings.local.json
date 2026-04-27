@@ -67,7 +67,8 @@
       "mcp__plugin_vercel_vercel__list_teams",
       "Bash(node -e \"const pkg = require\\('c:/Users/ehaba/ehab-eslam-crm/node_modules/lucide-react/package.json'\\); console.log\\(pkg.version\\)\")",
       "Bash(vercel inspect *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "mcp__plugin_vercel_vercel__get_project"
     ]
   }
 }
