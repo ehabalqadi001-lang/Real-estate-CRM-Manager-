@@ -60,7 +60,9 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       ...group,
       items: group.items.filter(
         (item) =>
-          (item.href.startsWith('/dashboard') || item.href.startsWith('/marketplace')) &&
+          (item.href.startsWith('/dashboard') ||
+            item.href.startsWith('/marketplace') ||
+            item.href.startsWith('/admin')) &&
           hasPermission(profile.role, item.permission),
       ),
     }))

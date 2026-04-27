@@ -125,6 +125,17 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'تصفح السوق', href: '/marketplace', permission: 'dashboard.view.own', icon: Store },
       { title: 'ملفي في السوق', href: '/marketplace/profile', permission: 'dashboard.view.own', icon: UserCheck },
       { title: 'شراء نقاط', href: '/marketplace/buy-points', permission: 'dashboard.view.own', icon: Coins },
+      { title: 'إضافة إعلان', href: '/marketplace/add-property', permission: 'dashboard.view.own', icon: Store },
+    ],
+  },
+  {
+    title: 'Marketplace Hub (Admin)',
+    items: [
+      { title: 'مراجعة الإعلانات', href: '/admin/marketplace/moderation', permission: 'ads.read', icon: ShieldCheck },
+      { title: 'إدارة الإعلانات', href: '/admin/marketplace/ads', permission: 'admin.view', icon: LayoutDashboard },
+      { title: 'العملاء 360°', href: '/admin/marketplace/clients', permission: 'admin.view', icon: Users },
+      { title: 'الواجهة والمظهر', href: '/admin/marketplace/appearance', permission: 'platform.manage', icon: Settings },
+      { title: 'النقاط والمحافظ', href: '/admin/points', permission: 'platform.manage', icon: Coins },
     ],
   },
 ]
