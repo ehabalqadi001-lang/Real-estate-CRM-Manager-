@@ -7,7 +7,7 @@ import {
   FileText, Headphones, Info, Lock,
   Mail, Megaphone, MessageCircle, Phone, PlusCircle,
   ShieldCheck, TicketCheck, UserRound, WalletCards,
-  XCircle,
+  XCircle, Search, Bookmark,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -80,12 +80,14 @@ type AdCosts = {
   premium_points_cost: number
 }
 
-type TabId = 'account' | 'wallet' | 'ads' | 'support' | 'about' | 'terms'
+type TabId = 'account' | 'wallet' | 'ads' | 'saved_properties' | 'saved_searches' | 'support' | 'about' | 'terms'
 
 const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   { id: 'account',  label: 'البيانات الشخصية',   icon: <UserRound   className="size-4" /> },
   { id: 'wallet',  label: 'المدفوعات والنقاط',  icon: <WalletCards  className="size-4" /> },
   { id: 'ads',     label: 'إعلاناتي',            icon: <Megaphone    className="size-4" /> },
+  { id: 'saved_properties', label: 'العقارات المحفوظة', icon: <CheckCircle2 className="size-4" /> },
+  { id: 'saved_searches', label: 'عمليات البحث', icon: <Search className="size-4" /> },
   { id: 'support', label: 'الدعم والتواصل',      icon: <Headphones   className="size-4" /> },
   { id: 'about',   label: 'عن الشركة',           icon: <Info         className="size-4" /> },
   { id: 'terms',   label: 'الشروط والأحكام',     icon: <FileText     className="size-4" /> },
@@ -262,6 +264,14 @@ export default function ClientProfileDashboard({
           promoteMessages={promoteMessages}
           onPromote={handlePromoteAd}
         />
+      )}
+
+      {activeTab === 'saved_properties' && (
+        <SavedPropertiesTab />
+      )}
+
+      {activeTab === 'saved_searches' && (
+        <SavedSearchesTab />
       )}
 
       {activeTab === 'support' && (
@@ -643,6 +653,42 @@ function AdsTab({
         </div>
       )}
     </div>
+  )
+}
+
+/* ── Tab: Saved Properties ─────────────────────────────── */
+
+function SavedPropertiesTab() {
+  return (
+    <section className="rounded-2xl border border-[#DDE6E4] bg-white p-10 text-center shadow-sm">
+      <div className="mx-auto max-w-lg">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#EEF6F5]">
+          <Bookmark className="size-8 text-[#0F8F83]" />
+        </div>
+        <h2 className="mt-5 text-2xl font-black text-[#102033]">العقارات المحفوظة</h2>
+        <p className="mt-3 text-sm font-semibold leading-7 text-[#64748B]">
+          هذا القسم قيد الإعداد. سيتم إظهار جميع العقارات التي قمت بحفظها هنا قريباً.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+/* ── Tab: Saved Searches ─────────────────────────────── */
+
+function SavedSearchesTab() {
+  return (
+    <section className="rounded-2xl border border-[#DDE6E4] bg-white p-10 text-center shadow-sm">
+      <div className="mx-auto max-w-lg">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#FFF8EC]">
+          <Search className="size-8 text-[#C9964A]" />
+        </div>
+        <h2 className="mt-5 text-2xl font-black text-[#102033]">عمليات البحث المحفوظة (التنبيهات)</h2>
+        <p className="mt-3 text-sm font-semibold leading-7 text-[#64748B]">
+          هذا القسم قيد الإعداد. ستتمكن من حفظ فلاتر البحث الخاصة بك هنا لتلقي إشعارات عند توفر عقارات جديدة تطابق طلبك.
+        </p>
+      </div>
+    </section>
   )
 }
 
