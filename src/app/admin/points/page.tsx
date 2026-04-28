@@ -1,13 +1,40 @@
 import type { InputHTMLAttributes } from 'react'
-import { Coins, CreditCard, KeyRound, Settings2, ShieldCheck, WalletCards } from 'lucide-react'
+import { Activity, Coins, CreditCard, KeyRound, Settings2, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react'
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateAdCosts, manualWalletOverride, updatePaymobSettings } from './actions'
+import { GamificationDashboard } from '@/app/admin/points/GamificationDashboard'
+import { SubmitButton } from './SubmitButton'
 
 export const dynamic = 'force-dynamic'
+
+const TX_TYPE_CLASSES: Record<string, string> = {
+  paymob_topup:  'bg-[#EEF6F5] text-[#27AE60]',
+  manual_grant:  'bg-blue-50 text-blue-600',
+  manual_deduct: 'bg-red-50 text-red-600',
+  ad_spend:      'bg-[#FFF8EC] text-[#C9964A]',
+}
+
+function Field(props: InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) {
+  const { label, name, ...inputProps } = props
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={name}>{label}</Label>
+      <Input id={name} name={name} {...inputProps} />
+    </div>
+  )
+}
+
+function Metric({ label, value }: { label: string; value: number | string | null }) {
+  return (
+    <div>
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">{label}</p>
+      <p className="mt-1 text-lg font-black text-[#27AE60]">{Number(value ?? 0).toLocaleString()} pts</p>
+    </div>
+  )
+}
 
 export default async function PointsAdminPage() {
   await requirePermission('platform.manage')
@@ -45,19 +72,34 @@ export default async function PointsAdminPage() {
       .limit(50),
   ])
 
-  const legacyById = new Map((legacyUsers ?? []).map((user) => [user.id, user]))
+  const legacyById = new Map<string, any>((legacyUsers ?? []).map((user) => [user.id, user]))
   const users = userProfiles && userProfiles.length > 0
     ? userProfiles.map((user) => {
       const legacy = legacyById.get(user.id)
       return {
-        id: user.id,
-        full_name: user.full_name,
-        email: legacy?.email ?? null,
-        company_name: legacy?.company_name ?? user.company_id ?? null,
+        id: String(user.id),
+        full_name: String(user.full_name ?? ''),
+        email: legacy?.email ? String(legacy.email) : null,
+        company_name: legacy?.company_name ? String(legacy.company_name) : (user.company_id ? String(user.company_id) : null),
       }
     })
-    : legacyUsers ?? []
-  const userById = new Map((users ?? []).map((user) => [user.id, user]))
+    : (legacyUsers ?? []).map(u => ({
+        id: String(u.id),
+        full_name: String(u.full_name ?? ''),
+        email: u.email ? String(u.email) : null,
+        company_name: u.company_name ? String(u.company_name) : null,
+      }))
+  
+  type UserMapEntry = { id: string; full_name: string | null; email: string | null; company_name: string | null }
+  const userById = new Map<string, UserMapEntry>((users ?? []).map((user) => [user.id, user as UserMapEntry]))
+
+  // Aggregate KPI Stats
+  const totalCirculatingPoints = (wallets ?? []).reduce((acc, w) => acc + Number(w.points_balance || 0), 0)
+  const totalLifetimeEarned = (wallets ?? []).reduce((acc, w) => acc + Number(w.lifetime_points_earned || 0), 0)
+  const recentTopupsEGP = (transactions ?? []).filter(tx => tx.type === 'paymob_topup').reduce((acc, tx) => acc + Number(tx.money_amount || 0), 0)
+
+  // Prepare simplified user payload for Gamification Client Component mapping
+  const gamificationUsers = users.map(u => ({ id: u.id, full_name: u.full_name, email: u.email }))
 
   return (
     <div className="space-y-6 p-4 sm:p-6" dir="ltr">
@@ -70,6 +112,34 @@ export default async function PointsAdminPage() {
         <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-300">
           Configure ad publication costs, Paymob payment credentials, and apply secure manual wallet adjustments.
         </p>
+      </section>
+      
+      {/* Gamification, Realtime Leaderboard & Ledger System */}
+      <GamificationDashboard users={gamificationUsers} />
+
+      {/* Quick KPIs Section */}
+      <section className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
+            <Activity className="size-4 text-[#27AE60]" />
+            Circulating Points
+          </div>
+          <p className="mt-2 text-3xl font-black text-[#0B1120]">{totalCirculatingPoints.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
+            <TrendingUp className="size-4 text-[#27AE60]" />
+            Lifetime Issued
+          </div>
+          <p className="mt-2 text-3xl font-black text-[#0B1120]">{totalLifetimeEarned.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
+            <CreditCard className="size-4 text-[#C9964A]" />
+            Recent Top-ups Revenue
+          </div>
+          <p className="mt-2 text-3xl font-black text-[#0B1120]">{recentTopupsEGP.toLocaleString()} <span className="text-lg text-[#64748B]">EGP</span></p>
+        </div>
       </section>
 
       {/* Ad costs + Conversion rate */}
@@ -98,10 +168,9 @@ export default async function PointsAdminPage() {
               </p>
             </div>
           </div>
-          <Button className="mt-5 w-full bg-[#27AE60] text-white hover:bg-[#1F8E4F]">
-            <Settings2 className="size-4" />
+          <SubmitButton type="submit" icon={Settings2} className="mt-5 w-full bg-[#27AE60] text-white hover:bg-[#1F8E4F]">
             Save costs
-          </Button>
+          </SubmitButton>
         </form>
 
         <form action={manualWalletOverride} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
@@ -133,10 +202,9 @@ export default async function PointsAdminPage() {
               <Input id="reason" name="reason" placeholder="Cash payment, compensation, correction..." />
             </div>
           </div>
-          <Button className="mt-5 w-full bg-[#0B1120] text-white hover:bg-[#1F2937]">
-            <WalletCards className="size-4" />
+          <SubmitButton type="submit" icon={WalletCards} className="mt-5 w-full bg-[#0B1120] text-white hover:bg-[#1F2937]">
             Apply override
-          </Button>
+          </SubmitButton>
         </form>
       </section>
 
@@ -164,10 +232,9 @@ export default async function PointsAdminPage() {
               <Field label="Card iFrame ID" name="card_iframe_id" type="text" defaultValue={paymobSettings?.card_iframe_id ?? ''} placeholder="e.g. 916988" />
             </div>
           </div>
-          <Button className="mt-5 bg-[#C9964A] text-white hover:bg-[#b8843a]">
-            <CreditCard className="size-4" />
+          <SubmitButton type="submit" icon={CreditCard} className="mt-5 bg-[#C9964A] text-white hover:bg-[#b8843a]">
             Save Paymob credentials
-          </Button>
+          </SubmitButton>
         </form>
       </section>
 
@@ -213,7 +280,7 @@ export default async function PointsAdminPage() {
                 const owner = userById.get(tx.user_id)
                 return (
                   <tr key={tx.id} className="transition hover:bg-[#F6FAF7]">
-                    <td className="px-4 py-3 font-semibold">{owner?.full_name ?? owner?.email ?? tx.user_id.slice(0, 8)}</td>
+                    <td className="px-4 py-3 font-semibold">{owner?.full_name ?? owner?.email ?? String(tx.user_id ?? '').slice(0, 8)}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-black ${TX_TYPE_CLASSES[tx.type] ?? 'bg-gray-100 text-gray-600'}`}>
                         {tx.type}
@@ -243,32 +310,6 @@ export default async function PointsAdminPage() {
           )}
         </div>
       </section>
-    </div>
-  )
-}
-
-const TX_TYPE_CLASSES: Record<string, string> = {
-  paymob_topup:  'bg-[#EEF6F5] text-[#27AE60]',
-  manual_grant:  'bg-blue-50 text-blue-600',
-  manual_deduct: 'bg-red-50 text-red-600',
-  ad_spend:      'bg-[#FFF8EC] text-[#C9964A]',
-}
-
-function Field(props: InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) {
-  const { label, name, ...inputProps } = props
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} {...inputProps} />
-    </div>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: number | string | null }) {
-  return (
-    <div>
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">{label}</p>
-      <p className="mt-1 text-lg font-black text-[#27AE60]">{Number(value ?? 0).toLocaleString()} pts</p>
     </div>
   )
 }
