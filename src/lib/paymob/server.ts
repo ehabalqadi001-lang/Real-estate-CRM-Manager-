@@ -73,8 +73,8 @@ export async function getPaymobConfigAsync(): Promise<PaymobConfig> {
     || process.env.PAYMOB_CARD_IFRAME_ID
     || String(cardIntegrationId)
 
-  if (!apiKey || !hmacSecret) {
-    throw new Error('Missing Paymob live configuration — set credentials in Admin → Points or environment variables')
+  if (!apiKey || !hmacSecret || !cardIntegrationId || !walletIntegrationId) {
+    throw new Error('Missing Paymob live configuration. Set credentials in Admin > Points or environment variables.')
   }
 
   return {
@@ -91,9 +91,8 @@ export function amountToCents(amountEgp: number) {
   return Math.round(amountEgp * 100)
 }
 
-
-export async function authenticatePaymob() {
-  const { apiKey } = getPaymobConfig()
+export async function authenticatePaymob(config?: Pick<PaymobConfig, 'apiKey'>) {
+  const apiKey = config?.apiKey ?? getPaymobConfig().apiKey
   const response = await fetch(`${PAYMOB_BASE_URL}/auth/tokens`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -199,7 +198,7 @@ export async function createPaymobCheckout(input: {
   const config = input.config ?? await getPaymobConfigAsync()
   const amountCents = amountToCents(input.pointPackage.amountEgp)
   const merchantOrderId = `fi_${input.pointPackage.id}_${input.userId}_${Date.now()}`
-  const authToken = await authenticatePaymob()
+  const authToken = await authenticatePaymob(config)
   const integrationId = input.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
   const orderId = await createPaymobOrder({ authToken, merchantOrderId, amountCents })
   const paymentToken = await createPaymobPaymentKey({
@@ -237,7 +236,7 @@ export async function createCustomTopUpCheckout(input: {
   const config = input.config ?? await getPaymobConfigAsync()
   const amountCents = amountToCents(input.amountEgp)
   const merchantOrderId = `fi_custom_${input.userId}_${input.pointsAmount}_${amountCents}_${Date.now()}`
-  const authToken = await authenticatePaymob()
+  const authToken = await authenticatePaymob(config)
   const integrationId = input.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
   const orderId = await createPaymobOrder({ authToken, merchantOrderId, amountCents })
   const paymentToken = await createPaymobPaymentKey({

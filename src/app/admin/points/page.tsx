@@ -11,6 +11,7 @@ export default async function PointsAdminPage() {
   const [
     { data: costs },
     { data: paymobSettings },
+    { data: pointPackages },
     { data: wallets },
     { data: userProfiles },
     { data: legacyUsers },
@@ -18,6 +19,11 @@ export default async function PointsAdminPage() {
   ] = await Promise.all([
     supabase.from('ad_cost_config').select('*').eq('id', true).maybeSingle(),
     supabase.from('paymob_settings').select('card_integration_id, wallet_integration_id, card_iframe_id, updated_at').eq('id', true).maybeSingle(),
+    supabase
+      .from('point_packages')
+      .select('id, name, description, package_kind, amount_egp, currency, points_amount, billing_interval, is_active, sort_order, updated_at')
+      .order('sort_order')
+      .order('created_at'),
     supabase
       .from('user_wallets')
       .select('id, user_id, points_balance, lifetime_points_earned, lifetime_points_spent, updated_at')
@@ -70,6 +76,7 @@ export default async function PointsAdminPage() {
     <PointsDashboardClient
       costs={costs}
       paymobSettings={paymobSettings}
+      pointPackages={pointPackages ?? []}
       wallets={wallets ?? []}
       users={users}
       transactions={transactions ?? []}

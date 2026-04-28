@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createRawClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/service'
+import { requirePermission } from '@/shared/rbac/require-permission'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const MAX_DOC_BYTES = 10 * 1024 * 1024
@@ -74,7 +76,7 @@ function listingType(formData: FormData) {
 }
 
 async function uploadFile(
-  supabase: Awaited<ReturnType<typeof createRawClient>>,
+  supabase: Awaited<ReturnType<typeof createRawClient>> | ReturnType<typeof createServiceRoleClient>,
   bucket: string,
   folder: string,
   file: File,
@@ -100,9 +102,19 @@ function assertFile(file: File, allowedTypes: Set<string>, maxBytes: number, lab
 }
 
 export async function submitListingAction(formData: FormData): Promise<{ error: string } | void> {
-  const supabase = await createRawClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const authClient = await createRawClient()
+  const { data: { user } } = await authClient.auth.getUser()
   if (!user) redirect('/login')
+
+  const requestedOwnerId = optionalString(formData, 'owner_user_id')
+  const listingOwnerId = requestedOwnerId || user.id
+  const isAdminDelegation = listingOwnerId !== user.id
+
+  if (isAdminDelegation) {
+    await requirePermission('admin.view')
+  }
+
+  const supabase = isAdminDelegation ? createServiceRoleClient() : authClient
 
   const imageFiles = formData.getAll('images').filter((file): file is File => file instanceof File && file.size > 0)
   if (imageFiles.length === 0) return { error: 'يجب رفع صورة واحدة على الأقل للوحدة' }
@@ -143,7 +155,7 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
 
     const imageUrls: string[] = []
     for (const image of imageFiles) {
-      imageUrls.push(await uploadFile(supabase, 'listing-images', user.id, image, true))
+      imageUrls.push(await uploadFile(supabase, 'listing-images', listingOwnerId, image, true))
     }
 
     const docFiles: string[] = []
@@ -151,7 +163,7 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
       const file = formData.get(key)
       if (file instanceof File && file.size > 0) {
         assertFile(file, DOC_TYPES, MAX_DOC_BYTES, 'مستند الوحدة')
-        docFiles.push(await uploadFile(supabase, 'listing-docs', user.id, file, false))
+        docFiles.push(await uploadFile(supabase, 'listing-docs', listingOwnerId, file, false))
       }
     }
 
@@ -162,12 +174,12 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
 
     if (layout instanceof File && layout.size > 0) {
       assertFile(layout, DOC_TYPES, MAX_DOC_BYTES, 'ملف Layout')
-      layoutFile = await uploadFile(supabase, 'listing-arch', user.id, layout, false)
+      layoutFile = await uploadFile(supabase, 'listing-arch', listingOwnerId, layout, false)
     }
 
     if (masterplan instanceof File && masterplan.size > 0) {
       assertFile(masterplan, DOC_TYPES, MAX_DOC_BYTES, 'ملف Masterplan')
-      masterplanFile = await uploadFile(supabase, 'listing-arch', user.id, masterplan, false)
+      masterplanFile = await uploadFile(supabase, 'listing-arch', listingOwnerId, masterplan, false)
     }
 
     const description = payload.marketing_description || payload.special_notes || payload.title
@@ -175,7 +187,7 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
     const selectedListingType = listingType(formData)
 
     const { data: ad, error } = await supabase.from('ads').insert({
-      user_id: user.id,
+      user_id: listingOwnerId,
       title: payload.title,
       description,
       property_type: payload.unit_type,
@@ -227,13 +239,13 @@ export async function submitListingAction(formData: FormData): Promise<{ error: 
     if (error) return { error: error.message }
 
     const { error: spendError } = await supabase.rpc('spend_points_for_marketplace_ad', {
-      p_user_id: user.id,
+      p_user_id: listingOwnerId,
       p_ad_id: ad.id,
       p_listing_type: selectedListingType,
     })
 
     if (spendError) {
-      await supabase.from('ads').delete().eq('id', ad.id).eq('user_id', user.id)
+      await supabase.from('ads').delete().eq('id', ad.id).eq('user_id', listingOwnerId)
       return { error: `${spendError.message}. Please buy points before publishing this ad.` }
     }
   } catch (error) {

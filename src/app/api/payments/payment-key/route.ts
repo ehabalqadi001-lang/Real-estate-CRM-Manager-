@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   try {
     const config = await getPaymobConfigAsync()
-    const authToken = await authenticatePaymob()
+    const authToken = await authenticatePaymob(config)
     const integrationId = body.method === 'wallet' ? config.walletIntegrationId : config.cardIntegrationId
     const paymentToken = await createPaymobPaymentKey({
       authToken,

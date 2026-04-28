@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { Check, CreditCard, Smartphone, ShieldCheck } from 'lucide-react'
+import { useActionState, useMemo, useState } from 'react'
+import { Check, CreditCard, Loader2, ShieldCheck, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { createPointCheckoutSession } from './actions'
+import { createPointCheckoutSession, initialCheckoutActionState } from './actions'
 
 type PointPackage = {
   id: string
@@ -20,11 +20,15 @@ type PointPackage = {
 export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) {
   const [accepted, setAccepted] = useState(false)
   const [method, setMethod] = useState<'card' | 'wallet'>('card')
+  const [state, formAction, pending] = useActionState(createPointCheckoutSession, initialCheckoutActionState)
 
-  const methodLabel = useMemo(() => method === 'card' ? 'Pay by Card' : 'Pay by Mobile Wallet', [method])
+  const methodLabel = useMemo(
+    () => (method === 'card' ? 'Pay by Card' : 'Pay by Mobile Wallet'),
+    [method]
+  )
 
   return (
-    <form action={createPointCheckoutSession} className="flex h-full flex-col rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+    <form action={formAction} className="flex h-full flex-col rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
       <input type="hidden" name="package_id" value={pointPackage.id} />
       <input type="hidden" name="payment_method" value={method} />
       <input type="hidden" name="accepted_terms" value={accepted ? 'on' : ''} />
@@ -53,7 +57,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
 
       {method === 'wallet' && (
         <div className="mt-4 rounded-lg border border-[#27AE60]/20 bg-[#27AE60]/5 p-3 text-sm font-semibold leading-6 text-[#1E874B]">
-          You will receive a Paymob wallet payment token after submitting. Complete the charge from your Egyptian mobile wallet.
+          You will receive a Paymob wallet token after submitting. Complete the charge from your Egyptian mobile wallet.
         </div>
       )}
 
@@ -74,21 +78,34 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
           aria-label="Accept payment terms"
         />
         <span>
-          لقد قرأت ووافقت على{' '}
+          I have read and accepted the{' '}
           <Link href="/payment-terms" target="_blank" className="text-[#27AE60] underline underline-offset-4">
-            شروط وأحكام الدفع
+            payment terms and conditions
           </Link>
+          .
         </span>
       </label>
 
       <Button
         type="submit"
-        disabled={!accepted}
+        disabled={!accepted || pending}
         className="mt-4 h-11 w-full bg-[#27AE60] text-white hover:bg-[#1F8E4F] disabled:cursor-not-allowed"
       >
-        {method === 'card' ? <CreditCard className="size-4" /> : <Smartphone className="size-4" />}
-        {accepted ? methodLabel : 'Accept terms to continue'}
+        {pending ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : method === 'card' ? (
+          <CreditCard className="size-4" />
+        ) : (
+          <Smartphone className="size-4" />
+        )}
+        {pending ? 'Starting checkout...' : accepted ? methodLabel : 'Accept terms to continue'}
       </Button>
+
+      {state.status === 'error' && (
+        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold leading-5 text-red-700">
+          {state.message}
+        </p>
+      )}
 
       <p className="mt-3 flex items-center gap-2 text-xs font-bold text-[#64748B]">
         <ShieldCheck className="size-4 text-[#27AE60]" />

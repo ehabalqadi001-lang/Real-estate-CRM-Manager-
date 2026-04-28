@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { amountToCents, authenticatePaymob, createPaymobOrder } from '@/lib/paymob/server'
+import { amountToCents, authenticatePaymob, createPaymobOrder, getPaymobConfigAsync } from '@/lib/paymob/server'
 import { createServerClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const authToken = await authenticatePaymob()
+    const config = await getPaymobConfigAsync()
+    const authToken = await authenticatePaymob(config)
     const merchantOrderId = `fi_${pointPackage.id}_${user.id}_${Date.now()}`
     const orderId = await createPaymobOrder({
       authToken,

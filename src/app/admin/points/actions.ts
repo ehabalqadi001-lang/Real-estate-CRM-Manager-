@@ -1,8 +1,22 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/shared/rbac/require-permission'
+
+const pointPackageSchema = z.object({
+  package_id: z.string().uuid().optional().or(z.literal('')),
+  name: z.string().trim().min(2, 'Package name is required'),
+  description: z.string().trim().optional(),
+  package_kind: z.enum(['one_time', 'subscription']),
+  amount_egp: z.coerce.number().positive('Amount must be greater than zero'),
+  currency: z.string().trim().min(3).max(8),
+  points_amount: z.coerce.number().int().positive('Points must be greater than zero'),
+  billing_interval: z.enum(['month', 'year', '']).optional(),
+  is_active: z.boolean(),
+  sort_order: z.coerce.number().int().min(0),
+})
 
 export async function updatePaymobSettings(formData: FormData) {
   await requirePermission('platform.manage')
@@ -51,6 +65,75 @@ export async function updateAdCosts(formData: FormData) {
 
   if (error) throw new Error(error.message)
   revalidatePath('/admin/points')
+}
+
+export async function savePointPackage(formData: FormData) {
+  await requirePermission('platform.manage')
+  const supabase = await createServerClient()
+
+  const parsed = pointPackageSchema.safeParse({
+    package_id: String(formData.get('package_id') ?? '').trim(),
+    name: String(formData.get('name') ?? ''),
+    description: String(formData.get('description') ?? ''),
+    package_kind: String(formData.get('package_kind') ?? 'one_time'),
+    amount_egp: formData.get('amount_egp'),
+    currency: String(formData.get('currency') ?? 'EGP'),
+    points_amount: formData.get('points_amount'),
+    billing_interval: String(formData.get('billing_interval') ?? ''),
+    is_active: formData.get('is_active') === 'on',
+    sort_order: formData.get('sort_order') ?? 0,
+  })
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Invalid package data')
+  }
+
+  const input = parsed.data
+  const billingInterval = input.package_kind === 'subscription'
+    ? (input.billing_interval || 'month')
+    : null
+
+  const payload = {
+    name: input.name,
+    description: input.description?.trim() ? input.description.trim() : null,
+    package_kind: input.package_kind,
+    amount_egp: Number(input.amount_egp.toFixed(2)),
+    currency: input.currency.trim().toUpperCase(),
+    points_amount: input.points_amount,
+    billing_interval: billingInterval,
+    is_active: input.is_active,
+    sort_order: input.sort_order,
+  }
+
+  const query = input.package_id
+    ? supabase.from('point_packages').update(payload).eq('id', input.package_id)
+    : supabase.from('point_packages').insert(payload)
+
+  const { error } = await query
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/admin/points')
+  revalidatePath('/marketplace/buy-points')
+}
+
+export async function togglePointPackageAvailability(formData: FormData) {
+  await requirePermission('platform.manage')
+  const supabase = await createServerClient()
+
+  const packageId = String(formData.get('package_id') ?? '').trim()
+  const nextActive = formData.get('next_active') === 'true'
+
+  if (!packageId) throw new Error('Package id is required')
+
+  const { error } = await supabase
+    .from('point_packages')
+    .update({ is_active: nextActive })
+    .eq('id', packageId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/admin/points')
+  revalidatePath('/marketplace/buy-points')
 }
 
 export async function manualWalletOverride(formData: FormData) {

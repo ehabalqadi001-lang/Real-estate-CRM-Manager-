@@ -1,54 +1,187 @@
 "use client"
 
 import type { InputHTMLAttributes } from 'react'
-import { Activity, Coins, CreditCard, KeyRound, Settings2, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react'
+import {
+  Activity,
+  Coins,
+  CreditCard,
+  KeyRound,
+  Package,
+  Settings2,
+  ShieldCheck,
+  TrendingUp,
+  WalletCards,
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { updateAdCosts, manualWalletOverride, updatePaymobSettings } from './actions'
-import { GamificationDashboard } from '@/app/admin/points/GamificationDashboard'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  manualWalletOverride,
+  savePointPackage,
+  togglePointPackageAvailability,
+  updateAdCosts,
+  updatePaymobSettings,
+} from './actions'
+import { GamificationDashboard } from './GamificationDashboard'
 import { SubmitButton } from './SubmitButton'
 
 const TX_TYPE_CLASSES: Record<string, string> = {
-  paymob_topup:  'bg-[#EEF6F5] text-[#27AE60]',
-  manual_grant:  'bg-blue-50 text-blue-600',
+  paymob_topup: 'bg-[#EEF6F5] text-[#27AE60]',
+  manual_grant: 'bg-blue-50 text-blue-600',
   manual_deduct: 'bg-red-50 text-red-600',
-  ad_spend:      'bg-[#FFF8EC] text-[#C9964A]',
+  ad_spend: 'bg-[#FFF8EC] text-[#C9964A]',
 }
 
 function Field(props: InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) {
-  const { label, name, ...inputProps } = props
+  const { label, name, id, ...inputProps } = props
+  const fieldId = id ?? name
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} {...inputProps} />
+      <Label htmlFor={fieldId}>{label}</Label>
+      <Input id={fieldId} name={name} {...inputProps} />
     </div>
   )
 }
 
-function Metric({ label, value }: { label: string; value: number | string | null }) {
+function Metric({ label, value, suffix = 'pts' }: { label: string; value: number | string | null; suffix?: string }) {
+  const formatted = typeof value === 'number' ? value.toLocaleString() : value ?? '0'
   return (
     <div>
       <p className="text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">{label}</p>
-      <p className="mt-1 text-lg font-black text-[#27AE60]">{Number(value ?? 0).toLocaleString()} pts</p>
+      <p className="mt-1 text-lg font-black text-[#27AE60]">
+        {formatted} {suffix}
+      </p>
+    </div>
+  )
+}
+
+function PackageEditor({
+  pointPackage,
+}: {
+  pointPackage?: any
+}) {
+  const isNew = !pointPackage?.id
+  const packageKind = pointPackage?.package_kind ?? 'one_time'
+  const isActive = isNew ? true : Boolean(pointPackage?.is_active)
+  const idPrefix = pointPackage?.id ?? 'new'
+
+  return (
+    <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-black text-[#0B1120]">{isNew ? 'Create New Offer' : pointPackage.name}</h3>
+          <p className="text-xs font-semibold text-[#64748B]">
+            {isNew
+              ? 'Add a new package that appears in the marketplace buy-points page.'
+              : `Package ID: ${pointPackage.id}`}
+          </p>
+        </div>
+        {!isNew && (
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-black ${
+              isActive ? 'bg-[#EEF6F5] text-[#27AE60]' : 'bg-slate-100 text-slate-600'
+            }`}
+          >
+            {isActive ? 'Active' : 'Hidden'}
+          </span>
+        )}
+      </div>
+
+      <form action={savePointPackage} className="space-y-4">
+        <input type="hidden" name="package_id" value={pointPackage?.id ?? ''} />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Package name" name="name" id={`name_${idPrefix}`} defaultValue={pointPackage?.name ?? ''} placeholder="Starter Pack" required />
+          <div className="space-y-1.5">
+            <Label htmlFor={`package_kind_${idPrefix}`}>Package type</Label>
+            <select
+              id={`package_kind_${idPrefix}`}
+              name="package_kind"
+              defaultValue={packageKind}
+              className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
+            >
+              <option value="one_time">One-time</option>
+              <option value="subscription">Subscription</option>
+            </select>
+          </div>
+          <div className="md:col-span-2 space-y-1.5">
+            <Label htmlFor={`description_${idPrefix}`}>Description</Label>
+            <Textarea
+              id={`description_${idPrefix}`}
+              name="description"
+              defaultValue={pointPackage?.description ?? ''}
+              placeholder="500 EGP = 5,000 marketplace ad points"
+              className="min-h-[84px]"
+            />
+          </div>
+          <Field
+            label="Amount (EGP)"
+            name="amount_egp"
+            id={`amount_egp_${idPrefix}`}
+            type="number"
+            min="0.01"
+            step="0.01"
+            defaultValue={String(pointPackage?.amount_egp ?? 150)}
+            required
+          />
+          <Field label="Points amount" name="points_amount" id={`points_amount_${idPrefix}`} type="number" min="1" step="1" defaultValue={String(pointPackage?.points_amount ?? 1500)} required />
+          <Field label="Currency" name="currency" id={`currency_${idPrefix}`} defaultValue={pointPackage?.currency ?? 'EGP'} maxLength={8} required />
+          <Field label="Sort order" name="sort_order" id={`sort_order_${idPrefix}`} type="number" min="0" step="1" defaultValue={String(pointPackage?.sort_order ?? 0)} required />
+          <div className="space-y-1.5">
+            <Label htmlFor={`billing_interval_${idPrefix}`}>Billing interval</Label>
+            <select
+              id={`billing_interval_${idPrefix}`}
+              name="billing_interval"
+              defaultValue={pointPackage?.billing_interval ?? (packageKind === 'subscription' ? 'month' : '')}
+              className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
+            >
+              <option value="">Not applicable</option>
+              <option value="month">Monthly</option>
+              <option value="year">Yearly</option>
+            </select>
+          </div>
+          <label className="flex items-center gap-2 rounded-lg border border-[#DDE6E4] px-3 py-2 text-sm font-semibold text-[#334155]">
+            <input type="checkbox" name="is_active" defaultChecked={isActive} className="size-4 rounded border-[#DDE6E4]" />
+            Visible in marketplace
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <SubmitButton type="submit" icon={Package} className="bg-[#27AE60] text-white hover:bg-[#1F8E4F]">
+            {isNew ? 'Create package' : 'Save package'}
+          </SubmitButton>
+        </div>
+      </form>
+
+      {!isNew && (
+        <form action={togglePointPackageAvailability} className="mt-3">
+          <input type="hidden" name="package_id" value={pointPackage.id} />
+          <input type="hidden" name="next_active" value={String(!isActive)} />
+          <SubmitButton type="submit" className="bg-[#0B1120] text-white hover:bg-[#1F2937]">
+            {isActive ? 'Hide package' : 'Activate package'}
+          </SubmitButton>
+        </form>
+      )}
     </div>
   )
 }
 
 interface PointsDashboardClientProps {
-  costs: any;
-  paymobSettings: any;
-  wallets: any[];
-  users: any[];
-  transactions: any[];
-  gamificationUsers: any[];
-  totalCirculatingPoints: number;
-  totalLifetimeEarned: number;
-  recentTopupsEGP: number;
+  costs: any
+  paymobSettings: any
+  pointPackages: any[]
+  wallets: any[]
+  users: any[]
+  transactions: any[]
+  gamificationUsers: any[]
+  totalCirculatingPoints: number
+  totalLifetimeEarned: number
+  recentTopupsEGP: number
 }
 
 export function PointsDashboardClient({
   costs,
   paymobSettings,
+  pointPackages,
   wallets,
   users,
   transactions,
@@ -57,8 +190,8 @@ export function PointsDashboardClient({
   totalLifetimeEarned,
   recentTopupsEGP,
 }: PointsDashboardClientProps) {
-  
   const userById = new Map<string, any>((users ?? []).map((user) => [user.id, user]))
+  const activePackagesCount = (pointPackages ?? []).filter((item) => item.is_active).length
 
   return (
     <div className="space-y-6 p-4 sm:p-6" dir="ltr">
@@ -69,15 +202,13 @@ export function PointsDashboardClient({
         </p>
         <h1 className="mt-2 text-3xl font-black">Marketplace Ads Wallet Control</h1>
         <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-300">
-          Configure ad publication costs, Paymob payment credentials, and apply secure manual wallet adjustments.
+          Configure ad publication costs, maintain the public offers catalog, manage Paymob credentials, and apply secure wallet adjustments.
         </p>
       </section>
-      
-      {/* Gamification, Realtime Leaderboard & Ledger System */}
+
       <GamificationDashboard users={gamificationUsers} />
 
-      {/* Quick KPIs Section */}
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <Activity className="size-4 text-[#27AE60]" />
@@ -97,11 +228,19 @@ export function PointsDashboardClient({
             <CreditCard className="size-4 text-[#C9964A]" />
             Recent Top-ups Revenue
           </div>
-          <p className="mt-2 text-3xl font-black text-[#0B1120]">{recentTopupsEGP.toLocaleString()} <span className="text-lg text-[#64748B]">EGP</span></p>
+          <p className="mt-2 text-3xl font-black text-[#0B1120]">
+            {recentTopupsEGP.toLocaleString()} <span className="text-lg text-[#64748B]">EGP</span>
+          </p>
+        </div>
+        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
+            <Package className="size-4 text-[#27AE60]" />
+            Active Offers
+          </div>
+          <p className="mt-2 text-3xl font-black text-[#0B1120]">{activePackagesCount}</p>
         </div>
       </section>
 
-      {/* Ad costs + Conversion rate */}
       <section className="grid gap-5 lg:grid-cols-[420px_1fr]">
         <form action={updateAdCosts} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
@@ -123,7 +262,7 @@ export function PointsDashboardClient({
                 defaultValue={String(costs?.points_per_egp ?? 10)}
               />
               <p className="mt-1 text-xs font-semibold text-[#64748B]">
-                e.g. 10 = customer pays 1 EGP → receives 10 points
+                Example: 10 means the client pays 1 EGP to receive 10 points.
               </p>
             </div>
           </div>
@@ -167,7 +306,27 @@ export function PointsDashboardClient({
         </form>
       </section>
 
-      {/* Paymob credentials */}
+      <section className="space-y-5">
+        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <div className="mb-5 flex items-center gap-2">
+            <Package className="size-5 text-[#27AE60]" />
+            <div>
+              <h2 className="font-black">Marketplace Offers Catalog</h2>
+              <p className="text-xs font-semibold text-[#64748B]">
+                Admin can create, reorder, activate, or pause buy-points offers without changing code.
+              </p>
+            </div>
+          </div>
+          <PackageEditor />
+        </div>
+
+        <div className="grid gap-5 xl:grid-cols-2">
+          {(pointPackages ?? []).map((pointPackage) => (
+            <PackageEditor key={pointPackage.id} pointPackage={pointPackage} />
+          ))}
+        </div>
+      </section>
+
       <section>
         <form action={updatePaymobSettings} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
@@ -175,20 +334,24 @@ export function PointsDashboardClient({
             <h2 className="font-black">Paymob API Credentials</h2>
             {paymobSettings?.updated_at && (
               <span className="ml-auto text-xs font-semibold text-[#64748B]">
-                Last updated: {new Date(paymobSettings.updated_at).toLocaleDateString('en-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
+                Last updated: {new Date(paymobSettings.updated_at).toLocaleDateString('en-EG', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </span>
             )}
           </div>
           <p className="mb-4 text-xs font-semibold text-[#64748B]">
-            Leave API Key and HMAC Secret blank to keep existing values. Credentials are stored securely and fall back to environment variables if blank.
+            Leave API Key and HMAC Secret blank to keep existing values. Stored values are used first, then environment variables as fallback.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="API Key (leave blank to keep)" name="api_key" type="password" placeholder="ak_••••••••••••••••••••" autoComplete="new-password" />
-            <Field label="HMAC Secret (leave blank to keep)" name="hmac_secret" type="password" placeholder="••••••••••••••••••••" autoComplete="new-password" />
-            <Field label="Card Integration ID" name="card_integration_id" type="text" defaultValue={paymobSettings?.card_integration_id ?? ''} placeholder="e.g. 4888832" />
-            <Field label="Wallet Integration ID" name="wallet_integration_id" type="text" defaultValue={paymobSettings?.wallet_integration_id ?? ''} placeholder="e.g. 4888833" />
+            <Field label="API Key (leave blank to keep)" name="api_key" type="password" placeholder="ak_xxxxxxxxxxxxxxxxxxxx" autoComplete="new-password" />
+            <Field label="HMAC Secret (leave blank to keep)" name="hmac_secret" type="password" placeholder="xxxxxxxxxxxxxxxxxxxx" autoComplete="new-password" />
+            <Field label="Card Integration ID" name="card_integration_id" type="text" defaultValue={paymobSettings?.card_integration_id ?? ''} placeholder="4888832" />
+            <Field label="Wallet Integration ID" name="wallet_integration_id" type="text" defaultValue={paymobSettings?.wallet_integration_id ?? ''} placeholder="4888833" />
             <div className="sm:col-span-2">
-              <Field label="Card iFrame ID" name="card_iframe_id" type="text" defaultValue={paymobSettings?.card_iframe_id ?? ''} placeholder="e.g. 916988" />
+              <Field label="Card iFrame ID" name="card_iframe_id" type="text" defaultValue={paymobSettings?.card_iframe_id ?? ''} placeholder="916988" />
             </div>
           </div>
           <SubmitButton type="submit" icon={CreditCard} className="mt-5 bg-[#C9964A] text-white hover:bg-[#b8843a]">
@@ -197,7 +360,6 @@ export function PointsDashboardClient({
         </form>
       </section>
 
-      {/* Recent wallets */}
       <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
         <div className="border-b border-[#DDE6E4] px-5 py-4">
           <h2 className="font-black">Recent Wallets</h2>
@@ -220,7 +382,6 @@ export function PointsDashboardClient({
         </div>
       </section>
 
-      {/* Transactions datatable */}
       <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
         <div className="border-b border-[#DDE6E4] px-5 py-4">
           <h2 className="font-black">All Transactions (last 50)</h2>
@@ -229,8 +390,10 @@ export function PointsDashboardClient({
           <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-[#F6FAF7]">
               <tr>
-                {['User', 'Type', 'Points', 'Balance After', 'EGP', 'Reason', 'Paymob TX ID', 'Date'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">{h}</th>
+                {['User', 'Type', 'Points', 'Balance After', 'EGP', 'Reason', 'Paymob TX ID', 'Date'].map((header) => (
+                  <th key={header} className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">
+                    {header}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -246,15 +409,16 @@ export function PointsDashboardClient({
                       </span>
                     </td>
                     <td className={`px-4 py-3 font-black ${Number(tx.points_delta) >= 0 ? 'text-[#27AE60]' : 'text-red-500'}`}>
-                      {Number(tx.points_delta) >= 0 ? '+' : ''}{Number(tx.points_delta).toLocaleString()}
+                      {Number(tx.points_delta) >= 0 ? '+' : ''}
+                      {Number(tx.points_delta).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 font-semibold">{Number(tx.balance_after).toLocaleString()} pts</td>
                     <td className="px-4 py-3 font-semibold text-[#64748B]">
-                      {tx.money_amount ? `${Number(tx.money_amount).toLocaleString()} ${tx.currency ?? 'EGP'}` : '—'}
+                      {tx.money_amount ? `${Number(tx.money_amount).toLocaleString()} ${tx.currency ?? 'EGP'}` : '-'}
                     </td>
-                    <td className="max-w-[180px] truncate px-4 py-3 font-semibold text-[#64748B]">{tx.reason ?? '—'}</td>
+                    <td className="max-w-[180px] truncate px-4 py-3 font-semibold text-[#64748B]">{tx.reason ?? '-'}</td>
                     <td className="px-4 py-3 font-mono text-xs text-[#64748B]">
-                      {tx.paymob_transaction_id ? tx.paymob_transaction_id.slice(0, 12) + '…' : '—'}
+                      {tx.paymob_transaction_id ? `${tx.paymob_transaction_id.slice(0, 12)}...` : '-'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-semibold text-[#64748B]">
                       {new Date(tx.created_at).toLocaleDateString('en-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
