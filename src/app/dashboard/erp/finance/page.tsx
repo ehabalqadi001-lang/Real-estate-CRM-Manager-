@@ -1,8 +1,10 @@
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
-import { BarChart3, TrendingDown, TrendingUp, BookOpen, AlertCircle, ArrowUpRight } from 'lucide-react'
+import { BarChart3, TrendingDown, TrendingUp, BookOpen, AlertCircle, ArrowUpRight, Target } from 'lucide-react'
+
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { JournalEntryForm } from './JournalEntryForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,11 +24,14 @@ export default async function ERPFinancePage() {
   const supabase = await createRawClient()
   const companyId = profile.company_id
 
+  const currentYear = new Date().getFullYear()
+
   const [
     { data: journalEntries },
     { data: arItems },
     { data: apItems },
     { data: accounts },
+    { data: budgets },
   ] = await Promise.all([
     supabase
       .from('journal_entries')
@@ -57,6 +62,13 @@ export default async function ERPFinancePage() {
       .eq('company_id', companyId)
       .eq('is_active', true)
       .order('account_code'),
+
+    supabase
+      .from('budgets')
+      .select('id, description, category, budgeted_amount, actual_amount, variance, status')
+      .eq('company_id', companyId)
+      .eq('fiscal_year', currentYear)
+      .order('category'),
   ])
 
   const totalAR       = arItems?.reduce((s, r) => s + Number(r.total_amount ?? 0) - Number(r.paid_amount ?? 0), 0) ?? 0
@@ -67,6 +79,9 @@ export default async function ERPFinancePage() {
   const totalAssets      = accounts?.filter(a => a.account_type === 'asset').reduce((s, a) => s + Number(a.balance ?? 0), 0) ?? 0
   const totalLiabilities = accounts?.filter(a => a.account_type === 'liability').reduce((s, a) => s + Number(a.balance ?? 0), 0) ?? 0
   const equity           = totalAssets - totalLiabilities
+  const totalBudgeted    = budgets?.reduce((s, b) => s + Number(b.budgeted_amount ?? 0), 0) ?? 0
+  const totalActual      = budgets?.reduce((s, b) => s + Number(b.actual_amount ?? 0), 0) ?? 0
+  const budgetUtilPct    = totalBudgeted > 0 ? Math.round((totalActual / totalBudgeted) * 100) : 0
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -83,12 +98,20 @@ export default async function ERPFinancePage() {
             <p className="text-xs text-[var(--fi-muted)]">ذمم مدينة · ذمم دائنة · قيود محاسبية · ميزان المراجعة</p>
           </div>
         </div>
-        <Link
-          href="/dashboard/finance"
-          className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors"
-        >
-          <ArrowUpRight size={14} /> المركز المالي
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/erp/finance/accounts"
+            className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors"
+          >
+            <BookOpen size={14} /> دليل الحسابات
+          </Link>
+          <Link
+            href="/dashboard/finance"
+            className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors"
+          >
+            <ArrowUpRight size={14} /> المركز المالي
+          </Link>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -98,6 +121,7 @@ export default async function ERPFinancePage() {
           { label: 'الذمم الدائنة (مستحق)', value: totalAP, icon: TrendingDown, color: 'bg-rose-50 text-rose-600' },
           { label: 'إجمالي الأصول', value: totalAssets, icon: BarChart3, color: 'bg-emerald-50 text-emerald-600' },
           { label: 'حقوق الملكية', value: equity, icon: BookOpen, color: 'bg-violet-50 text-violet-600' },
+          { label: 'الميزانية المنفقة', value: totalActual, icon: Target, color: 'bg-amber-50 text-amber-600' },
         ].map((kpi) => (
           <div key={kpi.label} className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -227,6 +251,62 @@ export default async function ERPFinancePage() {
           </table>
         </div>
       </div>
+
+      {/* Budget tracking */}
+      {(budgets?.length ?? 0) > 0 && (
+        <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-[var(--fi-line)] flex items-center justify-between">
+            <h2 className="font-bold text-[var(--fi-ink)]">الميزانية التشغيلية {currentYear}</h2>
+            <span className={`text-xs px-2 py-1 rounded-full font-bold ${budgetUtilPct > 90 ? 'bg-red-100 text-red-700' : budgetUtilPct > 70 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+              {budgetUtilPct}% مستهلك
+            </span>
+          </div>
+          <div className="p-4">
+            <div className="mb-3 overflow-hidden rounded-full bg-[var(--fi-soft)] h-2">
+              <div className={`h-2 rounded-full transition-all ${budgetUtilPct > 90 ? 'bg-red-500' : budgetUtilPct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}`}
+                style={{ width: `${Math.min(budgetUtilPct, 100)}%` }} />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-[var(--fi-muted)] text-xs">
+                    <th className="text-right py-2 px-1">البند</th>
+                    <th className="text-right py-2 px-1">الفئة</th>
+                    <th className="text-right py-2 px-1">المخصص</th>
+                    <th className="text-right py-2 px-1">الفعلي</th>
+                    <th className="text-right py-2 px-1">الفرق</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--fi-line)]">
+                  {budgets?.map(b => {
+                    const variance = Number(b.variance ?? 0)
+                    return (
+                      <tr key={b.id} className="hover:bg-[var(--fi-soft)]">
+                        <td className="py-2 px-1 text-[var(--fi-ink)] font-semibold text-xs">{b.description}</td>
+                        <td className="py-2 px-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${b.category === 'capex' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700'}`}>
+                            {b.category === 'capex' ? 'رأسمالي' : 'تشغيلي'}
+                          </span>
+                        </td>
+                        <td className="py-2 px-1 font-bold text-[var(--fi-ink)]">{fmtFull(Number(b.budgeted_amount))} ج.م</td>
+                        <td className="py-2 px-1 font-bold text-[var(--fi-muted)]">{fmtFull(Number(b.actual_amount))} ج.م</td>
+                        <td className="py-2 px-1">
+                          <span className={`font-black text-xs ${variance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {variance >= 0 ? '+' : ''}{fmtFull(variance)} ج.م
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Journal Entry */}
+      <JournalEntryForm companyId={companyId} accounts={accounts ?? []} />
 
       {/* Chart of Accounts summary */}
       {(accounts?.length ?? 0) > 0 && (

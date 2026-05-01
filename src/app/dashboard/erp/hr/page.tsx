@@ -3,9 +3,13 @@ import { redirect } from 'next/navigation'
 import {
   BadgeDollarSign,
   BriefcaseBusiness,
+  Brain,
   CalendarCheck2,
+  CalendarDays,
   Download,
+  GraduationCap,
   ShieldCheck,
+  UserSearch,
   Users,
 } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -272,6 +276,49 @@ export default async function ERPHRPage() {
         )}
       </div>
 
+      {/* Module navigation cards */}
+      <section className="ds-card p-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">ENTERPRISE HR MODULES</p>
+        <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">وحدات النظام</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <HrModuleCard
+            href="/dashboard/erp/hr/attendance"
+            icon={<CalendarDays className="size-5" />}
+            color="emerald"
+            title="الحضور والانصراف"
+            description="رصد لحظي — تقارير شهرية"
+          />
+          <HrModuleCard
+            href="/dashboard/erp/hr/commission"
+            icon={<BadgeDollarSign className="size-5" />}
+            color="amber"
+            title="محرك العمولات"
+            description="متدرج — ربط بالتحصيل"
+          />
+          <HrModuleCard
+            href="/dashboard/erp/hr/talent"
+            icon={<UserSearch className="size-5" />}
+            color="violet"
+            title="استقطاب المواهب"
+            description="قمع التوظيف — خطاب عرض"
+          />
+          <HrModuleCard
+            href="/dashboard/erp/hr/academy"
+            icon={<GraduationCap className="size-5" />}
+            color="blue"
+            title="أكاديمية التطوير"
+            description="مقررات — فجوات المهارات"
+          />
+          <HrModuleCard
+            href="/dashboard/erp/hr/hrbp"
+            icon={<Brain className="size-5" />}
+            color="red"
+            title="الذكاء البشري"
+            description="إجهاد — رضا — ثقافة"
+          />
+        </div>
+      </section>
+
       <section className="ds-card overflow-hidden">
         <div className="flex flex-col gap-2 border-b border-[var(--fi-line)] p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -307,9 +354,13 @@ export default async function ERPHRPage() {
                 return (
                   <tr key={employee.id} className="align-top transition hover:bg-[var(--fi-soft)]/60">
                     <td className="px-4 py-4">
-                      <p className="font-black text-[var(--fi-ink)]">{employee.profiles?.full_name ?? 'بدون اسم'}</p>
-                      <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.employee_number}</p>
-                      <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? 'بدون بريد'}</p>
+                      <Link href={`/dashboard/erp/hr/employees/${employee.id}`} className="group/emp block">
+                        <p className="font-black text-[var(--fi-ink)] transition group-hover/emp:text-[var(--fi-emerald)]">
+                          {employee.profiles?.full_name ?? 'بدون اسم'}
+                        </p>
+                        <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.employee_number}</p>
+                        <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? 'بدون بريد'}</p>
+                      </Link>
                     </td>
                     <td className="px-4 py-4 font-bold text-[var(--fi-ink)]">
                       {department?.name_ar ?? department?.name ?? 'غير محدد'}
@@ -406,4 +457,42 @@ function labelRole(role: string | null | undefined) {
   }
 
   return labels[role ?? ''] ?? role ?? 'غير محدد'
+}
+
+type ModuleColor = 'emerald' | 'amber' | 'violet' | 'blue' | 'red'
+
+const colorMap: Record<ModuleColor, { icon: string; title: string; border: string }> = {
+  emerald: { icon: 'bg-emerald-50 text-emerald-600', title: 'text-emerald-700', border: 'hover:border-emerald-300' },
+  amber:   { icon: 'bg-amber-50 text-amber-600',   title: 'text-amber-700',   border: 'hover:border-amber-300' },
+  violet:  { icon: 'bg-violet-50 text-violet-600', title: 'text-violet-700',  border: 'hover:border-violet-300' },
+  blue:    { icon: 'bg-blue-50 text-blue-600',     title: 'text-blue-700',    border: 'hover:border-blue-300' },
+  red:     { icon: 'bg-red-50 text-red-600',       title: 'text-red-700',     border: 'hover:border-red-300' },
+}
+
+function HrModuleCard({
+  href,
+  icon,
+  color,
+  title,
+  description,
+}: {
+  href: string
+  icon: React.ReactNode
+  color: ModuleColor
+  title: string
+  description: string
+}) {
+  const c = colorMap[color]
+  return (
+    <Link
+      href={href}
+      className={`group flex flex-col gap-3 rounded-xl border border-[var(--fi-line)] bg-white p-4 transition hover:shadow-md dark:bg-white/5 ${c.border}`}
+    >
+      <span className={`flex size-10 items-center justify-center rounded-lg ${c.icon}`}>{icon}</span>
+      <div>
+        <p className={`text-sm font-black ${c.title}`}>{title}</p>
+        <p className="mt-0.5 text-xs font-bold text-[var(--fi-muted)]">{description}</p>
+      </div>
+    </Link>
+  )
 }
