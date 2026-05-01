@@ -2,7 +2,7 @@ import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { redirect } from 'next/navigation'
 import { Bookmark, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
-import { CreateReservationForm, CancelReservationButton, ExtendReservationButton } from './ReservationForms'
+import { CreateReservationForm, CancelReservationButton, ExtendReservationButton, ConvertReservationButton } from './ReservationForms'
 
 export const dynamic = 'force-dynamic'
 
@@ -182,7 +182,8 @@ export default async function ReservationsPage() {
                           <p className="text-xs text-[var(--fi-muted)]">
                             تنتهي: {fmt(r.expires_at)}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-1 flex-wrap justify-end">
+                            <ConvertReservationButton reservationId={r.id} />
                             <ExtendReservationButton
                               reservationId={r.id}
                               extensionCount={r.extension_count ?? 0}

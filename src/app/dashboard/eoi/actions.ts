@@ -75,6 +75,63 @@ export async function createEOIAction(
   }
 }
 
+export async function convertEOIToDealAction(
+  _prev: EOIActionState,
+  formData: FormData,
+): Promise<EOIActionState> {
+  try {
+    const session = await requireSession()
+    if (!REVIEW_ALLOWED.includes(session.profile.role as AppRole)) {
+      return { ok: false, message: 'غير مصرح بتحويل خطاب النية.' }
+    }
+
+    const service = createServiceRoleClient()
+    const eoiId   = String(formData.get('eoiId') ?? '').trim()
+    if (!eoiId) return { ok: false, message: 'معرّف خطاب النية مطلوب.' }
+
+    const { data: eoi } = await service
+      .from('eoi_requests')
+      .select('id, eoi_number, client_name, client_phone, client_email, unit_id, agent_id, amount, notes, company_id, status')
+      .eq('id', eoiId)
+      .single()
+
+    if (!eoi) return { ok: false, message: 'خطاب النية غير موجود.' }
+    if (eoi.status === 'converted') return { ok: false, message: 'تم تحويل هذا الخطاب مسبقاً.' }
+
+    const { data: deal, error: dealError } = await service
+      .from('deals')
+      .insert({
+        company_id:  eoi.company_id,
+        agent_id:    eoi.agent_id,
+        assigned_to: eoi.agent_id,
+        client_name: eoi.client_name,
+        buyer_name:  eoi.client_name,
+        unit_id:     eoi.unit_id,
+        amount:      eoi.amount ?? 0,
+        value:       eoi.amount ?? 0,
+        source:      'eoi',
+        stage:       'New',
+        status:      'Lead',
+        deal_date:   new Date().toISOString().slice(0, 10),
+        notes:       `محوّل من خطاب النية ${eoi.eoi_number}${eoi.notes ? `\n${eoi.notes}` : ''}`,
+      })
+      .select('id')
+      .single()
+    if (dealError) throw dealError
+
+    await service
+      .from('eoi_requests')
+      .update({ status: 'converted', converted_deal_id: deal.id })
+      .eq('id', eoiId)
+
+    revalidatePath('/dashboard/eoi')
+    revalidatePath('/dashboard/deals')
+    return { ok: true, message: `تم إنشاء الصفقة وتحويل خطاب النية ${eoi.eoi_number} بنجاح.` }
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : 'حدث خطأ.' }
+  }
+}
+
 export async function updateEOIStatusAction(
   _prev: EOIActionState,
   formData: FormData,

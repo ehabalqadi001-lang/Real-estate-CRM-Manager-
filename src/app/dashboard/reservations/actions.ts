@@ -105,6 +105,63 @@ export async function cancelReservationAction(
   }
 }
 
+export async function convertReservationToDealAction(
+  _prev: ReservationActionState,
+  formData: FormData,
+): Promise<ReservationActionState> {
+  try {
+    const session = await requireSession()
+    if (!MANAGE_ALLOWED.includes(session.profile.role as AppRole)) {
+      return { ok: false, message: 'غير مصرح بتحويل الحجز إلى صفقة.' }
+    }
+
+    const service       = createServiceRoleClient()
+    const reservationId = String(formData.get('reservationId') ?? '').trim()
+    if (!reservationId) return { ok: false, message: 'معرّف الحجز مطلوب.' }
+
+    const { data: res } = await service
+      .from('unit_reservations')
+      .select('id, unit_id, client_name, client_phone, agent_id, company_id, deposit_amount, reservation_fee, notes, status')
+      .eq('id', reservationId)
+      .single()
+
+    if (!res) return { ok: false, message: 'الحجز غير موجود.' }
+    if (res.status === 'converted') return { ok: false, message: 'تم تحويل هذا الحجز مسبقاً.' }
+    if (res.status === 'cancelled') return { ok: false, message: 'لا يمكن تحويل حجز ملغى.' }
+
+    const { error: dealError } = await service
+      .from('deals')
+      .insert({
+        company_id:          res.company_id,
+        agent_id:            res.agent_id,
+        assigned_to:         res.agent_id,
+        client_name:         res.client_name,
+        buyer_name:          res.client_name,
+        unit_id:             res.unit_id,
+        unit_reservation_id: res.id,
+        amount:              Number(res.deposit_amount ?? 0),
+        value:               Number(res.deposit_amount ?? 0),
+        source:              'reservation',
+        stage:               'New',
+        status:              'Lead',
+        deal_date:           new Date().toISOString().slice(0, 10),
+        notes:               res.notes ?? null,
+      })
+    if (dealError) throw dealError
+
+    await service
+      .from('unit_reservations')
+      .update({ status: 'converted', converted_at: new Date().toISOString() })
+      .eq('id', reservationId)
+
+    revalidatePath('/dashboard/reservations')
+    revalidatePath('/dashboard/deals')
+    return { ok: true, message: `تم إنشاء الصفقة للعميل ${res.client_name} بنجاح.` }
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : 'حدث خطأ.' }
+  }
+}
+
 export async function extendReservationAction(
   _prev: ReservationActionState,
   formData: FormData,

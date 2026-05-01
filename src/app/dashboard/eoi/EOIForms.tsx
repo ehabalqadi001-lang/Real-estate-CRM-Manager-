@@ -5,6 +5,7 @@ import { Plus, CheckCircle, XCircle, ArrowRightCircle } from 'lucide-react'
 import {
   createEOIAction,
   updateEOIStatusAction,
+  convertEOIToDealAction,
   type EOIActionState,
 } from './actions'
 
@@ -153,13 +154,24 @@ export function RejectEOIButton({ eoiId }: { eoiId: string }) {
 }
 
 export function ConvertEOIButton({ eoiId }: { eoiId: string }) {
+  const [state, action, pending] = useActionState(convertEOIToDealAction, initial)
+
   return (
-    <EOIActionButton
-      eoiId={eoiId}
-      status="converted"
-      label="تحويل لصفقة"
-      icon={<ArrowRightCircle size={12} />}
-      colorClass="border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100"
-    />
+    <form action={action} className="inline">
+      <input type="hidden" name="eoiId" value={eoiId} />
+      {state.message && (
+        <p className={`text-xs mb-1 ${state.ok ? 'text-emerald-600' : 'text-red-600'}`}>
+          {state.message}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={pending}
+        className="flex items-center gap-1 rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-700 transition hover:bg-sky-100 disabled:opacity-50"
+      >
+        <ArrowRightCircle size={12} />
+        {pending ? '...' : 'تحويل لصفقة'}
+      </button>
+    </form>
   )
 }
