@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState, useTransition } from 'react'
-import { Play, CheckCircle2, ChevronsUp } from 'lucide-react'
-import { runPayrollAction, approvePayrollAction, approveAllPayrollAction, type PayrollActionState } from './actions'
+import { Play, CheckCircle2, ChevronsUp, Banknote } from 'lucide-react'
+import { runPayrollAction, approvePayrollAction, approveAllPayrollAction, markAsPaidAction, type PayrollActionState } from './actions'
 
 const initial: PayrollActionState = { ok: false, message: '' }
 
@@ -16,7 +16,7 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">PAYROLL ENGINE</p>
           <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">إصدار مسيرة رواتب</h2>
           <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-            يحتسب تلقائياً: الراتب الأساسي + العمولات المُقرَّرة — خصومات الغياب والتأخير.
+            يحتسب تلقائياً: الراتب الأساسي + البدلات + الحوافز + العمولات — خصم الغياب والتأخير والإجازات غير المدفوعة والتأمينات والضريبة.
           </p>
         </div>
         <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -48,6 +48,18 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
         <label className="block">
           <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">أيام العمل</span>
           <input name="workingDays" type="number" defaultValue={22} min={1} max={31} className={inputClass} />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">البدلات (ج.م)</span>
+          <input name="allowances" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">الحوافز / المكافآت (ج.م)</span>
+          <input name="bonus" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">أوفر تايم (ج.م)</span>
+          <input name="overtime" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
         </label>
         <div className="sm:col-span-3">
           <button
@@ -88,6 +100,20 @@ export function ApproveAllButton({ month, year, companyId }: { month: number; ye
     >
       <ChevronsUp className="size-4" />
       {pending ? 'جاري الإقرار...' : 'إقرار الكل'}
+    </button>
+  )
+}
+
+export function MarkAsPaidButton({ month, year, companyId }: { month: number; year: number; companyId: string }) {
+  const [pending, startTransition] = useTransition()
+  return (
+    <button
+      disabled={pending}
+      onClick={() => startTransition(async () => { await markAsPaidAction(month, year, companyId) })}
+      className="flex min-h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-60"
+    >
+      <Banknote className="size-4" />
+      {pending ? 'جاري التسجيل...' : 'تسجيل الصرف'}
     </button>
   )
 }

@@ -7,7 +7,7 @@ import type { AppRole } from '@/shared/auth/types'
 import { nullableUuid } from '@/lib/uuid'
 import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
 import { AnimatedCount } from '@/components/design-system/animated-count'
-import { RunPayrollForm, ApprovePayrollButton, ApproveAllButton } from './PayrollControls'
+import { RunPayrollForm, ApprovePayrollButton, ApproveAllButton, MarkAsPaidButton } from './PayrollControls'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,11 +20,18 @@ type PayrollRow = {
   month: number
   year: number
   basic_salary: number
+  allowances: number
+  bonus: number
+  overtime_amount: number
   present_days: number
   absent_days: number
   late_count: number
   total_commissions: number
   deductions: number
+  unpaid_leave_days: number
+  unpaid_leave_deduct: number
+  social_ins_emp: number
+  tax_amount: number
   gross_salary: number
   net_salary: number
   status: string
@@ -69,8 +76,12 @@ export default async function PayrollPage({
     .from('payroll')
     .select(`
       id, employee_id, month, year,
-      basic_salary, present_days, absent_days, late_count,
-      total_commissions, deductions, gross_salary, net_salary, status,
+      basic_salary, allowances, bonus, overtime_amount,
+      present_days, absent_days, late_count,
+      total_commissions, deductions,
+      unpaid_leave_days, unpaid_leave_deduct,
+      social_ins_emp, tax_amount,
+      gross_salary, net_salary, status,
       employees!payroll_employee_id_fkey(job_title, department_id, profiles(full_name))
     `)
     .eq('month', month)
@@ -98,8 +109,11 @@ export default async function PayrollPage({
   const totalNetSalary = payroll.reduce((s, p) => s + Number(p.net_salary ?? 0), 0)
   const totalCommissions = payroll.reduce((s, p) => s + Number(p.total_commissions ?? 0), 0)
   const totalDeductions = payroll.reduce((s, p) => s + Number(p.deductions ?? 0), 0)
+  const totalTax = payroll.reduce((s, p) => s + Number(p.tax_amount ?? 0), 0)
+  const totalSocialIns = payroll.reduce((s, p) => s + Number(p.social_ins_emp ?? 0), 0)
   const approvedCount = payroll.filter((p) => p.status === 'approved' || p.status === 'paid').length
   const draftCount = payroll.filter((p) => p.status === 'draft').length
+  const approvedOnlyCount = payroll.filter((p) => p.status === 'approved').length
 
   // Month navigation
   const prevMonth = month === 1 ? 12 : month - 1
@@ -159,9 +173,9 @@ export default async function PayrollPage({
           icon={<CheckCircle2 className="size-5" />}
         />
         <BentoKpiCard
-          title="إجمالي الاستقطاعات"
-          value={<><AnimatedCount value={totalDeductions} /> <span className="text-base">ج.م</span></>}
-          hint="غياب + تأخير"
+          title="ضريبة + تأمينات"
+          value={<><AnimatedCount value={totalTax + totalSocialIns} /> <span className="text-base">ج.م</span></>}
+          hint={`ضريبة ${formatter.format(totalTax)} — تأمين ${formatter.format(totalSocialIns)}`}
           icon={<Users className="size-5" />}
         />
       </BentoGrid>
@@ -173,12 +187,15 @@ export default async function PayrollPage({
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">آلية الاحتساب</p>
             <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">قواعد المسيرة</h2>
             <div className="mt-4 space-y-3 text-sm font-bold text-[var(--fi-muted)]">
-              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> الراتب الأساسي الشهري</div>
-              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> العمولات المُقرَّرة من محرك العمولات</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> الراتب الأساسي</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> البدلات + الحوافز + الأوفر تايم</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> عمولات HR + CRM المُقرَّرة</div>
               <div className="flex gap-2"><span className="text-red-500">−</span> يوم راتب لكل يوم غياب</div>
-              <div className="flex gap-2"><span className="text-red-500">−</span> ربع يوم لكل تأخير مسجّل</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> إجازة غير مدفوعة × معدل اليوم</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> تأمينات 11% من الأساسي</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> ضريبة دخل تصاعدية (ق. 91/2005)</div>
               <div className="mt-3 rounded-lg bg-[var(--fi-soft)] p-3 text-xs">
-                معادلة اليوم = الراتب الأساسي ÷ أيام العمل (22 افتراضياً)
+                معدل اليوم = الأساسي ÷ أيام العمل (22 افتراضياً)
               </div>
             </div>
           </section>
@@ -194,9 +211,12 @@ export default async function PayrollPage({
               </h2>
               <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">{payroll.length} موظف</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {canRun && draftCount > 0 && companyId && (
                 <ApproveAllButton month={month} year={year} companyId={companyId} />
+              )}
+              {canRun && approvedOnlyCount > 0 && companyId && (
+                <MarkAsPaidButton month={month} year={year} companyId={companyId} />
               )}
               <Link
                 href={`/api/erp/payroll/preview?month=${month}&year=${year}`}
@@ -210,15 +230,17 @@ export default async function PayrollPage({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] text-sm">
+            <table className="w-full min-w-[1200px] text-sm">
               <thead>
                 <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
                   <th className="px-4 py-3 text-right">الموظف</th>
-                  <th className="px-4 py-3 text-right">أيام حضور</th>
-                  <th className="px-4 py-3 text-right">غياب / تأخير</th>
-                  <th className="px-4 py-3 text-right">الراتب الأساسي</th>
+                  <th className="px-4 py-3 text-right">حضور / غياب</th>
+                  <th className="px-4 py-3 text-right">الأساسي</th>
+                  <th className="px-4 py-3 text-right">بدلات + حوافز</th>
                   <th className="px-4 py-3 text-right">عمولات</th>
-                  <th className="px-4 py-3 text-right">استقطاعات</th>
+                  <th className="px-4 py-3 text-right">خصومات</th>
+                  <th className="px-4 py-3 text-right">تأمينات</th>
+                  <th className="px-4 py-3 text-right">ضريبة</th>
                   <th className="px-4 py-3 text-right">الإجمالي</th>
                   <th className="px-4 py-3 text-right">الصافي</th>
                   <th className="px-4 py-3 text-right">الحالة</th>
@@ -232,21 +254,34 @@ export default async function PayrollPage({
                       <p className="font-black text-[var(--fi-ink)]">{p.employees?.profiles?.full_name ?? 'غير محدد'}</p>
                       <p className="mt-0.5 text-xs text-[var(--fi-muted)]">{p.employees?.job_title ?? '—'}</p>
                     </td>
-                    <td className="px-4 py-3 font-bold text-emerald-600">{p.present_days ?? 0}</td>
                     <td className="px-4 py-3">
-                      <span className="font-bold text-red-600">{p.absent_days ?? 0}</span>
+                      <span className="font-bold text-emerald-600">{p.present_days ?? 0}✓</span>
                       <span className="mx-1 text-[var(--fi-muted)]">/</span>
-                      <span className="font-bold text-amber-600">{p.late_count ?? 0}</span>
+                      <span className="font-bold text-red-500">{p.absent_days ?? 0}✗</span>
+                      {(p.late_count ?? 0) > 0 && (
+                        <span className="mr-1 text-xs font-bold text-amber-600">({p.late_count}م)</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.basic_salary)} ج.م</td>
+                    <td className="px-4 py-3 font-bold text-violet-600">
+                      {(Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0)) > 0
+                        ? `${formatter.format(Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0))} ج.م`
+                        : '—'}
+                    </td>
                     <td className="px-4 py-3 font-black text-emerald-600">
-                      {p.total_commissions > 0 ? `${formatter.format(p.total_commissions)} ج.م` : '—'}
+                      {(p.total_commissions ?? 0) > 0 ? `${formatter.format(p.total_commissions)} ج.م` : '—'}
                     </td>
                     <td className="px-4 py-3 font-bold text-red-500">
-                      {p.deductions > 0 ? `(${formatter.format(p.deductions)}) ج.م` : '—'}
+                      {(p.deductions ?? 0) > 0 ? `(${formatter.format(p.deductions)}) ج.م` : '—'}
+                    </td>
+                    <td className="px-4 py-3 font-bold text-orange-600">
+                      {(p.social_ins_emp ?? 0) > 0 ? `(${formatter.format(p.social_ins_emp)}) ج.م` : '—'}
+                    </td>
+                    <td className="px-4 py-3 font-bold text-rose-600">
+                      {(p.tax_amount ?? 0) > 0 ? `(${formatter.format(p.tax_amount)}) ج.م` : '—'}
                     </td>
                     <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.gross_salary)} ج.م</td>
-                    <td className="px-4 py-3 font-black text-[var(--fi-ink)] text-base">{formatter.format(p.net_salary)} ج.م</td>
+                    <td className="px-4 py-3 font-black text-emerald-700 text-base">{formatter.format(p.net_salary)} ج.م</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-3 py-1 text-xs font-black ${statusBadge[p.status] ?? 'bg-slate-100 text-slate-600'}`}>
                         {statusLabel[p.status] ?? p.status}
@@ -264,10 +299,13 @@ export default async function PayrollPage({
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-[var(--fi-line)] bg-[var(--fi-soft)] font-black">
-                  <td className="px-4 py-3 text-[var(--fi-ink)]" colSpan={3}>الإجماليات</td>
+                  <td className="px-4 py-3 text-[var(--fi-ink)]" colSpan={2}>الإجماليات</td>
                   <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.basic_salary, 0))} ج.م</td>
+                  <td className="px-4 py-3 text-violet-600">{formatter.format(payroll.reduce((s, p) => s + Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0), 0))} ج.م</td>
                   <td className="px-4 py-3 text-emerald-600">{formatter.format(totalCommissions)} ج.م</td>
                   <td className="px-4 py-3 text-red-500">({formatter.format(totalDeductions)}) ج.م</td>
+                  <td className="px-4 py-3 text-orange-600">({formatter.format(totalSocialIns)}) ج.م</td>
+                  <td className="px-4 py-3 text-rose-600">({formatter.format(totalTax)}) ج.م</td>
                   <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.gross_salary, 0))} ج.م</td>
                   <td className="px-4 py-3 text-emerald-700 text-base">{formatter.format(totalNetSalary)} ج.م</td>
                   <td colSpan={canRun ? 2 : 1} />
