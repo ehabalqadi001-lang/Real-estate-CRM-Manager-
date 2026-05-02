@@ -28,22 +28,25 @@ const HR_WRITE_ROLES: AppRole[] = [
 ]
 
 const EMPLOYEE_ROLES: AppRole[] = [
-  'agent',
-  'senior_agent',
-  'branch_manager',
-  'finance_officer',
-  'finance_manager',
-  'hr_manager',
-  'hr_staff',
-  'hr_officer',
-  'customer_support',
-  'cs_agent',
-  'cs_supervisor',
-  'marketing_manager',
-  'campaign_specialist',
-  'inventory_rep',
-  'data_manager',
-  'viewer',
+  // Sales
+  'agent', 'senior_agent', 'team_leader', 'branch_manager', 'sales_director',
+  'account_manager', 'buyer_manager', 'seller_resale_manager', 'broker', 'freelancer',
+  // Finance
+  'finance_officer', 'finance_manager', 'collection_rep',
+  // HR
+  'hr_manager', 'hr_staff', 'hr_officer',
+  // Customer Service
+  'customer_support', 'cs_agent', 'cs_supervisor',
+  // Marketing
+  'marketing_manager', 'campaign_specialist',
+  // Data / Inventory
+  'inventory_rep', 'data_manager',
+  // Ad Approvals
+  'ad_reviewer', 'ad_manager',
+  // Account Management
+  'users_am', 'ads_am', 'am_supervisor',
+  // Executive
+  'company_admin', 'admin', 'viewer',
 ]
 
 export async function createEmployeeAction(_prev: HrActionState, formData: FormData): Promise<HrActionState> {
@@ -60,9 +63,22 @@ export async function createEmployeeAction(_prev: HrActionState, formData: FormD
     const departmentId = clean(formData.get('departmentId'))
     const jobTitle = clean(formData.get('jobTitle'))
     const role = clean(formData.get('role')) as AppRole
+    const employmentType = clean(formData.get('employmentType')) || 'full_time'
     const basicSalary = toMoney(formData.get('basicSalary'))
     const commissionRate = toMoney(formData.get('commissionRate'))
+    const payCycle = clean(formData.get('payCycle')) || 'monthly'
+    const annualLeaveBalance = toMoney(formData.get('annualLeaveBalance')) || 21
     const hireDate = clean(formData.get('hireDate')) || new Date().toISOString().slice(0, 10)
+    const probationEndDate = clean(formData.get('probationEndDate')) || null
+    const bankName = clean(formData.get('bankName')) || null
+    const bankAccountName = clean(formData.get('bankAccountName')) || null
+    const bankAccountNumber = clean(formData.get('bankAccountNumber')) || null
+    const bankIban = clean(formData.get('bankIban')) || null
+    const taxId = clean(formData.get('taxId')) || null
+    const socialInsuranceNo = clean(formData.get('socialInsuranceNo')) || null
+    const emergencyContactName = clean(formData.get('emergencyContactName')) || null
+    const emergencyContactPhone = clean(formData.get('emergencyContactPhone')) || null
+    const notes = clean(formData.get('notes')) || null
 
     if (!fullName || !username || !password || !departmentId || !jobTitle) {
       return fail('أكمل الاسم واسم المستخدم وكلمة المرور والقسم والمسمى الوظيفي.')
@@ -156,12 +172,23 @@ export async function createEmployeeAction(_prev: HrActionState, formData: FormD
       department_id: departmentId,
       job_title: jobTitle,
       hire_date: hireDate,
+      probation_end_date: probationEndDate || undefined,
       base_salary: basicSalary,
       basic_salary: basicSalary,
       commission_rate: commissionRate,
-      employment_type: 'full_time',
+      employment_type: employmentType,
       salary_currency: 'EGP',
-      pay_cycle: 'monthly',
+      pay_cycle: payCycle,
+      annual_leave_balance: annualLeaveBalance,
+      bank_name: bankName || undefined,
+      bank_account_name: bankAccountName || undefined,
+      bank_account_number: bankAccountNumber || undefined,
+      bank_iban: bankIban || undefined,
+      tax_id: taxId || undefined,
+      social_insurance_no: socialInsuranceNo || undefined,
+      emergency_contact_name: emergencyContactName || undefined,
+      emergency_contact_phone: emergencyContactPhone || undefined,
+      notes: notes || undefined,
       status: 'active',
     }, { onConflict: 'id' })
 
