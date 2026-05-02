@@ -9,6 +9,7 @@ import {
   updateBrokerSaleLifecycle,
 } from './actions'
 import AccountManagerAssignmentForm from './AccountManagerAssignmentForm'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'إدارة الشركاء | FAST INVESTMENT' }
@@ -16,9 +17,6 @@ export const metadata = { title: 'إدارة الشركاء | FAST INVESTMENT' }
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
-
-const money = (value: number | null | undefined) =>
-  new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(Number(value ?? 0))
 
 const applicationStatus: Record<string, string> = {
   pending: 'قيد المراجعة',
@@ -115,6 +113,9 @@ function collectPartnerDocuments(value: unknown): PartnerDocument[] {
 }
 
 export default async function PartnersManagementPage({ searchParams }: PageProps) {
+  const { t, numLocale } = await getI18n()
+  const money = (value: number | null | undefined) =>
+    new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(Number(value ?? 0))
   const session = await requireSession()
   const sp = await searchParams
 
@@ -250,26 +251,26 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
       </section>
 
       <section className="grid gap-3 md:grid-cols-4">
-        <Kpi label="طلبات قيد المراجعة" value={pendingApplications.toLocaleString('ar-EG')} icon={Clock} />
-        <Kpi label="مبيعات تحتاج اعتماد" value={submittedSales.toLocaleString('ar-EG')} icon={FileCheck2} />
-        <Kpi label="مبيعات معتمدة" value={approvedSales.toLocaleString('ar-EG')} icon={CheckCircle2} />
-        <Kpi label="جاهز لتحديد الصرف" value={`${money(payable)} ج.م`} icon={Banknote} />
+        <Kpi label={t('طلبات قيد المراجعة', 'Pending Applications')} value={pendingApplications.toLocaleString(numLocale)} icon={Clock} />
+        <Kpi label={t('مبيعات تحتاج اعتماد', 'Sales Awaiting Approval')} value={submittedSales.toLocaleString(numLocale)} icon={FileCheck2} />
+        <Kpi label={t('مبيعات معتمدة', 'Approved Sales')} value={approvedSales.toLocaleString(numLocale)} icon={CheckCircle2} />
+        <Kpi label={t('جاهز لتحديد الصرف', 'Ready for Payout')} value={`${money(payable)} ${t('ج.م', 'EGP')}`} icon={Banknote} />
       </section>
 
       <section className="sales-card rounded-3xl border border-[var(--fi-line)] bg-white shadow-sm">
         <div className="border-b border-[var(--fi-line)] p-5">
-          <h2 className="text-lg font-black text-[var(--fi-ink)]">طلبات إنشاء حساب الشركاء</h2>
-          <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">اعتماد أو رفض الحسابات مع تعيين Account Manager.</p>
+          <h2 className="text-lg font-black text-[var(--fi-ink)]">{t('طلبات إنشاء حساب الشركاء', 'Partner Account Applications')}</h2>
+          <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{t('اعتماد أو رفض الحسابات مع تعيين Account Manager.', 'Approve or reject accounts and assign an Account Manager.')}</p>
         </div>
         <div className="divide-y divide-[var(--fi-line)]">
           {appRows.length === 0 ? (
-            <EmptyState label="لا توجد طلبات شركاء حتى الآن" />
+            <EmptyState label={t('لا توجد طلبات شركاء حتى الآن', 'No partner applications yet')} />
           ) : appRows.map((application) => (
             <article key={application.id} className="grid gap-4 p-5 transition hover:bg-white/60 xl:grid-cols-[minmax(0,1fr)_420px]">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-[var(--fi-soft)] px-3 py-1 text-xs font-black text-[var(--fi-emerald)]">
-                    {application.applicant_type === 'company' ? 'شركة' : 'Broker / Freelancer'}
+                    {application.applicant_type === 'company' ? t('شركة', 'Company') : 'Broker / Freelancer'}
                   </span>
                   <span className="rounded-full border border-[var(--fi-line)] px-3 py-1 text-xs font-black text-[var(--fi-muted)]">
                     {applicationStatus[application.status ?? 'pending'] ?? application.status}
@@ -279,22 +280,22 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                   {application.company_name || application.full_name || application.email}
                 </h3>
                 <div className="mt-2 grid gap-2 text-xs font-semibold text-[var(--fi-muted)] md:grid-cols-2">
-                  <span>الإيميل: {application.email}</span>
-                  <span>الهاتف: {application.phone || application.manager_phone || 'غير محدد'}</span>
-                  <span>مدير الشركة: {application.manager_name || 'غير محدد'}</span>
-                  <span>المالك: {application.owner_phone || 'غير محدد'}</span>
+                  <span>{t('الإيميل:', 'Email:')} {application.email}</span>
+                  <span>{t('الهاتف:', 'Phone:')} {application.phone || application.manager_phone || t('غير محدد', 'N/A')}</span>
+                  <span>{t('مدير الشركة:', 'Manager:')} {application.manager_name || t('غير محدد', 'N/A')}</span>
+                  <span>{t('المالك:', 'Owner:')} {application.owner_phone || t('غير محدد', 'N/A')}</span>
                   <span className={`col-span-2 flex items-center gap-1 ${application.assignedManagerName ? 'text-[var(--fi-emerald)]' : ''}`}>
                     Account Manager:{' '}
-                    <strong>{application.assignedManagerName ?? 'غير مُعيَّن'}</strong>
+                    <strong>{application.assignedManagerName ?? t('غير مُعيَّن', 'Unassigned')}</strong>
                   </span>
                 </div>
                 {application.review_reason && (
                   <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs font-bold text-amber-700">{application.review_reason}</p>
                 )}
                 <div className="mt-4 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
-                  <p className="text-xs font-black text-[var(--fi-ink)]">مستندات الاعتماد</p>
+                  <p className="text-xs font-black text-[var(--fi-ink)]">{t('مستندات الاعتماد', 'Accreditation Documents')}</p>
                   {application.reviewDocuments.length === 0 ? (
-                    <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">لا توجد مستندات مرفوعة لهذا الطلب.</p>
+                    <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">{t('لا توجد مستندات مرفوعة لهذا الطلب.', 'No documents uploaded for this application.')}</p>
                   ) : (
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {application.reviewDocuments.map((document) => (
@@ -324,7 +325,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                   <ReviewApplicationForm applicationId={application.id} />
                 ) : (
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center text-sm font-black text-[var(--fi-muted)]">
-                    تمت مراجعة الطلب: {applicationStatus[application.status ?? 'pending'] ?? application.status}
+                    {t('تمت مراجعة الطلب:', 'Application reviewed:')} {applicationStatus[application.status ?? 'pending'] ?? application.status}
                   </div>
                 )}
               </div>
@@ -337,8 +338,8 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
         <div className="border-b border-[var(--fi-line)] p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h2 className="text-lg font-black text-[var(--fi-ink)]">مبيعات الشركاء ودورة العمولات</h2>
-              <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">فلترة حسب Account Manager، المطور، المرحلة، وموعد الصرف.</p>
+              <h2 className="text-lg font-black text-[var(--fi-ink)]">{t('مبيعات الشركاء ودورة العمولات', 'Partner Sales & Commission Lifecycle')}</h2>
+              <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{t('فلترة حسب Account Manager، المطور، المرحلة، وموعد الصرف.', 'Filter by Account Manager, developer, stage, and payout date.')}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <a href={pdfExportHref} className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">
@@ -351,11 +352,11 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
           </div>
           <form className="mt-4 grid gap-2 md:grid-cols-6" action="/dashboard/partners">
             <select name="status" defaultValue={currentParams.status} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
-              <option value="">كل الحالات</option>
-              <option value="submitted">قيد المراجعة</option>
-              <option value="under_review">جارٍ المراجعة</option>
-              <option value="approved">معتمد</option>
-              <option value="rejected">مرفوض</option>
+              <option value="">{t('كل الحالات', 'All Statuses')}</option>
+              <option value="submitted">{t('قيد المراجعة', 'Pending Review')}</option>
+              <option value="under_review">{t('جارٍ المراجعة', 'Under Review')}</option>
+              <option value="approved">{t('معتمد', 'Approved')}</option>
+              <option value="rejected">{t('مرفوض', 'Rejected')}</option>
             </select>
             <select name="stage" defaultValue={currentParams.stage} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل المراحل</option>
@@ -364,12 +365,12 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
               <option value="contract">Contract</option>
             </select>
             <select name="lifecycle" defaultValue={currentParams.lifecycle} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
-              <option value="">كل دورات العمولة</option>
-              <option value="sale_approved">اعتماد البيع</option>
-              <option value="claim_submitted_to_developer">مطالبة المطور</option>
-              <option value="developer_commission_collected">تم التحصيل</option>
-              <option value="broker_payout_scheduled">موعد صرف</option>
-              <option value="broker_paid">مصروف</option>
+              <option value="">{t('كل دورات العمولة', 'All Lifecycle Stages')}</option>
+              <option value="sale_approved">{t('اعتماد البيع', 'Sale Approved')}</option>
+              <option value="claim_submitted_to_developer">{t('مطالبة المطور', 'Developer Claim Submitted')}</option>
+              <option value="developer_commission_collected">{t('تم التحصيل', 'Commission Collected')}</option>
+              <option value="broker_payout_scheduled">{t('موعد صرف', 'Payout Scheduled')}</option>
+              <option value="broker_paid">{t('مصروف', 'Paid Out')}</option>
             </select>
             <select name="accountManager" defaultValue={currentParams.accountManager} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold">
               <option value="">كل Account Managers</option>
@@ -377,16 +378,16 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                 <option key={manager.id} value={manager.id}>{manager.full_name || manager.email}</option>
               ))}
             </select>
-            <input name="developer" defaultValue={currentParams.developer} placeholder="بحث بالمطور" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
+            <input name="developer" defaultValue={currentParams.developer} placeholder={t('بحث بالمطور', 'Search developer')} className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <input name="payoutDate" defaultValue={currentParams.payoutDate} type="date" className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-xs font-bold" />
-              <button className="sales-primary h-10 rounded-xl px-3 text-xs font-black text-white">فلترة</button>
+              <button className="sales-primary h-10 rounded-xl px-3 text-xs font-black text-white">{t('فلترة', 'Filter')}</button>
             </div>
           </form>
         </div>
         <div className="divide-y divide-[var(--fi-line)]">
           {saleRows.length === 0 ? (
-            <EmptyState label="لا توجد مبيعات مطابقة للفلاتر الحالية" />
+            <EmptyState label={t('لا توجد مبيعات مطابقة للفلاتر الحالية', 'No sales match the current filters')} />
           ) : saleRows.map((sale) => (
             <article key={sale.id} className="grid gap-4 p-5 transition hover:bg-white/60 xl:grid-cols-[minmax(0,1fr)_460px]">
               <div>
@@ -404,19 +405,19 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
                 </div>
                 <h3 className="mt-3 text-base font-black text-[var(--fi-ink)]">{sale.project_name}</h3>
                 <div className="mt-2 grid gap-2 text-xs font-semibold text-[var(--fi-muted)] md:grid-cols-2">
-                  <span>الشريك: <strong className="text-[var(--fi-ink)]">{brokerNameById.get(sale.broker_user_id ?? '') ?? 'غير محدد'}</strong></span>
-                  <span>Account Manager: <strong className="text-[var(--fi-ink)]">{sale.assigned_account_manager_id ? (managerById.get(sale.assigned_account_manager_id) ?? 'غير معروف') : 'غير مُعيَّن'}</strong></span>
-                  <span>العميل: {sale.client_name}</span>
-                  <span>المطور: {sale.developer_name || 'غير محدد'}</span>
-                  <span>الوحدة: {sale.unit_code || 'غير محدد'}</span>
-                  <span>قيمة البيع: {money(sale.deal_value)} ج.م</span>
-                  <span>إجمالي العمولة: {money(sale.gross_commission)} ج.م</span>
-                  <span>عمولة الشريك: {money(sale.broker_commission_amount)} ج.م</span>
+                  <span>{t('الشريك:', 'Partner:')} <strong className="text-[var(--fi-ink)]">{brokerNameById.get(sale.broker_user_id ?? '') ?? t('غير محدد', 'N/A')}</strong></span>
+                  <span>Account Manager: <strong className="text-[var(--fi-ink)]">{sale.assigned_account_manager_id ? (managerById.get(sale.assigned_account_manager_id) ?? t('غير معروف', 'Unknown')) : t('غير مُعيَّن', 'Unassigned')}</strong></span>
+                  <span>{t('العميل:', 'Client:')} {sale.client_name}</span>
+                  <span>{t('المطور:', 'Developer:')} {sale.developer_name || t('غير محدد', 'N/A')}</span>
+                  <span>{t('الوحدة:', 'Unit:')} {sale.unit_code || t('غير محدد', 'N/A')}</span>
+                  <span>{t('قيمة البيع:', 'Deal Value:')} {money(sale.deal_value)} {t('ج.م', 'EGP')}</span>
+                  <span>{t('إجمالي العمولة:', 'Total Commission:')} {money(sale.gross_commission)} {t('ج.م', 'EGP')}</span>
+                  <span>{t('عمولة الشريك:', 'Partner Commission:')} {money(sale.broker_commission_amount)} {t('ج.م', 'EGP')}</span>
                 </div>
                 {sale.notes && <p className="mt-3 rounded-lg bg-slate-50 border border-slate-100 p-3 text-xs font-semibold text-slate-600">{sale.notes}</p>}
                 {sale.rejection_reason && <p className="mt-3 rounded-lg bg-red-50 p-3 text-xs font-bold text-red-700">{sale.rejection_reason}</p>}
                 <Link href={`/dashboard/partners/sales/${sale.id}`} className="mt-3 inline-flex h-9 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">
-                  تفاصيل ومراجعة المستندات
+                  {t('تفاصيل ومراجعة المستندات', 'Details & Document Review')}
                 </Link>
               </div>
 
@@ -445,11 +446,11 @@ function PaginationControls({ total, page, pageSize, paramName, searchParams }: 
   return (
     <div className="flex items-center justify-between border-t border-[var(--fi-line)] p-4 bg-white rounded-b-3xl">
       <p className="text-xs text-[var(--fi-muted)] font-bold">
-        عرض {((page - 1) * pageSize) + 1} إلى {Math.min(page * pageSize, total)} من {total}
+        {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)} / {total}
       </p>
       <div className="flex gap-2">
-        {page > 1 && <Link href={buildUrl(page - 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]"><ChevronRight className="size-4 ml-1" /> السابق</Link>}
-        {page < totalPages && <Link href={buildUrl(page + 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">التالي <ChevronLeft className="size-4 mr-1" /></Link>}
+        {page > 1 && <Link href={buildUrl(page - 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]"><ChevronRight className="size-4 ml-1" /> Prev</Link>}
+        {page < totalPages && <Link href={buildUrl(page + 1)} className="inline-flex h-8 items-center justify-center rounded-lg border border-[var(--fi-line)] px-3 text-xs font-black text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]">Next <ChevronLeft className="size-4 mr-1" /></Link>}
       </div>
     </div>
   )

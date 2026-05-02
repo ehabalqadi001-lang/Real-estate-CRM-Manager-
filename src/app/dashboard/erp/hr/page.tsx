@@ -83,10 +83,9 @@ const HR_WRITE_ROLES: AppRole[] = [
   'hr_officer',
 ]
 
-const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
-
 export default async function ERPHRPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const formatter = new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 })
   const session = await requireSession()
   const { profile } = session
 
@@ -187,10 +186,10 @@ export default async function ERPHRPage() {
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT HRMS</p>
             <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">
-              إدارة الموارد البشرية والرواتب
+              {t('إدارة الموارد البشرية والرواتب', 'HR & Payroll Management')}
             </h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-              مركز موحد لإضافة الموظفين، عزل صلاحيات أقسام HR، ربط بيئة العمل، تسجيل الحضور الذكي، ومتابعة الرواتب والعمولات.
+              {t('مركز موحد لإضافة الموظفين، عزل صلاحيات أقسام HR، ربط بيئة العمل، تسجيل الحضور الذكي، ومتابعة الرواتب والعمولات.', 'Unified hub for adding employees, isolating HR permissions, linking environments, smart attendance, and tracking salaries and commissions.')}
             </p>
           </div>
           <Link
@@ -199,48 +198,48 @@ export default async function ERPHRPage() {
             className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-4 text-sm font-black text-[var(--fi-ink)] transition hover:border-[var(--fi-emerald)] dark:bg-white/5"
           >
             <Download className="size-4" aria-hidden="true" />
-            معاينة رواتب الشهر
+            {t('معاينة رواتب الشهر', 'Preview Monthly Payroll')}
           </Link>
         </div>
       </section>
 
       {pageError ? (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-          تعذر تحميل بيانات الموارد البشرية: {pageError.message}
+          {t('تعذر تحميل بيانات الموارد البشرية:', 'Failed to load HR data:')} {pageError.message}
         </section>
       ) : null}
 
       <BentoGrid>
         <BentoKpiCard
-          title="إجمالي الموظفين النشطين"
+          title={t('إجمالي الموظفين النشطين', 'Active Employees')}
           value={<AnimatedCount value={activeEmployees.length} />}
-          hint="كل الأقسام"
+          hint={t('كل الأقسام', 'All departments')}
           icon={<Users className="size-5" />}
         />
         <BentoKpiCard
-          title="حضور اليوم"
+          title={t('حضور اليوم', "Today's Attendance")}
           value={<AnimatedCount value={presentToday} />}
-          hint={`${formatter.format(lockedEmployees)} بيئة مربوطة`}
+          hint={`${formatter.format(lockedEmployees)} ${t('بيئة مربوطة', 'linked environments')}`}
           icon={<CalendarCheck2 className="size-5" />}
         />
         <BentoKpiCard
-          title="صافي الرواتب"
+          title={t('صافي الرواتب', 'Net Payroll')}
           value={
             <>
-              <AnimatedCount value={totalPayroll} /> <span className="text-base">ج.م</span>
+              <AnimatedCount value={totalPayroll} /> <span className="text-base">{t('ج.م', 'EGP')}</span>
             </>
           }
           hint={`${month}/${year}`}
           icon={<BadgeDollarSign className="size-5" />}
         />
         <BentoKpiCard
-          title="عمولات محتسبة"
+          title={t('عمولات محتسبة', 'Calculated Commissions')}
           value={
             <>
-              <AnimatedCount value={totalCommissions} /> <span className="text-base">ج.م</span>
+              <AnimatedCount value={totalCommissions} /> <span className="text-base">{t('ج.م', 'EGP')}</span>
             </>
           }
-          hint="من payroll"
+          hint={t('من payroll', 'from payroll')}
           icon={<BriefcaseBusiness className="size-5" />}
         />
       </BentoGrid>
@@ -250,14 +249,14 @@ export default async function ERPHRPage() {
           <AddEmployeeForm departments={departments} />
         ) : (
           <section className="ds-card p-5">
-            <h2 className="text-xl font-black text-[var(--fi-ink)]">إضافة موظف جديد</h2>
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">{t('إضافة موظف جديد', 'Add New Employee')}</h2>
             <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-              إنشاء الموظفين متاح لمدير النظام وفريق الموارد البشرية داخل شركة محددة فقط.
+              {t('إنشاء الموظفين متاح لمدير النظام وفريق الموارد البشرية داخل شركة محددة فقط.', 'Employee creation is available to system admins and HR teams within a specific company only.')}
             </p>
             <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-800">
-              حسابك الحالي غير مرتبط بشركة صالحة. افتح لوحة شركة محددة أو اربط الحقل
+              {t('حسابك الحالي غير مرتبط بشركة صالحة. افتح لوحة شركة محددة أو اربط الحقل', 'Your account is not linked to a valid company. Open a specific company panel or link the field')}
               <span className="mx-1 rounded bg-white px-2 py-1 font-mono text-xs">company_id</span>
-              قبل إنشاء حسابات موظفين.
+              {t('قبل إنشاء حسابات موظفين.', 'before creating employee accounts.')}
             </div>
           </section>
         )}
@@ -270,9 +269,9 @@ export default async function ERPHRPage() {
               <ShieldCheck className="size-6" aria-hidden="true" />
             </div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">SMART ATTENDANCE</p>
-            <h2 className="mt-2 text-xl font-black text-[var(--fi-ink)]">تسجيل الحضور الذكي</h2>
+            <h2 className="mt-2 text-xl font-black text-[var(--fi-ink)]">{t('تسجيل الحضور الذكي', 'Smart Attendance')}</h2>
             <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-              يظهر زر الحضور للحسابات المرتبطة بسجل موظف فقط. مدير النظام يستطيع إدارة السجلات بدون تسجيل حضور شخصي.
+              {t('يظهر زر الحضور للحسابات المرتبطة بسجل موظف فقط. مدير النظام يستطيع إدارة السجلات بدون تسجيل حضور شخصي.', 'The attendance button appears only for accounts linked to an employee record. Admins can manage records without personal check-in.')}
             </p>
           </section>
         )}
@@ -281,42 +280,42 @@ export default async function ERPHRPage() {
       {/* Module navigation cards */}
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">ENTERPRISE HR MODULES</p>
-        <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">وحدات النظام</h2>
+        <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">{t('وحدات النظام', 'System Modules')}</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <HrModuleCard
             href="/dashboard/erp/hr/attendance"
             icon={<CalendarDays className="size-5" />}
             color="emerald"
-            title="الحضور والانصراف"
-            description="رصد لحظي — تقارير شهرية"
+            title={t('الحضور والانصراف', 'Attendance')}
+            description={t('رصد لحظي — تقارير شهرية', 'Real-time — Monthly reports')}
           />
           <HrModuleCard
             href="/dashboard/erp/hr/commission"
             icon={<BadgeDollarSign className="size-5" />}
             color="amber"
-            title="محرك العمولات"
-            description="متدرج — ربط بالتحصيل"
+            title={t('محرك العمولات', 'Commission Engine')}
+            description={t('متدرج — ربط بالتحصيل', 'Tiered — linked to collections')}
           />
           <HrModuleCard
             href="/dashboard/erp/hr/talent"
             icon={<UserSearch className="size-5" />}
             color="violet"
-            title="استقطاب المواهب"
-            description="قمع التوظيف — خطاب عرض"
+            title={t('استقطاب المواهب', 'Talent Acquisition')}
+            description={t('قمع التوظيف — خطاب عرض', 'Hiring funnel — Offer letters')}
           />
           <HrModuleCard
             href="/dashboard/erp/hr/academy"
             icon={<GraduationCap className="size-5" />}
             color="blue"
-            title="أكاديمية التطوير"
-            description="مقررات — فجوات المهارات"
+            title={t('أكاديمية التطوير', 'Development Academy')}
+            description={t('مقررات — فجوات المهارات', 'Courses — Skill gaps')}
           />
           <HrModuleCard
             href="/dashboard/erp/hr/hrbp"
             icon={<Brain className="size-5" />}
             color="red"
-            title="الذكاء البشري"
-            description="إجهاد — رضا — ثقافة"
+            title={t('الذكاء البشري', 'People Intelligence')}
+            description={t('إجهاد — رضا — ثقافة', 'Burnout — Satisfaction — Culture')}
           />
         </div>
       </section>
@@ -324,14 +323,14 @@ export default async function ERPHRPage() {
       <section className="ds-card overflow-hidden">
         <div className="flex flex-col gap-2 border-b border-[var(--fi-line)] p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-black text-[var(--fi-ink)]">سجل الموظفين</h2>
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">{t('سجل الموظفين', 'Employee Registry')}</h2>
             <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-              الرواتب، الأقسام، حالة البيئة، وحضور اليوم.
+              {t('الرواتب، الأقسام، حالة البيئة، وحضور اليوم.', 'Salaries, departments, environment status, and today\'s attendance.')}
             </p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-xs font-black text-[var(--fi-emerald)]">
             <ShieldCheck className="size-4" aria-hidden="true" />
-            HR فقط
+            {t('HR فقط', 'HR Only')}
           </span>
         </div>
 
@@ -339,13 +338,13 @@ export default async function ERPHRPage() {
           <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
-                <th className="px-4 py-3 text-right">الموظف</th>
-                <th className="px-4 py-3 text-right">القسم</th>
-                <th className="px-4 py-3 text-right">الدور</th>
-                <th className="px-4 py-3 text-right">الراتب</th>
-                <th className="px-4 py-3 text-right">العمولة</th>
-                <th className="px-4 py-3 text-right">حضور اليوم</th>
-                <th className="px-4 py-3 text-right">بيئة العمل</th>
+                <th className="px-4 py-3 text-right">{t('الموظف', 'Employee')}</th>
+                <th className="px-4 py-3 text-right">{t('القسم', 'Department')}</th>
+                <th className="px-4 py-3 text-right">{t('الدور', 'Role')}</th>
+                <th className="px-4 py-3 text-right">{t('الراتب', 'Salary')}</th>
+                <th className="px-4 py-3 text-right">{t('العمولة', 'Commission')}</th>
+                <th className="px-4 py-3 text-right">{t('حضور اليوم', "Today's Attendance")}</th>
+                <th className="px-4 py-3 text-right">{t('بيئة العمل', 'Environment')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
@@ -358,24 +357,24 @@ export default async function ERPHRPage() {
                     <td className="px-4 py-4">
                       <Link href={`/dashboard/erp/hr/employees/${employee.id}`} className="group/emp block">
                         <p className="font-black text-[var(--fi-ink)] transition group-hover/emp:text-[var(--fi-emerald)]">
-                          {employee.profiles?.full_name ?? 'بدون اسم'}
+                          {employee.profiles?.full_name ?? t('بدون اسم', 'No name')}
                         </p>
                         <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.employee_number}</p>
-                        <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? 'بدون بريد'}</p>
+                        <p className="mt-1 text-xs text-[var(--fi-muted)]">{employee.profiles?.email ?? t('بدون بريد', 'No email')}</p>
                       </Link>
                     </td>
                     <td className="px-4 py-4 font-bold text-[var(--fi-ink)]">
-                      {department?.name_ar ?? department?.name ?? 'غير محدد'}
+                      {department?.name_ar ?? department?.name ?? t('غير محدد', 'N/A')}
                     </td>
                     <td className="px-4 py-4">
-                      <p className="font-bold text-[var(--fi-ink)]">{employee.job_title ?? 'غير محدد'}</p>
+                      <p className="font-bold text-[var(--fi-ink)]">{employee.job_title ?? t('غير محدد', 'N/A')}</p>
                       <p className="mt-1 text-xs text-[var(--fi-muted)]">{labelRole(employee.profiles?.role)}</p>
                     </td>
                     <td className="px-4 py-4 font-black text-[var(--fi-ink)]">
-                      {formatter.format(Number(employee.basic_salary ?? employee.base_salary ?? employeePayroll?.net_salary ?? 0))} ج.م
+                      {formatter.format(Number(employee.basic_salary ?? employee.base_salary ?? employeePayroll?.net_salary ?? 0))} {t('ج.م', 'EGP')}
                     </td>
                     <td className="px-4 py-4 font-black text-emerald-600">
-                      {formatter.format(Number(employeePayroll?.total_commissions ?? 0))} ج.م
+                      {formatter.format(Number(employeePayroll?.total_commissions ?? 0))} {t('ج.م', 'EGP')}
                       <span className="mt-1 block text-xs text-[var(--fi-muted)]">{Number(employee.commission_rate ?? 0)}%</span>
                     </td>
                     <td className="px-4 py-4">
@@ -390,7 +389,7 @@ export default async function ERPHRPage() {
                               : 'bg-amber-50 text-amber-700'
                           }`}
                         >
-                          {employee.is_env_locked ? 'مربوطة' : 'غير مربوطة'}
+                          {employee.is_env_locked ? t('مربوطة', 'Linked') : t('غير مربوطة', 'Unlinked')}
                         </span>
                       </div>
                       {canManageHr ? <EnvironmentLockButton employeeId={employee.id} locked={Boolean(employee.is_env_locked)} /> : null}
@@ -401,7 +400,7 @@ export default async function ERPHRPage() {
               {!employees.length ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-sm font-bold text-[var(--fi-muted)]">
-                    لا يوجد موظفون حتى الآن. استخدم نموذج إضافة موظف لإنشاء أول حساب داخل شركة مرتبطة.
+                    {t('لا يوجد موظفون حتى الآن. استخدم نموذج إضافة موظف لإنشاء أول حساب داخل شركة مرتبطة.', 'No employees yet. Use the add employee form to create the first account within a linked company.')}
                   </td>
                 </tr>
               ) : null}
@@ -432,9 +431,9 @@ function AttendanceBadge({ attendance }: { attendance: AttendanceRow | undefined
   )
 }
 
-function formatTime(value: string | null | undefined) {
+function formatTime(value: string | null | undefined, locale = 'ar-EG') {
   if (!value) return '...'
-  return new Intl.DateTimeFormat('ar-EG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 }
 
 function labelRole(role: string | null | undefined) {

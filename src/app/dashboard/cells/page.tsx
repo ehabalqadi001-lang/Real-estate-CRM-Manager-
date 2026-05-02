@@ -36,7 +36,7 @@ const MANAGER_ROLES = new Set([
 ])
 
 export default async function CellsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   const session = await requireSession()
   if (!MANAGER_ROLES.has(session.profile.role)) redirect('/dashboard')
 
@@ -48,9 +48,9 @@ export default async function CellsPage() {
       <main className="space-y-6 p-4 sm:p-6">
         <section className="ds-card p-5 sm:p-6">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT OPERATIONS</p>
-          <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة خلايا العمل</h1>
+          <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">{t('إدارة خلايا العمل', 'Work Cell Management')}</h1>
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-800">
-            حسابك الحالي غير مرتبط بشركة صالحة. اربط حساب المدير بشركة قبل إنشاء خلايا العمل.
+            {t('حسابك الحالي غير مرتبط بشركة صالحة. اربط حساب المدير بشركة قبل إنشاء خلايا العمل.', 'Your account is not linked to a valid company. Link the manager account to a company before creating work cells.')}
           </div>
         </section>
       </main>
@@ -88,23 +88,23 @@ export default async function CellsPage() {
     <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT OPERATIONS</p>
-        <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">إدارة خلايا العمل</h1>
+        <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">{t('إدارة خلايا العمل', 'Work Cell Management')}</h1>
         <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-          تتبع كل خلية، قائدها، أعضائها، أهداف GMV، ومعدلات التحويل بشكل مستقل مع رؤية مركزية للإدارة.
+          {t('تتبع كل خلية، قائدها، أعضائها، أهداف GMV، ومعدلات التحويل بشكل مستقل مع رؤية مركزية للإدارة.', 'Track each cell, its leader, members, GMV targets, and conversion rates independently with central management visibility.')}
         </p>
       </section>
 
       {pageError ? (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-          تعذر تحميل بيانات الخلايا: {pageError.message}
+          {t('تعذر تحميل بيانات الخلايا:', 'Failed to load cell data:')} {pageError.message}
         </section>
       ) : null}
 
       <BentoGrid>
-        <BentoKpiCard title="عدد الخلايا" value={<AnimatedCount value={cells.length} />} hint="نشطة ومؤرشفة" icon={<Network className="size-5" />} />
-        <BentoKpiCard title="أعضاء الخلايا" value={<AnimatedCount value={totalMembers} />} hint="أعضاء نشطون" icon={<Users className="size-5" />} />
-        <BentoKpiCard title="هدف GMV" value={<><AnimatedCount value={totalTarget} compact /> <span className="text-base">ج.م</span></>} hint="شهرياً" icon={<Target className="size-5" />} />
-        <BentoKpiCard title="GMV فعلي" value={<><AnimatedCount value={totalGmv} compact /> <span className="text-base">ج.م</span></>} hint="من snapshots" icon={<TrendingUp className="size-5" />} />
+        <BentoKpiCard title={t('عدد الخلايا', 'Total Cells')} value={<AnimatedCount value={cells.length} />} hint={t('نشطة ومؤرشفة', 'Active & archived')} icon={<Network className="size-5" />} />
+        <BentoKpiCard title={t('أعضاء الخلايا', 'Cell Members')} value={<AnimatedCount value={totalMembers} />} hint={t('أعضاء نشطون', 'Active members')} icon={<Users className="size-5" />} />
+        <BentoKpiCard title={t('هدف GMV', 'GMV Target')} value={<><AnimatedCount value={totalTarget} compact /> <span className="text-base">{t('ج.م', 'EGP')}</span></>} hint={t('شهرياً', 'Monthly')} icon={<Target className="size-5" />} />
+        <BentoKpiCard title={t('GMV فعلي', 'Actual GMV')} value={<><AnimatedCount value={totalGmv} compact /> <span className="text-base">{t('ج.م', 'EGP')}</span></>} hint={t('من snapshots', 'from snapshots')} icon={<TrendingUp className="size-5" />} />
       </BentoGrid>
 
       <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
@@ -112,9 +112,9 @@ export default async function CellsPage() {
 
         <section className="ds-card overflow-hidden">
           <div className="border-b border-[var(--fi-line)] p-5">
-            <h2 className="text-xl font-black text-[var(--fi-ink)]">الخلايا الحالية</h2>
+            <h2 className="text-xl font-black text-[var(--fi-ink)]">{t('الخلايا الحالية', 'Current Cells')}</h2>
             <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-              كل خلية لها أهداف ومؤشرات وتحكم مستقل في بيانات العملاء.
+              {t('كل خلية لها أهداف ومؤشرات وتحكم مستقل في بيانات العملاء.', 'Each cell has its own targets, KPIs, and independent control over client data.')}
             </p>
           </div>
           <div className="grid gap-4 p-5 md:grid-cols-2">
@@ -124,23 +124,23 @@ export default async function CellsPage() {
                   <div>
                     <h3 className="text-lg font-black text-[var(--fi-ink)]">{cell.name_ar}</h3>
                     <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">
-                      {cell.work_cell_members?.filter((member) => member.status === 'active').length ?? 0} أعضاء
+                      {cell.work_cell_members?.filter((member) => member.status === 'active').length ?? 0} {t('أعضاء', 'members')}
                     </p>
                   </div>
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-                    {cell.status === 'active' ? 'نشطة' : cell.status}
+                    {cell.status === 'active' ? t('نشطة', 'Active') : cell.status}
                   </span>
                 </div>
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
-                  <Metric label="GMV" value={`${Number(cell.monthly_gmv_target ?? 0).toLocaleString('ar-EG')} ج.م`} />
+                  <Metric label="GMV" value={`${Number(cell.monthly_gmv_target ?? 0).toLocaleString(numLocale)} ${t('ج.م', 'EGP')}`} />
                   <Metric label="Leads" value={String(cell.monthly_leads_target ?? 0)} />
-                  <Metric label="تحويل" value={`${cell.conversion_target_pct ?? 0}%`} />
+                  <Metric label={t('تحويل', 'Conv.')} value={`${cell.conversion_target_pct ?? 0}%`} />
                 </div>
               </article>
             ))}
             {!cells.length ? (
               <div className="rounded-lg border border-dashed border-[var(--fi-line)] p-10 text-center text-sm font-bold text-[var(--fi-muted)] md:col-span-2">
-                لا توجد خلايا حتى الآن. أنشئ أول خلية عمل من النموذج.
+                {t('لا توجد خلايا حتى الآن. أنشئ أول خلية عمل من النموذج.', 'No cells yet. Create the first work cell from the form.')}
               </div>
             ) : null}
           </div>

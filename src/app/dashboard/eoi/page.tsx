@@ -7,18 +7,10 @@ import { CreateEOIForm, ApproveEOIButton, RejectEOIButton, ConvertEOIButton } fr
 
 export const dynamic = 'force-dynamic'
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  pending:   { label: 'قيد المراجعة', cls: 'bg-amber-50 text-amber-700 border border-amber-200'   },
-  approved:  { label: 'معتمد',        cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
-  rejected:  { label: 'مرفوض',       cls: 'bg-red-50 text-red-700 border border-red-200'           },
-  converted: { label: 'محوّل',        cls: 'bg-sky-50 text-sky-700 border border-sky-200'           },
-  expired:   { label: 'منتهي',        cls: 'bg-slate-100 text-slate-500 border border-slate-200'    },
-}
-
-const fmt  = (d: string | null) =>
-  d ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short' }).format(new Date(d)) : '—'
-const fmtN = (n: number | null | undefined) =>
-  n != null ? new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n) : '—'
+const fmt  = (d: string | null, locale: string) =>
+  d ? new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(new Date(d)) : '—'
+const fmtN = (n: number | null | undefined, locale: string) =>
+  n != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(n) : '—'
 
 const ALLOWED_ROLES = [
   'super_admin', 'platform_admin', 'sales_manager', 'sales_agent',
@@ -29,7 +21,14 @@ const CAN_REVIEW = [
 ]
 
 export default async function EOIPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const STATUS_MAP: Record<string, { label: string; cls: string }> = {
+    pending:   { label: t('قيد المراجعة', 'Pending'),   cls: 'bg-amber-50 text-amber-700 border border-amber-200'   },
+    approved:  { label: t('معتمد', 'Approved'),          cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+    rejected:  { label: t('مرفوض', 'Rejected'),         cls: 'bg-red-50 text-red-700 border border-red-200'           },
+    converted: { label: t('محوّل', 'Converted'),         cls: 'bg-sky-50 text-sky-700 border border-sky-200'           },
+    expired:   { label: t('منتهي', 'Expired'),           cls: 'bg-slate-100 text-slate-500 border border-slate-200'    },
+  }
   const session = await requireSession()
   const { profile } = session
 
@@ -81,10 +80,10 @@ export default async function EOIPage() {
   const history = eois.filter(e => e.status !== 'pending')
 
   const kpis = [
-    { label: 'قيد المراجعة', value: pending.length,   icon: Clock,            color: 'text-amber-600',   bg: 'bg-amber-50'   },
-    { label: 'معتمدة',       value: approved.length,  icon: CheckCircle,      color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'مرفوضة',      value: rejected.length,  icon: XCircle,          color: 'text-red-600',     bg: 'bg-red-50'     },
-    { label: 'محوّلة لصفقة', value: converted.length, icon: ArrowRightCircle, color: 'text-sky-600',     bg: 'bg-sky-50'     },
+    { label: t('قيد المراجعة', 'Pending'),    value: pending.length,   icon: Clock,            color: 'text-amber-600',   bg: 'bg-amber-50'   },
+    { label: t('معتمدة', 'Approved'),          value: approved.length,  icon: CheckCircle,      color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: t('مرفوضة', 'Rejected'),          value: rejected.length,  icon: XCircle,          color: 'text-red-600',     bg: 'bg-red-50'     },
+    { label: t('محوّلة لصفقة', 'Converted'),   value: converted.length, icon: ArrowRightCircle, color: 'text-sky-600',     bg: 'bg-sky-50'     },
   ]
 
   return (
@@ -95,9 +94,9 @@ export default async function EOIPage() {
           <ClipboardList size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-[var(--fi-ink)]">خطابات النية (EOI)</h1>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('خطابات النية (EOI)', 'Expression of Interest (EOI)')}</h1>
           <p className="text-xs text-[var(--fi-muted)]">
-            تتبع اهتمام العملاء وتحويلها إلى صفقات
+            {t('تتبع اهتمام العملاء وتحويلها إلى صفقات', 'Track client interest and convert to deals')}
           </p>
         </div>
       </div>
@@ -122,16 +121,16 @@ export default async function EOIPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-[var(--fi-line)]">
-              <h2 className="font-bold text-[var(--fi-ink)]">قيد المراجعة</h2>
+              <h2 className="font-bold text-[var(--fi-ink)]">{t('قيد المراجعة', 'Pending Review')}</h2>
               <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
-                {pending.length} خطاب
+                {pending.length} {t('خطاب', 'letters')}
               </span>
             </div>
 
             {pending.length === 0 ? (
               <div className="p-10 text-center">
                 <ClipboardList size={32} className="mx-auto mb-2 opacity-20" />
-                <p className="font-bold text-[var(--fi-ink)]">لا توجد خطابات قيد المراجعة</p>
+                <p className="font-bold text-[var(--fi-ink)]">{t('لا توجد خطابات قيد المراجعة', 'No pending EOIs')}</p>
               </div>
             ) : (
               <div className="divide-y divide-[var(--fi-line)]">
@@ -153,12 +152,12 @@ export default async function EOIPage() {
                         )}
                         {e.unit_id && (
                           <p className="text-xs text-[var(--fi-muted)]">
-                            وحدة: {unitMap[e.unit_id] ?? e.unit_id.slice(0, 8)}
+                            {t('وحدة:', 'Unit:')} {unitMap[e.unit_id] ?? e.unit_id.slice(0, 8)}
                           </p>
                         )}
                         {e.amount && (
                           <p className="text-xs font-bold text-[var(--fi-ink)]">
-                            المبلغ: {fmtN(e.amount)} ج.م
+                            {t('المبلغ:', 'Amount:')} {fmtN(e.amount, numLocale)} EGP
                           </p>
                         )}
                         {e.notes && (
@@ -168,10 +167,10 @@ export default async function EOIPage() {
 
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <p className="text-xs text-[var(--fi-muted)]">
-                          صالح حتى: {fmt(e.expiry_date)}
+                          {t('صالح حتى:', 'Valid until:')} {fmt(e.expiry_date, numLocale)}
                         </p>
                         <p className="text-xs text-[var(--fi-muted)]">
-                          بتاريخ: {fmt(e.created_at)}
+                          {t('بتاريخ:', 'Date:')} {fmt(e.created_at, numLocale)}
                         </p>
                         {canReview && (
                           <div className="flex items-center gap-2 mt-1 flex-wrap justify-end">
@@ -192,17 +191,17 @@ export default async function EOIPage() {
           {history.length > 0 && (
             <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
               <div className="p-4 border-b border-[var(--fi-line)]">
-                <h2 className="font-bold text-[var(--fi-ink)]">السجل التاريخي</h2>
+                <h2 className="font-bold text-[var(--fi-ink)]">{t('السجل التاريخي', 'History')}</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-[var(--fi-soft)] text-[var(--fi-muted)] text-xs">
-                      <th className="px-4 py-3 text-right font-black">الرقم</th>
-                      <th className="px-4 py-3 text-right font-black">العميل</th>
-                      <th className="px-4 py-3 text-right font-black">المبلغ</th>
-                      <th className="px-4 py-3 text-right font-black">الحالة</th>
-                      <th className="px-4 py-3 text-right font-black">التاريخ</th>
+                      <th className="px-4 py-3 text-right font-black">{t('الرقم','No.')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('العميل','Client')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('المبلغ','Amount')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('الحالة','Status')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('التاريخ','Date')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--fi-line)]">
@@ -212,11 +211,11 @@ export default async function EOIPage() {
                         <tr key={e.id} className="hover:bg-[var(--fi-soft)] transition-colors">
                           <td className="px-4 py-3 font-mono text-xs text-[var(--fi-muted)]">{e.eoi_number}</td>
                           <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{e.client_name}</td>
-                          <td className="px-4 py-3 text-[var(--fi-muted)]">{e.amount ? `${fmtN(e.amount)} ج.م` : '—'}</td>
+                          <td className="px-4 py-3 text-[var(--fi-muted)]">{e.amount ? `${fmtN(e.amount, numLocale)} EGP` : '—'}</td>
                           <td className="px-4 py-3">
                             <span className={`rounded-lg px-2 py-1 text-xs font-black ${st.cls}`}>{st.label}</span>
                           </td>
-                          <td className="px-4 py-3 text-[var(--fi-muted)]">{fmt(e.created_at)}</td>
+                          <td className="px-4 py-3 text-[var(--fi-muted)]">{fmt(e.created_at, numLocale)}</td>
                         </tr>
                       )
                     })}

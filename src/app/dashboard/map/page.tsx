@@ -7,7 +7,7 @@ import InventoryMap from './InventoryMap'
 export const dynamic = 'force-dynamic'
 
 export default async function MapPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,12 +29,12 @@ export default async function MapPage() {
       .not('lng', 'is', null),
   ])
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
   const mappedUnits = (units ?? []).map((unit) => ({
     id: unit.id,
     lat: Number(unit.lat),
     lng: Number(unit.lng),
-    label: unit.project_name ?? unit.unit_name ?? 'وحدة',
+    label: unit.project_name ?? unit.unit_name ?? t('وحدة', 'Unit'),
     type: unit.unit_type ?? '',
     price: fmt(Number(unit.price || 0)),
     status: (unit.status ?? 'available').toLowerCase(),
@@ -55,9 +55,9 @@ export default async function MapPage() {
           <MapPin size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-slate-900">خريطة العقارات</h1>
+          <h1 className="text-lg font-black text-slate-900">{t('خريطة العقارات', 'Property Map')}</h1>
           <p className="text-xs text-slate-400">
-            {mappedUnits.length} وحدة - {mappedProjects.length} مشروع على الخريطة
+            {mappedUnits.length} {t('وحدة', 'units')} - {mappedProjects.length} {t('مشروع على الخريطة', 'projects on map')}
           </p>
         </div>
       </div>

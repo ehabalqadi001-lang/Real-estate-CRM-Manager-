@@ -9,13 +9,12 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = { title: 'التقارير | FAST INVESTMENT' }
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-
 const WON_STAGES = ['Contracted', 'Registration', 'Handover', 'Won', 'contract']
 
 export default async function ReportsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
   await requireAuth()
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -57,7 +56,7 @@ export default async function ReportsPage() {
   const monthlyTrend = Array.from({ length: 12 }, (_, index) => {
     const date = new Date(now)
     date.setMonth(date.getMonth() - (11 - index))
-    const label = date.toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' })
+    const label = date.toLocaleDateString(numLocale, { month: 'short', year: '2-digit' })
     const monthDeals = safeDeals.filter((deal) => {
       const createdAt = new Date(deal.created_at)
       return createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear()
@@ -106,12 +105,12 @@ export default async function ReportsPage() {
   const maxDevSales = sortedDevs[0]?.[1] ?? 1
 
   const kpis = [
-    { label: 'إجمالي الإيرادات', value: `${fmt(totalRevenue)} ج.م`, icon: DollarSign, color: 'text-[var(--fi-emerald)]', bg: 'bg-[var(--fi-soft)]' },
-    { label: 'إجمالي التحصيلات', value: `${fmt(totalCollected)} ج.م`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'إجمالي العملاء', value: `${safeLeads.length}`, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { label: 'معدل التحويل', value: `${conversion}%`, icon: Target, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    { label: 'صافي العمولات', value: `${fmt(totalCommissions)} ج.م`, icon: FileBarChart2, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
-    { label: 'إجمالي الصفقات', value: `${safeDeals.length}`, icon: Target, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+    { label: t('إجمالي الإيرادات', 'Total Revenue'),     value: `${fmt(totalRevenue)} ${t('ج.م', 'EGP')}`,     icon: DollarSign,   color: 'text-[var(--fi-emerald)]', bg: 'bg-[var(--fi-soft)]' },
+    { label: t('إجمالي التحصيلات', 'Total Collections'), value: `${fmt(totalCollected)} ${t('ج.م', 'EGP')}`,   icon: TrendingUp,   color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: t('إجمالي العملاء', 'Total Leads'),         value: `${safeLeads.length}`,                          icon: Users,        color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: t('معدل التحويل', 'Conversion Rate'),        value: `${conversion}%`,                               icon: Target,       color: 'text-amber-600',  bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { label: t('صافي العمولات', 'Net Commissions'),       value: `${fmt(totalCommissions)} ${t('ج.م', 'EGP')}`, icon: FileBarChart2, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+    { label: t('إجمالي الصفقات', 'Total Deals'),         value: `${safeDeals.length}`,                          icon: Target,       color: 'text-rose-600',   bg: 'bg-rose-50 dark:bg-rose-900/20' },
   ]
 
   return (
@@ -122,8 +121,8 @@ export default async function ReportsPage() {
             <FileBarChart2 size={18} className="text-white" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">التقارير والتحليلات</h1>
-            <p className="text-xs text-[var(--fi-muted)]">أداء المبيعات، الإيرادات، الوكلاء، والمطورين</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('التقارير والتحليلات', 'Reports & Analytics')}</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{t('أداء المبيعات، الإيرادات، الوكلاء، والمطورين', 'Sales performance, revenue, agents & developers')}</p>
           </div>
         </div>
         <ExportReportsPdfButton fileName={`fast-investment-${new Date().toISOString().slice(0, 10)}.pdf`} />
@@ -151,7 +150,7 @@ export default async function ReportsPage() {
 
         {sortedDevs.length > 0 && (
           <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
-            <h2 className="mb-5 text-sm font-black text-[var(--fi-ink)]">تقرير أداء المطورين العقاريين</h2>
+            <h2 className="mb-5 text-sm font-black text-[var(--fi-ink)]">{t('تقرير أداء المطورين العقاريين', 'Developer Performance Report')}</h2>
             <div className="space-y-4">
               {sortedDevs.map(([developerName, sales]) => {
                 const percentage = (sales / maxDevSales) * 100
@@ -161,7 +160,7 @@ export default async function ReportsPage() {
                       <span className={`text-sm font-bold ${developerName === 'غير محدد' ? 'text-red-500' : 'text-[var(--fi-ink)]'}`}>
                         {developerName}
                       </span>
-                      <span className="fi-tabular text-sm font-black text-[var(--fi-emerald)]">{fmt(sales)} ج.م</span>
+                      <span className="fi-tabular text-sm font-black text-[var(--fi-emerald)]">{fmt(sales)} {t('ج.م', 'EGP')}</span>
                     </div>
                     <div className="h-2.5 overflow-hidden rounded-full bg-[var(--fi-soft)]">
                       <div
@@ -176,7 +175,7 @@ export default async function ReportsPage() {
             </div>
             {sortedDevs.some(([name]) => name === 'غير محدد') && (
               <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-700">
-                تنبيه: بعض الصفقات غير مرتبطة بمطور. يرجى تعديلها لضمان دقة التقارير.
+                {t('تنبيه: بعض الصفقات غير مرتبطة بمطور. يرجى تعديلها لضمان دقة التقارير.', 'Warning: Some deals are not linked to a developer. Please update them to ensure report accuracy.')}
               </p>
             )}
           </div>

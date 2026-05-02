@@ -6,15 +6,15 @@ import AddResaleButton from './AddResaleButton'
 
 export const dynamic = 'force-dynamic'
 
-const STATUS_CONFIG = {
-  active:       { label: 'نشط',         color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', dot: 'bg-emerald-500' },
-  under_offer:  { label: 'تحت العرض',   color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-100',     dot: 'bg-amber-500' },
-  sold:         { label: 'مباع',        color: 'text-blue-700',    bg: 'bg-blue-50 border-blue-100',       dot: 'bg-blue-500' },
-  withdrawn:    { label: 'منسحب',       color: 'text-slate-500',   bg: 'bg-slate-50 border-slate-200',     dot: 'bg-slate-400' },
+const STATUS_CONFIG_STYLES = {
+  active:      { color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100', dot: 'bg-emerald-500' },
+  under_offer: { color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-100',     dot: 'bg-amber-500' },
+  sold:        { color: 'text-blue-700',    bg: 'bg-blue-50 border-blue-100',       dot: 'bg-blue-500' },
+  withdrawn:   { color: 'text-slate-500',   bg: 'bg-slate-50 border-slate-200',     dot: 'bg-slate-400' },
 } as const
 
 export default async function ResalePage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,7 +33,14 @@ export default async function ResalePage() {
   const sold        = listings?.filter(l => l.status === 'sold').length ?? 0
   const totalValue  = listings?.filter(l => l.status === 'active').reduce((s, l) => s + Number(l.asking_price || 0), 0) ?? 0
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
+  const STATUS_CONFIG = {
+    active:      { label: t('نشط', 'Active'),           ...STATUS_CONFIG_STYLES.active },
+    under_offer: { label: t('تحت العرض', 'Under Offer'), ...STATUS_CONFIG_STYLES.under_offer },
+    sold:        { label: t('مباع', 'Sold'),             ...STATUS_CONFIG_STYLES.sold },
+    withdrawn:   { label: t('منسحب', 'Withdrawn'),       ...STATUS_CONFIG_STYLES.withdrawn },
+  }
+
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
 
   return (
     <div className="p-6 space-y-5">
@@ -45,8 +52,8 @@ export default async function ResalePage() {
             <Home size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">سوق إعادة البيع</h1>
-            <p className="text-xs text-slate-400">{total} وحدة · قيمة متاح {fmt(totalValue)} ج.م</p>
+            <h1 className="text-lg font-black text-slate-900">{t('سوق إعادة البيع', 'Resale Market')}</h1>
+            <p className="text-xs text-slate-400">{total} {t('وحدة', 'units')} · {t('قيمة متاح', 'available value')} {fmt(totalValue)} {t('ج.م', 'EGP')}</p>
           </div>
         </div>
         <AddResaleButton />
@@ -55,10 +62,10 @@ export default async function ResalePage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'إجمالي الوحدات', value: total,      color: 'text-blue-600',    bg: 'bg-blue-50' },
-          { label: 'نشطة',           value: active,     color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'تحت العرض',      value: underOffer, color: 'text-amber-600',   bg: 'bg-amber-50' },
-          { label: 'مباعة',          value: sold,       color: 'text-purple-600',  bg: 'bg-purple-50' },
+          { label: t('إجمالي الوحدات', 'Total Units'),  value: total,      color: 'text-blue-600',    bg: 'bg-blue-50' },
+          { label: t('نشطة', 'Active'),                value: active,     color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: t('تحت العرض', 'Under Offer'),      value: underOffer, color: 'text-amber-600',   bg: 'bg-amber-50' },
+          { label: t('مباعة', 'Sold'),                 value: sold,       color: 'text-purple-600',  bg: 'bg-purple-50' },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center gap-3">
             <div className={`${k.bg} w-9 h-9 rounded-lg flex items-center justify-center`}>
@@ -76,8 +83,8 @@ export default async function ResalePage() {
       {(!listings || listings.length === 0) ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-16 text-center">
           <Home size={40} className="mx-auto text-slate-200 mb-3" />
-          <p className="font-bold text-slate-600">لا توجد وحدات إعادة بيع</p>
-          <p className="text-sm text-slate-400 mt-1">أضف أول وحدة إعادة بيع لبدء تتبع السوق الثانوي</p>
+          <p className="font-bold text-slate-600">{t('لا توجد وحدات إعادة بيع', 'No resale listings')}</p>
+          <p className="text-sm text-slate-400 mt-1">{t('أضف أول وحدة إعادة بيع لبدء تتبع السوق الثانوي', 'Add the first resale unit to start tracking the secondary market')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -103,21 +110,21 @@ export default async function ResalePage() {
                     </span>
                   </div>
                   {listing.floor && (
-                    <p className="text-xs text-white/40 mt-1">دور {listing.floor} {listing.building ? `· ${listing.building}` : ''}</p>
+                    <p className="text-xs text-white/40 mt-1">{t('دور', 'Floor')} {listing.floor} {listing.building ? `· ${listing.building}` : ''}</p>
                   )}
                 </div>
 
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] text-slate-400 font-bold">سعر الطلب</p>
-                      <p className="text-lg font-black text-[#00C27C]">{fmt(Number(listing.asking_price))} ج.م</p>
+                      <p className="text-[10px] text-slate-400 font-bold">{t('سعر الطلب', 'Asking Price')}</p>
+                      <p className="text-lg font-black text-[#00C27C]">{fmt(Number(listing.asking_price))} {t('ج.م', 'EGP')}</p>
                     </div>
                     {profit !== null && (
                       <div className="text-left">
-                        <p className="text-[10px] text-slate-400 font-bold">هامش الربح</p>
+                        <p className="text-[10px] text-slate-400 font-bold">{t('هامش الربح', 'Profit Margin')}</p>
                         <p className={`text-sm font-black ${profit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                          {profit >= 0 ? '+' : ''}{fmt(profit)} ج.م
+                          {profit >= 0 ? '+' : ''}{fmt(profit)} {t('ج.م', 'EGP')}
                         </p>
                       </div>
                     )}
@@ -125,7 +132,7 @@ export default async function ResalePage() {
 
                   {listing.seller_name && (
                     <p className="text-xs text-slate-500 border-t border-slate-50 pt-2">
-                      البائع: <span className="font-bold text-slate-700">{listing.seller_name}</span>
+                      {t('البائع:', 'Seller:')} <span className="font-bold text-slate-700">{listing.seller_name}</span>
                       {listing.seller_phone && (
                         <a href={`tel:${listing.seller_phone}`} className="text-blue-500 hover:underline mr-2" dir="ltr">{listing.seller_phone}</a>
                       )}
@@ -134,10 +141,10 @@ export default async function ResalePage() {
 
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                      <Eye size={11} /> {listing.views ?? 0} مشاهدة
+                      <Eye size={11} /> {listing.views ?? 0} {t('مشاهدة', 'views')}
                     </div>
                     <p className="text-[11px] text-slate-400">
-                      {listing.profiles?.full_name ?? 'وكيل'}
+                      {listing.profiles?.full_name ?? t('وكيل', 'Agent')}
                     </p>
                   </div>
                 </div>

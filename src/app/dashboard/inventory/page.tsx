@@ -1,4 +1,5 @@
 import { Building2, CheckCircle2, Clock3, Hand, Home, WalletCards } from 'lucide-react'
+import { getI18n } from '@/lib/i18n'
 import AddUnitButton from '@/components/inventory/AddUnitButton'
 import { InventoryClient } from '@/components/inventory/inventory-client'
 import type { InventoryDeveloper, InventoryStats, InventoryUnit, PaymentPlan, UnitStatus } from '@/components/inventory/inventory-types'
@@ -117,20 +118,16 @@ function calculateStats(units: InventoryUnit[]): InventoryStats {
   }
 }
 
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 export default async function InventoryPage({
   searchParams,
 }: {
   searchParams?: Promise<{ developer?: string | string[] }>
 }) {
+  const { t, numLocale } = await getI18n()
   await requirePermission('unit.view')
+
+  const formatEgp = (value: number) =>
+    new Intl.NumberFormat(numLocale, { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(value)
   const params = await searchParams
   const initialDeveloperIds = Array.isArray(params?.developer)
     ? params.developer
@@ -168,9 +165,9 @@ export default async function InventoryPage({
             <Building2 className="size-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-[var(--fi-ink)]">إدارة المخزون العقاري</h1>
+            <h1 className="text-xl font-black text-[var(--fi-ink)]">{t('إدارة المخزون العقاري', 'Property Inventory')}</h1>
             <p className="text-sm text-[var(--fi-muted)]">
-              {developers.length} مطور · {units.length} وحدة · بيانات متصلة مباشرة بـ Supabase
+              {developers.length} {t('مطور', 'developers')} · {units.length} {t('وحدة', 'units')}
             </p>
           </div>
         </div>
@@ -179,18 +176,18 @@ export default async function InventoryPage({
 
       {error ? (
         <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-10 text-center">
-          <p className="font-black text-[var(--fi-ink)]">تعذر تحميل المخزون</p>
+          <p className="font-black text-[var(--fi-ink)]">{t('تعذر تحميل المخزون', 'Failed to load inventory')}</p>
           <p className="mt-2 text-sm text-[var(--fi-muted)]">{error.message}</p>
         </div>
       ) : (
         <>
           <section className="grid grid-cols-1 xs:grid-cols-2 gap-3 lg:grid-cols-6">
-            <StatCard label="إجمالي الوحدات" value={stats.total.toLocaleString('ar-EG')} icon={Home} />
-            <StatCard label="متاح" value={stats.available.toLocaleString('ar-EG')} icon={CheckCircle2} />
-            <StatCard label="محتجز" value={stats.held.toLocaleString('ar-EG')} icon={Hand} />
-            <StatCard label="محجوز" value={stats.reserved.toLocaleString('ar-EG')} icon={Clock3} />
-            <StatCard label="القيمة المتاحة" value={formatEgp(stats.totalValue)} icon={WalletCards} />
-            <StatCard label="متوسط السعر" value={formatEgp(stats.averagePrice)} icon={WalletCards} />
+            <StatCard label={t('إجمالي الوحدات','Total')} value={stats.total.toLocaleString(numLocale)} icon={Home} />
+            <StatCard label={t('متاح','Available')} value={stats.available.toLocaleString(numLocale)} icon={CheckCircle2} />
+            <StatCard label={t('محتجز','Held')} value={stats.held.toLocaleString(numLocale)} icon={Hand} />
+            <StatCard label={t('محجوز','Reserved')} value={stats.reserved.toLocaleString(numLocale)} icon={Clock3} />
+            <StatCard label={t('القيمة المتاحة','Available Value')} value={formatEgp(stats.totalValue)} icon={WalletCards} />
+            <StatCard label={t('متوسط السعر','Avg Price')} value={formatEgp(stats.averagePrice)} icon={WalletCards} />
           </section>
 
           <InventoryClient units={units} developers={developers} initialDeveloperIds={initialDeveloperIds} />

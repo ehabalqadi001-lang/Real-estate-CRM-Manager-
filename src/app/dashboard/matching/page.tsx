@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { Sparkles, User, Building2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { matchLeadToUnits } from './matching-engine'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,7 @@ interface PageProps {
 }
 
 export default async function MatchingPage({ searchParams }: PageProps) {
+  const { t, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,10 +37,10 @@ export default async function MatchingPage({ searchParams }: PageProps) {
   const selectedLead = lead_id ? leads?.find(l => l.id === lead_id) : null
   const matches = selectedLead && units ? matchLeadToUnits(selectedLead, units) : []
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
 
       {/* Header */}
       <div className="flex items-center gap-3 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
@@ -46,8 +48,8 @@ export default async function MatchingPage({ searchParams }: PageProps) {
           <Sparkles size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-slate-900">مطابقة المشترين بالوحدات</h1>
-          <p className="text-xs text-slate-400">اختر عميلاً لعرض أفضل الوحدات المناسبة له تلقائياً</p>
+          <h1 className="text-lg font-black text-slate-900">{t('مطابقة المشترين بالوحدات', 'Lead-to-Unit Matching')}</h1>
+          <p className="text-xs text-slate-400">{t('اختر عميلاً لعرض أفضل الوحدات المناسبة له تلقائياً', 'Select a lead to automatically show the best matching units')}</p>
         </div>
       </div>
 
@@ -56,7 +58,7 @@ export default async function MatchingPage({ searchParams }: PageProps) {
         {/* Lead selector */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
           <h2 className="text-sm font-black text-slate-800 mb-3 flex items-center gap-2">
-            <User size={15} className="text-[#00C27C]" /> اختر العميل
+            <User size={15} className="text-[#00C27C]" /> {t('اختر العميل', 'Select Lead')}
           </h2>
           <div className="space-y-2 max-h-[480px] overflow-y-auto">
             {(leads ?? []).map(lead => {
@@ -75,7 +77,7 @@ export default async function MatchingPage({ searchParams }: PageProps) {
                   <div>
                     <p className="font-bold text-sm">{name}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      {lead.status} · ميزانية {fmt(Number(lead.expected_value || 0))} ج.م
+                      {lead.status} · {t('ميزانية', 'Budget')} {fmt(Number(lead.expected_value || 0))} {t('ج.م', 'EGP')}
                     </p>
                   </div>
                   {isSelected && <ArrowLeft size={14} className="text-[#00C27C]" />}
@@ -83,7 +85,7 @@ export default async function MatchingPage({ searchParams }: PageProps) {
               )
             })}
             {!leads?.length && (
-              <p className="text-sm text-slate-400 text-center py-8">لا توجد عملاء مهتمون في الوقت الحالي</p>
+              <p className="text-sm text-slate-400 text-center py-8">{t('لا توجد عملاء مهتمون في الوقت الحالي', 'No interested leads at the moment')}</p>
             )}
           </div>
         </div>
@@ -93,19 +95,19 @@ export default async function MatchingPage({ searchParams }: PageProps) {
           <h2 className="text-sm font-black text-slate-800 mb-3 flex items-center gap-2">
             <Building2 size={15} className="text-[#00C27C]" />
             {selectedLead
-              ? `أفضل وحدات لـ ${selectedLead.full_name || selectedLead.client_name}`
-              : 'نتائج المطابقة'}
+              ? `${t('أفضل وحدات لـ', 'Best units for')} ${selectedLead.full_name || selectedLead.client_name}`
+              : t('نتائج المطابقة', 'Matching Results')}
           </h2>
 
           {!selectedLead ? (
             <div className="flex flex-col items-center justify-center h-64 text-slate-300">
               <Sparkles size={40} className="mb-3" />
-              <p className="text-sm font-bold text-slate-400">اختر عميلاً من القائمة لبدء المطابقة</p>
+              <p className="text-sm font-bold text-slate-400">{t('اختر عميلاً من القائمة لبدء المطابقة', 'Select a lead from the list to start matching')}</p>
             </div>
           ) : matches.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-slate-300">
               <Building2 size={40} className="mb-3" />
-              <p className="text-sm font-bold text-slate-400">لا توجد وحدات متاحة مناسبة حالياً</p>
+              <p className="text-sm font-bold text-slate-400">{t('لا توجد وحدات متاحة مناسبة حالياً', 'No suitable available units at the moment')}</p>
             </div>
           ) : (
             <div className="space-y-3 max-h-[480px] overflow-y-auto">
@@ -114,7 +116,7 @@ export default async function MatchingPage({ searchParams }: PageProps) {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-black text-slate-900 text-sm">{unit.project_name}</p>
-                      <p className="text-xs text-slate-500">{unit.unit_type} {unit.area ? `· ${unit.area}م²` : ''} {unit.floor ? `· دور ${unit.floor}` : ''}</p>
+                      <p className="text-xs text-slate-500">{unit.unit_type} {unit.area ? `· ${unit.area}${t('م²', 'sqm')}` : ''} {unit.floor ? `· ${t('دور', 'Fl.')} ${unit.floor}` : ''}</p>
                     </div>
                     <div className="text-left">
                       <div className={`text-xs font-black px-2 py-0.5 rounded-lg ${
@@ -122,11 +124,11 @@ export default async function MatchingPage({ searchParams }: PageProps) {
                         score >= 60 ? 'bg-amber-50 text-amber-700' :
                         'bg-slate-50 text-slate-600'
                       }`}>
-                        {score}% تطابق
+                        {score}% {t('تطابق', 'match')}
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm font-black text-[#00C27C]">{fmt(Number(unit.price))} ج.م</p>
+                  <p className="text-sm font-black text-[#00C27C]">{fmt(Number(unit.price))} {t('ج.م', 'EGP')}</p>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {reasons.map(r => (
                       <span key={r} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">{r}</span>

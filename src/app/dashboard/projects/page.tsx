@@ -8,7 +8,7 @@ import AddProjectButton from './AddProjectButton'
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -54,7 +54,7 @@ export default async function ProjectsPage() {
 
   const projects = Array.from(projectMap.values()).sort((a, b) => b.total - a.total)
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
 
   return (
     <div className="p-6 space-y-5">
@@ -64,9 +64,9 @@ export default async function ProjectsPage() {
             <Building2 size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">هيكل المشاريع</h1>
+            <h1 className="text-lg font-black text-slate-900">{t('هيكل المشاريع', 'Project Structure')}</h1>
             <p className="text-xs text-slate-400">
-              {projects.length} مشروع · {units?.length ?? 0} وحدة إجمالية
+              {projects.length} {t('مشروع', 'projects')} · {units?.length ?? 0} {t('وحدة إجمالية', 'total units')}
             </p>
           </div>
         </div>
@@ -76,10 +76,10 @@ export default async function ProjectsPage() {
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'إجمالي المشاريع', value: projects.length, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'وحدات متاحة', value: projects.reduce((s, p) => s + p.available, 0), color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'وحدات محجوزة', value: projects.reduce((s, p) => s + p.reserved, 0), color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'وحدات مباعة', value: projects.reduce((s, p) => s + p.sold, 0), color: 'text-red-600', bg: 'bg-red-50' },
+          { label: t('إجمالي المشاريع', 'Total Projects'), value: projects.length, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: t('وحدات متاحة', 'Available Units'), value: projects.reduce((s, p) => s + p.available, 0), color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: t('وحدات محجوزة', 'Reserved Units'), value: projects.reduce((s, p) => s + p.reserved, 0), color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: t('وحدات مباعة', 'Sold Units'), value: projects.reduce((s, p) => s + p.sold, 0), color: 'text-red-600', bg: 'bg-red-50' },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center gap-3">
             <div className={`${k.bg} w-9 h-9 rounded-lg flex items-center justify-center`}>
@@ -109,7 +109,7 @@ export default async function ProjectsPage() {
                   <p className="text-xs text-slate-400 mt-0.5">{Array.from(project.types).join(' · ')}</p>
                 </div>
                 <div className="bg-[#00C27C]/10 text-[#00C27C] text-xs font-black px-2.5 py-1 rounded-lg">
-                  {project.total} وحدة
+                  {project.total} {t('وحدة', 'units')}
                 </div>
               </div>
 
@@ -132,13 +132,13 @@ export default async function ProjectsPage() {
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 text-emerald-600 font-bold">
-                    <CheckCircle size={11} /> {project.available} متاح
+                    <CheckCircle size={11} /> {project.available} {t('متاح', 'avail')}
                   </span>
                   <span className="flex items-center gap-1 text-amber-600 font-bold">
-                    <Clock size={11} /> {project.reserved} محجوز
+                    <Clock size={11} /> {project.reserved} {t('محجوز', 'rsrvd')}
                   </span>
                   <span className="flex items-center gap-1 text-red-500 font-bold">
-                    <XCircle size={11} /> {project.sold} مباع
+                    <XCircle size={11} /> {project.sold} {t('مباع', 'sold')}
                   </span>
                 </div>
                 <span className="flex items-center gap-1 text-purple-600 font-bold">
@@ -148,8 +148,8 @@ export default async function ProjectsPage() {
 
               {project.totalValue > 0 && (
                 <div className="mt-3 pt-3 border-t border-slate-50">
-                  <p className="text-xs text-slate-400">قيمة المتاح</p>
-                  <p className="text-sm font-black text-[#00C27C]">{fmt(project.totalValue)} ج.م</p>
+                  <p className="text-xs text-slate-400">{t('قيمة المتاح', 'Available Value')}</p>
+                  <p className="text-sm font-black text-[#00C27C]">{fmt(project.totalValue)} {t('ج.م', 'EGP')}</p>
                 </div>
               )}
             </Link>
