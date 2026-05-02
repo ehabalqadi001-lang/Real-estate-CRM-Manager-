@@ -9,14 +9,12 @@ import { JournalEntryForm } from './JournalEntryForm'
 
 export const dynamic = 'force-dynamic'
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-
-const fmtFull = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
-
 export default async function ERPFinancePage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+  const fmtFull = (n: number) =>
+    new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
   const session = await requireSession()
   const { profile } = session
 
@@ -96,8 +94,8 @@ export default async function ERPFinancePage() {
             <BarChart3 size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">محاسبة المؤسسة — دفتر الأستاذ</h1>
-            <p className="text-xs text-[var(--fi-muted)]">ذمم مدينة · ذمم دائنة · قيود محاسبية · ميزان المراجعة</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('محاسبة المؤسسة — دفتر الأستاذ', 'Enterprise Accounting — General Ledger')}</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{t('ذمم مدينة · ذمم دائنة · قيود محاسبية · ميزان المراجعة', 'Accounts Receivable · Accounts Payable · Journal Entries · Trial Balance')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -105,13 +103,13 @@ export default async function ERPFinancePage() {
             href="/dashboard/erp/finance/accounts"
             className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors"
           >
-            <BookOpen size={14} /> دليل الحسابات
+            <BookOpen size={14} /> {t('دليل الحسابات', 'Chart of Accounts')}
           </Link>
           <Link
             href="/dashboard/finance"
             className="flex items-center gap-2 border border-[var(--fi-line)] text-[var(--fi-muted)] px-3 py-2 rounded-xl text-sm font-bold hover:bg-[var(--fi-soft)] transition-colors"
           >
-            <ArrowUpRight size={14} /> المركز المالي
+            <ArrowUpRight size={14} /> {t('المركز المالي', 'Financial Center')}
           </Link>
         </div>
       </div>
@@ -119,11 +117,11 @@ export default async function ERPFinancePage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'الذمم المدينة (مستحق)', value: totalAR, icon: TrendingUp, color: 'bg-sky-50 text-sky-600' },
-          { label: 'الذمم الدائنة (مستحق)', value: totalAP, icon: TrendingDown, color: 'bg-rose-50 text-rose-600' },
-          { label: 'إجمالي الأصول', value: totalAssets, icon: BarChart3, color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'حقوق الملكية', value: equity, icon: BookOpen, color: 'bg-violet-50 text-violet-600' },
-          { label: 'الميزانية المنفقة', value: totalActual, icon: Target, color: 'bg-amber-50 text-amber-600' },
+          { label: t('الذمم المدينة (مستحق)', 'Accounts Receivable (Due)'), value: totalAR, icon: TrendingUp, color: 'bg-sky-50 text-sky-600' },
+          { label: t('الذمم الدائنة (مستحق)', 'Accounts Payable (Due)'), value: totalAP, icon: TrendingDown, color: 'bg-rose-50 text-rose-600' },
+          { label: t('إجمالي الأصول', 'Total Assets'), value: totalAssets, icon: BarChart3, color: 'bg-emerald-50 text-emerald-600' },
+          { label: t('حقوق الملكية', 'Equity'), value: equity, icon: BookOpen, color: 'bg-violet-50 text-violet-600' },
+          { label: t('الميزانية المنفقة', 'Budget Spent'), value: totalActual, icon: Target, color: 'bg-amber-50 text-amber-600' },
         ].map((kpi) => (
           <div key={kpi.label} className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -132,7 +130,7 @@ export default async function ERPFinancePage() {
               </div>
               <span className="text-xs text-[var(--fi-muted)]">{kpi.label}</span>
             </div>
-            <p className="text-2xl font-black text-[var(--fi-ink)]">{fmt(kpi.value)} ج.م</p>
+            <p className="text-2xl font-black text-[var(--fi-ink)]">{fmt(kpi.value)} {t('ج.م', 'EGP')}</p>
           </div>
         ))}
       </div>
@@ -141,10 +139,10 @@ export default async function ERPFinancePage() {
         {/* Accounts Receivable */}
         <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--fi-line)] flex items-center justify-between">
-            <h2 className="font-bold text-[var(--fi-ink)]">الذمم المدينة</h2>
+            <h2 className="font-bold text-[var(--fi-ink)]">{t('الذمم المدينة', 'Accounts Receivable')}</h2>
             {overdueAR > 0 && (
               <span className="flex items-center gap-1 text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded-full font-semibold">
-                <AlertCircle size={12} /> {overdueAR} متأخر
+                <AlertCircle size={12} /> {overdueAR} {t('متأخر', 'overdue')}
               </span>
             )}
           </div>
@@ -157,21 +155,21 @@ export default async function ERPFinancePage() {
                 <div key={r.id} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <p className="font-semibold text-[var(--fi-ink)] text-sm">{r.invoice_number ?? '—'}</p>
-                    <p className="text-xs text-[var(--fi-muted)]">{dev?.name ?? '—'} · {r.due_date ? new Date(r.due_date).toLocaleDateString('ar-EG') : '—'}</p>
+                    <p className="text-xs text-[var(--fi-muted)]">{dev?.name ?? '—'} · {r.due_date ? new Date(r.due_date).toLocaleDateString(numLocale) : '—'}</p>
                   </div>
                   <div className="text-left">
                     <p className={`font-black text-sm ${isOverdue ? 'text-rose-600' : 'text-[var(--fi-ink)]'}`}>
-                      {fmtFull(outstanding)} ج.م
+                      {fmtFull(outstanding)} {t('ج.م', 'EGP')}
                     </p>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${isOverdue ? 'bg-rose-100 text-rose-700' : 'bg-sky-100 text-sky-700'}`}>
-                      {isOverdue ? 'متأخر' : 'مفتوح'}
+                      {isOverdue ? t('متأخر', 'Overdue') : t('مفتوح', 'Open')}
                     </span>
                   </div>
                 </div>
               )
             })}
             {!arItems?.length && (
-              <p className="p-6 text-center text-sm text-[var(--fi-muted)]">لا توجد ذمم مدينة مفتوحة</p>
+              <p className="p-6 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد ذمم مدينة مفتوحة', 'No open receivables')}</p>
             )}
           </div>
         </div>
@@ -179,7 +177,7 @@ export default async function ERPFinancePage() {
         {/* Accounts Payable */}
         <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--fi-line)]">
-            <h2 className="font-bold text-[var(--fi-ink)]">الذمم الدائنة</h2>
+            <h2 className="font-bold text-[var(--fi-ink)]">{t('الذمم الدائنة', 'Accounts Payable')}</h2>
           </div>
           <div className="divide-y divide-[var(--fi-line)]">
             {(apItems ?? []).map(r => {
@@ -189,21 +187,21 @@ export default async function ERPFinancePage() {
                 <div key={r.id} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <p className="font-semibold text-[var(--fi-ink)] text-sm">{r.bill_number ?? '—'}</p>
-                    <p className="text-xs text-[var(--fi-muted)]">{r.due_date ? new Date(r.due_date).toLocaleDateString('ar-EG') : '—'}</p>
+                    <p className="text-xs text-[var(--fi-muted)]">{r.due_date ? new Date(r.due_date).toLocaleDateString(numLocale) : '—'}</p>
                   </div>
                   <div className="text-left">
                     <p className={`font-black text-sm ${isOverdue ? 'text-rose-600' : 'text-[var(--fi-ink)]'}`}>
-                      {fmtFull(outstanding)} ج.م
+                      {fmtFull(outstanding)} {t('ج.م', 'EGP')}
                     </p>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${isOverdue ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {isOverdue ? 'متأخر' : 'مفتوح'}
+                      {isOverdue ? t('متأخر', 'Overdue') : t('مفتوح', 'Open')}
                     </span>
                   </div>
                 </div>
               )
             })}
             {!apItems?.length && (
-              <p className="p-6 text-center text-sm text-[var(--fi-muted)]">لا توجد ذمم دائنة مفتوحة</p>
+              <p className="p-6 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد ذمم دائنة مفتوحة', 'No open payables')}</p>
             )}
           </div>
         </div>
@@ -212,17 +210,17 @@ export default async function ERPFinancePage() {
       {/* Journal Entries */}
       <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
         <div className="p-4 border-b border-[var(--fi-line)]">
-          <h2 className="font-bold text-[var(--fi-ink)]">آخر القيود المحاسبية ({recentEntries})</h2>
+          <h2 className="font-bold text-[var(--fi-ink)]">{t('آخر القيود المحاسبية', 'Recent Journal Entries')} ({recentEntries})</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[var(--fi-soft)] text-[var(--fi-muted)] text-xs">
-                <th className="text-right px-4 py-3">رقم القيد</th>
-                <th className="text-right px-4 py-3">البيان</th>
-                <th className="text-right px-4 py-3">المبلغ</th>
-                <th className="text-right px-4 py-3">التاريخ</th>
-                <th className="text-right px-4 py-3">الحالة</th>
+                <th className="text-right px-4 py-3">{t('رقم القيد', 'Entry #')}</th>
+                <th className="text-right px-4 py-3">{t('البيان', 'Description')}</th>
+                <th className="text-right px-4 py-3">{t('المبلغ', 'Amount')}</th>
+                <th className="text-right px-4 py-3">{t('التاريخ', 'Date')}</th>
+                <th className="text-right px-4 py-3">{t('الحالة', 'Status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
@@ -230,13 +228,13 @@ export default async function ERPFinancePage() {
                 <tr key={je.id} className="hover:bg-[var(--fi-soft)] transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-[var(--fi-muted)]">{je.entry_number}</td>
                   <td className="px-4 py-3 text-[var(--fi-ink)]">{je.description}</td>
-                  <td className="px-4 py-3 font-bold">{fmtFull(Number(je.total_debit ?? 0))} ج.م</td>
+                  <td className="px-4 py-3 font-bold">{fmtFull(Number(je.total_debit ?? 0))} {t('ج.م', 'EGP')}</td>
                   <td className="px-4 py-3 text-[var(--fi-muted)] text-xs">
-                    {je.entry_date ? new Date(je.entry_date).toLocaleDateString('ar-EG') : '—'}
+                    {je.entry_date ? new Date(je.entry_date).toLocaleDateString(numLocale) : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${je.is_posted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {je.is_posted ? 'مرحَّل' : 'مسودة'}
+                      {je.is_posted ? t('مرحَّل', 'Posted') : t('مسودة', 'Draft')}
                     </span>
                   </td>
                 </tr>
@@ -245,7 +243,7 @@ export default async function ERPFinancePage() {
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-[var(--fi-muted)]">
                     <AlertCircle size={24} className="mx-auto mb-2 opacity-40" />
-                    لا توجد قيود محاسبية
+                    {t('لا توجد قيود محاسبية', 'No journal entries')}
                   </td>
                 </tr>
               )}
@@ -258,9 +256,9 @@ export default async function ERPFinancePage() {
       {(budgets?.length ?? 0) > 0 && (
         <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--fi-line)] flex items-center justify-between">
-            <h2 className="font-bold text-[var(--fi-ink)]">الميزانية التشغيلية {currentYear}</h2>
+            <h2 className="font-bold text-[var(--fi-ink)]">{t('الميزانية التشغيلية', 'Operating Budget')} {currentYear}</h2>
             <span className={`text-xs px-2 py-1 rounded-full font-bold ${budgetUtilPct > 90 ? 'bg-red-100 text-red-700' : budgetUtilPct > 70 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-              {budgetUtilPct}% مستهلك
+              {budgetUtilPct}% {t('مستهلك', 'used')}
             </span>
           </div>
           <div className="p-4">
@@ -272,11 +270,11 @@ export default async function ERPFinancePage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-[var(--fi-muted)] text-xs">
-                    <th className="text-right py-2 px-1">البند</th>
-                    <th className="text-right py-2 px-1">الفئة</th>
-                    <th className="text-right py-2 px-1">المخصص</th>
-                    <th className="text-right py-2 px-1">الفعلي</th>
-                    <th className="text-right py-2 px-1">الفرق</th>
+                    <th className="text-right py-2 px-1">{t('البند', 'Item')}</th>
+                    <th className="text-right py-2 px-1">{t('الفئة', 'Category')}</th>
+                    <th className="text-right py-2 px-1">{t('المخصص', 'Budgeted')}</th>
+                    <th className="text-right py-2 px-1">{t('الفعلي', 'Actual')}</th>
+                    <th className="text-right py-2 px-1">{t('الفرق', 'Variance')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--fi-line)]">
@@ -287,14 +285,14 @@ export default async function ERPFinancePage() {
                         <td className="py-2 px-1 text-[var(--fi-ink)] font-semibold text-xs">{b.description}</td>
                         <td className="py-2 px-1">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${b.category === 'capex' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700'}`}>
-                            {b.category === 'capex' ? 'رأسمالي' : 'تشغيلي'}
+                            {b.category === 'capex' ? t('رأسمالي', 'CapEx') : t('تشغيلي', 'OpEx')}
                           </span>
                         </td>
-                        <td className="py-2 px-1 font-bold text-[var(--fi-ink)]">{fmtFull(Number(b.budgeted_amount))} ج.م</td>
-                        <td className="py-2 px-1 font-bold text-[var(--fi-muted)]">{fmtFull(Number(b.actual_amount))} ج.م</td>
+                        <td className="py-2 px-1 font-bold text-[var(--fi-ink)]">{fmtFull(Number(b.budgeted_amount))} {t('ج.م', 'EGP')}</td>
+                        <td className="py-2 px-1 font-bold text-[var(--fi-muted)]">{fmtFull(Number(b.actual_amount))} {t('ج.م', 'EGP')}</td>
                         <td className="py-2 px-1">
                           <span className={`font-black text-xs ${variance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {variance >= 0 ? '+' : ''}{fmtFull(variance)} ج.م
+                            {variance >= 0 ? '+' : ''}{fmtFull(variance)} {t('ج.م', 'EGP')}
                           </span>
                         </td>
                       </tr>
@@ -314,16 +312,16 @@ export default async function ERPFinancePage() {
       {(accounts?.length ?? 0) > 0 && (
         <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--fi-line)]">
-            <h2 className="font-bold text-[var(--fi-ink)]">دليل الحسابات</h2>
+            <h2 className="font-bold text-[var(--fi-ink)]">{t('دليل الحسابات', 'Chart of Accounts')}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-[var(--fi-soft)] text-[var(--fi-muted)] text-xs">
-                  <th className="text-right px-4 py-3">كود</th>
-                  <th className="text-right px-4 py-3">اسم الحساب</th>
-                  <th className="text-right px-4 py-3">النوع</th>
-                  <th className="text-right px-4 py-3">الرصيد</th>
+                  <th className="text-right px-4 py-3">{t('كود', 'Code')}</th>
+                  <th className="text-right px-4 py-3">{t('اسم الحساب', 'Account Name')}</th>
+                  <th className="text-right px-4 py-3">{t('النوع', 'Type')}</th>
+                  <th className="text-right px-4 py-3">{t('الرصيد', 'Balance')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--fi-line)]">
@@ -339,14 +337,14 @@ export default async function ERPFinancePage() {
                         acc.account_type === 'revenue' ? 'bg-emerald-100 text-emerald-700' :
                         'bg-amber-100 text-amber-700'
                       }`}>
-                        {acc.account_type === 'asset' ? 'أصل' :
-                         acc.account_type === 'liability' ? 'التزام' :
-                         acc.account_type === 'equity' ? 'حقوق ملكية' :
-                         acc.account_type === 'revenue' ? 'إيراد' : 'مصروف'}
+                        {acc.account_type === 'asset' ? t('أصل', 'Asset') :
+                         acc.account_type === 'liability' ? t('التزام', 'Liability') :
+                         acc.account_type === 'equity' ? t('حقوق ملكية', 'Equity') :
+                         acc.account_type === 'revenue' ? t('إيراد', 'Revenue') : t('مصروف', 'Expense')}
                       </span>
                     </td>
                     <td className="px-4 py-2 font-bold text-[var(--fi-ink)]">
-                      {fmtFull(Number(acc.balance ?? 0))} ج.م
+                      {fmtFull(Number(acc.balance ?? 0))} {t('ج.م', 'EGP')}
                     </td>
                   </tr>
                 ))}

@@ -10,33 +10,33 @@ import { CreateLegalDocumentForm, CreateHRContractForm, DocStatusButton } from '
 
 export const dynamic = 'force-dynamic'
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  draft:    { label: 'مسودة',        color: 'bg-slate-100 text-slate-600' },
-  pending:  { label: 'قيد المراجعة', color: 'bg-amber-100 text-amber-700' },
-  approved: { label: 'معتمد',        color: 'bg-emerald-100 text-emerald-700' },
-  sent:     { label: 'مُرسَل',       color: 'bg-sky-100 text-sky-700' },
-  signed:   { label: 'موقَّع',       color: 'bg-violet-100 text-violet-700' },
-  void:     { label: 'ملغي',         color: 'bg-rose-100 text-rose-700' },
-  expired:  { label: 'منتهي',        color: 'bg-slate-100 text-slate-500' },
-}
-
-const CONTRACT_TYPE_LABELS: Record<string, string> = {
-  employment: 'عقد توظيف',
-  nda:        'اتفاقية سرية',
-  freelance:  'عقد مستقل',
-  internship: 'تدريب',
-  amendment:  'تعديل عقد',
-}
-
-const CONTRACT_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  draft:      { label: 'مسودة',  color: 'bg-slate-100 text-slate-600' },
-  active:     { label: 'ساري',   color: 'bg-emerald-100 text-emerald-700' },
-  expired:    { label: 'منتهي', color: 'bg-slate-100 text-slate-500' },
-  terminated: { label: 'مُنهى', color: 'bg-rose-100 text-rose-700' },
-}
-
 export default async function ERPLegalPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+
+  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+    draft:    { label: t('مسودة', 'Draft'),               color: 'bg-slate-100 text-slate-600' },
+    pending:  { label: t('قيد المراجعة', 'Under Review'),  color: 'bg-amber-100 text-amber-700' },
+    approved: { label: t('معتمد', 'Approved'),             color: 'bg-emerald-100 text-emerald-700' },
+    sent:     { label: t('مُرسَل', 'Sent'),                color: 'bg-sky-100 text-sky-700' },
+    signed:   { label: t('موقَّع', 'Signed'),              color: 'bg-violet-100 text-violet-700' },
+    void:     { label: t('ملغي', 'Void'),                  color: 'bg-rose-100 text-rose-700' },
+    expired:  { label: t('منتهي', 'Expired'),              color: 'bg-slate-100 text-slate-500' },
+  }
+
+  const CONTRACT_TYPE_LABELS: Record<string, string> = {
+    employment: t('عقد توظيف', 'Employment Contract'),
+    nda:        t('اتفاقية سرية', 'NDA'),
+    freelance:  t('عقد مستقل', 'Freelance Contract'),
+    internship: t('تدريب', 'Internship'),
+    amendment:  t('تعديل عقد', 'Contract Amendment'),
+  }
+
+  const CONTRACT_STATUS_MAP: Record<string, { label: string; color: string }> = {
+    draft:      { label: t('مسودة', 'Draft'),       color: 'bg-slate-100 text-slate-600' },
+    active:     { label: t('ساري', 'Active'),        color: 'bg-emerald-100 text-emerald-700' },
+    expired:    { label: t('منتهي', 'Expired'),      color: 'bg-slate-100 text-slate-500' },
+    terminated: { label: t('مُنهى', 'Terminated'),   color: 'bg-rose-100 text-rose-700' },
+  }
   const session = await requireSession()
   const { profile } = session
 
@@ -93,7 +93,7 @@ export default async function ERPLegalPage() {
 
   const employees = (employeesRaw ?? []).map((e: any) => ({
     id: e.id as string,
-    name: (Array.isArray(e.profiles) ? e.profiles[0] : e.profiles)?.full_name ?? 'موظف',
+    name: (Array.isArray(e.profiles) ? e.profiles[0] : e.profiles)?.full_name ?? t('موظف', 'Employee'),
   }))
   const empNameMap: Record<string, string> = Object.fromEntries(
     employees.map(e => [e.id, e.name]),
@@ -125,8 +125,8 @@ export default async function ERPLegalPage() {
             <ShieldCheck size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">إدارة العقود والوثائق القانونية</h1>
-            <p className="text-xs text-[var(--fi-muted)]">العقود · القوالب · سجل التدقيق القانوني</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('إدارة العقود والوثائق القانونية', 'Legal Documents & Contracts')}</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{t('العقود · القوالب · سجل التدقيق القانوني', 'Contracts · Templates · Legal Audit Log')}</p>
           </div>
         </div>
       </div>
@@ -137,14 +137,14 @@ export default async function ERPLegalPage() {
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle size={16} className="text-amber-600 shrink-0" />
             <p className="font-black text-amber-800 text-sm">
-              {expiringContracts.length} عقد ينتهي خلال 30 يوماً — يرجى المراجعة والتجديد
+              {expiringContracts.length} {t('عقد ينتهي خلال 30 يوماً — يرجى المراجعة والتجديد', 'contract(s) expiring within 30 days — please review and renew')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {expiringContracts.map(c => (
               <span key={c.id} className="rounded-lg bg-amber-100 px-3 py-1 text-xs font-black text-amber-800">
                 {c.contract_number} · {empNameMap[c.employee_id] ?? '—'} ·{' '}
-                {new Date(c.end_date).toLocaleDateString('ar-EG')}
+                {new Date(c.end_date).toLocaleDateString(numLocale)}
               </span>
             ))}
           </div>
@@ -154,11 +154,11 @@ export default async function ERPLegalPage() {
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'إجمالي الوثائق',  value: total,          icon: FileText,    color: 'bg-indigo-50 text-indigo-600' },
-          { label: 'موقَّعة',          value: signed,         icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'قيد الإنجاز',      value: pendingCount,   icon: Clock,        color: 'bg-amber-50 text-amber-600' },
-          { label: 'ملغاة',            value: voided,         icon: XCircle,      color: 'bg-rose-50 text-rose-600' },
-          { label: 'عقود الموظفين',    value: contractsTotal, icon: UserCheck,    color: 'bg-violet-50 text-violet-600' },
+          { label: t('إجمالي الوثائق', 'Total Documents'),  value: total,          icon: FileText,    color: 'bg-indigo-50 text-indigo-600' },
+          { label: t('موقَّعة', 'Signed'),                  value: signed,         icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-600' },
+          { label: t('قيد الإنجاز', 'In Progress'),         value: pendingCount,   icon: Clock,        color: 'bg-amber-50 text-amber-600' },
+          { label: t('ملغاة', 'Voided'),                    value: voided,         icon: XCircle,      color: 'bg-rose-50 text-rose-600' },
+          { label: t('عقود الموظفين', 'Employee Contracts'), value: contractsTotal, icon: UserCheck,    color: 'bg-violet-50 text-violet-600' },
         ].map(kpi => (
           <div key={kpi.label} className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -184,20 +184,20 @@ export default async function ERPLegalPage() {
           <div className="flex size-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
             <UserCheck size={15} />
           </div>
-          <h2 className="font-bold text-[var(--fi-ink)]">عقود الموظفين ({contractsTotal})</h2>
+          <h2 className="font-bold text-[var(--fi-ink)]">{t('عقود الموظفين', 'Employee Contracts')} ({contractsTotal})</h2>
         </div>
         <div className="overflow-x-auto">
           {hrContracts?.length ? (
             <table className="w-full min-w-[700px] text-sm">
               <thead>
                 <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
-                  <th className="px-4 py-3 text-right">رقم العقد</th>
-                  <th className="px-4 py-3 text-right">الموظف</th>
-                  <th className="px-4 py-3 text-right">العنوان</th>
-                  <th className="px-4 py-3 text-right">النوع</th>
-                  <th className="px-4 py-3 text-right">تاريخ البدء</th>
-                  <th className="px-4 py-3 text-right">الانتهاء</th>
-                  <th className="px-4 py-3 text-right">الحالة</th>
+                  <th className="px-4 py-3 text-right">{t('رقم العقد', 'Contract #')}</th>
+                  <th className="px-4 py-3 text-right">{t('الموظف', 'Employee')}</th>
+                  <th className="px-4 py-3 text-right">{t('العنوان', 'Title')}</th>
+                  <th className="px-4 py-3 text-right">{t('النوع', 'Type')}</th>
+                  <th className="px-4 py-3 text-right">{t('تاريخ البدء', 'Start Date')}</th>
+                  <th className="px-4 py-3 text-right">{t('الانتهاء', 'End Date')}</th>
+                  <th className="px-4 py-3 text-right">{t('الحالة', 'Status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--fi-line)]">
@@ -210,13 +210,13 @@ export default async function ERPLegalPage() {
                       <td className="px-4 py-3 font-semibold text-[var(--fi-ink)]">{empNameMap[c.employee_id] ?? '—'}</td>
                       <td className="px-4 py-3 text-[var(--fi-muted)] max-w-[200px] truncate">{c.title}</td>
                       <td className="px-4 py-3 text-[var(--fi-muted)]">{CONTRACT_TYPE_LABELS[c.contract_type] ?? c.contract_type}</td>
-                      <td className="px-4 py-3 text-[var(--fi-muted)]">{new Date(c.start_date).toLocaleDateString('ar-EG')}</td>
+                      <td className="px-4 py-3 text-[var(--fi-muted)]">{new Date(c.start_date).toLocaleDateString(numLocale)}</td>
                       <td className="px-4 py-3">
                         {c.is_permanent
-                          ? <span className="text-xs font-bold text-emerald-600">دائم</span>
+                          ? <span className="text-xs font-bold text-emerald-600">{t('دائم', 'Permanent')}</span>
                           : c.end_date
                             ? <span className={`text-xs font-bold ${isExpiring ? 'text-amber-600 font-black' : 'text-[var(--fi-muted)]'}`}>
-                                {new Date(c.end_date).toLocaleDateString('ar-EG')}{isExpiring && ' ⚠'}
+                                {new Date(c.end_date).toLocaleDateString(numLocale)}{isExpiring && ' ⚠'}
                               </span>
                             : '—'
                         }
@@ -232,7 +232,7 @@ export default async function ERPLegalPage() {
           ) : (
             <div className="p-8 text-center text-[var(--fi-muted)]">
               <UserCheck size={24} className="mx-auto mb-2 opacity-40" />
-              لا توجد عقود موظفين بعد
+              {t('لا توجد عقود موظفين بعد', 'No employee contracts yet')}
             </div>
           )}
         </div>
@@ -242,7 +242,7 @@ export default async function ERPLegalPage() {
         {/* Document pipeline */}
         <div className="lg:col-span-2 bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--fi-line)]">
-            <h2 className="font-bold text-[var(--fi-ink)]">خط أنابيب الوثائق</h2>
+            <h2 className="font-bold text-[var(--fi-ink)]">{t('خط أنابيب الوثائق', 'Document Pipeline')}</h2>
           </div>
           <div className="divide-y divide-[var(--fi-line)]">
             {(documents ?? []).map(doc => {
@@ -256,7 +256,7 @@ export default async function ERPLegalPage() {
                     <div>
                       <p className="font-semibold text-[var(--fi-ink)] text-sm">{doc.title}</p>
                       <p className="text-xs text-[var(--fi-muted)]">
-                        {doc.document_type} · {new Date(doc.created_at).toLocaleDateString('ar-EG')}
+                        {doc.document_type} · {new Date(doc.created_at).toLocaleDateString(numLocale)}
                       </p>
                     </div>
                   </div>
@@ -270,7 +270,7 @@ export default async function ERPLegalPage() {
             {!documents?.length && (
               <div className="p-8 text-center text-[var(--fi-muted)]">
                 <AlertCircle size={24} className="mx-auto mb-2 opacity-40" />
-                لا توجد وثائق قانونية
+                {t('لا توجد وثائق قانونية', 'No legal documents')}
               </div>
             )}
           </div>
@@ -280,7 +280,7 @@ export default async function ERPLegalPage() {
         <div className="space-y-4">
           <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--fi-line)]">
-              <h2 className="font-bold text-[var(--fi-ink)] text-sm">القوالب النشطة ({templates?.length ?? 0})</h2>
+              <h2 className="font-bold text-[var(--fi-ink)] text-sm">{t('القوالب النشطة', 'Active Templates')} ({templates?.length ?? 0})</h2>
             </div>
             <div className="divide-y divide-[var(--fi-line)]">
               {(templates ?? []).map(t => (
@@ -293,14 +293,14 @@ export default async function ERPLegalPage() {
                 </div>
               ))}
               {!templates?.length && (
-                <p className="p-4 text-center text-sm text-[var(--fi-muted)]">لا توجد قوالب</p>
+                <p className="p-4 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد قوالب', 'No templates')}</p>
               )}
             </div>
           </div>
 
           <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--fi-line)]">
-              <h2 className="font-bold text-[var(--fi-ink)] text-sm">سجل التدقيق القانوني</h2>
+              <h2 className="font-bold text-[var(--fi-ink)] text-sm">{t('سجل التدقيق القانوني', 'Legal Audit Log')}</h2>
             </div>
             <div className="divide-y divide-[var(--fi-line)] max-h-64 overflow-y-auto">
               {(auditLogs ?? []).map(log => (
@@ -315,12 +315,12 @@ export default async function ERPLegalPage() {
                     }`}>{log.action}</span>
                   </div>
                   <p className="text-xs text-[var(--fi-muted)]">
-                    {log.actor_role} · {new Date(log.created_at).toLocaleString('ar-EG')}
+                    {log.actor_role} · {new Date(log.created_at).toLocaleString(numLocale)}
                   </p>
                 </div>
               ))}
               {!auditLogs?.length && (
-                <p className="p-4 text-center text-sm text-[var(--fi-muted)]">لا يوجد سجل تدقيق</p>
+                <p className="p-4 text-center text-sm text-[var(--fi-muted)]">{t('لا يوجد سجل تدقيق', 'No audit records')}</p>
               )}
             </div>
           </div>
