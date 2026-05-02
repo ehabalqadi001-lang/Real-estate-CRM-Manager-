@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { WalletCards, BadgeDollarSign, Users, CheckCircle2, Download } from 'lucide-react'
+import { WalletCards, BadgeDollarSign, Users, CheckCircle2, Download, ExternalLink } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import type { AppRole } from '@/shared/auth/types'
@@ -251,7 +251,15 @@ export default async function PayrollPage({
                 {payroll.map((p) => (
                   <tr key={p.employee_id} className="transition hover:bg-[var(--fi-soft)]/60">
                     <td className="px-4 py-3">
-                      <p className="font-black text-[var(--fi-ink)]">{p.employees?.profiles?.full_name ?? 'غير محدد'}</p>
+                      <Link
+                        href={`/dashboard/erp/hr/payroll/${p.id}`}
+                        className="group flex items-center gap-1.5 hover:text-[var(--fi-emerald)] transition-colors"
+                      >
+                        <p className="font-black text-[var(--fi-ink)] group-hover:text-[var(--fi-emerald)]">
+                          {p.employees?.profiles?.full_name ?? 'غير محدد'}
+                        </p>
+                        <ExternalLink size={12} className="shrink-0 opacity-0 group-hover:opacity-60" />
+                      </Link>
                       <p className="mt-0.5 text-xs text-[var(--fi-muted)]">{p.employees?.job_title ?? '—'}</p>
                     </td>
                     <td className="px-4 py-3">
