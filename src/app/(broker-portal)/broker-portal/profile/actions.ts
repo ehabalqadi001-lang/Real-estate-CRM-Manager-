@@ -41,6 +41,11 @@ export async function updateBrokerProfile(formData: FormData): Promise<ActionRes
       return { ok: false, error: error.message }
     }
 
+    if (photoPath) {
+      await service.from('profiles').update({ avatar_url: photoPath }).eq('id', uid)
+      await service.from('user_profiles').update({ avatar_url: photoPath }).eq('id', uid)
+    }
+
     revalidatePath('/broker-portal/profile')
     return { ok: true, data: undefined }
   } catch (err) {

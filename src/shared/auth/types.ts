@@ -121,6 +121,7 @@ export interface AppProfile {
   account_type?: string | null
   status?: string | null
   is_active?: boolean | null
+  avatar_url?: string | null
 }
 
 export interface AppSession {

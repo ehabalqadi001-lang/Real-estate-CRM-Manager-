@@ -47,13 +47,13 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
 
   const { data: userProfile } = await supabase
     .from('user_profiles')
-    .select('id, company_id, branch_id, full_name, role, account_type, status, onboarding_completed')
+    .select('id, company_id, branch_id, full_name, role, account_type, status, onboarding_completed, avatar_url')
     .eq('id', user.id)
     .maybeSingle()
 
   const { data: legacyProfile } = userProfile ? { data: null } : await supabase
     .from('profiles')
-    .select('id, company_id, tenant_id, full_name, role, account_type, status, is_active')
+    .select('id, company_id, tenant_id, full_name, role, account_type, status, is_active, avatar_url')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -67,6 +67,7 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
     status?: string | null
     is_active?: boolean | null
     onboarding_completed?: boolean | null
+    avatar_url?: string | null
   } | null
 
   const tenantId = (profile?.tenant_id as string | null | undefined)
@@ -100,6 +101,7 @@ export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
     account_type: (profile?.account_type as string | null | undefined) ?? null,
     status: (profile?.status as string | null | undefined) ?? null,
     is_active: profile?.status === 'suspended' || profile?.status === 'rejected' ? false : (profile?.is_active ?? true),
+    avatar_url: (profile?.avatar_url as string | null | undefined) ?? null,
   }
 
   return { user, profile: appProfile }

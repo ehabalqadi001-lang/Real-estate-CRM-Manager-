@@ -65,9 +65,17 @@ export default function BrokerPortalShell({ profile, children }: Props) {
         {/* Profile Card */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-700 dark:text-green-300 font-semibold text-sm">
-              {profile.full_name?.charAt(0) ?? 'و'}
-            </div>
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name ?? ''}
+                className="w-10 h-10 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-700 dark:text-green-300 font-semibold text-sm shrink-0">
+                {profile.full_name?.charAt(0) ?? 'و'}
+              </div>
+            )}
             <div className="min-w-0">
               <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
                 {profile.full_name ?? 'وسيط'}
