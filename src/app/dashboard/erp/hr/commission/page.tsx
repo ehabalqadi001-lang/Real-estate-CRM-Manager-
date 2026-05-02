@@ -8,7 +8,7 @@ import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLa
 import { AnimatedCount } from '@/components/design-system/animated-count'
 import { RecordDealForm } from './RecordDealForm'
 import { CommissionApproveButton, CommissionRejectButton, SyncCRMButton } from './CommissionActions'
-import { calculateTieredCommission } from './actions'
+import { calculateTieredCommission } from './utils'
 
 export const dynamic = 'force-dynamic'
 
