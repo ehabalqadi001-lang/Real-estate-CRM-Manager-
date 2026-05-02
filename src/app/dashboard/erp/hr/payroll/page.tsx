@@ -28,8 +28,11 @@ type PayrollRow = {
   gross_salary: number
   net_salary: number
   status: string
-  profiles: { full_name: string | null } | null
-  employees: { job_title: string | null; department_id: string | null } | null
+  employees: {
+    job_title: string | null
+    department_id: string | null
+    profiles: { full_name: string | null } | null
+  } | null
 }
 
 const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
@@ -68,8 +71,7 @@ export default async function PayrollPage({
       id, employee_id, month, year,
       basic_salary, present_days, absent_days, late_count,
       total_commissions, deductions, gross_salary, net_salary, status,
-      profiles!payroll_employee_id_fkey(full_name),
-      employees!payroll_employee_id_fkey(job_title, department_id)
+      employees!payroll_employee_id_fkey(job_title, department_id, profiles(full_name))
     `)
     .eq('month', month)
     .eq('year', year)
@@ -79,11 +81,18 @@ export default async function PayrollPage({
 
   const { data: payrollData, error: payrollError } = await payrollQuery
 
-  const payroll = ((payrollData ?? []) as unknown as PayrollRow[]).map((p) => ({
-    ...p,
-    profiles: Array.isArray(p.profiles) ? p.profiles[0] : p.profiles,
-    employees: Array.isArray(p.employees) ? p.employees[0] : p.employees,
-  }))
+  const payroll = ((payrollData ?? []) as unknown as PayrollRow[]).map((p) => {
+    const emp = Array.isArray(p.employees) ? p.employees[0] : p.employees
+    return {
+      ...p,
+      employees: emp
+        ? {
+            ...emp,
+            profiles: Array.isArray(emp.profiles) ? emp.profiles[0] : emp.profiles,
+          }
+        : null,
+    }
+  })
 
   const canRun = PAYROLL_RUN_ROLES.includes(profile.role)
   const totalNetSalary = payroll.reduce((s, p) => s + Number(p.net_salary ?? 0), 0)
@@ -220,7 +229,7 @@ export default async function PayrollPage({
                 {payroll.map((p) => (
                   <tr key={p.employee_id} className="transition hover:bg-[var(--fi-soft)]/60">
                     <td className="px-4 py-3">
-                      <p className="font-black text-[var(--fi-ink)]">{p.profiles?.full_name ?? 'غير محدد'}</p>
+                      <p className="font-black text-[var(--fi-ink)]">{p.employees?.profiles?.full_name ?? 'غير محدد'}</p>
                       <p className="mt-0.5 text-xs text-[var(--fi-muted)]">{p.employees?.job_title ?? '—'}</p>
                     </td>
                     <td className="px-4 py-3 font-bold text-emerald-600">{p.present_days ?? 0}</td>
