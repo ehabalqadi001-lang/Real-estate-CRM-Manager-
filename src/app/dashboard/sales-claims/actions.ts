@@ -14,7 +14,7 @@ const CREATE_ALLOWED: AppRole[] = [
 ]
 const REVIEW_ALLOWED: AppRole[] = [
   'super_admin', 'platform_admin', 'company_owner', 'company_admin',
-  'sales_manager', 'sales_director', 'branch_manager',
+  'sales_director', 'branch_manager',
 ]
 
 export async function createSaleClaimAction(
