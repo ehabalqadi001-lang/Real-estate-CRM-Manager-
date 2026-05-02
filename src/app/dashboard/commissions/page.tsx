@@ -2,12 +2,10 @@ import { CommissionsDashboard } from '@/components/commissions/CommissionsDashbo
 import type { CommissionLeadOption, CommissionProjectOption, CommissionRateOption, CommissionRow, CommissionStatus } from '@/components/commissions/commission-types'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
-import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CommissionsPage() {
-  const { dir } = await getI18n()
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
   const isGlobalAdmin = ['super_admin', 'platform_admin'].includes(session.profile.role)

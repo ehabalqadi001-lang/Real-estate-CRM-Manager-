@@ -1,4 +1,5 @@
 import { TeamManagementClient, type TeamMemberRow } from '@/components/team/TeamManagementClient'
+import { getI18n } from '@/lib/i18n'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { normalizeRole } from '@/lib/permissions'
@@ -6,6 +7,7 @@ import { normalizeRole } from '@/lib/permissions'
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
+  const { t, numLocale } = await getI18n()
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
@@ -31,14 +33,14 @@ export default async function TeamPage() {
     const memberCommissions = commissions.filter((commission) => commission.agent_id === profile.id)
     return {
       id: profile.id,
-      name: profile.full_name ?? 'عضو فريق',
+      name: profile.full_name ?? t('عضو فريق', 'Team Member'),
       email: profile.email,
       role: profile.role ?? 'agent',
       activeDeals: memberDeals.filter((deal) => !['closed', 'closed_won', 'lost', 'closed_lost'].includes(String(deal.stage))).length,
       monthSales: monthDeals.reduce((sum, deal) => sum + Number(deal.final_price ?? deal.unit_value ?? deal.value ?? deal.amount ?? 0), 0),
       commissions: memberCommissions.reduce((sum, commission) => sum + Number(commission.agent_amount ?? commission.amount ?? 0), 0),
       status: profile.status === 'suspended' || profile.status === 'rejected' ? 'suspended' : 'active',
-      sparkline: buildSparkline(memberDeals),
+      sparkline: buildSparkline(memberDeals, numLocale),
     }
   })
 
@@ -100,12 +102,12 @@ async function getTeamProfiles(supabase: ServerSupabase, companyId: string | nul
   }))
 }
 
-function buildSparkline(deals: Array<Record<string, unknown>>) {
+function buildSparkline(deals: Array<Record<string, unknown>>, numLocale: string) {
   const now = new Date()
   return Array.from({ length: 6 }, (_, index) => {
     const date = new Date(now.getFullYear(), now.getMonth() + index - 5, 1)
     return {
-      label: date.toLocaleDateString('ar-EG', { month: 'short' }),
+      label: date.toLocaleDateString(numLocale, { month: 'short' }),
       value: deals
         .filter((deal) => {
           const created = new Date(String(deal.created_at))

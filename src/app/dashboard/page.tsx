@@ -2,6 +2,7 @@ import { ActivityFeed, type ActivityFeedItem } from '@/components/dashboard/Acti
 import { BentoDashboardLayout } from '@/components/dashboard/BentoDashboardLayout'
 import { DashboardKPIs } from '@/components/dashboard/DashboardKPIs'
 import type { DashboardData, DashboardKpi, StagePoint } from '@/components/dashboard/useDashboardData'
+import { getI18n } from '@/lib/i18n'
 import type { AuditLog, Commission, Deal, Lead, Profile } from '@/lib/types/db'
 import { requireSession } from '@/shared/auth/session'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
@@ -9,17 +10,18 @@ import { createServerSupabaseClient } from '@/shared/supabase/server'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardRoot() {
+  const { t, numLocale } = await getI18n()
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
 
   const [dashboardData, activities] = await Promise.all([
-    getDashboardData(supabase, companyId),
-    getActivityFeed(supabase),
+    getDashboardData(supabase, companyId, t, numLocale),
+    getActivityFeed(supabase, t),
   ])
 
   return (
-    <main className="space-y-4 px-3 py-4 sm:px-4 lg:px-6" dir="ltr">
+    <main className="space-y-4 px-3 py-4 sm:px-4 lg:px-6">
       <BentoDashboardLayout
         main={(
           <DashboardKPIs
@@ -34,8 +36,9 @@ export default async function DashboardRoot() {
 }
 
 type ServerSupabase = Awaited<ReturnType<typeof createServerSupabaseClient>>
+type TFn = (ar: string, en: string) => string
 
-async function getDashboardData(supabase: ServerSupabase, companyId: string | null): Promise<DashboardData> {
+async function getDashboardData(supabase: ServerSupabase, companyId: string | null, t: TFn, numLocale: string): Promise<DashboardData> {
   const now = new Date()
   const range = { start: new Date(now.getFullYear(), now.getMonth(), 1), end: endOfDay(now) }
   const previous = { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end: endOfDay(new Date(now.getFullYear(), now.getMonth(), 0)) }
@@ -91,8 +94,8 @@ async function getDashboardData(supabase: ServerSupabase, companyId: string | nu
     conversionRate: leadsInRange.length ? Math.round((convertedLeads.length / leadsInRange.length) * 100) : 0,
   }
 
-  const monthly = buildMonthlyPoints(leads, deals, commissions)
-  const dealsByStage = groupDealsByStage(dealsInRange)
+  const monthly = buildMonthlyPoints(leads, deals, commissions, numLocale)
+  const dealsByStage = groupDealsByStage(dealsInRange, t)
 
   return {
     kpis,
@@ -100,12 +103,12 @@ async function getDashboardData(supabase: ServerSupabase, companyId: string | nu
     clientGrowth: monthly,
     commissionsByMonth: monthly,
     dealsByStage,
-    alerts: buildAiAlerts(kpis, dealsByStage),
+    alerts: buildAiAlerts(kpis, dealsByStage, t, numLocale),
     generatedAt: new Date().toISOString(),
   }
 }
 
-async function getActivityFeed(supabase: ServerSupabase): Promise<ActivityFeedItem[]> {
+async function getActivityFeed(supabase: ServerSupabase, t: TFn): Promise<ActivityFeedItem[]> {
   const { data: logs } = await supabase
     .from('audit_logs')
     .select('id, user_id, action, target_table, target_id, metadata, created_at')
@@ -129,12 +132,12 @@ async function getActivityFeed(supabase: ServerSupabase): Promise<ActivityFeedIt
     id: log.id,
     action: log.action,
     targetTable: log.target_table,
-    agentName: (log.user_id ? names.get(log.user_id) : null) || 'عضو فريق',
+    agentName: (log.user_id ? names.get(log.user_id) : null) || t('عضو فريق', 'Team Member'),
     createdAt: log.created_at,
   }))
 }
 
-function buildMonthlyPoints(leads: Lead[], deals: Deal[], commissions: Commission[]) {
+function buildMonthlyPoints(leads: Lead[], deals: Deal[], commissions: Commission[], numLocale: string) {
   let cumulativeClients = 0
   const now = new Date()
 
@@ -146,7 +149,7 @@ function buildMonthlyPoints(leads: Lead[], deals: Deal[], commissions: Commissio
     cumulativeClients += monthLeads
 
     return {
-      label: start.toLocaleDateString('ar-EG', { month: 'short' }),
+      label: start.toLocaleDateString(numLocale, { month: 'short' }),
       sales: deals
         .filter((deal) => inRange(deal.contract_signed_at ?? deal.deal_date ?? deal.created_at, monthRange) && isWonDeal(deal))
         .reduce((sum, deal) => sum + dealValue(deal), 0),
@@ -160,64 +163,62 @@ function buildMonthlyPoints(leads: Lead[], deals: Deal[], commissions: Commissio
   })
 }
 
-function groupDealsByStage(deals: Deal[]): StagePoint[] {
+function groupDealsByStage(deals: Deal[], t: TFn): StagePoint[] {
+  const s_new   = t('جديد', 'New')
+  const s_cont  = t('تواصل', 'Contacted')
+  const s_view  = t('معاينة', 'Viewing')
+  const s_offer = t('عرض سعر', 'Offer')
+  const s_ctrct = t('عقد', 'Contract')
+  const s_won   = t('مغلقة', 'Closed')
+  const s_lost  = t('خسرنا', 'Lost')
   const labels: Record<string, string> = {
-    lead: 'جديد',
-    new: 'جديد',
-    qualified: 'تواصل',
-    contacted: 'تواصل',
-    site_visit: 'معاينة',
-    viewing: 'معاينة',
-    proposal: 'عرض سعر',
-    offer: 'عرض سعر',
-    negotiation: 'عرض سعر',
-    reservation: 'عقد',
-    contract: 'عقد',
-    Contracted: 'عقد',
-    closed_won: 'مغلقة',
-    closed: 'مغلقة',
-    closed_lost: 'خسرنا',
-    lost: 'خسرنا',
-    Lost: 'خسرنا',
+    lead: s_new, new: s_new,
+    qualified: s_cont, contacted: s_cont,
+    site_visit: s_view, viewing: s_view,
+    proposal: s_offer, offer: s_offer, negotiation: s_offer,
+    reservation: s_ctrct, contract: s_ctrct, Contracted: s_ctrct,
+    closed_won: s_won, closed: s_won,
+    closed_lost: s_lost, lost: s_lost, Lost: s_lost,
   }
   const map = new Map<string, StagePoint>()
 
   for (const deal of deals) {
-    const stage = labels[deal.stage ?? 'lead'] ?? 'غير محدد'
+    const stage = labels[deal.stage ?? 'lead'] ?? t('غير محدد', 'Other')
     const current = map.get(stage) ?? { stage, count: 0, value: 0 }
     current.count += 1
     current.value += dealValue(deal)
     map.set(stage, current)
   }
 
-  return ['جديد', 'تواصل', 'معاينة', 'عرض سعر', 'عقد', 'مغلقة', 'خسرنا'].map((stage) => map.get(stage) ?? { stage, count: 0, value: 0 })
+  return [s_new, s_cont, s_view, s_offer, s_ctrct, s_won, s_lost].map((stage) => map.get(stage) ?? { stage, count: 0, value: 0 })
 }
 
-function buildAiAlerts(kpis: DashboardKpi, stages: StagePoint[]) {
-  const contractCount = stages.find((stage) => stage.stage === 'عقد')?.count ?? 0
+function buildAiAlerts(kpis: DashboardKpi, stages: StagePoint[], t: TFn, numLocale: string) {
+  const contractStageLabel = t('عقد', 'Contract')
+  const contractCount = stages.find((stage) => stage.stage === contractStageLabel)?.count ?? 0
   return [
     {
       id: 'conversion',
-      title: kpis.conversionRate < 8 ? 'معدل التحويل يحتاج متابعة' : 'معدل التحويل مستقر',
-      body: kpis.conversionRate < 8 ? 'راجع العملاء الجدد غير المتابعين واربطهم بمواعيد اتصال واضحة.' : 'استمر في دفع العملاء الأعلى نية إلى المعاينات والعقود.',
+      title: kpis.conversionRate < 8 ? t('معدل التحويل يحتاج متابعة', 'Conversion rate needs attention') : t('معدل التحويل مستقر', 'Conversion rate is stable'),
+      body: kpis.conversionRate < 8 ? t('راجع العملاء الجدد غير المتابعين واربطهم بمواعيد اتصال واضحة.', 'Review new uncontacted leads and schedule clear follow-up calls.') : t('استمر في دفع العملاء الأعلى نية إلى المعاينات والعقود.', 'Keep pushing high-intent leads toward viewings and contracts.'),
       priority: kpis.conversionRate < 8 ? 'critical' as const : 'medium' as const,
-      actionLabel: 'فتح العملاء',
+      actionLabel: t('فتح العملاء', 'Open Leads'),
       href: '/dashboard/leads',
     },
     {
       id: 'commissions',
-      title: 'عمولات مستحقة للمراجعة',
-      body: `${new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(kpis.pendingCommissions)} ج.م في حالة مستحقة أو معتمدة.`,
+      title: t('عمولات مستحقة للمراجعة', 'Commissions pending review'),
+      body: `${new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(kpis.pendingCommissions)} ${t('ج.م', 'EGP')} ${t('في حالة مستحقة أو معتمدة.', 'in pending or approved status.')}`,
       priority: kpis.pendingCommissions > 500000 ? 'high' as const : 'medium' as const,
-      actionLabel: 'مراجعة العمولات',
+      actionLabel: t('مراجعة العمولات', 'Review Commissions'),
       href: '/dashboard/commissions',
     },
     {
       id: 'pipeline',
-      title: 'فرص قريبة من الإغلاق',
-      body: contractCount > 0 ? `${contractCount.toLocaleString('ar-EG')} صفقة في مرحلة العقد تحتاج دفع سريع.` : 'راجع عروض السعر المفتوحة لتحويلها إلى عقود.',
+      title: t('فرص قريبة من الإغلاق', 'Deals close to closing'),
+      body: contractCount > 0 ? `${contractCount.toLocaleString(numLocale)} ${t('صفقة في مرحلة العقد تحتاج دفع سريع.', 'deals in contract stage need a quick push.')}` : t('راجع عروض السعر المفتوحة لتحويلها إلى عقود.', 'Review open offers to convert them into contracts.'),
       priority: contractCount > 0 ? 'high' as const : 'medium' as const,
-      actionLabel: 'فتح Pipeline',
+      actionLabel: t('فتح Pipeline', 'Open Pipeline'),
       href: '/dashboard/pipeline',
     },
   ]

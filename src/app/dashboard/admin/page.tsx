@@ -17,7 +17,7 @@ interface AdminUser {
 }
 
 export default function AdminPage() {
-  const { dir } = useI18n()
+  const { t } = useI18n()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -39,7 +39,7 @@ export default function AdminPage() {
   }, [])
 
   const updateStatus = async (id: string, newStatus: string) => {
-    if (!confirm(`هل أنت متأكد من تغيير الحالة إلى "${newStatus}"؟`)) return
+    if (!confirm(t(`هل أنت متأكد من تغيير الحالة إلى "${newStatus}"؟`, `Confirm status change to "${newStatus}"?`))) return
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -57,10 +57,10 @@ export default function AdminPage() {
         </div>
         <div>
           <h1 className="text-xl font-black text-[var(--fi-ink)] dark:text-white">
-            إدارة حسابات الشركاء
+            {t('إدارة حسابات الشركاء', 'Partner Account Management')}
           </h1>
           <p className="text-xs font-semibold text-[var(--fi-muted)]">
-            مراجعة وإدارة طلبات الشركاء المعلقة
+            {t('مراجعة وإدارة طلبات الشركاء المعلقة', 'Review and manage pending partner requests')}
           </p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function AdminPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--fi-line)] bg-[var(--fi-soft)]">
-                {['الشريك', 'التواصل', 'نوع الحساب', 'الحالة', 'إجراء'].map((h) => (
+                {[t('الشريك', 'Partner'), t('التواصل', 'Contact'), t('نوع الحساب', 'Account Type'), t('الحالة', 'Status'), t('إجراء', 'Action')].map((h) => (
                   <th key={h} className="px-5 py-3 text-right text-xs font-black text-[var(--fi-muted)] uppercase tracking-[0.1em]">
                     {h}
                   </th>
@@ -82,13 +82,13 @@ export default function AdminPage() {
               {loading ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center text-sm text-[var(--fi-muted)]">
-                    جارٍ التحميل…
+                    {t('جارٍ التحميل…', 'Loading…')}
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center text-sm text-[var(--fi-muted)]">
-                    لا توجد بيانات.
+                    {t('لا توجد بيانات.', 'No data found.')}
                   </td>
                 </tr>
               ) : (
@@ -99,7 +99,7 @@ export default function AdminPage() {
                         {u.first_name} {u.last_name}
                       </p>
                       <p className="text-xs text-[var(--fi-muted)] mt-0.5">
-                        {u.company_name || 'مستقل'}
+                        {u.company_name || t('مستقل', 'Independent')}
                       </p>
                     </td>
                     <td className="px-5 py-4">
@@ -122,10 +122,10 @@ export default function AdminPage() {
                         }`}
                       >
                         {u.status === 'approved'
-                          ? 'معتمد'
+                          ? t('معتمد', 'Approved')
                           : u.status === 'rejected'
-                            ? 'مرفوض'
-                            : 'قيد المراجعة'}
+                            ? t('مرفوض', 'Rejected')
+                            : t('قيد المراجعة', 'Under Review')}
                       </span>
                     </td>
                     <td className="px-5 py-4">
@@ -135,17 +135,17 @@ export default function AdminPage() {
                             onClick={() => updateStatus(u.id, 'approved')}
                             className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition hover:bg-emerald-700"
                           >
-                            اعتماد
+                            {t('اعتماد', 'Approve')}
                           </button>
                           <button
                             onClick={() => updateStatus(u.id, 'rejected')}
                             className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-black text-red-600 transition hover:bg-red-50"
                           >
-                            رفض
+                            {t('رفض', 'Reject')}
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-[var(--fi-muted)]">تمت المعالجة</span>
+                        <span className="text-xs text-[var(--fi-muted)]">{t('تمت المعالجة', 'Processed')}</span>
                       )}
                     </td>
                   </tr>

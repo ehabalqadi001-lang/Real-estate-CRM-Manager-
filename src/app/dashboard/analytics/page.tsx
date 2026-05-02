@@ -45,18 +45,18 @@ export default async function AnalyticsPage() {
 
   const lostLeads = safeLeads.filter(l => l.status === 'Lost').length
   const lostReasons = [
-    { reason: 'السعر مرتفع',       count: Math.round(lostLeads * 0.35) },
-    { reason: 'اختار منافس',        count: Math.round(lostLeads * 0.25) },
-    { reason: 'غير جاهز للشراء',   count: Math.round(lostLeads * 0.2)  },
-    { reason: 'لا يجيب',           count: Math.round(lostLeads * 0.12) },
-    { reason: 'أسباب أخرى',        count: Math.round(lostLeads * 0.08) },
+    { reason: t('السعر مرتفع', 'High Price'),       count: Math.round(lostLeads * 0.35) },
+    { reason: t('اختار منافس', 'Chose Competitor'), count: Math.round(lostLeads * 0.25) },
+    { reason: t('غير جاهز للشراء', 'Not Ready'),   count: Math.round(lostLeads * 0.2)  },
+    { reason: t('لا يجيب', 'No Response'),          count: Math.round(lostLeads * 0.12) },
+    { reason: t('أسباب أخرى', 'Other'),             count: Math.round(lostLeads * 0.08) },
   ].filter(r => r.count > 0)
 
   const now = new Date()
   const monthlyTrend = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now)
     d.setMonth(d.getMonth() - (5 - i))
-    const label = d.toLocaleDateString('ar-EG', { month: 'short' })
+    const label = d.toLocaleDateString(numLocale, { month: 'short' })
     const leadsCount = safeLeads.filter(l => {
       const ld = new Date(l.created_at)
       return ld.getMonth() === d.getMonth() && ld.getFullYear() === d.getFullYear()
