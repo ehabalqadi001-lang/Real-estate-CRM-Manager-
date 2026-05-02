@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +37,7 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
 }
 
 export default async function AuditPage() {
+  const { dir } = await getI18n()
   await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -53,7 +55,7 @@ export default async function AuditPage() {
   const auditLogs: AuditLog[] = logs || []
 
   return (
-    <div className="p-6 space-y-6 bg-[var(--fi-soft)] min-h-screen" dir="rtl">
+    <div className="p-6 space-y-6 bg-[var(--fi-soft)] min-h-screen">
       <div className="flex justify-between items-center bg-[var(--fi-paper)] p-4 sm:p-6 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div>
           <h1 className="text-2xl font-bold text-[var(--fi-ink)]">سجل العمليات</h1>

@@ -1,6 +1,6 @@
 export default function PartnersLoading() {
   return (
-    <main className="sales-command space-y-5 p-4 sm:p-6" dir="rtl">
+    <main className="sales-command space-y-5 p-4 sm:p-6">
       <section className="sales-hero rounded-3xl p-4 sm:p-6">
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="sales-skeleton h-4 w-48 bg-white/20" />

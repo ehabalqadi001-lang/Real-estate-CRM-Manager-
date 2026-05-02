@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { redirect } from 'next/navigation'
@@ -18,6 +19,7 @@ const fmtFull = (n: number) =>
   new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 
 export default async function ERPOverviewPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -108,7 +110,7 @@ export default async function ERPOverviewPage() {
   ]
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       {/* Header */}
       <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

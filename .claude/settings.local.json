@@ -72,7 +72,9 @@
       "Bash(ls src/app/dashboard/marketplace)",
       "Bash(ls src/components/dashboard/)",
       "Bash(Start-Sleep -Seconds 30)",
-      "Bash(Write-Output \"done\")"
+      "Bash(Write-Output \"done\")",
+      "Bash(node scripts/fix-i18n-dir.mjs)",
+      "Bash(node scripts/fix-i18n-params.mjs)"
     ]
   }
 }

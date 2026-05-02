@@ -23,7 +23,7 @@ export function JournalEntryForm({
   const today = new Date().toISOString().slice(0, 10)
 
   return (
-    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden" dir="rtl">
+    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 border-b border-[var(--fi-line)] p-4">
         <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
           <BookOpen size={16} />

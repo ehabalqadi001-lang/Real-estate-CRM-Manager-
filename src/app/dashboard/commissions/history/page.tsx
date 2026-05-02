@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { CommissionsHistoryClient } from '@/components/commissions/CommissionsHistoryClient'
@@ -6,6 +7,7 @@ import type { CommissionRow, CommissionStatus } from '@/components/commissions/c
 export const dynamic = 'force-dynamic'
 
 export default async function CommissionHistoryPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
@@ -53,7 +55,7 @@ export default async function CommissionHistoryPage() {
   })
 
   return (
-    <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+    <main className="px-3 py-4 sm:px-4 lg:px-6">
       <CommissionsHistoryClient commissions={commissions} />
     </main>
   )

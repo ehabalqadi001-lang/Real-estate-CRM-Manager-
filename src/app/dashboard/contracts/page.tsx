@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
@@ -6,6 +7,7 @@ import { ExternalLink, FileText, Plus, CheckCircle, Clock, AlertTriangle, XCircl
 export const dynamic = 'force-dynamic'
 
 export default async function ContractsPage() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,7 +39,7 @@ export default async function ContractsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">

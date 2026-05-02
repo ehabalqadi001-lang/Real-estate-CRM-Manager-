@@ -41,7 +41,7 @@ export function CompanyContextForm({
   }
 
   return (
-    <section className="ds-card space-y-5 p-5 sm:p-6" dir="rtl">
+    <section className="ds-card space-y-5 p-5 sm:p-6">
       <div className="flex items-start gap-3">
         <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
           <ShieldCheck className="size-6" aria-hidden="true" />

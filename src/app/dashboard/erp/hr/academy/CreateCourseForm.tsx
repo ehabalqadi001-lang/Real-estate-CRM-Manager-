@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useActionState } from 'react'
 import { GraduationCap } from 'lucide-react'
@@ -28,10 +29,11 @@ const roleTargets = [
 ]
 
 export function CreateCourseForm() {
+  const { dir } = useI18n()
   const [state, action, pending] = useActionState(createCourseAction, initial)
 
   return (
-    <section className="ds-card p-5" dir="rtl">
+    <section className="ds-card p-5">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">L&D ACADEMY</p>

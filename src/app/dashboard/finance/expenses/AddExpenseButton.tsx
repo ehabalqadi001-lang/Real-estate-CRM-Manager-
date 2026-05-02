@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useState, useTransition } from 'react'
 import { Plus, Loader2 } from 'lucide-react'
@@ -16,6 +17,7 @@ const CATEGORIES = [
 ]
 
 export default function AddExpenseButton() {
+  const { dir } = useI18n()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -55,7 +57,7 @@ export default function AddExpenseButton() {
 
       {open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 space-y-4" dir="rtl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-black text-slate-900">إضافة مصروف جديد</h3>
 
             <div className="space-y-3">

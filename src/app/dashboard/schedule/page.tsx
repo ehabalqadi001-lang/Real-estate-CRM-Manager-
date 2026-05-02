@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { CalendarClock, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
@@ -15,6 +16,7 @@ interface Installment {
 }
 
 export default async function PaymentSchedulePage() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,7 +59,7 @@ export default async function PaymentSchedulePage() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">

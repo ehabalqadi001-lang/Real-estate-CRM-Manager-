@@ -50,7 +50,7 @@ export function MappingReviewForm({
   const [state, formAction, pending] = useActionState(updateBatchMappingAction, initialState)
 
   return (
-    <form action={formAction} className="ds-card overflow-hidden" dir="rtl">
+    <form action={formAction} className="ds-card overflow-hidden">
       <input type="hidden" name="batchId" value={batchId} />
       <div className="border-b border-[var(--fi-line)] p-5">
         <h2 className="text-xl font-black text-[var(--fi-ink)]">مراجعة Auto-Mapping</h2>

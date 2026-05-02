@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { MapPin } from 'lucide-react'
@@ -6,6 +7,7 @@ import InventoryMap from './InventoryMap'
 export const dynamic = 'force-dynamic'
 
 export default async function MapPage() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,7 +49,7 @@ export default async function MapPage() {
   }))
 
   return (
-    <div className="space-y-5 p-4 sm:p-6" dir="rtl">
+    <div className="space-y-5 p-4 sm:p-6">
       <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <div className="flex size-10 items-center justify-center rounded-xl bg-[#00C27C] shadow-lg shadow-[#00C27C]/20">
           <MapPin size={18} className="text-white" />

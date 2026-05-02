@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { Brain, AlertTriangle, Heart, Trophy, TrendingUp } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -57,6 +58,7 @@ const riskLabel: Record<string, string> = {
 const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 1 })
 
 export default async function HRBPPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -131,7 +133,7 @@ export default async function HRBPPage() {
   const thisMonthBurnout = burnoutData.filter((b) => b.period_month === month)
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">HRBP INTELLIGENCE & CULTURE</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">الذكاء البشري وثقافة الأداء</h1>

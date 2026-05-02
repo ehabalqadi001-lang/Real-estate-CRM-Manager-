@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
@@ -16,6 +17,7 @@ interface AdminUser {
 }
 
 export default function AdminPage() {
+  const { dir } = useI18n()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -47,7 +49,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3 rounded-2xl border border-[var(--fi-line)] bg-white p-5 shadow-sm dark:bg-gray-900">
         <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50">

@@ -110,7 +110,7 @@ export default async function HrAssignManagersPage({
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <div className="space-y-6 p-4 sm:p-6">
       {/* Header */}
       <div className="rounded-2xl border border-[var(--fi-line)] bg-white p-5 shadow-sm dark:bg-gray-900">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--fi-emerald)]">HR PORTAL</p>

@@ -77,7 +77,7 @@ export default async function AccountManagerDashboard({
 
   if (brokerIds.length === 0 && !isAdmin) {
     return (
-      <div className="space-y-6 p-4 sm:p-6" dir="rtl">
+      <div className="space-y-6 p-4 sm:p-6">
         <PageHeader amName={session.profile.full_name} isAdmin={isAdmin} />
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-8 text-center">
           <UserCheck className="mx-auto mb-3 size-10 text-amber-400" />
@@ -122,7 +122,7 @@ export default async function AccountManagerDashboard({
   const verifiedBrokers = (myBrokers ?? []).filter((b) => b.verification_status === 'verified').length
 
   return (
-    <div className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <div className="space-y-6 p-4 sm:p-6">
       <PageHeader amName={session.profile.full_name} isAdmin={isAdmin} />
 
       {/* KPIs */}

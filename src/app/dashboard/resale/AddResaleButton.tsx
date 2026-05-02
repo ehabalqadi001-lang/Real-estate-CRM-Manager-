@@ -3,8 +3,10 @@
 import { useState, useTransition } from 'react'
 import { Plus, X } from 'lucide-react'
 import { addResaleListing } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function AddResaleButton() {
+  const { dir } = useI18n()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
 
@@ -28,7 +30,7 @@ export default function AddResaleButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-4 sm:p-6 my-4" dir="rtl">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-4 sm:p-6 my-4">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-slate-900">وحدة إعادة بيع جديدة</h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>

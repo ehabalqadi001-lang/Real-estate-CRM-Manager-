@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { GraduationCap, BookOpen, Users, CheckCircle2, TrendingUp } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -71,6 +72,7 @@ const skillCategoryLabel: Record<string, string> = {
 const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
 
 export default async function AcademyPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -130,7 +132,7 @@ export default async function AcademyPage() {
   }, {})
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">L&D ACADEMY</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">أكاديمية التطوير والتعلم</h1>

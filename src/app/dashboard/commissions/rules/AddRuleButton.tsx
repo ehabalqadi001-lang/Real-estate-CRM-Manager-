@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { addRule } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function AddRuleButton() {
+  const { dir } = useI18n()
   const [open, setOpen] = useState(false)
   const [usePercentage, setUsePercentage] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -33,7 +35,7 @@ export default function AddRuleButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6" dir="rtl">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-slate-900">قاعدة عمولة جديدة</h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600">

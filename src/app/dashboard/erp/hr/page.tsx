@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
@@ -85,6 +86,7 @@ const HR_WRITE_ROLES: AppRole[] = [
 const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
 
 export default async function ERPHRPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -179,7 +181,7 @@ export default async function ERPHRPage() {
     : null
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

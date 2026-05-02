@@ -115,7 +115,7 @@ export default async function PayslipPage({
   const st = statusCls[row.status] ?? statusCls.draft
 
   return (
-    <main className="space-y-6 p-4 sm:p-6 max-w-3xl mx-auto" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6 max-w-3xl mx-auto">
       {/* Back + Print */}
       <div className="flex items-center justify-between">
         <Link

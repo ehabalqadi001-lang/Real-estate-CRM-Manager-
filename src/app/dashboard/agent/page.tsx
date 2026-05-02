@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ import LeadScoreBadge from '@/components/leads/LeadScoreBadge'
 export const dynamic = 'force-dynamic'
 
 export default async function AgentDashboard() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -59,7 +61,7 @@ export default async function AgentDashboard() {
   }
 
   return (
-    <div className="p-5 space-y-5 min-h-screen bg-[#F4F6F9]" dir="rtl">
+    <div className="p-5 space-y-5 min-h-screen bg-[#F4F6F9]">
 
       {/* ── Welcome header ──────────────────────────────────────────── */}
       <div className="bg-gradient-to-l from-[#0C1A2E] to-[#0F2748] rounded-2xl p-4 sm:p-6 text-white shadow-xl">

@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -9,6 +10,7 @@ import { updateDealStage } from './actions'
 export const dynamic = 'force-dynamic'
 
 export default async function DealsKanbanPage() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,7 +33,7 @@ export default async function DealsKanbanPage() {
   const totalValue = (deals ?? []).reduce((sum, deal) => sum + Number(deal.unit_value ?? 0), 0)
 
   return (
-    <div className="min-h-screen space-y-4 px-3 py-4 sm:px-4 lg:px-6" dir="rtl">
+    <div className="min-h-screen space-y-4 px-3 py-4 sm:px-4 lg:px-6">
       <section className="fi-card overflow-hidden p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">

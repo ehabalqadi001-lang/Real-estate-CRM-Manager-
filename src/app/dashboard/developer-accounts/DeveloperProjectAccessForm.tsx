@@ -30,7 +30,7 @@ export function DeveloperProjectAccessForm({
   const groupedProjects = useMemo(() => projects, [projects])
 
   return (
-    <section className="ds-card p-5" dir="rtl">
+    <section className="ds-card p-5">
       <div className="mb-5 flex items-center gap-3">
         <span className="flex size-11 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
           <FolderKanban className="size-5" aria-hidden="true" />

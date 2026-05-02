@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { BarChart2, TrendingUp, Users, Target, XCircle } from 'lucide-react'
@@ -7,6 +8,7 @@ import { requireAdmin } from '@/lib/require-role'
 export const dynamic = 'force-dynamic'
 
 export default async function AnalyticsPage() {
+  const { dir } = await getI18n()
   await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -84,7 +86,7 @@ export default async function AnalyticsPage() {
   const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 
   return (
-    <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
+    <div className="min-h-screen space-y-5 p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:p-5">
         <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-600/20">

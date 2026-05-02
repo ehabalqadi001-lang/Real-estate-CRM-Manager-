@@ -16,7 +16,7 @@ export default function LeadsError({
   }, [error])
 
   return (
-    <div className="flex h-[80vh] flex-col items-center justify-center p-4 sm:p-8 text-center" dir="rtl">
+    <div className="flex h-[80vh] flex-col items-center justify-center p-4 sm:p-8 text-center">
       <div className="bg-red-50 p-4 sm:p-8 rounded-3xl border border-red-100 max-w-lg w-full shadow-lg">
         <AlertTriangle className="mx-auto text-red-500 mb-6" size={64} />
         <h2 className="text-2xl font-black text-slate-900 mb-3">عذراً، حدث خلل في مسار المبيعات</h2>

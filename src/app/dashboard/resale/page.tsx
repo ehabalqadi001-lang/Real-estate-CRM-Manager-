@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Home, Eye } from 'lucide-react'
@@ -13,6 +14,7 @@ const STATUS_CONFIG = {
 } as const
 
 export default async function ResalePage() {
+  const { dir } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,7 +36,7 @@ export default async function ResalePage() {
   const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">

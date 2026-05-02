@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CalendarOff, Clock, CheckCircle2, Users } from 'lucide-react'
@@ -46,6 +47,7 @@ const statusLabel: Record<string, string> = {
 const dateFormatter = new Intl.DateTimeFormat('ar-EG', { day: '2-digit', month: 'short', year: 'numeric' })
 
 export default async function LeavesPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -116,7 +118,7 @@ export default async function LeavesPage() {
   }))
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

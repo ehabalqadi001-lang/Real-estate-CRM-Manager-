@@ -261,7 +261,7 @@ export default async function EmployeeProfilePage({
     : `${tenureMonths} شهر`
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       {/* Back link */}
       <Link
         href="/dashboard/erp/hr"

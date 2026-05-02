@@ -20,7 +20,7 @@ export function DeveloperAccountForm({
   const [state, action, pending] = useActionState(linkDeveloperAccountAction, initialState)
 
   return (
-    <section className="ds-card p-5" dir="rtl">
+    <section className="ds-card p-5">
       <div className="mb-5 flex items-start gap-3">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
           <UserCog className="size-5" />

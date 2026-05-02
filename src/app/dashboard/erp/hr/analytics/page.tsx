@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { BarChart3, TrendingUp, Users, WalletCards, CalendarDays, Target } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -14,6 +15,7 @@ const HR_ROLES: AppRole[] = ['super_admin', 'platform_admin', 'hr_manager', 'hr_
 const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 
 export default async function HRAnalyticsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -166,7 +168,7 @@ export default async function HRAnalyticsPage() {
   }).length
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">HR ANALYTICS & INTELLIGENCE</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">تحليلات الموارد البشرية</h1>

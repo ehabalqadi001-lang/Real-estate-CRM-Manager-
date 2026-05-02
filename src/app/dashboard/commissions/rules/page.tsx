@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { requireAdmin } from '@/lib/require-role'
@@ -8,6 +9,7 @@ import ToggleRuleButton from './ToggleRuleButton'
 export const dynamic = 'force-dynamic'
 
 export default async function CommissionRulesPage() {
+  const { dir } = await getI18n()
   await requireAdmin()
 
   const cookieStore = await cookies()
@@ -27,7 +29,7 @@ export default async function CommissionRulesPage() {
   }
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#00C27C] rounded-xl flex items-center justify-center shadow-lg shadow-[#00C27C]/20">

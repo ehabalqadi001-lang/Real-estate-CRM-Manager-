@@ -94,7 +94,7 @@ export default async function EmployeeListPage({
   }
 
   return (
-    <main className="space-y-5 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-5 p-4 sm:p-6">
       {/* Header */}
       <section className="ds-card p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

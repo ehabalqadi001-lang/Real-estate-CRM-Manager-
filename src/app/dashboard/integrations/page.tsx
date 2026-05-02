@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Activity, DatabaseZap, PlugZap, RefreshCw } from 'lucide-react'
@@ -47,6 +48,7 @@ const ALLOWED = new Set([
 ])
 
 export default async function IntegrationsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   if (!ALLOWED.has(session.profile.role)) redirect('/dashboard')
 
@@ -82,7 +84,7 @@ export default async function IntegrationsPage() {
   const pageError = integrationsResult.error || developersResult.error || eventsResult.error || batchesResult.error
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">API-FIRST DEVELOPER GATEWAY</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">تكاملات المطورين والمخزون</h1>

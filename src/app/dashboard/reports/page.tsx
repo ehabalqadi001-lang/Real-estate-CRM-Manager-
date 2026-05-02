@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { DollarSign, FileBarChart2, Target, TrendingUp, Users } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/require-role'
@@ -14,6 +15,7 @@ const fmt = (n: number) =>
 const WON_STAGES = ['Contracted', 'Registration', 'Handover', 'Won', 'contract']
 
 export default async function ReportsPage() {
+  const { dir } = await getI18n()
   await requireAuth()
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -113,7 +115,7 @@ export default async function ReportsPage() {
   ]
 
   return (
-    <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
+    <div className="min-h-screen space-y-5 p-4 sm:p-6">
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--fi-emerald)] shadow-lg shadow-[var(--fi-emerald)]/20">

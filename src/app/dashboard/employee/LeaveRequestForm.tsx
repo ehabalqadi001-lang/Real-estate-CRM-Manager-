@@ -21,7 +21,7 @@ export function LeaveRequestForm({
   const [state, action, pending] = useActionState(requestLeaveAction, initial)
 
   return (
-    <section className="ds-card p-5" dir="rtl">
+    <section className="ds-card p-5">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">LEAVE REQUEST</p>

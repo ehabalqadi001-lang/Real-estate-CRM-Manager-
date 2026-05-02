@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import {
@@ -35,6 +36,7 @@ const CONTRACT_STATUS_MAP: Record<string, { label: string; color: string }> = {
 }
 
 export default async function ERPLegalPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -115,7 +117,7 @@ export default async function ERPLegalPage() {
   )
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">

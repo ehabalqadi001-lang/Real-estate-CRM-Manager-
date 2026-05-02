@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { redirect } from 'next/navigation'
@@ -45,6 +46,7 @@ const fmtDate = (d: string | null) =>
   d ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short' }).format(new Date(d)) : '—'
 
 export default async function SaleClaimsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -106,7 +108,7 @@ export default async function SaleClaimsPage() {
   const history = claims.filter(c => ['approved', 'rejected', 'paid'].includes(c.status))
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">

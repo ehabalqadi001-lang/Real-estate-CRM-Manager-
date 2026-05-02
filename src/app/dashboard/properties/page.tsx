@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { getProperties } from './actions'
 import AddPropertyButton from '@/components/properties/AddPropertyButton'
 import { Building2, MapPin, DollarSign, Percent, CheckCircle2 } from 'lucide-react'
@@ -5,10 +6,11 @@ import { Building2, MapPin, DollarSign, Percent, CheckCircle2 } from 'lucide-rea
 export const dynamic = 'force-dynamic'
 
 export default async function PropertiesPage() {
+  const { dir } = await getI18n()
   const properties = await getProperties()
 
   return (
-    <div className="p-8 space-y-8 min-h-screen bg-slate-50" dir="rtl">
+    <div className="p-8 space-y-8 min-h-screen bg-slate-50">
       
       {/* الهيدر العلوي */}
       <div className="flex justify-between items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">

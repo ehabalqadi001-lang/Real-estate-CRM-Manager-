@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { BarChart3, TrendingDown, TrendingUp, BookOpen, AlertCircle, ArrowUpRight, Target } from 'lucide-react'
@@ -15,6 +16,7 @@ const fmtFull = (n: number) =>
   new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
 
 export default async function ERPFinancePage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -86,7 +88,7 @@ export default async function ERPFinancePage() {
   const today = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="flex items-center gap-3">

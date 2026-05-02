@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { Building2, ShieldCheck, UserCog, Users } from 'lucide-react'
 import { createServiceRoleClient } from '@/lib/supabase/service'
@@ -32,6 +33,7 @@ type ProjectAccessRow = {
 }
 
 export default async function DeveloperAccountsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   if (!hasPermission(session.profile.role, 'developer.manage')) redirect('/dashboard')
 
@@ -77,7 +79,7 @@ export default async function DeveloperAccountsPage() {
   const pageError = accountsResult.error || developersResult.error || usersResult.error || projectsResult.error || accessResult.error
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">DEVELOPER ACCESS CONTROL</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">صلاحيات بوابة المطور</h1>

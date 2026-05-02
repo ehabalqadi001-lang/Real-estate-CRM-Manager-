@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, X, User, Phone, Mail, Star, Percent } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
+import { useI18n } from '@/hooks/use-i18n'
 
 const TIERS = [
   { value: 'bronze',   label: 'برونزي' },
@@ -12,6 +13,7 @@ const TIERS = [
 ]
 
 export default function AddBrokerButton() {
+  const { dir } = useI18n()
   const [open, setOpen]       = useState(false)
   const [loading, setLoading] = useState(false)
   const [form, setForm]       = useState({
@@ -59,7 +61,7 @@ export default function AddBrokerButton() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" dir="rtl">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">

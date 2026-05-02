@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useState, useTransition } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { ShieldCheck, X, Loader2, CheckCircle2, AlertCircle, QrCode } from 'lucide-react'
 
 export default function TwoFactorSetup() {
+  const { dir } = useI18n()
   const [open, setOpen]         = useState(false)
   const [step, setStep]         = useState<'idle' | 'enroll' | 'verify' | 'done'>('idle')
   const [qrCode, setQrCode]     = useState('')
@@ -67,7 +69,7 @@ export default function TwoFactorSetup() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" dir="rtl">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={close} />
           <div className="relative w-full max-w-md rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 sm:p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">

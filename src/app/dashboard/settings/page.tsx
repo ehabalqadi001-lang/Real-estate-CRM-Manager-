@@ -6,10 +6,12 @@ import ChangePasswordDialog from './ChangePasswordDialog'
 import TwoFactorSetup from './TwoFactorSetup'
 import { getCountryCode } from '@/lib/country'
 import { CountrySwitcher } from '@/components/settings/CountrySwitcher'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
+  const { t, dir } = await getI18n()
   const company = await getCompanySettings()
   const country = await getCountryCode()
   const logoStyle = company?.logo_url
@@ -17,14 +19,14 @@ export default async function SettingsPage() {
     : undefined
 
   return (
-    <div className="max-w-4xl space-y-5 p-4 sm:p-6" dir="rtl">
+    <div className="max-w-4xl space-y-5 p-4 sm:p-6">
       <div className="flex items-center gap-3 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:p-5">
         <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
           <Settings size={18} aria-hidden="true" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-[var(--fi-ink)]">إعدادات الشركة</h1>
-          <p className="text-xs text-[var(--fi-muted)]">هوية مساحة العمل، الدولة، العملة، الإشعارات، والأمان.</p>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('إعدادات الشركة', 'Company Settings')}</h1>
+          <p className="text-xs text-[var(--fi-muted)]">{t('هوية مساحة العمل، الدولة، العملة، الإشعارات، والأمان.', 'Workspace identity, country, currency, notifications, and security.')}</p>
         </div>
       </div>
 

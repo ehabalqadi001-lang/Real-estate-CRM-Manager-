@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import Link from 'next/link'
 import { getMyActivityBoard } from '@/domains/activities/queries'
 import { Calendar, PhoneCall, MessageCircle, MapPin, CheckCircle2, Clock, ArrowLeft } from 'lucide-react'
@@ -6,6 +7,7 @@ import ActivityDoneButton from '@/components/activities/ActivityDoneButton' // �
 export const dynamic = 'force-dynamic'
 
 export default async function ActivitiesPage() {
+  const { dir } = await getI18n()
   // جلب مهام الوكيل الحالي مع بيانات العملاء
   const { pendingActivities, completedActivities } = await getMyActivityBoard()
 
@@ -20,7 +22,7 @@ export default async function ActivitiesPage() {
   }
 
   return (
-    <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
+    <div className="p-8 space-y-8 min-h-screen bg-slate-50/50">
       
       {/* الهيدر التكتيكي */}
       <div className="flex justify-between items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">

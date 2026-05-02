@@ -48,7 +48,7 @@ export function EnvironmentLockButton({
   }
 
   return (
-    <div className="min-w-[220px] space-y-2" dir="rtl">
+    <div className="min-w-[220px] space-y-2">
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Wifi className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" />

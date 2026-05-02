@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useActionState, useTransition } from 'react'
 import { FileText, Plus, UserCheck } from 'lucide-react'
@@ -30,9 +31,10 @@ const CONTRACT_TYPES = [
 ]
 
 export function CreateLegalDocumentForm() {
+  const { dir } = useI18n()
   const [state, action, pending] = useActionState(createLegalDocumentAction, initial)
   return (
-    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden" dir="rtl">
+    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 border-b border-[var(--fi-line)] p-4">
         <div className="flex size-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
           <FileText size={16} />
@@ -82,7 +84,7 @@ export function CreateLegalDocumentForm() {
 export function CreateHRContractForm({ employees }: { employees: Employee[] }) {
   const [state, action, pending] = useActionState(createHRContractAction, initial)
   return (
-    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden" dir="rtl">
+    <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 border-b border-[var(--fi-line)] p-4">
         <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
           <UserCheck size={16} />

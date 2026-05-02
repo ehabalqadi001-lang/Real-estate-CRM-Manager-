@@ -1,6 +1,6 @@
 export default function CommissionsLoading() {
   return (
-    <main className="px-3 py-4 sm:px-4 lg:px-6" dir="rtl" aria-busy="true">
+    <main className="px-3 py-4 sm:px-4 lg:px-6" aria-busy="true">
       <section className="space-y-4">
         <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

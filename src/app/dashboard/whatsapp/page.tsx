@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useState, useEffect } from 'react'
 import { MessageSquare, CheckCircle2, AlertCircle, Clock, Zap } from 'lucide-react'
@@ -51,6 +52,7 @@ const VARIANT_STYLES = {
 }
 
 function highlightVars(text: string) {
+  const { dir } = useI18n()
   return text.split(/(\[.*?\])/g).map((part, i) => {
     if (!part.startsWith('[')) return <span key={i}>{part}</span>
     const isMoney = /قيمة|مبلغ|رصيد|مقدم|قسط/.test(part)
@@ -87,7 +89,7 @@ export default function WhatsAppHub() {
   })[s] ?? s
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl shadow-sm border border-slate-100">

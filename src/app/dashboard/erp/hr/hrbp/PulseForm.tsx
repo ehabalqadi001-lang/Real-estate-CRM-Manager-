@@ -1,4 +1,5 @@
 'use client'
+import { useI18n } from '@/hooks/use-i18n'
 
 import { useActionState } from 'react'
 import { Heart } from 'lucide-react'
@@ -7,10 +8,11 @@ import { saveEmployeePulseAction, type HRBPActionState } from './actions'
 const initial: HRBPActionState = { ok: false, message: '' }
 
 export function PulseForm() {
+  const { dir } = useI18n()
   const [state, action, pending] = useActionState(saveEmployeePulseAction, initial)
 
   return (
-    <section className="ds-card p-5" dir="rtl">
+    <section className="ds-card p-5">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-500">CULTURE PULSE</p>

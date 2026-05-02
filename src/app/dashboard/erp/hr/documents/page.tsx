@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { FileText, ShieldCheck, AlertTriangle, Upload } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -57,6 +58,7 @@ function formatBytes(bytes: number | null) {
 }
 
 export default async function DocumentsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -116,7 +118,7 @@ export default async function DocumentsPage() {
   ).sort((a, b) => a.name.localeCompare(b.name, 'ar'))
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">DOCUMENT VAULT</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">وثائق الموظفين</h1>

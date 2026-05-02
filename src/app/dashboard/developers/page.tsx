@@ -1,4 +1,5 @@
 "use client"
+import { useI18n } from '@/hooks/use-i18n'
 /* eslint-disable react-hooks/set-state-in-effect -- Legacy client-loaded developers page; will move to server query + client form island. */
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -21,6 +22,7 @@ const GRADE_STYLE: Record<string, { label: string; color: string; bg: string; bo
 }
 
 export default function DevelopersPage() {
+  const { dir } = useI18n()
   const [todayMs] = useState(() => Date.now())
   const [developers, setDevelopers] = useState<Developer[]>([])
   const [deals, setDeals] = useState<{ developer: string; unit_value: number }[]>([])
@@ -104,7 +106,7 @@ export default function DevelopersPage() {
   )
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
@@ -213,7 +215,7 @@ export default function DevelopersPage() {
 
       {/* Add Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" dir="rtl">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
               <h3 className="font-bold text-slate-900 flex items-center gap-2"><Building2 size={16} className="text-blue-600" /> إضافة مطور عقاري</h3>
@@ -264,7 +266,7 @@ export default function DevelopersPage() {
 
       {/* Manage Modal */}
       {isManageOpen && selectedDev && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" dir="rtl">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
               <h3 className="font-bold text-slate-900 flex items-center gap-2"><Settings size={16} className="text-blue-600" /> {selectedDev.name}</h3>

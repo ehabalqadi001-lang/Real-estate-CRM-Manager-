@@ -1,6 +1,6 @@
 export default function DashboardLoading() {
   return (
-    <div className="fi-shell-bg flex h-screen overflow-hidden text-[var(--fi-ink)]" dir="rtl" aria-busy="true">
+    <div className="fi-shell-bg flex h-screen overflow-hidden text-[var(--fi-ink)]" aria-busy="true">
       {/* Sidebar skeleton — left side, matches DashboardShell layout */}
       {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
       <div className="hidden lg:block" style={{ width: 268, padding: 12, flexShrink: 0 }}>

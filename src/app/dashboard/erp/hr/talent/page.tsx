@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { UserSearch, Users, Clock, CheckCircle2, FileText } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
@@ -65,6 +66,7 @@ const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
 const funnelStages = ['new', 'screening', 'interview_1', 'interview_2', 'offer_sent', 'hired']
 
 export default async function TalentPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -108,7 +110,7 @@ export default async function TalentPage() {
   const maxCount = Math.max(...funnelData.map((f) => f.count), 1)
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">TALENT ACQUISITION HUNTER</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">استقطاب المواهب</h1>

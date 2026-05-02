@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import { requireSession } from '@/shared/auth/session'
 import { isSuperAdmin } from '@/shared/auth/types'
@@ -7,13 +8,14 @@ import { CompanyContextForm } from './CompanyContextForm'
 export const dynamic = 'force-dynamic'
 
 export default async function CompanyContextPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   if (!isSuperAdmin(session.profile.role)) redirect('/dashboard')
 
   const context = await getActiveCompanyContext(session)
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT OS</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">سياق الشركة النشطة</h1>

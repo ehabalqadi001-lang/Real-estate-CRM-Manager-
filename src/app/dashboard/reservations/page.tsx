@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import { redirect } from 'next/navigation'
@@ -29,6 +30,7 @@ const ALLOWED_ROLES = [
 ]
 
 export default async function ReservationsPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
 
@@ -89,7 +91,7 @@ export default async function ReservationsPage() {
   ]
 
   return (
-    <div className="p-6 space-y-5" dir="rtl">
+    <div className="p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3 bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">

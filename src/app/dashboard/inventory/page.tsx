@@ -161,7 +161,7 @@ export default async function InventoryPage({
   const stats = calculateStats(units)
 
   return (
-    <main className="space-y-5 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-5 p-4 sm:p-6">
       <header className="ds-card-hover flex flex-col gap-4 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)] text-white">

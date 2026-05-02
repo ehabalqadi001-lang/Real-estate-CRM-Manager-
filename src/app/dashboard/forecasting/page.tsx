@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import Link from 'next/link'
 import { getSalesForecast } from './actions'
 import ForecastChart from './ForecastChart'
@@ -6,6 +7,7 @@ import { TrendingUp, DollarSign, Target, BarChart2, PlusCircle } from 'lucide-re
 export const dynamic = 'force-dynamic'
 
 export default async function ForecastingPage() {
+  const { dir } = await getI18n()
   const data = await getSalesForecast()
 
   const kpis = [
@@ -40,7 +42,7 @@ export default async function ForecastingPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">

@@ -1,6 +1,6 @@
 export default function InventoryLoading() {
   return (
-    <main className="space-y-5 p-4 sm:p-6" dir="rtl" aria-busy="true">
+    <main className="space-y-5 p-4 sm:p-6" aria-busy="true">
       <header className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <div className="h-8 w-60 rounded-md ds-skeleton" />
         <div className="mt-3 h-4 w-full max-w-2xl rounded-md ds-skeleton" />

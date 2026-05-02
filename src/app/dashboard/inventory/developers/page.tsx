@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Building2, CheckCircle2, Home, WalletCards } from 'lucide-react'
@@ -17,6 +18,7 @@ function formatEgp(value: number) {
 }
 
 export default async function InventoryDevelopersPage() {
+  const { dir } = await getI18n()
   await requirePermission('developer.view')
   const supabase = await createTypedServerClient()
 
@@ -31,7 +33,7 @@ export default async function InventoryDevelopersPage() {
   const units = unitsResult.data ?? []
 
   return (
-    <main className="space-y-5 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-5 p-4 sm:p-6">
       <header className="ds-card-hover rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)] text-white">

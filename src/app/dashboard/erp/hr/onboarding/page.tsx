@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ClipboardList, CheckCircle2, Clock, Users } from 'lucide-react'
@@ -48,6 +49,7 @@ const categoryColor: Record<string, string> = {
 }
 
 export default async function OnboardingPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -100,7 +102,7 @@ export default async function OnboardingPage() {
   const overdueTasks    = tasks.filter((t) => !t.completed_at && t.due_date && t.due_date < new Date().toISOString().slice(0, 10)).length
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">ONBOARDING WORKFLOW</p>
         <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">بروتوكول استقبال الموظفين</h1>

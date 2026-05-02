@@ -1,6 +1,6 @@
 export default function UnitDetailLoading() {
   return (
-    <div className="p-4 lg:p-6 space-y-5 max-w-4xl animate-pulse" dir="rtl">
+    <div className="p-4 lg:p-6 space-y-5 max-w-4xl animate-pulse">
       <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">

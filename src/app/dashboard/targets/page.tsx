@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Target, TrendingUp, Users } from 'lucide-react'
@@ -8,6 +9,7 @@ import { requireAdmin } from '@/lib/require-role'
 export const dynamic = 'force-dynamic'
 
 export default async function TargetsPage() {
+  const { dir } = await getI18n()
   await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -34,7 +36,7 @@ export default async function TargetsPage() {
   const totalDealsActual = targets.reduce((s, t) => s + t.deals_actual, 0)
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       <div className="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Users, TrendingUp, DollarSign, Target } from 'lucide-react'
@@ -16,6 +17,7 @@ interface AgentStats {
 }
 
 export default async function PerformancePage() {
+  const { dir } = await getI18n()
   await requireAdmin()
 
   const cookieStore = await cookies()
@@ -78,7 +80,7 @@ export default async function PerformancePage() {
   const totalDeals = agentStats.reduce((s, a) => s + a.deals, 0)
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Users className="text-indigo-600" size={24} />

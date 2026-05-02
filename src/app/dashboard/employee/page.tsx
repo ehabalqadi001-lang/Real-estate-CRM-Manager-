@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { BadgeDollarSign, BookOpen, CalendarDays, CheckCircle2, ClipboardList, FileDown, FileText, ShieldCheck, Star, Trophy } from 'lucide-react'
 import { createRawClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
@@ -94,6 +95,7 @@ const categoryLabel: Record<string, string> = {
 }
 
 export default async function EmployeePortalPage() {
+  const { dir } = await getI18n()
   const session = await requireSession()
   const supabase = await createRawClient()
   const today = new Date().toISOString().slice(0, 10)
@@ -255,7 +257,7 @@ export default async function EmployeePortalPage() {
     : null
 
   return (
-    <main className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <main className="space-y-6 p-4 sm:p-6">
       <section className="ds-card p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
