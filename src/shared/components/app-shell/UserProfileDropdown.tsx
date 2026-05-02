@@ -71,7 +71,7 @@ export function UserProfileDropdown({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-[var(--fi-line)] bg-white p-2 shadow-xl dark:bg-slate-900 z-50">
+        <div className="absolute end-0 top-full mt-2 w-72 rounded-xl border border-[var(--fi-line)] bg-white p-2 shadow-xl dark:bg-slate-900 z-50 max-w-[calc(100vw-1rem)]">
           <div className="mb-2 px-2 pb-2 border-b border-[var(--fi-line)]">
              <p className="text-sm font-bold text-[var(--fi-ink)] truncate">{profile.full_name}</p>
              <p className="text-xs text-[var(--fi-muted)] truncate">{labelRole(profile.role)}</p>
