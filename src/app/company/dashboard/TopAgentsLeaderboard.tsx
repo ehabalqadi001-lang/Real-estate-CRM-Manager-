@@ -19,7 +19,7 @@ export default function TopAgentsLeaderboard({ agents }: Props) {
   const maxRev  = sorted[0]?.revenue ?? 1
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="font-bold text-slate-800 flex items-center gap-2">

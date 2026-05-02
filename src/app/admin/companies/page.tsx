@@ -54,7 +54,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
         <EmptyState message="لا توجد شركات في هذا التصنيف." />
       ) : (
         <div className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)]">
-          <table className="w-full min-w-[980px] text-sm">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full min-w-[980px] text-sm">
             <thead className="bg-[var(--fi-soft)] text-[var(--fi-muted)]">
               <tr>
                 <th className="p-3 text-right">اسم الشركة</th>
@@ -122,7 +122,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </main>
@@ -145,9 +145,9 @@ function CompanyStatus({ company }: { company: { active: boolean | null; is_susp
 }
 
 function ErrorState({ message }: { message: string }) {
-  return <Card><CardContent className="p-8 text-center text-destructive">{message}</CardContent></Card>
+  return <Card><CardContent className="p-4 sm:p-8 text-center text-destructive">{message}</CardContent></Card>
 }
 
 function EmptyState({ message }: { message: string }) {
-  return <Card><CardContent className="p-8 text-center text-[var(--fi-muted)]">{message}</CardContent></Card>
+  return <Card><CardContent className="p-4 sm:p-8 text-center text-[var(--fi-muted)]">{message}</CardContent></Card>
 }

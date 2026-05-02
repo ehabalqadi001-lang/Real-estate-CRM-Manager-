@@ -229,7 +229,7 @@ export default async function DeveloperPortalPage() {
                       <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">
                         {project.city ?? 'مدينة غير محددة'} · {project.location ?? 'موقع غير محدد'}
                       </p>
-                      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <div className="mt-4 grid grid-cols-1 xs:grid-cols-2 gap-2 sm:grid-cols-4">
                         <MiniMetric label="الوحدات" value={String(projectUnits.length || project.total_units || 0)} />
                         <MiniMetric label="المتاح" value={String(projectUnits.filter((unit) => unit.status === 'available').length || project.available_units || 0)} />
                         <MiniMetric label="الاهتمام" value={String(projectEngagement)} />
@@ -280,7 +280,7 @@ export default async function DeveloperPortalPage() {
                   </div>
                 ))}
                 {!units.length ? (
-                  <p className="rounded-lg border border-dashed border-[var(--fi-line)] p-6 text-center text-sm font-bold text-[var(--fi-muted)]">
+                  <p className="rounded-lg border border-dashed border-[var(--fi-line)] p-4 sm:p-6 text-center text-sm font-bold text-[var(--fi-muted)]">
                     لا توجد وحدات مستوردة بعد.
                   </p>
                 ) : null}
@@ -296,7 +296,7 @@ export default async function DeveloperPortalPage() {
 function NoDeveloperAccess() {
   return (
     <main className="min-h-screen bg-[var(--fi-bg)] p-4 sm:p-6" dir="rtl">
-      <section className="mx-auto max-w-3xl rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+      <section className="mx-auto max-w-3xl rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-6 text-center">
         <h1 className="text-2xl font-black text-amber-900">لا توجد صلاحية مطور مرتبطة بحسابك</h1>
         <p className="mt-3 text-sm font-bold leading-7 text-amber-800">
           يجب ربط حسابك بجدول developer_accounts من خلال مدير المنصة قبل استخدام بوابة المطور.

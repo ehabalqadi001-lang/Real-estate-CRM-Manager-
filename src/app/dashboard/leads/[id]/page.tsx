@@ -48,8 +48,8 @@ export default async function LeadProfilePage({ params }: PageProps) {
   // 4. درع الأخطاء الفولاذي (في حالة الرفض الأمني أو حذف العميل)
   if (leadError || !lead) {
     return (
-      <div className="flex h-[80vh] flex-col items-center justify-center p-8 text-center" dir="rtl">
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 max-w-lg w-full shadow-lg">
+      <div className="flex h-[80vh] flex-col items-center justify-center p-4 sm:p-8 text-center" dir="rtl">
+        <div className="bg-white p-4 sm:p-8 rounded-3xl border border-slate-200 max-w-lg w-full shadow-lg">
           <AlertTriangle className="mx-auto text-amber-500 mb-6" size={64} />
           <h2 className="text-2xl font-black text-slate-900 mb-3">عذراً، لا يمكن الوصول لسجل هذا العميل</h2>
           <p className="text-slate-600 mb-6 font-medium leading-relaxed">
@@ -65,7 +65,7 @@ export default async function LeadProfilePage({ params }: PageProps) {
 
           <Link 
             href="/dashboard/leads" 
-            className="bg-[#0A1128] hover:bg-[#152042] text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-md"
+            className="bg-[#0A1128] hover:bg-[#152042] text-white px-4 sm:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-md"
           >
             العودة لمسار المبيعات <ArrowRight size={18} />
           </Link>
@@ -88,7 +88,7 @@ export default async function LeadProfilePage({ params }: PageProps) {
 
       {/* بطاقة الهوية الذكية */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="bg-gradient-to-l from-[#0A1128] to-[#152042] p-8 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-l from-[#0A1128] to-[#152042] p-4 sm:p-8 text-white relative overflow-hidden">
           {/* زخرفة بصرية */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
           
@@ -162,7 +162,7 @@ export default async function LeadProfilePage({ params }: PageProps) {
       </div>
 
       {/* سجل الأنشطة */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
         <div className="flex items-center justify-between mb-5 border-b border-slate-100 pb-4">
           <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
             <Activity className="text-[#00C27C]" size={20} />
@@ -174,7 +174,7 @@ export default async function LeadProfilePage({ params }: PageProps) {
       </div>
 
       {/* الجدول الزمني للمفاوضات (Timeline) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-8">
         <h3 className="text-xl font-black text-slate-800 flex items-center gap-2 mb-8 border-b border-slate-100 pb-4">
           <Activity className="text-blue-600" />
           الصندوق الأسود (تاريخ التقارير)

@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
             <ShieldCheck className="size-3.5" />
             FAST INVESTMENT
           </span>
-          <h1 className="mt-4 text-3xl font-black">تعيين كلمة مرور جديدة</h1>
+          <h1 className="mt-4 text-xl sm:text-3xl font-black">تعيين كلمة مرور جديدة</h1>
           <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
             اختر كلمة مرور قوية لحسابك. هذا الإجراء متاح لكل العملاء والوكلاء ومديري الشركات.
           </p>
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="fi-card rounded-lg p-6">
+        <form onSubmit={handleSubmit} className="fi-card rounded-lg p-4 sm:p-6">
           {!ready && !state?.ok && (
             <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center text-xs font-bold leading-6 text-amber-700">
               افتح هذه الصفحة من رابط الاستعادة الموجود في البريد. إذا انتهت صلاحية الرابط، اطلب رابطاً جديداً.

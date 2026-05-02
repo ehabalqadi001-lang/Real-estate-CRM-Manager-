@@ -105,7 +105,7 @@ export default function RegisterPage() {
             </motion.div>
 
             <motion.h1 variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.07 }}
-              className="mt-5 text-3xl font-black leading-tight">
+              className="mt-5 text-xl sm:text-3xl font-black leading-tight">
               {copy.title}
             </motion.h1>
 

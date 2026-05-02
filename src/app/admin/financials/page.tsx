@@ -74,14 +74,14 @@ export default async function AdminFinancialsPage() {
               <Button name="status" value="approved">اعتماد الكل</Button>
               <Button name="status" value="disputed" variant="destructive">رفض الكل</Button>
             </form>
-            <table className="w-full min-w-[760px] text-sm">
+            <div className="overflow-x-auto w-full rounded-xl"><table className="w-full min-w-[760px] text-sm">
               <thead className="text-[var(--fi-muted)]">
                 <tr><th className="p-2 text-right">الصفقة</th><th className="p-2 text-right">الشركة</th><th className="p-2 text-right">نصيب المنصة</th><th className="p-2 text-right">الحالة</th></tr>
               </thead>
               <tbody>
                 {pending.map((row) => <tr key={row.id} className="border-t"><td className="p-2">{row.deal_id}</td><td className="p-2">{row.company_id}</td><td className="p-2">{money(Number(row.company_amount ?? 0))}</td><td className="p-2">{row.status}</td></tr>)}
               </tbody>
-            </table>
+            </table></div>
           </section>
         </>
       )}

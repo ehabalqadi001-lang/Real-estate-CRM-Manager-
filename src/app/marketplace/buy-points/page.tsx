@@ -36,21 +36,21 @@ export default async function BuyPointsPage({
     <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="ltr">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8">
-        <section className="rounded-lg border border-[#DDE6E4] bg-white p-6 shadow-sm">
+        <section className="rounded-lg border border-[#DDE6E4] bg-white p-4 sm:p-6 shadow-sm">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
               <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-[#27AE60]">
                 <Coins className="size-4" />
                 Marketplace Ads Wallet
               </p>
-              <h1 className="mt-2 text-3xl font-black">Buy Points</h1>
+              <h1 className="mt-2 text-xl sm:text-3xl font-black">Buy Points</h1>
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#64748B]">
                 Points are used exclusively to publish Regular and Premium marketplace ads. Paymob live payments top up this wallet after signed webhook confirmation.
               </p>
             </div>
             <div className="rounded-lg bg-[#27AE60] px-5 py-4 text-white">
               <p className="text-xs font-black uppercase tracking-[0.18em]">Balance</p>
-              <p className="mt-1 text-3xl font-black">{Number(wallet?.points_balance ?? 0).toLocaleString()} pts</p>
+              <p className="mt-1 text-xl sm:text-3xl font-black">{Number(wallet?.points_balance ?? 0).toLocaleString()} pts</p>
             </div>
           </div>
         </section>

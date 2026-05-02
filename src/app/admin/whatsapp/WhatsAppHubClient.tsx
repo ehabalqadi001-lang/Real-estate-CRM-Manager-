@@ -102,7 +102,7 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
 
         <div className="mt-4 max-h-[640px] space-y-2 overflow-y-auto pl-1">
           {filteredUsers.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[#DDE6E4] p-6 text-center text-sm font-bold text-[#64748B]">
+            <div className="rounded-lg border border-dashed border-[#DDE6E4] p-4 sm:p-6 text-center text-sm font-bold text-[#64748B]">
               لا توجد نتائج مطابقة
             </div>
           ) : (
@@ -215,7 +215,7 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-black text-[#64748B]">إجمالي السجلات</p>
-                <p className="mt-1 text-3xl font-black text-[#102033]">{users.length.toLocaleString('ar-EG')}</p>
+                <p className="mt-1 text-xl sm:text-3xl font-black text-[#102033]">{users.length.toLocaleString('ar-EG')}</p>
               </div>
               <div className="flex size-11 items-center justify-center rounded-lg bg-[#EAF8F0] text-[#27AE60]">
                 <UsersRound className="size-5" />
@@ -227,7 +227,7 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-black text-[#64748B]">أرقام متاحة</p>
-                <p className="mt-1 text-3xl font-black text-[#102033]">
+                <p className="mt-1 text-xl sm:text-3xl font-black text-[#102033]">
                   {users.filter((user) => user.phone).length.toLocaleString('ar-EG')}
                 </p>
               </div>

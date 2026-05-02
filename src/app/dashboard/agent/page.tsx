@@ -62,7 +62,7 @@ export default async function AgentDashboard() {
     <div className="p-5 space-y-5 min-h-screen bg-[#F4F6F9]" dir="rtl">
 
       {/* ── Welcome header ──────────────────────────────────────────── */}
-      <div className="bg-gradient-to-l from-[#0C1A2E] to-[#0F2748] rounded-2xl p-6 text-white shadow-xl">
+      <div className="bg-gradient-to-l from-[#0C1A2E] to-[#0F2748] rounded-2xl p-4 sm:p-6 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[#00C27C] text-xs font-bold uppercase tracking-widest mb-1">مساحة عملك</p>
@@ -76,7 +76,7 @@ export default async function AgentDashboard() {
         </div>
 
         {/* Mini stats inside header */}
-        <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/[0.08]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/[0.08]">
           {[
             { label: 'إجمالي العملاء', value: safeLeads.length, icon: Users, color: 'text-blue-300' },
             { label: 'مبيعات محققة', value: `${(totalWonValue / 1_000_000).toFixed(1)}M`, icon: TrendingUp, color: 'text-[#00C27C]' },

@@ -23,7 +23,7 @@ export default async function ActivitiesPage() {
     <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
       
       {/* الهيدر التكتيكي */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex justify-between items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-2xl bg-[#0A1128] text-white flex items-center justify-center shadow-lg">
             <Calendar size={28} className="text-blue-400" />

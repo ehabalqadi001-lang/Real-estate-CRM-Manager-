@@ -65,7 +65,7 @@ export default async function SuperAdminDashboardPage() {
 
   return (
     <main className="space-y-6 p-4 sm:p-6" dir="rtl">
-      <section className="rounded-lg border border-[var(--fi-line)] bg-[#050816] p-6 text-white shadow-xl">
+      <section className="rounded-lg border border-[var(--fi-line)] bg-[#050816] p-4 sm:p-6 text-white shadow-xl">
         <p className="text-xs font-black text-[var(--fi-emerald)]">منصة Fast Investment CRM</p>
         <h1 className="mt-2 text-2xl font-black sm:text-3xl">لوحة تحكم المالك</h1>
         <p className="mt-2 text-sm text-white/60">مؤشرات مركزية لكل الشركات والوكلاء والصفقات والعمولات.</p>

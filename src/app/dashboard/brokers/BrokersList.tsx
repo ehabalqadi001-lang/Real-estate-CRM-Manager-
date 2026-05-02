@@ -132,7 +132,7 @@ export default function BrokersList({ brokers }: Props) {
                   </div>
 
                   {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
                     <div className="bg-slate-50 rounded-xl p-2.5 text-center">
                       <p className="text-xs font-black text-slate-900">{broker.total_deals}</p>
                       <p className="text-[9px] text-slate-400">صفقة</p>
@@ -187,7 +187,7 @@ export default function BrokersList({ brokers }: Props) {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
                 {['الوسيط', 'المستوى', 'الحالة', 'الصفقات', 'المبيعات', 'العمولة', 'التواصل'].map(h => (
@@ -244,7 +244,7 @@ export default function BrokersList({ brokers }: Props) {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </div>

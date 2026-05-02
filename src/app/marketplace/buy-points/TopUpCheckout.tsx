@@ -50,7 +50,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 rounded-lg bg-[#F6FAF7] p-1">
+      <div className="mt-5 grid grid-cols-1 xs:grid-cols-2 gap-2 rounded-lg bg-[#F6FAF7] p-1">
         <PaymentMethodButton active={method === 'card'} icon={CreditCard} label="Card" onClick={() => setMethod('card')} />
         <PaymentMethodButton active={method === 'wallet'} icon={Smartphone} label="Wallet" onClick={() => setMethod('wallet')} />
       </div>

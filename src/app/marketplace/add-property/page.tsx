@@ -41,7 +41,7 @@ export default async function AddPropertyPage({
         <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_360px]">
           <section>
             <p className="text-sm font-black text-[#0F8F83]">إضافة وحدة عقارية</p>
-            <h1 className="mt-2 text-4xl font-black">محرك إدراج وحدات FAST INVESTMENT</h1>
+            <h1 className="mt-2 text-2xl sm:text-4xl font-black">محرك إدراج وحدات FAST INVESTMENT</h1>
             <p className="mt-3 max-w-3xl text-base font-semibold leading-8 text-[#64748B]">
               أضف بيانات وحدتك في نموذج متعدد الخطوات. كل إعلان يدخل حالة المراجعة أولا، ولا تظهر أرقام الهاتف للعامة؛ التواصل يتم عبر محادثة داخل النظام لحماية العميل والمشتري.
             </p>
@@ -51,7 +51,7 @@ export default async function AddPropertyPage({
               <Coins className="size-4 text-[#C9964A]" />
               محفظة الإعلانات
             </p>
-            <p className="mt-3 text-3xl font-black">{Number(walletResult.data?.points_balance ?? 0).toLocaleString()} pts</p>
+            <p className="mt-3 text-xl sm:text-3xl font-black">{Number(walletResult.data?.points_balance ?? 0).toLocaleString()} pts</p>
             <p className="mt-2 text-sm font-semibold leading-6 text-[#64748B]">
               Regular: {Number(costResult.data?.regular_points_cost ?? 10).toLocaleString()} pts · Premium: {Number(costResult.data?.premium_points_cost ?? 50).toLocaleString()} pts
             </p>

@@ -59,7 +59,7 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
             />
             <div className="p-5">
               <p className="text-3xl font-black text-[#17375E]">{Number(property.price).toLocaleString('ar-EG')} ج.م</p>
-              <h1 className="mt-3 text-4xl font-black">{property.title}</h1>
+              <h1 className="mt-3 text-2xl sm:text-4xl font-black">{property.title}</h1>
               <p className="mt-3 text-base font-semibold leading-8 text-[#64748B] whitespace-pre-wrap">{property.description}</p>
             </div>
 

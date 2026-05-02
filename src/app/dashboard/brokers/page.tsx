@@ -57,7 +57,7 @@ export default async function BrokersPage() {
     <div className="p-6 space-y-6" dir="rtl">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-100">
         <div>
           <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
             <Star className="text-amber-500" size={24} /> إدارة الوسطاء العقاريين

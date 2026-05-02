@@ -42,7 +42,7 @@ export default function CreatePayoutButton() {
 
       {open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" dir="rtl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 space-y-4" dir="rtl" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-black text-slate-900">إنشاء دفعة صرف جديدة</h3>
 
             <div className="space-y-3">
@@ -56,7 +56,7 @@ export default function CreatePayoutButton() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-600 mb-1 block">الشهر</label>
                   <select

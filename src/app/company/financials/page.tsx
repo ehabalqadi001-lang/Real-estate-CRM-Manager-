@@ -40,7 +40,7 @@ export default async function FinancialsPage() {
     <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
       
       {/* الهيدر المالي */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex justify-between items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center shadow-lg">
             <Wallet size={28} className="text-emerald-400" />
@@ -54,7 +54,7 @@ export default async function FinancialsPage() {
 
       {/* مؤشرات التدفق المالي (Financial KPIs) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute left-0 top-0 w-1 h-full bg-amber-500"></div>
           <div className="bg-amber-50 p-4 rounded-xl text-amber-600"><Clock size={28}/></div>
           <div>
@@ -63,7 +63,7 @@ export default async function FinancialsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
           <div className="bg-blue-50 p-4 rounded-xl text-blue-600"><ShieldCheck size={28}/></div>
           <div>
@@ -72,7 +72,7 @@ export default async function FinancialsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute left-0 top-0 w-1 h-full bg-emerald-500"></div>
           <div className="bg-emerald-50 p-4 rounded-xl text-emerald-600"><CheckCircle2 size={28}/></div>
           <div>

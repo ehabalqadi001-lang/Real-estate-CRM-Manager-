@@ -90,7 +90,7 @@ export default async function MarketplacePage() {
                 Verified Real Estate · Managed by FAST INVESTMENT
               </div>
 
-              <h1 className="max-w-xl text-4xl font-black leading-[1.1] text-slate-900 md:text-5xl lg:text-6xl">
+              <h1 className="max-w-xl text-2xl sm:text-4xl font-black leading-[1.1] text-slate-900 md:text-5xl lg:text-6xl">
                 Premium Properties
                 <span
                   className="block bg-clip-text text-transparent"

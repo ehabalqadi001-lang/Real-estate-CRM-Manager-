@@ -97,7 +97,7 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: 'إجمالي العملاء',  value: fmt(safeLeads.length),  icon: Users,      color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20' },
           { label: 'إجمالي الصفقات', value: fmt(safeDeals.length),  icon: Target,     color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },

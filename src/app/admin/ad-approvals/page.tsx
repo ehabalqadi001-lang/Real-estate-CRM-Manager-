@@ -24,7 +24,7 @@ export default async function AdApprovalsPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-black text-[#0F8F83]">Ad Approval Team</p>
-        <h1 className="mt-1 text-3xl font-black text-[#102033] dark:text-white">طابور مراجعة الإعلانات</h1>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">طابور مراجعة الإعلانات</h1>
         <p className="mt-1 text-sm font-semibold text-slate-500">
           راجع كل إعلان بضغطة واحدة — موافقة أو رفض مع سبب. اختصارات لوحة المفاتيح: → موافقة · ← رفض.
         </p>
@@ -50,7 +50,7 @@ function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: s
         {icon}
         <span className="text-sm font-black text-slate-500">{label}</span>
       </div>
-      <p className="mt-3 text-3xl font-black text-[#102033] dark:text-white">{value}</p>
+      <p className="mt-3 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">{value}</p>
     </div>
   )
 }

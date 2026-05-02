@@ -256,3 +256,73 @@ html[lang="en"] body {
     transition: none;
   }
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Mobile Responsive Utilities
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Fluid font size: scales between 14px (320px screen) and 16px (1280px+) */
+html {
+  font-size: clamp(14px, 0.875rem + 0.2vw, 16px);
+}
+
+/* Scrollable tables with consistent styling */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.75rem;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Touch-friendly minimum tap target */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent content overflow in flex/grid children */
+.min-w-0-safe {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobile-safe modal/sheet bottom spacing (iPhone home indicator) */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Responsive KPI card stack: full-width on mobile, 2 cols on sm, 4 on lg */
+@media (max-width: 375px) {
+  .ds-bento-kpi {
+    grid-column: span 12 / span 12;
+  }
+}
+
+/* Improve readability of Arabic text on small screens */
+@media (max-width: 640px) {
+  th, td {
+    font-size: 0.8125rem;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* ds-card consistent padding on mobile */
+  .ds-card {
+    border-radius: 0.75rem;
+  }
+}
+
+/* Prevent horizontal overflow at root level */
+body {
+  overflow-x: hidden;
+}

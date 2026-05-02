@@ -69,7 +69,7 @@ export default function TwoFactorSetup() {
       {open && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" dir="rtl">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={close} />
-          <div className="relative w-full max-w-md rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 sm:p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="flex items-center gap-2 font-black text-[var(--fi-ink)]">
                 <ShieldCheck className="size-5 text-[var(--fi-emerald)]" />

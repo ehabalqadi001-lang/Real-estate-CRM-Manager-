@@ -63,7 +63,7 @@ export default async function DealsPage() {
 
       {/* KPI strip */}
       {sales.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { label: 'الكل', value: counts.total, color: 'border-gray-200 bg-gray-50 text-gray-700' },
             { label: 'معتمدة', value: counts.approved, color: 'border-emerald-200 bg-emerald-50 text-emerald-700' },

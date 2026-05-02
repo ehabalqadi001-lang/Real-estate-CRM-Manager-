@@ -36,9 +36,9 @@ export default async function AdminCreateAdPage() {
   const premiumPoints = Number(costsResult.data?.premium_points_cost ?? 50)
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6" dir="ltr">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#17375E] via-[#1D4E89] to-[#0F8F83] p-6 text-white shadow-lg">
+    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6" dir="ltr">
+      <div className="mx-auto max-w-full xl:max-w-7xl space-y-6">
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#17375E] via-[#1D4E89] to-[#0F8F83] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-2">
               <p className="text-sm font-bold text-white/70">Marketplace Admin</p>

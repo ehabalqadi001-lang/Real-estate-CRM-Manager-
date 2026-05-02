@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
             <RotateCcw className="size-3.5" />
             FAST INVESTMENT
           </span>
-          <h1 className="mt-4 text-3xl font-black">استعادة كلمة المرور</h1>
+          <h1 className="mt-4 text-xl sm:text-3xl font-black">استعادة كلمة المرور</h1>
           <p className="mt-2 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
             أدخل بريدك الإلكتروني وسنرسل لك رابطا آمنا لتعيين كلمة مرور جديدة.
           </p>
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="fi-card rounded-2xl p-6 sm:p-8">
+        <form onSubmit={handleSubmit} className="fi-card rounded-2xl p-4 sm:p-6 sm:p-8">
           <label htmlFor="reset-email" className="mb-1.5 block text-sm font-black text-[var(--fi-ink)]">
             البريد الإلكتروني
           </label>

@@ -195,12 +195,12 @@ export function PointsDashboardClient({
 
   return (
     <div className="space-y-6 p-4 sm:p-6" dir="ltr">
-      <section className="rounded-lg border border-[#DDE6E4] bg-[#0B1120] p-6 text-white shadow-xl">
+      <section className="rounded-lg border border-[#DDE6E4] bg-[#0B1120] p-4 sm:p-6 text-white shadow-xl">
         <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-[#27AE60]">
           <ShieldCheck className="size-4" />
           FAST INVESTMENT Points Economy
         </p>
-        <h1 className="mt-2 text-3xl font-black">Marketplace Ads Wallet Control</h1>
+        <h1 className="mt-2 text-xl sm:text-3xl font-black">Marketplace Ads Wallet Control</h1>
         <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-300">
           Configure ad publication costs, maintain the public offers catalog, manage Paymob credentials, and apply secure wallet adjustments.
         </p>
@@ -214,21 +214,21 @@ export function PointsDashboardClient({
             <Activity className="size-4 text-[#27AE60]" />
             Circulating Points
           </div>
-          <p className="mt-2 text-3xl font-black text-[#0B1120]">{totalCirculatingPoints.toLocaleString()}</p>
+          <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">{totalCirculatingPoints.toLocaleString()}</p>
         </div>
         <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <TrendingUp className="size-4 text-[#27AE60]" />
             Lifetime Issued
           </div>
-          <p className="mt-2 text-3xl font-black text-[#0B1120]">{totalLifetimeEarned.toLocaleString()}</p>
+          <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">{totalLifetimeEarned.toLocaleString()}</p>
         </div>
         <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <CreditCard className="size-4 text-[#C9964A]" />
             Recent Top-ups Revenue
           </div>
-          <p className="mt-2 text-3xl font-black text-[#0B1120]">
+          <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">
             {recentTopupsEGP.toLocaleString()} <span className="text-lg text-[#64748B]">EGP</span>
           </p>
         </div>
@@ -237,7 +237,7 @@ export function PointsDashboardClient({
             <Package className="size-4 text-[#27AE60]" />
             Active Offers
           </div>
-          <p className="mt-2 text-3xl font-black text-[#0B1120]">{activePackagesCount}</p>
+          <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">{activePackagesCount}</p>
         </div>
       </section>
 
@@ -429,7 +429,7 @@ export function PointsDashboardClient({
             </tbody>
           </table>
           {(transactions ?? []).length === 0 && (
-            <p className="p-8 text-center text-sm font-semibold text-[#64748B]">No transactions found.</p>
+            <p className="p-4 sm:p-8 text-center text-sm font-semibold text-[#64748B]">No transactions found.</p>
           )}
         </div>
       </section>

@@ -78,7 +78,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: 'إجمالي العملاء', value: fmt(total),      icon: '👥', color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20' },
           { label: 'عملاء جدد',      value: fmt(fresh),     icon: '✨', color: 'text-indigo-600',  bg: 'bg-indigo-50 dark:bg-indigo-900/20' },

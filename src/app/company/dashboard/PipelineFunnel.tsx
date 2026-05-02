@@ -12,7 +12,7 @@ export default function PipelineFunnel({ data }: Props) {
   const maxCount = Math.max(...data.map(d => d.count), 1)
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 h-full">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6 h-full">
       <div className="mb-4">
         <h3 className="font-bold text-slate-800">مسار الصفقات (Pipeline)</h3>
         <p className="text-xs text-slate-400">توزيع الصفقات حسب المرحلة</p>

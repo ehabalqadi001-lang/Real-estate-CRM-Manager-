@@ -49,7 +49,7 @@ export default function CompareClient({ units }: { units: Unit[] }) {
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <GitCompare className="text-violet-600" size={24} />
           مقارنة الوحدات العقارية

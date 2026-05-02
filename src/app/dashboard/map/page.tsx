@@ -47,7 +47,7 @@ export default async function MapPage() {
   }))
 
   return (
-    <div className="space-y-5 p-6" dir="rtl">
+    <div className="space-y-5 p-4 sm:p-6" dir="rtl">
       <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <div className="flex size-10 items-center justify-center rounded-xl bg-[#00C27C] shadow-lg shadow-[#00C27C]/20">
           <MapPin size={18} className="text-white" />

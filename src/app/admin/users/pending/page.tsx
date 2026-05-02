@@ -42,7 +42,7 @@ export default async function PendingUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-black text-slate-900">طلبات الموافقة المعلقة</h1>
           <p className="text-sm text-slate-500 mt-1">مراجعة وثائق التسجيل للشركات والأفراد قبل تفعيل حساباتهم</p>
@@ -69,7 +69,7 @@ export default async function PendingUsersPage() {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {pendingUsers.map((user) => (
-            <div key={user.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
+            <div key={user.id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 flex flex-col">
               <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -86,7 +86,7 @@ export default async function PendingUsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm mb-6 flex-1">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 text-sm mb-6 flex-1">
                 <div className="flex items-center gap-2 text-slate-600">
                   <Phone size={16} className="text-slate-400" /> {user.phone || 'غير مسجل'}
                 </div>
@@ -115,7 +115,7 @@ export default async function PendingUsersPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-100">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-100">
                 <form action={approveUser}>
                   <input type="hidden" name="userId" value={user.id} />
                   <button type="submit" className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold transition-colors">

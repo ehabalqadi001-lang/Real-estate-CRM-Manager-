@@ -60,14 +60,14 @@ export function PipelineBoard() {
       </div>
 
       {/* Kanban Board */}
-      <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar h-[calc(100vh-250px)] items-start">
+      <div className="flex gap-4 overflow-x-auto pb-8 no-scrollbar h-[calc(100vh-250px)] items-start">
         {STAGES.map((stage) => {
           const stageDeals = deals.filter((d) => d.stage === stage.id)
-          
+
           return (
             <div
               key={stage.id}
-              className="sales-stage-column flex-shrink-0 w-80 rounded-2xl p-4 min-h-[200px]"
+              className="sales-stage-column flex-shrink-0 w-[calc(100vw-2rem)] xs:w-72 sm:w-80 rounded-2xl p-4 min-h-[200px]"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, stage.id)}
             >

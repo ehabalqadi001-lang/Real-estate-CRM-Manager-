@@ -136,7 +136,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
   if (!isManagerRole(session.profile.role) && !isSuperAdmin(session.profile.role) && session.profile.role !== 'account_manager') {
     return (
       <main className="p-6" dir="rtl">
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm font-black text-red-700">
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-4 sm:p-6 text-sm font-black text-red-700">
           غير مصرح لك بفتح إدارة الشركاء.
         </div>
       </main>
@@ -470,7 +470,7 @@ function ReviewApplicationForm({ applicationId }: { applicationId: string }) {
     <form action={reviewPartnerApplication} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3">
       <input type="hidden" name="applicationId" value={applicationId} />
       <textarea name="reason" rows={2} placeholder="سبب الرفض أو طلب الاستكمال" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-sm font-semibold outline-none" />
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button name="decision" value="approved" className="sales-success inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black text-white"><UserCheck className="size-4" /> اعتماد</button>
         <button name="decision" value="needs_info" className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 py-2 text-xs font-black text-white"><Clock className="size-4" /> استكمال</button>
         <button name="decision" value="rejected" className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-xs font-black text-white"><XCircle className="size-4" /> رفض</button>
@@ -484,7 +484,7 @@ function ReviewSaleForm({ saleId }: { saleId: string }) {
     <form action={reviewBrokerSale} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)]/70 p-3">
       <input type="hidden" name="saleId" value={saleId} />
       <textarea name="reason" rows={2} placeholder="سبب الرفض إن وجد" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-sm font-semibold outline-none" />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         <button name="decision" value="approved" className="sales-success rounded-xl px-3 py-2 text-xs font-black text-white">اعتماد البيع وإنشاء العمولة</button>
         <button name="decision" value="rejected" className="rounded-lg bg-red-600 px-3 py-2 text-xs font-black text-white">رفض البيع</button>
       </div>

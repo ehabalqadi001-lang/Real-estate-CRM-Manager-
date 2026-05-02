@@ -41,7 +41,7 @@ export default async function RoleAssignmentPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-black text-[#0F8F83]">Super Admin</p>
-        <h1 className="mt-1 flex items-center gap-2 text-3xl font-black text-[#102033] dark:text-white">
+        <h1 className="mt-1 flex items-center gap-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">
           <ShieldCheck className="size-8 text-[#C9964A]" />
           تعيين الأدوار الوظيفية
         </h1>

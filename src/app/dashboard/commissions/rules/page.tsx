@@ -49,7 +49,7 @@ export default async function CommissionRulesPage() {
             <p className="text-sm text-[var(--fi-muted)] mt-1">أضف قاعدة لحساب العمولات تلقائياً عند تسجيل الصفقات</p>
           </div>
         ) : (
-          <table className="w-full text-right">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full text-right">
             <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               <tr>
                 {['الاسم', 'النوع', 'المشروع', 'النسبة / المبلغ', 'الحالة', ''].map(h => (
@@ -83,7 +83,7 @@ export default async function CommissionRulesPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
     </div>

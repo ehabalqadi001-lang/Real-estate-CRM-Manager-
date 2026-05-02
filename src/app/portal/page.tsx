@@ -56,7 +56,7 @@ export default function ClientPortalPage() {
   const getStageIndex = (stage: string) => STAGES.findIndex(s => s.key === stage)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-950 flex flex-col items-center justify-start p-6 pt-16" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-950 flex flex-col items-center justify-start p-4 sm:p-6 pt-16" dir="rtl">
       {/* Logo */}
       <div className="text-center mb-10">
         <h1 className="text-3xl font-black text-white italic">FAST <span className="text-yellow-400">INVESTMENT</span></h1>
@@ -64,7 +64,7 @@ export default function ClientPortalPage() {
       </div>
 
       {/* Search Card */}
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-md">
         <h2 className="text-xl font-bold text-slate-800 mb-2">تتبع صفقتك العقارية</h2>
         <p className="text-sm text-slate-500 mb-6">أدخل رقم هاتفك المسجل لعرض حالة صفقتك</p>
 
@@ -108,7 +108,7 @@ export default function ClientPortalPage() {
             deals.map(deal => {
               const stageIdx = getStageIndex(deal.stage)
               return (
-                <div key={deal.id} className="bg-white rounded-2xl shadow-xl p-6">
+                <div key={deal.id} className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-bold text-slate-800">{deal.compound}</h3>

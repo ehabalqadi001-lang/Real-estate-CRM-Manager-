@@ -55,7 +55,7 @@ export default function AddUnitButton({ projectId }: Props) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" dir="rtl">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6" dir="rtl">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-slate-900">إضافة وحدة جديدة</h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -66,7 +66,7 @@ export default function AddUnitButton({ projectId }: Props) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-600 block mb-1">رقم الوحدة *</label>
                   <input name="unit_number" required
@@ -81,7 +81,7 @@ export default function AddUnitButton({ projectId }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-600 block mb-1">السعر (ج.م)</label>
                   <input name="price" type="number" min="0"
@@ -94,7 +94,7 @@ export default function AddUnitButton({ projectId }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-600 block mb-1">عدد الغرف</label>
                   <input name="bedrooms" type="number" min="0"

@@ -67,7 +67,7 @@ export default function LoginPage() {
           variants={slideInLeft}
           initial="hidden"
           animate="show"
-          className="fi-login-hero relative flex flex-col justify-between overflow-hidden p-8 text-white lg:w-[58%] lg:p-14"
+          className="fi-login-hero relative flex flex-col justify-between overflow-hidden p-4 sm:p-8 text-white lg:w-[58%] lg:p-14"
         >
           {/* Hero grid overlay */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -111,7 +111,7 @@ export default function LoginPage() {
               </span>
             </motion.div>
 
-            <motion.h1 variants={fadeUp} className="mt-6 max-w-xl text-4xl font-black leading-[1.12] lg:text-5xl">
+            <motion.h1 variants={fadeUp} className="mt-6 max-w-xl text-2xl sm:text-4xl font-black leading-[1.12] lg:text-5xl">
               Your Real Estate
               <span className="block bg-gradient-to-r from-emerald-300 to-blue-300 bg-clip-text text-transparent">
                 Command Center.
@@ -123,7 +123,7 @@ export default function LoginPage() {
             </motion.p>
 
             {/* Stats */}
-            <motion.div variants={fadeUp} className="mt-8 grid grid-cols-3 gap-3">
+            <motion.div variants={fadeUp} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { icon: TrendingUp, value: '500+', label: 'Active Deals' },
                 { icon: Users, value: '200+', label: 'Partners' },
@@ -166,7 +166,7 @@ export default function LoginPage() {
           variants={slideInRight}
           initial="hidden"
           animate="show"
-          className="flex min-h-screen items-center justify-center bg-[#f2f7ff] p-6 lg:min-h-0 lg:w-[42%] lg:p-10"
+          className="flex min-h-screen items-center justify-center bg-[#f2f7ff] p-4 sm:p-6 lg:min-h-0 lg:w-[42%] lg:p-10"
         >
           <div className="w-full max-w-md">
             {/* Form card */}
@@ -174,11 +174,11 @@ export default function LoginPage() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, type: 'spring', stiffness: 260, damping: 22 }}
-              className="fi-login-card rounded-3xl p-8"
+              className="fi-login-card rounded-3xl p-4 sm:p-8"
             >
               <div className="mb-7">
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-blue-600">Secure Access</p>
-                <h2 className="mt-2 text-3xl font-black text-slate-900">Sign In</h2>
+                <h2 className="mt-2 text-xl sm:text-3xl font-black text-slate-900">Sign In</h2>
                 <p className="mt-2 text-sm font-semibold text-slate-500">
                   Enter your credentials to access your workspace.
                 </p>
@@ -281,7 +281,7 @@ export default function LoginPage() {
               </div>
 
               {/* Register options */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <Link href="/register?role=client"
                   className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-600">
                   <Users className="size-3.5" />

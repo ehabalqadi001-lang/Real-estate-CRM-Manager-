@@ -50,9 +50,9 @@ export default async function AdminUsersPage({ searchParams }: { searchParams?: 
         <Button>تطبيق الفلاتر</Button>
       </form>
 
-      {error ? <div className="rounded-lg bg-[var(--fi-paper)] p-6 text-destructive">{error.message}</div> : (
+      {error ? <div className="rounded-lg bg-[var(--fi-paper)] p-4 sm:p-6 text-destructive">{error.message}</div> : (
         <div className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)]">
-          <table className="w-full min-w-[1050px] text-sm">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full min-w-[1050px] text-sm">
             <thead className="bg-[var(--fi-soft)] text-[var(--fi-muted)]">
               <tr><th className="p-3 text-right">الاسم</th><th className="p-3 text-right">الشركة</th><th className="p-3 text-right">الدور</th><th className="p-3 text-right">الحالة</th><th className="p-3 text-right">تاريخ الانضمام</th><th className="p-3 text-right">إجراءات</th></tr>
             </thead>
@@ -73,7 +73,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams?: 
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </main>

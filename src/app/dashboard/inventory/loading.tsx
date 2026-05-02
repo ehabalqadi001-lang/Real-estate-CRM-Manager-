@@ -49,13 +49,13 @@ export default function InventoryLoading() {
                 <div className="space-y-4 p-4">
                   <div className="h-5 w-44 rounded-md ds-skeleton" />
                   <div className="h-4 w-32 rounded-md ds-skeleton" />
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     {Array.from({ length: 4 }).map((_, specIndex) => (
                       <div key={specIndex} className="h-7 rounded-md ds-skeleton" />
                     ))}
                   </div>
                   <div className="h-7 w-36 rounded-md ds-skeleton" />
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {Array.from({ length: 3 }).map((_, actionIndex) => (
                       <div key={actionIndex} className="h-9 rounded-lg ds-skeleton" />
                     ))}

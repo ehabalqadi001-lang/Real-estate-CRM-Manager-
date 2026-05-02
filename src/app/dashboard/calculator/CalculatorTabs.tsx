@@ -38,7 +38,7 @@ function MortgageCalc() {
           </div>
         ))}
       </div>
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-6 space-y-4">
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-4 sm:p-6 space-y-4">
         <h3 className="text-lg font-bold opacity-80">نتائج التمويل</h3>
         {[
           { label: 'مبلغ التمويل', value: principal.toLocaleString('ar-EG', { maximumFractionDigits: 0 }) + ' ج.م' },
@@ -98,7 +98,7 @@ function PaymentPlanCalc() {
         ))}
       </div>
       <div className="space-y-3">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 grid grid-cols-2 gap-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 grid grid-cols-1 xs:grid-cols-2 gap-3">
           {[
             { label: 'المقدم', value: down },
             { label: 'قسط التسليم', value: delivery },
@@ -183,7 +183,7 @@ function ROICalc() {
           </div>
         ))}
       </div>
-      <div className="bg-gradient-to-br from-purple-700 to-indigo-900 text-white rounded-2xl p-6 space-y-3">
+      <div className="bg-gradient-to-br from-purple-700 to-indigo-900 text-white rounded-2xl p-4 sm:p-6 space-y-3">
         <h3 className="text-lg font-bold opacity-80">تحليل العائد</h3>
         {[
           { label: 'العائد الإجمالي على الاستثمار', value: roi.toFixed(1) + '%', big: true },

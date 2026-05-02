@@ -52,7 +52,7 @@ export default async function Client360Page({ params }: { params: Promise<{ id: 
   const initials = (profile.full_name ?? profile.email ?? 'C').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
 
   return (
-    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-6" dir="rtl">
+    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-4 sm:p-6" dir="rtl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500">
         <Link href="/admin/marketplace/clients" className="flex items-center gap-1 hover:text-teal-600">
@@ -99,7 +99,7 @@ export default async function Client360Page({ params }: { params: Promise<{ id: 
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500">رصيد النقاط</p>
-              <p className="mt-1 text-3xl font-black text-emerald-700">{Number(wallet?.points_balance ?? 0).toLocaleString('ar-EG')}</p>
+              <p className="mt-1 text-xl sm:text-3xl font-black text-emerald-700">{Number(wallet?.points_balance ?? 0).toLocaleString('ar-EG')}</p>
             </div>
             <Wallet className="size-8 text-emerald-300" />
           </div>
@@ -108,7 +108,7 @@ export default async function Client360Page({ params }: { params: Promise<{ id: 
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500">نقاط مكتسبة</p>
-              <p className="mt-1 text-3xl font-black text-blue-700">{Number(wallet?.lifetime_points_earned ?? 0).toLocaleString('ar-EG')}</p>
+              <p className="mt-1 text-xl sm:text-3xl font-black text-blue-700">{Number(wallet?.lifetime_points_earned ?? 0).toLocaleString('ar-EG')}</p>
             </div>
             <Coins className="size-8 text-blue-300" />
           </div>
@@ -117,7 +117,7 @@ export default async function Client360Page({ params }: { params: Promise<{ id: 
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500">إعلانات مباشرة</p>
-              <p className="mt-1 text-3xl font-black text-purple-700">{(activeAds ?? []).length}</p>
+              <p className="mt-1 text-xl sm:text-3xl font-black text-purple-700">{(activeAds ?? []).length}</p>
             </div>
             <ShoppingBag className="size-8 text-purple-300" />
           </div>
@@ -126,7 +126,7 @@ export default async function Client360Page({ params }: { params: Promise<{ id: 
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500">إعلانات معلقة</p>
-              <p className="mt-1 text-3xl font-black text-amber-700">{(pendingAds ?? []).length}</p>
+              <p className="mt-1 text-xl sm:text-3xl font-black text-amber-700">{(pendingAds ?? []).length}</p>
             </div>
             <Clock className="size-8 text-amber-300" />
           </div>

@@ -9,7 +9,7 @@ export default function PaymentTermsPage() {
   return (
     <main className="min-h-screen bg-[#F7FBF8] px-4 py-8 text-[#102033]">
       <section className="mx-auto max-w-4xl overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <header className="border-b border-[#DDE6E4] bg-[#27AE60] px-6 py-8 text-white md:px-10">
+        <header className="border-b border-[#DDE6E4] bg-[#27AE60] px-4 sm:px-6 py-8 text-white md:px-10">
           <div className="flex items-center gap-3">
             <span className="flex size-11 items-center justify-center rounded-lg bg-white/15">
               <ShieldCheck className="size-6" />
@@ -21,7 +21,7 @@ export default function PaymentTermsPage() {
           </div>
         </header>
 
-        <article className="space-y-7 px-6 py-8 text-lg font-semibold leading-9 md:px-10">
+        <article className="space-y-7 px-4 sm:px-6 py-8 text-lg font-semibold leading-9 md:px-10">
           <p>
             This page explains the terms related to electronic payments and marketplace points purchases on the FAST INVESTMENT platform.
           </p>

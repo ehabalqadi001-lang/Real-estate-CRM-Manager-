@@ -69,7 +69,7 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" dir="rtl">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-base font-black text-slate-900">حجز مؤقت</h2>

@@ -68,7 +68,7 @@ export default async function BrokerProfilePage() {
     <div className="space-y-5 max-w-2xl" dir="rtl">
 
       {/* ── Header ── */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
             <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-xl select-none overflow-hidden">
@@ -105,7 +105,7 @@ export default async function BrokerProfilePage() {
           {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${completionPct}%` }} />
         </div>
-        <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-2 gap-x-4">
           {completionItems.map(({ label, done }) => (
             <div key={label} className="flex items-center gap-2 text-sm">
               {done

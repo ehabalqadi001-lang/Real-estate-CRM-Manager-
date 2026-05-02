@@ -169,7 +169,7 @@ export default function DevelopersPage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 mb-4">
                     <div className="bg-slate-50 rounded-xl p-3 text-center">
                       <p className="text-xs text-slate-400 mb-0.5">حجم المبيعات</p>
                       <p className="text-sm font-black text-blue-600">{(dev.totalVolume / 1_000_000).toFixed(1)}M</p>
@@ -225,7 +225,7 @@ export default function DevelopersPage() {
                 <input required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">المنطقة</label>
                   <select value={form.region} onChange={e => setForm({...form, region: e.target.value})}

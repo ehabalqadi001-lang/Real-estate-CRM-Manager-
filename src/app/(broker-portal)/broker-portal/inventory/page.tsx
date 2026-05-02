@@ -63,7 +63,7 @@ export default async function InventoryPage() {
 
       {/* Stats strip */}
       {projects.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800 p-3 text-center">
             <p className="text-2xl font-black text-emerald-700">{projects.length}</p>
             <p className="text-xs text-emerald-600 font-semibold mt-0.5">مشاريع نشطة</p>

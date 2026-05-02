@@ -71,7 +71,7 @@ export default async function CompanyDashboardPage() {
 
   if (profileError) {
     return (
-      <div className="bg-red-50 p-6 rounded-2xl flex items-start gap-4 m-8" dir="rtl">
+      <div className="bg-red-50 p-4 sm:p-6 rounded-2xl flex items-start gap-4 m-8" dir="rtl">
         <AlertTriangle className="text-red-500 flex-shrink-0" size={24} />
         <div>
           <h3 className="font-bold text-red-800">خطأ في جلب البيانات</h3>

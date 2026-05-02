@@ -16,8 +16,8 @@ export default function LeadsError({
   }, [error])
 
   return (
-    <div className="flex h-[80vh] flex-col items-center justify-center p-8 text-center" dir="rtl">
-      <div className="bg-red-50 p-8 rounded-3xl border border-red-100 max-w-lg w-full shadow-lg">
+    <div className="flex h-[80vh] flex-col items-center justify-center p-4 sm:p-8 text-center" dir="rtl">
+      <div className="bg-red-50 p-4 sm:p-8 rounded-3xl border border-red-100 max-w-lg w-full shadow-lg">
         <AlertTriangle className="mx-auto text-red-500 mb-6" size={64} />
         <h2 className="text-2xl font-black text-slate-900 mb-3">عذراً، حدث خلل في مسار المبيعات</h2>
         <p className="text-slate-600 mb-8 font-medium">
@@ -28,7 +28,7 @@ export default function LeadsError({
         </p>
         <button
           onClick={() => reset()}
-          className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-md shadow-red-900/20"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-md shadow-red-900/20"
         >
           <RefreshCcw size={18} />
           إعادة تحميل مسار المبيعات

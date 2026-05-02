@@ -58,7 +58,7 @@ export default async function AccountManagerWorkspacePage() {
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-black text-[#0F8F83]">Account Management</p>
-          <h1 className="mt-1 text-3xl font-black text-[#102033] dark:text-white">مساحة عمل مدير الحسابات</h1>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">مساحة عمل مدير الحسابات</h1>
           <p className="mt-1 text-sm font-semibold text-slate-500">
             عرض 360° لملفات العملاء، أرصدة النقاط، والإعلانات النشطة.
           </p>
@@ -118,7 +118,7 @@ function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; 
   return (
     <div className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
       <div className="flex items-center gap-2 text-[#0F8F83]">{icon}</div>
-      <p className="mt-2 text-3xl font-black text-[#102033] dark:text-white">{value}</p>
+      <p className="mt-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">{value}</p>
       <p className="text-xs font-semibold text-slate-500">{label}</p>
     </div>
   )

@@ -18,7 +18,7 @@ export default async function MarketplaceChatPage() {
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6">
           <p className="text-sm font-black text-[#0F8F83]">مركز المحادثات</p>
-          <h1 className="mt-2 text-4xl font-black">التواصل الداخلي للعقارات</h1>
+          <h1 className="mt-2 text-2xl sm:text-4xl font-black">التواصل الداخلي للعقارات</h1>
           <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[#64748B]">
             هذه واجهة أولية لمحادثات المشتري والبائع. الربط الفعلي يستخدم React Query و Supabase Realtime عبر `useChatMessages`.
           </p>

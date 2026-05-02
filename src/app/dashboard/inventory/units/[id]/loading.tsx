@@ -12,7 +12,7 @@ export default function UnitDetailLoading() {
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
             <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
               {Array.from({length: 6}).map((_, i) => (
                 <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 rounded-xl" />
               ))}

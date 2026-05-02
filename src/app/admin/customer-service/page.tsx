@@ -13,7 +13,7 @@ export default function CustomerServicePage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-black text-[#0F8F83]">Customer Service Team</p>
-        <h1 className="mt-2 text-3xl font-black text-[#102033] dark:text-white">مركز خدمة العملاء الموحد</h1>
+        <h1 className="mt-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">مركز خدمة العملاء الموحد</h1>
         <p className="mt-2 text-sm font-semibold text-slate-500">إدارة محادثات النظام وتجهيز قناة WhatsApp Business API ضمن نفس شاشة التشغيل.</p>
       </div>
 

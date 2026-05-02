@@ -291,7 +291,7 @@ export default async function LeavesPage() {
 
       {/* Leave types reference card */}
       {!leaveTypes.length && (
-        <section className="ds-card border-2 border-dashed border-[var(--fi-line)] p-8 text-center">
+        <section className="ds-card border-2 border-dashed border-[var(--fi-line)] p-4 sm:p-8 text-center">
           <CalendarOff className="mx-auto mb-3 size-10 text-[var(--fi-muted)]" />
           <p className="font-black text-[var(--fi-ink)]">لا توجد أنواع إجازات مُعرَّفة</p>
           <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">

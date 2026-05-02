@@ -53,10 +53,10 @@ export default async function MarketplaceFinancePage() {
     .reduce((sum, t) => sum + Math.abs(Number(t.points_delta ?? 0)), 0)
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div>
         <p className="text-sm font-black text-[#0F8F83]">Finance Team</p>
-        <h1 className="mt-2 text-3xl font-black text-[#102033] dark:text-white">إيرادات الباقات ومحافظ النقاط</h1>
+        <h1 className="mt-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">إيرادات الباقات ومحافظ النقاط</h1>
         <p className="mt-2 text-sm font-semibold text-slate-500">متابعة المدفوعات، أرصدة النقاط، وتسوية عمليات شراء الباقات.</p>
       </div>
 
@@ -131,7 +131,7 @@ function FinanceCard({ icon, label, value }: { icon: ReactElement; label: string
         {icon}
         <span className="text-sm font-black text-slate-500">{label}</span>
       </div>
-      <p className="mt-3 text-3xl font-black text-[#102033] dark:text-white">{value}</p>
+      <p className="mt-3 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">{value}</p>
     </div>
   )
 }

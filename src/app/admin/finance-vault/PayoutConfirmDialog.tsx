@@ -61,7 +61,7 @@ export function PayoutConfirmDialog({ payoutId, recipientName, amount }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-[#DDE6E4] bg-white p-6 shadow-2xl dark:bg-slate-900">
+      <div className="w-full max-w-sm rounded-2xl border border-[#DDE6E4] bg-white p-4 sm:p-6 shadow-2xl dark:bg-slate-900">
         <div className="mb-4 flex items-center gap-3">
           <div className="rounded-xl bg-[#C9964A]/10 p-2">
             <ShieldAlert className="size-6 text-[#C9964A]" />

@@ -136,7 +136,7 @@ export function AdminAdCreateForm({
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <form
         ref={formRef}
-        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm"
         onSubmit={(event) => {
           event.preventDefault()
           handleSubmit()
@@ -167,7 +167,7 @@ export function AdminAdCreateForm({
           </Field>
 
           <Field label="Listing type" hint="Controls point spend">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setListingType('REGULAR')}

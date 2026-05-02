@@ -25,13 +25,13 @@ export default async function NewLeadPage({ searchParams }: PageProps) {
   const params = await searchParams
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6" dir="rtl">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6" dir="rtl">
       <div className="mx-auto max-w-2xl space-y-5">
         <Link href="/dashboard/leads" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900">
           <ArrowRight size={16} /> العودة للعملاء المحتملين
         </Link>
 
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-6 shadow-sm">
           <div className="mb-6 border-b border-slate-100 pb-5">
             <h1 className="text-2xl font-black text-slate-950">إضافة عميل محتمل</h1>
             <p className="mt-1 text-sm text-slate-500">سجل بيانات العميل ليظهر داخل مسار المبيعات الخاص بك.</p>

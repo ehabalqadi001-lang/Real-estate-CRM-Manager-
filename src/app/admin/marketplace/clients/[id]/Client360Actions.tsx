@@ -85,7 +85,7 @@ export function Client360Actions({ clientId, isSuspended }: Props) {
       {/* Wallet Adjust Modal */}
       {walletModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Coins className="size-5 text-emerald-500" />

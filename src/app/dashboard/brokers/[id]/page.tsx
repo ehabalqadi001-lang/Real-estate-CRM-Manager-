@@ -235,7 +235,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
         </div>
 
         {/* KPI strip */}
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-5 grid grid-cols-1 xs:grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { label: 'إجمالي الصفقات', value: fmt(brokerTotalDeals), icon: Briefcase },
             { label: 'إجمالي المبيعات', value: brokerTotalSales > 0 ? fmtMoney(brokerTotalSales) : fmt(totalSales) + ' ج.م', icon: DollarSign },
@@ -262,7 +262,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
       {tab === 'profile' && (
         <div className="grid gap-5 lg:grid-cols-2">
           <SectionCard title="البيانات الشخصية" icon={User}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <InfoItem label="الاسم الكامل" value={broker.full_name} />
               <InfoItem label="اسم العرض" value={broker.display_name} />
               <InfoItem label="رقم الهاتف" value={broker.phone} dir="ltr" />
@@ -273,7 +273,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
           </SectionCard>
 
           <SectionCard title="بيانات الأعمال" icon={Building2}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <InfoItem label="كود الشريك" value={brokerCode} />
               <InfoItem label="المستوى" value={tier.label} />
               <InfoItem label="نسبة العمولة" value={`${broker.broker_commission_rate ?? broker.commission_rate ?? 0}%`} />
@@ -339,7 +339,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
           ) : (
             <>
               {/* Summary strip */}
-              <div className="mb-5 grid grid-cols-4 gap-3">
+              <div className="mb-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   { label: 'إجمالي', value: sales.length },
                   { label: 'معتمدة', value: sales.filter(s => s.status === 'approved').length },
@@ -450,7 +450,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
               <p className="py-6 text-center text-sm text-[var(--fi-muted)]">لا توجد مبيعات مسجلة</p>
             ) : (
               <>
-                <div className="mb-4 grid grid-cols-3 gap-3">
+                <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
                     <p className="text-lg font-black text-[var(--fi-emerald)]">{fmtMoney(approvedSales.reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
                     <p className="text-xs font-bold text-[var(--fi-muted)]">عمولة معتمدة</p>
@@ -515,7 +515,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
           )}
 
           <SectionCard title="معلومات الحساب" icon={Shield}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <InfoItem label="كود الشريك" value={brokerCode} />
               <InfoItem label="معرّف النظام (ID)" value={broker.id} dir="ltr" />
               <InfoItem label="Profile ID" value={profileId ?? '—'} dir="ltr" />

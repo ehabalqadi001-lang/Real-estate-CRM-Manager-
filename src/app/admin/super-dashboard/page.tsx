@@ -55,15 +55,15 @@ export default async function SuperDashboard() {
               <Field label="Initial admin email" name="admin_email" type="email" placeholder="admin@prime.example.com" />
               <Field label="Logo URL" name="logo_url" placeholder="https://..." />
               <Field label="Brand color" name="primary_brand_color" type="color" defaultValue="#0f766e" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <Field label="Max users" name="max_users" type="number" defaultValue="10" min="1" />
                 <Field label="Max listings" name="max_listings" type="number" defaultValue="100" min="1" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <SelectField label="Plan" name="plan_tier" options={plans.map((plan) => ({ label: String(plan.name), value: String(plan.slug) }))} />
                 <SelectField label="Tenant status" name="status" options={statusOptions} defaultValue="trial" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <SelectField label="Subscription" name="subscription_status" options={subscriptionOptions} defaultValue="trial" />
                 <SelectField label="Cycle" name="billing_cycle" options={cycleOptions} defaultValue="monthly" />
               </div>
@@ -93,7 +93,7 @@ export default async function SuperDashboard() {
                     <p className="mt-1 text-sm text-[var(--fi-muted)]">
                       {tenant.subdomain ? `${tenant.subdomain}.fastinvestment.com` : tenant.domain ?? 'No tenant subdomain'}
                     </p>
-                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-1 xs:grid-cols-2 gap-3 text-sm md:grid-cols-4">
                       <MiniStat label="Users" value={tenant.user_count ?? 0} />
                       <MiniStat label="Leads" value={tenant.lead_count ?? 0} />
                       <MiniStat label="Deals" value={tenant.deal_count ?? 0} />
@@ -103,7 +103,7 @@ export default async function SuperDashboard() {
 
                   <form action={updateTenantPlan} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
                     <input type="hidden" name="tenant_id" value={tenant.tenant_id} />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                       <SelectField label="Plan" name="plan_tier" defaultValue={tenant.plan_tier} options={plans.map((plan) => ({ label: String(plan.name), value: String(plan.slug) }))} compact />
                       <SelectField label="Tenant" name="status" defaultValue={tenant.tenant_status} options={statusOptions} compact />
                       <SelectField label="Billing" name="subscription_status" defaultValue={tenant.subscription_status ?? 'trial'} options={subscriptionOptions} compact />
@@ -141,7 +141,7 @@ function MetricCard({ icon: Icon, label, value }: { icon: LucideIcon; label: str
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--fi-muted)]">{label}</p>
-            <p className="mt-2 text-3xl font-black text-[var(--fi-ink)]">{value}</p>
+            <p className="mt-2 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">{value}</p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-lg bg-[var(--fi-soft)] text-[var(--fi-emerald)]">
             <Icon className="size-5" />

@@ -52,9 +52,9 @@ export default async function ModerationPage() {
   ]
 
   return (
-    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-6" dir="rtl">
+    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-4 sm:p-6" dir="rtl">
       {/* Header */}
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-l from-amber-600 via-orange-500 to-red-500 p-6 text-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-l from-amber-600 via-orange-500 to-red-500 p-4 sm:p-6 text-white shadow-lg">
         <div className="flex items-center gap-4">
           <div className="flex size-12 items-center justify-center rounded-xl bg-white/20">
             <ShieldAlert className="size-6" />
@@ -76,7 +76,7 @@ export default async function ModerationPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-500">{s.label}</p>
-                <p className={`mt-1 text-3xl font-black ${s.text}`}>{s.value}</p>
+                <p className={`mt-1 text-xl sm:text-3xl font-black ${s.text}`}>{s.value}</p>
               </div>
               <div className={`flex size-11 items-center justify-center rounded-xl ${s.iconBg}`}>
                 <s.icon className={`size-5 ${s.text}`} />

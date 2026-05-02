@@ -144,7 +144,7 @@ export default function TargetsClient({
                 <input type="month" name="month" defaultValue={currentMonth} required
                   className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-400" />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">الإيراد (ج.م)</label>
                   <input type="number" name="revenue_target" min={0} placeholder="0" required

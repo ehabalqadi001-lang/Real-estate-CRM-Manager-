@@ -234,7 +234,7 @@ export function ModerationTable({ ads: initialAds }: { ads: PendingAd[] }) {
       {/* Modal Backdrop */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
             {/* Modal header */}
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">

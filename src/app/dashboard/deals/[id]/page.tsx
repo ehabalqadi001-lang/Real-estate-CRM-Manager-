@@ -256,7 +256,7 @@ export default function DealDetailsPage() {
                 // eslint-disable-next-line no-inline-styles/no-inline-styles
                 <div style={{textAlign: 'center', color: '#64748b', padding: '20px'}}>لم يتم إعداد جدول أقساط لهذه الصفقة بعد.</div>
               ) : (
-                <table>
+                <div className="overflow-x-auto w-full rounded-xl"><table>
                   <thead>
                     <tr>
                       <th>تاريخ الاستحقاق</th>
@@ -292,7 +292,7 @@ export default function DealDetailsPage() {
                       );
                     })}
                   </tbody>
-                </table>
+                </table></div>
               )}
             </div>
           </div>

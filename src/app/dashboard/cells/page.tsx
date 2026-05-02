@@ -129,7 +129,7 @@ export default async function CellsPage() {
                     {cell.status === 'active' ? 'نشطة' : cell.status}
                   </span>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
                   <Metric label="GMV" value={`${Number(cell.monthly_gmv_target ?? 0).toLocaleString('ar-EG')} ج.م`} />
                   <Metric label="Leads" value={String(cell.monthly_leads_target ?? 0)} />
                   <Metric label="تحويل" value={`${cell.conversion_target_pct ?? 0}%`} />

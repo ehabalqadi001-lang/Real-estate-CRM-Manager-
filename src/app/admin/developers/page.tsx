@@ -77,7 +77,7 @@ export default async function AdminDevelopersPage() {
               {/* Regions */}
               <div className="space-y-1.5">
                 <Label>المناطق الجغرافية</Label>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border bg-muted/30 p-3">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border bg-muted/30 p-3">
                   {AREAS.map((area) => (
                     <label key={area} className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
                       <input type="checkbox" name="regions" value={area} className="accent-emerald-600" />
@@ -119,7 +119,7 @@ export default async function AdminDevelopersPage() {
               <Field name="min_value" label="أقل قيمة صفقة" type="number" defaultValue="0" />
               <Field name="max_value" label="أعلى قيمة صفقة (فارغ = بلا حد)" type="number" />
               <Field name="rate_percentage" label="نسبة عمولة المطور %" type="number" step="0.01" required />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                 <Field name="agent_share_percentage" label="نصيب الوكيل %" type="number" defaultValue="70" />
                 <Field name="company_share_percentage" label="نصيب الشركة %" type="number" defaultValue="30" />
               </div>
@@ -161,7 +161,7 @@ export default async function AdminDevelopersPage() {
                   {projects?.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                 <Field name="developer_commission_rate" label="عمولة المطور %" type="number" step="0.01" required />
                 <Field name="broker_commission_rate" label="عمولة الشريك %" type="number" step="0.01" required />
               </div>

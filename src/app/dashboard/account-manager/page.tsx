@@ -79,7 +79,7 @@ export default async function AccountManagerDashboard({
     return (
       <div className="space-y-6 p-4 sm:p-6" dir="rtl">
         <PageHeader amName={session.profile.full_name} isAdmin={isAdmin} />
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-8 text-center">
           <UserCheck className="mx-auto mb-3 size-10 text-amber-400" />
           <p className="font-black text-amber-800">لم يتم تعيين أي شركاء لك بعد</p>
           <p className="mt-1 text-sm font-semibold text-amber-700">تواصل مع قسم الـ HR لتعيين الشركاء المسؤول عنهم.</p>
@@ -324,7 +324,7 @@ function ReviewSaleForm({ saleId }: { saleId: string }) {
     <form action={reviewBrokerSale} className="space-y-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
       <input type="hidden" name="saleId" value={saleId} />
       <textarea name="reason" rows={2} placeholder="سبب الرفض إن وجد" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-2.5 text-sm font-semibold outline-none resize-none" />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         <button name="decision" value="approved" className="rounded-xl bg-[var(--fi-emerald)] py-2 text-xs font-black text-white hover:opacity-90">
           اعتماد البيع
         </button>

@@ -35,7 +35,7 @@ export default async function BrokerSaleDetailPage({ params }: PageProps) {
   if (!isManagerRole(session.profile.role) && !isSuperAdmin(session.profile.role) && session.profile.role !== 'account_manager') {
     return (
       <main className="p-6" dir="rtl">
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm font-black text-red-700">
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-4 sm:p-6 text-sm font-black text-red-700">
           غير مصرح لك بمراجعة مبيعات الشركاء.
         </div>
       </main>
@@ -63,7 +63,7 @@ export default async function BrokerSaleDetailPage({ params }: PageProps) {
         <Link href="/dashboard/partners" className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-[var(--fi-muted)]">
           <ArrowRight className="size-4" /> العودة لإدارة الشركاء
         </Link>
-        <div className="rounded-2xl border border-[var(--fi-line)] bg-white p-8 text-center text-sm font-bold text-[var(--fi-muted)]">
+        <div className="rounded-2xl border border-[var(--fi-line)] bg-white p-4 sm:p-8 text-center text-sm font-bold text-[var(--fi-muted)]">
           طلب البيع غير موجود.
         </div>
       </main>
@@ -142,7 +142,7 @@ export default async function BrokerSaleDetailPage({ params }: PageProps) {
                     <input type="hidden" name="saleId" value={id} />
                     <input type="hidden" name="documentId" value={document.id} />
                     <textarea name="reason" rows={2} placeholder="سبب الرفض إن وجد" className="w-full rounded-lg border border-[var(--fi-line)] bg-white p-3 text-xs font-bold outline-none" />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                       <button name="decision" value="approved" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--fi-emerald)] px-3 py-2 text-xs font-black text-white">
                         <CheckCircle2 className="size-4" /> اعتماد
                       </button>

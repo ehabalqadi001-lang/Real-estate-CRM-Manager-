@@ -70,7 +70,7 @@ export function EnterpriseTopbar({
               <Search className="size-4 shrink-0 text-[var(--fi-emerald)]" aria-hidden="true" />
               <span className="truncate">بحث عن عملاء، صفقات، وحدات...</span>
             </span>
-            <span className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--fi-line)] bg-white px-2 py-1 text-[10px] font-black text-[var(--fi-muted)] dark:bg-slate-800">
+            <span className="hidden xs:flex shrink-0 items-center gap-1 rounded-lg border border-[var(--fi-line)] bg-white px-2 py-1 text-[10px] font-black text-[var(--fi-muted)] dark:bg-slate-800">
               ⌘K
             </span>
           </button>

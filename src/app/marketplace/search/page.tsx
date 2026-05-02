@@ -66,7 +66,7 @@ export default async function MarketplaceSearchPage({ searchParams }: { searchPa
       <section className="mx-auto max-w-7xl space-y-6">
         <div className="ds-card p-5 sm:p-6">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">FAST INVESTMENT MARKETPLACE</p>
-          <h1 className="mt-2 text-3xl font-black text-[var(--fi-ink)]">بحث ذكي في العقارات</h1>
+          <h1 className="mt-2 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">بحث ذكي في العقارات</h1>
           <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[var(--fi-muted)]">
             اكتب وصفاً مثل: مكتب إداري في العاصمة الإدارية بمقدم مليون جنيه، أو استخدم الفلاتر المتسلسلة للوصول إلى أفضل نتيجة.
           </p>
@@ -145,7 +145,7 @@ export default async function MarketplaceSearchPage({ searchParams }: { searchPa
                 <p className="text-2xl font-black text-[var(--fi-ink)]">
                   {Number(property.list_price).toLocaleString('ar-EG')} ج.م
                 </p>
-                <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
                   <Spec icon={<Building2 className="size-4" />} label={`${property.area_sqm ?? '-'} م²`} />
                   <Spec icon={<BedDouble className="size-4" />} label={`${property.bedrooms ?? '-'} غرف`} />
                   <Spec icon={<Bath className="size-4" />} label={`${property.bathrooms ?? '-'} حمام`} />

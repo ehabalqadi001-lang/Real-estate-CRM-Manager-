@@ -106,7 +106,7 @@ export default async function UnitsPage({ searchParams }: PageProps) {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 text-xs text-slate-500 mb-3">
                   {unit.unit_type && (
                     <span className="bg-slate-50 rounded-lg px-2 py-1 font-medium">
                       {TYPE_LABELS[unit.unit_type ?? ''] ?? unit.unit_type}

@@ -35,7 +35,7 @@ export default function AddDealModal({ isOpen, onClose, onRefresh }: AddDealModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl">
+      <div className="bg-white w-full max-w-md p-4 sm:p-6 rounded-2xl shadow-2xl">
         <h2 className="text-xl font-bold mb-4">إضافة صفقة جديدة 🚀</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -45,7 +45,7 @@ export default function AddDealModal({ isOpen, onClose, onRefresh }: AddDealModa
             required
             onChange={e => setFormData({...formData, title: e.target.value})}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <input 
               className="w-full p-3 border rounded-lg" 
               placeholder="اسم العميل" 

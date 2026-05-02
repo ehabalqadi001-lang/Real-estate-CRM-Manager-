@@ -43,7 +43,7 @@ export function BurnoutForm({ employees }: { employees: EmployeeOption[] }) {
           </select>
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
           <Field label="الشهر">
             <input name="periodMonth" type="number" min={1} max={12} defaultValue={now.getMonth() + 1} className={inputClass} />
           </Field>

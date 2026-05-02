@@ -27,7 +27,7 @@ export default function ForecastChart({ monthlyData, forecast }: Props) {
   const splitMonth = combined[splitIndex]?.month
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-100">
       <h2 className="text-lg font-bold text-slate-800 mb-1">الإيرادات الشهرية + التوقعات</h2>
       <p className="text-xs text-slate-400 mb-5">الأعمدة = إيراد فعلي | الخط = صفقات | المنطقة المعلمة = توقعات</p>
 

@@ -42,7 +42,7 @@ export default async function ForecastingPage() {
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <TrendingUp className="text-blue-600" size={24} />
           التنبؤ بالمبيعات
@@ -86,7 +86,7 @@ export default async function ForecastingPage() {
 
       {/* AI Insights — only when there is data */}
       {data.totalRevenueLTM > 0 && (
-        <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-4 sm:p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
             <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">تحليل الذكاء الاصطناعي</span>

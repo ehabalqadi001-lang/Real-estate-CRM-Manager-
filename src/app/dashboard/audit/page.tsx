@@ -54,7 +54,7 @@ export default async function AuditPage() {
 
   return (
     <div className="p-6 space-y-6 bg-[var(--fi-soft)] min-h-screen" dir="rtl">
-      <div className="flex justify-between items-center bg-[var(--fi-paper)] p-6 rounded-2xl shadow-sm border border-[var(--fi-line)]">
+      <div className="flex justify-between items-center bg-[var(--fi-paper)] p-4 sm:p-6 rounded-2xl shadow-sm border border-[var(--fi-line)]">
         <div>
           <h1 className="text-2xl font-bold text-[var(--fi-ink)]">سجل العمليات</h1>
           <p className="text-sm text-[var(--fi-muted)] mt-1">تتبع كل عملية في النظام — آخر 200 إجراء</p>
@@ -69,7 +69,7 @@ export default async function AuditPage() {
             <p className="text-sm mt-1">ستظهر هنا كل العمليات التي تتم على النظام</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full text-sm">
             <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               <tr>
                 <th className="text-right p-4 font-semibold text-[var(--fi-muted)]">الإجراء</th>
@@ -103,7 +103,7 @@ export default async function AuditPage() {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         )}
       </Card>
     </div>

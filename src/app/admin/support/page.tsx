@@ -34,7 +34,7 @@ export default async function AdminSupportPage() {
             </article>
           ))}
         </div>
-      ) : <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-8 text-center text-[var(--fi-muted)]">لا توجد تذاكر دعم حالياً.</div>}
+      ) : <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 sm:p-8 text-center text-[var(--fi-muted)]">لا توجد تذاكر دعم حالياً.</div>}
     </main>
   )
 }

@@ -123,7 +123,7 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
       {/* Stage selector */}
       <div className="col-span-2">
         <span className="mb-1.5 block text-xs font-black text-gray-700 dark:text-gray-300">مرحلة التعاقد</span>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {Object.entries(STAGE_LABELS).map(([value, label]) => (
             <button
               key={value}
@@ -219,7 +219,7 @@ export function SaleFormFields({ developers, projects, rates, allExceptions }: P
           <p className="mb-1 font-black">
             {commission.source === 'exception' ? '⭐ عمولة استثنائية خاصة بك' : '📋 عمولة قياسية'}
           </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-4 gap-y-0.5">
             <span>عمولة المطور: <strong>{commission.devRate}%</strong></span>
             <span>نصيبك: <strong>{commission.brokerRate}%</strong></span>
             {dealValue > 0 && (

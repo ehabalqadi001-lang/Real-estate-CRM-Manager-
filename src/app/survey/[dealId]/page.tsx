@@ -51,7 +51,7 @@ export default function SurveyPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6" dir="rtl">
         <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full">
           <CheckCircle size={56} className="text-emerald-500 mx-auto mb-4" />
           <h2 className="text-xl font-black text-slate-900 mb-2">شكراً على تقييمك!</h2>
@@ -62,9 +62,9 @@ export default function SurveyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6" dir="rtl">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="bg-slate-900 p-6 text-center">
+        <div className="bg-slate-900 p-4 sm:p-6 text-center">
           <h1 className="text-xl font-black text-white">FAST INVESTMENT</h1>
           <p className="text-slate-400 text-sm mt-1">استطلاع رضا العملاء</p>
         </div>

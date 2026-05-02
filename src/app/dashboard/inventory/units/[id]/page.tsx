@@ -195,7 +195,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
           {specs.length > 0 && (
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-5">
               <h2 className="font-black text-slate-800 dark:text-white mb-4">المواصفات</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 {specs.map(s => (
                   <div key={s.label} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                     <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
@@ -215,7 +215,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
           {floorPlans.length > 0 && (
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-5">
               <h2 className="font-black text-slate-800 dark:text-white mb-3">المخططات</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 {floorPlans.map(fp => (
                   <a key={fp.id} href={fp.url} target="_blank" rel="noreferrer"
                     className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">

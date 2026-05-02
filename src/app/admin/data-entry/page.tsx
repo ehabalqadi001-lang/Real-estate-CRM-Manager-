@@ -21,7 +21,7 @@ export default async function DataEntryHubPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-black text-[#0F8F83]">Data Entry Hub</p>
-        <h1 className="mt-1 text-3xl font-black text-[#102033] dark:text-white">مركز إدخال البيانات</h1>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">مركز إدخال البيانات</h1>
         <p className="mt-1 text-sm font-semibold text-slate-500">
           رفع وتحديث بيانات المطورين، المشاريع، والوحدات. يدعم CSV و Excel مع Drag & Drop.
         </p>

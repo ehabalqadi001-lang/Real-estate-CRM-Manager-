@@ -37,7 +37,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Main content skeleton */}
-      <div className="flex-1 p-6 space-y-5 overflow-hidden min-w-0">
+      <div className="flex-1 p-4 sm:p-6 space-y-5 overflow-hidden min-w-0">
         <div className="h-8 w-56 rounded-xl ds-skeleton" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (

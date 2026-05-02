@@ -43,7 +43,7 @@ export default async function ExpensesPage({ searchParams }: PageProps) {
         <AddExpenseButton />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <div className="bg-[var(--fi-paper)] rounded-xl p-4 shadow-sm border border-[var(--fi-line)] flex items-center gap-3">
           <CheckCircle size={18} className="text-emerald-600" />
           <div>
@@ -67,7 +67,7 @@ export default async function ExpensesPage({ searchParams }: PageProps) {
             <p className="font-bold text-[var(--fi-muted)]">لا توجد مصروفات مسجلة</p>
           </div>
         ) : (
-          <table className="w-full text-right text-sm" dir="rtl">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full text-right text-sm" dir="rtl">
             <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               <tr>
                 {['التاريخ','التصنيف','الوصف','المبلغ','الحالة',''].map(h => (
@@ -104,7 +104,7 @@ export default async function ExpensesPage({ searchParams }: PageProps) {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
     </div>

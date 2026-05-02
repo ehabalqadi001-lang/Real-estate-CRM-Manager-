@@ -87,7 +87,7 @@ export default async function InventoryDevelopersPage() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <Metric icon={Building2} label="مشاريع" value={developerProjects.length.toLocaleString('ar-EG')} />
                       <Metric icon={Home} label="وحدات" value={developerUnits.length.toLocaleString('ar-EG')} />
                       <Metric icon={CheckCircle2} label="متاح" value={availableUnits.length.toLocaleString('ar-EG')} />

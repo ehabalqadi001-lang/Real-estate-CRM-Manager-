@@ -32,7 +32,7 @@ export default async function CSMarketingHubPage() {
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-black text-[#0F8F83]">CS & Marketing Hub</p>
-          <h1 className="mt-1 text-3xl font-black text-[#102033] dark:text-white">مركز خدمة العملاء والتسويق</h1>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">مركز خدمة العملاء والتسويق</h1>
           <p className="mt-1 text-sm font-semibold text-slate-500">صندوق موحد + WhatsApp Business API + بث جماعي</p>
         </div>
         <Button className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]">

@@ -50,7 +50,7 @@ export default async function FinanceVaultPage() {
           <p className="flex items-center gap-1.5 text-sm font-black text-[#C9964A]">
             <ShieldAlert className="size-4" /> Finance Vault — محمي
           </p>
-          <h1 className="mt-1 text-3xl font-black text-[#102033] dark:text-white">خزينة التمويل</h1>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">خزينة التمويل</h1>
           <p className="mt-1 text-sm font-semibold text-slate-500">
             إصدار العمولات يتطلب تأكيدًا ثنائي الخطوة.
           </p>

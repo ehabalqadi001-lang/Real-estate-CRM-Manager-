@@ -33,7 +33,7 @@ export default function AddAgentPage() {
     <div className="p-8 max-w-3xl mx-auto space-y-8" dir="rtl">
       
       {/* الهيدر */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
         <Link href="/company/dashboard" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
           <ArrowRight className="text-slate-500" size={24} />
         </Link>
@@ -45,7 +45,7 @@ export default function AddAgentPage() {
 
       {/* صائد الأخطاء */}
       {errorState && (
-        <div className="bg-red-50 border border-red-200 p-6 rounded-2xl flex items-start gap-4">
+        <div className="bg-red-50 border border-red-200 p-4 sm:p-6 rounded-2xl flex items-start gap-4">
           <AlertTriangle className="text-red-500 flex-shrink-0" size={24} />
           <div>
             <h3 className="font-bold text-red-800">{errorState.message}</h3>
@@ -55,7 +55,7 @@ export default function AddAgentPage() {
       )}
 
       {/* نموذج الإضافة */}
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

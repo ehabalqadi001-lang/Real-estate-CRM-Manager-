@@ -11,7 +11,7 @@ export default async function PropertiesPage() {
     <div className="p-8 space-y-8 min-h-screen bg-slate-50" dir="rtl">
       
       {/* الهيدر العلوي */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex justify-between items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
           <h1 className="text-2xl font-black text-slate-900">المخزون العقاري (Inventory)</h1>
           <p className="text-sm font-bold text-slate-500 mt-1">إدارة المشاريع والوحدات المتاحة للعرض على العملاء</p>

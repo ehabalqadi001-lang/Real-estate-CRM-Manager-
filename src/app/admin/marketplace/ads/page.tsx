@@ -61,8 +61,8 @@ export default async function GlobalAdsManagerPage({
   ]
 
   return (
-    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-6" dir="ltr">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#17375E] via-[#1D4E89] to-[#0F8F83] p-6 text-white shadow-lg">
+    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-4 sm:p-6" dir="ltr">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#17375E] via-[#1D4E89] to-[#0F8F83] p-4 sm:p-6 text-white shadow-lg">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex size-12 items-center justify-center rounded-xl bg-white/20">
@@ -104,7 +104,7 @@ export default async function GlobalAdsManagerPage({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-500">{stat.label}</p>
-                <p className={`mt-1 text-3xl font-black ${stat.text}`}>{stat.value.toLocaleString('en-US')}</p>
+                <p className={`mt-1 text-xl sm:text-3xl font-black ${stat.text}`}>{stat.value.toLocaleString('en-US')}</p>
               </div>
               <stat.icon className={`size-8 ${stat.text} opacity-30`} />
             </div>

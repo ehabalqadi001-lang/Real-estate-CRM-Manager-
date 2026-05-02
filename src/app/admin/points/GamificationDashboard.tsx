@@ -189,7 +189,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
       </AnimatePresence>
 
       {/* Leaderboard Chart Section */}
-      <section className="rounded-lg border border-[#DDE6E4] bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-[#DDE6E4] bg-white p-4 sm:p-6 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="size-6 text-[#C9964A]" />
@@ -264,7 +264,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length} className="p-8 text-center text-sm font-semibold text-[#64748B]">
+                  <td colSpan={columns.length} className="p-4 sm:p-8 text-center text-sm font-semibold text-[#64748B]">
                     No points history found.
                   </td>
                 </tr>

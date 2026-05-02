@@ -42,7 +42,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       </Link>
 
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-black text-slate-900">{project.name}</h1>
@@ -70,7 +70,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: 'إجمالي',   value: units.length, color: 'text-slate-800',   bg: 'bg-slate-50' },
           { label: 'متاح',     value: available,    color: 'text-emerald-700', bg: 'bg-emerald-50' },

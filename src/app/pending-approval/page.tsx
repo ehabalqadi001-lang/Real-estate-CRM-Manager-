@@ -6,7 +6,7 @@ export default function PendingPage() {
       className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#EEF6F5_0%,#F7FAF8_45%,#FFFFFF_100%)] p-4 text-center"
       dir="rtl"
     >
-      <div className="w-full max-w-md rounded-3xl border border-[var(--fi-line)] bg-white p-8 shadow-xl sm:p-10">
+      <div className="w-full max-w-md rounded-3xl border border-[var(--fi-line)] bg-white p-4 sm:p-8 shadow-xl sm:p-10">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-amber-500">
           <Clock size={40} />
         </div>

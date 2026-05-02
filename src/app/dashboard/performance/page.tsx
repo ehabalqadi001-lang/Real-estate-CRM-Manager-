@@ -79,7 +79,7 @@ export default async function PerformancePage() {
 
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen" dir="rtl">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Users className="text-indigo-600" size={24} />
           أداء فريق المبيعات
@@ -116,7 +116,7 @@ export default async function PerformancePage() {
         {agentStats.length === 0 ? (
           <div className="p-16 text-center text-slate-400">لا يوجد وكلاء مسجلون بعد</div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto w-full rounded-xl"><table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-right p-4 font-semibold text-slate-600">الترتيب</th>
@@ -168,7 +168,7 @@ export default async function PerformancePage() {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
     </div>

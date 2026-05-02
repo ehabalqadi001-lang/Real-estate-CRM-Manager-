@@ -184,7 +184,7 @@ export default async function InventoryPage({
         </div>
       ) : (
         <>
-          <section className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+          <section className="grid grid-cols-1 xs:grid-cols-2 gap-3 lg:grid-cols-6">
             <StatCard label="إجمالي الوحدات" value={stats.total.toLocaleString('ar-EG')} icon={Home} />
             <StatCard label="متاح" value={stats.available.toLocaleString('ar-EG')} icon={CheckCircle2} />
             <StatCard label="محتجز" value={stats.held.toLocaleString('ar-EG')} icon={Hand} />

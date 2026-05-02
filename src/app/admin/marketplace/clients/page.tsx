@@ -46,9 +46,9 @@ export default async function ClientsPage() {
   ]
 
   return (
-    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-6" dir="rtl">
+    <div className="min-h-screen space-y-6 bg-[#f8fafc] p-4 sm:p-6" dir="rtl">
       {/* Header */}
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-l from-cyan-600 via-teal-500 to-emerald-500 p-6 text-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-l from-cyan-600 via-teal-500 to-emerald-500 p-4 sm:p-6 text-white shadow-lg">
         <div className="flex items-center gap-4">
           <div className="flex size-12 items-center justify-center rounded-xl bg-white/20">
             <Users className="size-6" />
@@ -68,7 +68,7 @@ export default async function ClientsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-500">{s.label}</p>
-                <p className={`mt-1 text-3xl font-black ${s.text}`}>{s.value.toLocaleString('ar-EG')}</p>
+                <p className={`mt-1 text-xl sm:text-3xl font-black ${s.text}`}>{s.value.toLocaleString('ar-EG')}</p>
               </div>
               <s.icon className={`size-8 ${s.text} opacity-30`} />
             </div>

@@ -28,7 +28,7 @@ export default function AddProjectButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" dir="rtl">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6" dir="rtl">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-slate-900">مشروع جديد</h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -42,7 +42,7 @@ export default function AddProjectButton() {
                 <label className="text-xs font-bold text-slate-600 block mb-1">الموقع / المنطقة</label>
                 <input name="location" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00C27C]/30" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-600 block mb-1">تاريخ الإطلاق</label>
                   <input name="launch_date" type="date" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00C27C]/30" />

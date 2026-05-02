@@ -55,7 +55,7 @@ export default async function ReportsPage() {
     <div className="p-8 space-y-8 min-h-screen bg-slate-50/50" dir="rtl">
       
       {/* الهيدر الاستراتيجي */}
-      <div className="flex justify-between items-end bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex justify-between items-end bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-2xl bg-[#0A1128] text-white flex items-center justify-center shadow-lg">
             <BarChart3 size={28} />
@@ -69,21 +69,21 @@ export default async function ReportsPage() {
 
       {/* الرادار المالي (Financial Forecast) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-4 sm:p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
           <div className="absolute -right-4 -top-4 opacity-10"><Trophy size={120}/></div>
           <p className="text-emerald-100 font-bold text-sm mb-1 flex items-center gap-2"><DollarSign size={16}/> الأموال المحققة (Won)</p>
           <h3 className="text-3xl font-black">{totalWonValue.toLocaleString()} <span className="text-lg font-bold">ج.م</span></h3>
           <p className="text-emerald-200 text-xs mt-3 font-medium">إجمالي قيمة الصفقات المغلقة بنجاح</p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-4 sm:p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
           <div className="absolute -right-4 -top-4 opacity-10"><TrendingUp size={120}/></div>
           <p className="text-blue-100 font-bold text-sm mb-1 flex items-center gap-2"><Activity size={16}/> الأموال المحتملة (Pipeline)</p>
           <h3 className="text-3xl font-black">{totalActiveValue.toLocaleString()} <span className="text-lg font-bold">ج.م</span></h3>
           <p className="text-blue-200 text-xs mt-3 font-medium">أموال قيد التفاوض (اجتماعات ومتابعة)</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center relative overflow-hidden">
           <p className="text-slate-400 font-bold text-sm mb-1 flex items-center gap-2"><Target size={16} className="text-purple-500"/> متوسط حجم الصفقة</p>
           <h3 className="text-3xl font-black text-slate-900">{Math.round(averageDealSize).toLocaleString()} <span className="text-lg font-bold text-slate-400">ج.م</span></h3>
           <p className="text-slate-500 text-xs mt-3 font-medium">متوسط قيمة العميل الواحد عند الشراء</p>

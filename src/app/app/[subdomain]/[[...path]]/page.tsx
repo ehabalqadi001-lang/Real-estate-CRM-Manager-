@@ -65,7 +65,7 @@ function Metric({ icon: Icon, label, value }: { icon: typeof Home; label: string
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-black">{value}</p>
+          <p className="mt-2 text-xl sm:text-3xl font-black">{value}</p>
         </div>
         <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--tenant-primary)] text-white">
           <Icon className="size-5" />

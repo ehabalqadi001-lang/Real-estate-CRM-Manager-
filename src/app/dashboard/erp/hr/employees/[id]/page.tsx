@@ -272,7 +272,7 @@ export default async function EmployeeProfilePage({
       </Link>
 
       {/* Hero card */}
-      <section className="ds-card p-6">
+      <section className="ds-card p-4 sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-[var(--fi-soft)] text-2xl font-black text-[var(--fi-emerald)]">
@@ -295,7 +295,7 @@ export default async function EmployeeProfilePage({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:text-left">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:text-left">
             {empProfile?.email && (
               <a href={`mailto:${empProfile.email}`} className="flex items-center gap-2 text-sm font-bold text-[var(--fi-muted)] hover:text-[var(--fi-ink)]">
                 <Mail className="size-4 text-[var(--fi-emerald)]" />
@@ -335,7 +335,7 @@ export default async function EmployeeProfilePage({
         <section className="ds-card p-5">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">CONTRACT INFO</p>
           <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">بيانات العقد</h2>
-          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <dl className="mt-4 grid grid-cols-1 xs:grid-cols-2 gap-x-4 gap-y-3 text-sm">
             <InfoItem label="تاريخ التعيين" value={emp.hire_date ? dateFormatter.format(new Date(emp.hire_date)) : '—'} />
             <InfoItem label="نوع التعاقد" value={emp.employment_type === 'full_time' ? 'دوام كامل' : emp.employment_type ?? '—'} />
             <InfoItem label="الراتب الأساسي" value={`${formatter.format(Number(emp.basic_salary ?? emp.base_salary ?? 0))} ج.م`} />
@@ -356,7 +356,7 @@ export default async function EmployeeProfilePage({
         <section className="ds-card p-5">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">ATTENDANCE SUMMARY</p>
           <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">إحصاء الحضور — 12 شهر</h2>
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl bg-emerald-50 p-3 text-center">
               <p className="text-2xl font-black text-emerald-700">{presentCount}</p>
               <p className="mt-1 text-xs font-bold text-emerald-600">يوم حضور</p>

@@ -32,7 +32,7 @@ export default function PipelineLoading() {
         className="space-y-5"
       >
         {/* Hero skeleton */}
-        <motion.section variants={fadeUp} className="sales-hero rounded-3xl p-6 lg:p-8">
+        <motion.section variants={fadeUp} className="sales-hero rounded-3xl p-4 sm:p-6 lg:p-8">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center">
             <div className="space-y-4">
               <div className="sales-skeleton h-7 w-52 rounded-full bg-white/20" />

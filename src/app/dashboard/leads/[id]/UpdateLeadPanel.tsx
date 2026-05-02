@@ -49,7 +49,7 @@ export default function UpdateLeadPanel({ leadId, currentStatus, currentTemp, cu
 
       {open && (
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] font-bold text-slate-500 block mb-1">الحالة</label>
               <select name="status" defaultValue={currentStatus ?? 'Fresh Leads'}

@@ -62,8 +62,8 @@ export default async function ClientProfilePage({ params }: PageProps) {
 
   if (error || !client) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-8" dir="rtl">
-        <div className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-sm">
+      <div className="flex min-h-screen items-center justify-center p-4 sm:p-8" dir="rtl">
+        <div className="rounded-2xl border border-red-100 bg-white p-4 sm:p-8 text-center shadow-sm">
           <p className="font-black text-red-700">تعذر تحميل ملف العميل</p>
           <p className="mt-2 text-sm text-red-600">{error ?? 'العميل غير موجود'}</p>
           <Link href="/dashboard/clients" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
@@ -120,7 +120,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
         </div>
 
         {/* KPI strip */}
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { label: 'إجمالي الصفقات', value: deals.length.toString() },
             { label: 'قيمة الاستثمارات', value: totalInvestment > 0 ? formatMoney(totalInvestment) : '—' },
@@ -138,7 +138,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
 
         {/* Contact info */}
         <SectionCard title="بيانات التواصل" icon={Phone}>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <InfoItem label="رقم الهاتف الرئيسي" value={client.phone_country_code ? `${client.phone_country_code} ${phone}` : phone} dir="ltr" />
             <InfoItem label="رقم الهاتف الثاني" value={client.secondary_phone ? `${client.secondary_phone_country_code ?? ''} ${client.secondary_phone}`.trim() : null} dir="ltr" />
             <InfoItem label="البريد الإلكتروني" value={client.email} dir="ltr" />
@@ -148,7 +148,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
 
         {/* Personal info */}
         <SectionCard title="البيانات الشخصية" icon={User}>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <InfoItem label="الجنسية" value={client.nationality} />
             <InfoItem label="مكان الإقامة" value={client.residence_country} />
             <InfoItem label="العنوان" value={client.address} />
@@ -169,7 +169,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
                 </div>
               </div>
             ) : null}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <InfoItem label="قيمة الاستثمار" value={client.investment_budget ? formatMoney(client.investment_budget) : null} />
               <InfoItem label="طريقة الدفع" value={PAYMENT_LABELS[client.payment_method ?? ''] ?? client.payment_method} />
             </div>
