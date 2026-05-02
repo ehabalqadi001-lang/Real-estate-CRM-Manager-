@@ -52,7 +52,6 @@ const VARIANT_STYLES = {
 }
 
 function highlightVars(text: string) {
-  const { dir } = useI18n()
   return text.split(/(\[.*?\])/g).map((part, i) => {
     if (!part.startsWith('[')) return <span key={i}>{part}</span>
     const isMoney = /قيمة|مبلغ|رصيد|مقدم|قسط/.test(part)
@@ -66,6 +65,7 @@ function highlightVars(text: string) {
 }
 
 export default function WhatsAppHub() {
+  const { t, numLocale } = useI18n()
   const [logs, setLogs] = useState<WhatsAppLog[]>([])
   const [loading, setLoading] = useState(true)
   const [enabled, setEnabled] = useState<Record<number, boolean>>({ 1: true, 2: true, 3: true, 4: true })
@@ -85,7 +85,7 @@ export default function WhatsAppHub() {
   }
 
   const statusLabel = (s: string) => ({
-    delivered: 'تم الاستلام', sent: 'أُرسلت', failed: 'فشل الإرسال',
+    delivered: t('تم الاستلام', 'Delivered'), sent: t('أُرسلت', 'Sent'), failed: t('فشل الإرسال', 'Failed'),
   })[s] ?? s
 
   return (
@@ -98,13 +98,13 @@ export default function WhatsAppHub() {
             <MessageSquare size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900">مركز واتساب الأتمتة</h1>
+            <h1 className="text-lg font-black text-slate-900">{t('مركز واتساب الأتمتة', 'WhatsApp Automation Hub')}</h1>
             <p className="text-xs text-slate-400">WhatsApp Business API — قوالب الإرسال التلقائي</p>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-bold">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Gateway: متصل
+          Gateway: {t('متصل', 'Connected')}
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export default function WhatsAppHub() {
                   >
                     <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${enabled[tpl.id] ? 'left-5' : 'left-0.5'}`} />
                   </div>
-                  <span className="text-xs font-bold text-slate-500">{enabled[tpl.id] ? 'مفعل' : 'معطل'}</span>
+                  <span className="text-xs font-bold text-slate-500">{enabled[tpl.id] ? t('مفعل', 'On') : t('معطل', 'Off')}</span>
                 </label>
               </div>
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs text-slate-700 font-mono leading-relaxed whitespace-pre-wrap">
@@ -143,32 +143,32 @@ export default function WhatsAppHub() {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
           <Zap size={15} className="text-amber-500" />
-          <h2 className="font-black text-slate-800 text-sm">سجل الرسائل الصادرة</h2>
+          <h2 className="font-black text-slate-800 text-sm">{t('سجل الرسائل الصادرة', 'Outbound Message Log')}</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-right text-sm">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                {['الوقت', 'هاتف العميل', 'نوع الرسالة', 'الحالة'].map(h => (
+                {[t('الوقت','Time'), t('هاتف العميل','Client Phone'), t('نوع الرسالة','Message Type'), t('الحالة','Status')].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-bold text-slate-500">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {loading ? (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-xs">جاري التحميل...</td></tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-xs">{t('جاري التحميل...', 'Loading...')}</td></tr>
               ) : logs.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-xs">لا يوجد نشاط إرسال حتى الآن.</td></tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-xs">{t('لا يوجد نشاط إرسال حتى الآن.', 'No messages sent yet.')}</td></tr>
               ) : logs.map(log => (
                 <tr key={log.id} className="hover:bg-slate-50/50">
                   <td className="px-4 py-3 text-xs text-slate-500" dir="ltr">
-                    {new Date(log.sent_at).toLocaleString('ar-EG')}
+                    {new Date(log.sent_at).toLocaleString(numLocale)}
                   </td>
                   <td className="px-4 py-3 text-xs font-bold text-blue-600" dir="ltr">{log.client_phone}</td>
                   <td className="px-4 py-3 text-xs text-slate-600">
-                    {log.message_body.includes('متأخر') ? 'مطالبة متأخرات'
-                      : log.message_body.includes('مبروك') ? 'تهنئة تسليم'
-                      : 'تذكير / حجز'}
+                    {log.message_body.includes('متأخر') ? t('مطالبة متأخرات', 'Overdue Reminder')
+                      : log.message_body.includes('مبروك') ? t('تهنئة تسليم', 'Handover Congrats')
+                      : t('تذكير / حجز', 'Reminder / Booking')}
                   </td>
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-1 text-xs font-bold">
@@ -185,7 +185,7 @@ export default function WhatsAppHub() {
       {/* AI Assistant */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
         <h2 className="font-black text-slate-800 text-sm mb-4 flex items-center gap-2">
-          🤖 المساعد الذكي — محادثة تجريبية مع عميل
+          🤖 {t('المساعد الذكي — محادثة تجريبية مع عميل', 'AI Assistant — Test Client Conversation')}
         </h2>
         <AIAssistantChat />
       </div>

@@ -17,7 +17,7 @@ interface AgentStats {
 }
 
 export default async function PerformancePage() {
-  const { dir } = await getI18n()
+  const { t } = await getI18n()
   await requireAdmin()
 
   const cookieStore = await cookies()
@@ -84,18 +84,18 @@ export default async function PerformancePage() {
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Users className="text-indigo-600" size={24} />
-          أداء فريق المبيعات
+          {t('أداء فريق المبيعات', 'Sales Team Performance')}
         </h1>
-        <p className="text-sm text-slate-500 mt-1">مقارنة شاملة لأداء الوكلاء وتحليل مؤشرات الإنجاز</p>
+        <p className="text-sm text-slate-500 mt-1">{t('مقارنة شاملة لأداء الوكلاء وتحليل مؤشرات الإنجاز', 'Comprehensive agent performance comparison and KPI analysis')}</p>
       </div>
 
       {/* ملخص عام */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'إجمالي الإيراد', value: `${(totalRevenue / 1_000_000).toFixed(1)}M ج.م`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'إجمالي الصفقات', value: totalDeals, icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'عدد الوكلاء', value: agentStats.length, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'أعلى وكيل', value: topAgent?.full_name ?? '—', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
+          { label: t('إجمالي الإيراد', 'Total Revenue'), value: `${(totalRevenue / 1_000_000).toFixed(1)}M`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: t('إجمالي الصفقات', 'Total Deals'), value: totalDeals, icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: t('عدد الوكلاء', 'Agents'), value: agentStats.length, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: t('أعلى وكيل', 'Top Agent'), value: topAgent?.full_name ?? '—', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
         ].map(kpi => (
           <div key={kpi.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
             <div className={`${kpi.bg} ${kpi.color} w-10 h-10 rounded-xl flex items-center justify-center mb-3`}>

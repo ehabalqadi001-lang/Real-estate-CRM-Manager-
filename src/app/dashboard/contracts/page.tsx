@@ -7,7 +7,7 @@ import { ExternalLink, FileText, Plus, CheckCircle, Clock, AlertTriangle, XCircl
 export const dynamic = 'force-dynamic'
 
 export default async function ContractsPage() {
-  const { dir } = await getI18n()
+  const { t, dir, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,12 +30,12 @@ export default async function ContractsPage() {
   const totalValue = contracts.reduce((s, d) => s + Number(d.unit_value ?? d.amount ?? 0), 0)
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
+    new Intl.NumberFormat(numLocale, { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
 
   const STAGE_STYLE: Record<string, { label: string; color: string; bg: string; border: string; icon: typeof CheckCircle }> = {
-    'Contracted':  { label: 'تعاقد',    color: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-100',    icon: FileText },
-    'Registration':{ label: 'تسجيل',   color: 'text-purple-700',  bg: 'bg-purple-50',  border: 'border-purple-100',  icon: Clock },
-    'Handover':    { label: 'تسليم',    color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle },
+    'Contracted':  { label: t('تعاقد', 'Contracted'),    color: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-100',    icon: FileText },
+    'Registration':{ label: t('تسجيل', 'Registration'),  color: 'text-purple-700',  bg: 'bg-purple-50',  border: 'border-purple-100',  icon: Clock },
+    'Handover':    { label: t('تسليم', 'Handover'),       color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle },
   }
 
   return (
@@ -48,12 +48,12 @@ export default async function ContractsPage() {
             <FileText size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">إدارة العقود</h1>
-            <p className="text-xs text-[var(--fi-muted)]">{total} عقد نشط</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('إدارة العقود', 'Contracts')}</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{total} {t('عقد نشط', 'active contracts')}</p>
           </div>
         </div>
         <button className="flex items-center gap-2 bg-[#00C27C] hover:bg-[#009F64] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#00C27C]/20">
-          <Plus size={15} /> إضافة عقد جديد
+          <Plus size={15} /> {t('إضافة عقد جديد', 'New Contract')}
         </button>
       </div>
 
@@ -66,10 +66,10 @@ export default async function ContractsPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'إجمالي العقود',  value: total,      icon: FileText,    color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-100' },
-          { label: 'تعاقد',          value: contracted,  icon: Clock,       color: 'text-[var(--fi-muted)]',   bg: 'bg-[var(--fi-soft)]',   border: 'border-[var(--fi-line)]' },
-          { label: 'قيد التسجيل',   value: registered,  icon: AlertTriangle, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-          { label: 'تم التسليم',    value: handover,    icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+          { label: t('إجمالي العقود', 'Total Contracts'),  value: total,      icon: FileText,    color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-100' },
+          { label: t('تعاقد', 'Contracted'),              value: contracted,  icon: Clock,       color: 'text-[var(--fi-muted)]',   bg: 'bg-[var(--fi-soft)]',   border: 'border-[var(--fi-line)]' },
+          { label: t('قيد التسجيل', 'In Registration'),  value: registered,  icon: AlertTriangle, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+          { label: t('تم التسليم', 'Handed Over'),        value: handover,    icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
         ].map(kpi => (
           <div key={kpi.label} className={`bg-[var(--fi-paper)] p-5 rounded-2xl shadow-sm border ${kpi.border} flex items-center gap-3`}>
             <div className={`${kpi.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}>
@@ -85,7 +85,7 @@ export default async function ContractsPage() {
 
       {/* Total value */}
       <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 text-white shadow-lg shadow-blue-900/20">
-        <p className="text-blue-200 text-sm font-semibold mb-1">إجمالي قيمة العقود</p>
+        <p className="text-blue-200 text-sm font-semibold mb-1">{t('إجمالي قيمة العقود', 'Total Contract Value')}</p>
         <p className="text-3xl font-black">{fmt(totalValue)}</p>
       </div>
 
@@ -100,15 +100,15 @@ export default async function ContractsPage() {
         {contracts.length === 0 ? (
           <div className="text-center py-16">
             <XCircle size={40} className="mx-auto text-slate-200 mb-3" />
-            <p className="text-[var(--fi-muted)] font-bold">لا توجد عقود مسجلة</p>
-            <p className="text-xs text-[var(--fi-muted)] mt-1">ستظهر هنا الصفقات التي وصلت مرحلة التعاقد</p>
+            <p className="text-[var(--fi-muted)] font-bold">{t('لا توجد عقود مسجلة', 'No contracts yet')}</p>
+            <p className="text-xs text-[var(--fi-muted)] mt-1">{t('ستظهر هنا الصفقات التي وصلت مرحلة التعاقد', 'Deals reaching the contracted stage appear here')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
                 <tr>
-                  {['العقد', 'العميل', 'المرحلة', 'القيمة', 'التاريخ'].map(h => (
+                  {[t('العقد','Contract'), t('العميل','Client'), t('المرحلة','Stage'), t('القيمة','Value'), t('التاريخ','Date')].map(h => (
                     <th key={h} className="px-4 py-3 text-xs font-bold text-[var(--fi-muted)]">{h}</th>
                   ))}
                 </tr>
@@ -136,7 +136,7 @@ export default async function ContractsPage() {
                         {fmt(Number(deal.unit_value ?? deal.amount ?? 0))}
                       </td>
                       <td className="px-4 py-3 text-xs text-[var(--fi-muted)]">
-                        {new Date(deal.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(deal.created_at).toLocaleDateString(numLocale, { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
                     </tr>
                   )

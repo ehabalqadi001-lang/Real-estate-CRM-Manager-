@@ -9,7 +9,7 @@ import { requireAdmin } from '@/lib/require-role'
 export const dynamic = 'force-dynamic'
 
 export default async function TargetsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -40,19 +40,19 @@ export default async function TargetsPage() {
       <div className="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <Target size={20} className="text-orange-500" /> الأهداف والإنجازات الشهرية
+            <Target size={20} className="text-orange-500" /> {t('الأهداف والإنجازات الشهرية', 'Monthly Targets & Achievements')}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">تتبع أداء كل وكيل مقابل هدفه لشهر {now.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' })}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{t('تتبع أداء كل وكيل مقابل هدفه لشهر', 'Track each agent\'s performance for')} {now.toLocaleDateString(numLocale, { month: 'long', year: 'numeric' })}</p>
         </div>
       </div>
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'إجمالي الإيراد المستهدف', value: `${(totalRevTarget / 1_000_000).toFixed(1)}M`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
-          { label: 'الإيراد المحقق فعلياً', value: `${(totalRevActual / 1_000_000).toFixed(1)}M`, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
-          { label: 'إجمالي الصفقات المستهدفة', value: totalDealsTarget, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
-          { label: 'الصفقات المبرمة فعلياً', value: totalDealsActual, icon: Users, color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
+          { label: t('إجمالي الإيراد المستهدف', 'Revenue Target'), value: `${(totalRevTarget / 1_000_000).toFixed(1)}M`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
+          { label: t('الإيراد المحقق فعلياً', 'Revenue Actual'), value: `${(totalRevActual / 1_000_000).toFixed(1)}M`, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+          { label: t('إجمالي الصفقات المستهدفة', 'Deals Target'), value: totalDealsTarget, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
+          { label: t('الصفقات المبرمة فعلياً', 'Deals Actual'), value: totalDealsActual, icon: Users, color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
         ].map(kpi => (
           <div key={kpi.label} className={`border rounded-2xl p-4 ${kpi.bg}`}>
             <kpi.icon size={18} className={kpi.color} />

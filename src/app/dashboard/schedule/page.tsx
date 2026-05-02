@@ -16,7 +16,7 @@ interface Installment {
 }
 
 export default async function PaymentSchedulePage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,7 +47,7 @@ export default async function PaymentSchedulePage() {
   const totalUpcoming = (upcoming ?? []).reduce((s, i) => s + Number(i.amount ?? 0), 0)
   const totalOverdue  = (overdue  ?? []).reduce((s, i) => s + Number(i.amount ?? 0), 0)
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
 
   function daysDiff(dateStr: string) {
     const diff = Math.round((new Date(dateStr).getTime() - today.getTime()) / 86400000)
@@ -63,19 +63,19 @@ export default async function PaymentSchedulePage() {
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <CalendarClock size={20} className="text-blue-600" /> جدول الأقساط والمدفوعات
+            <CalendarClock size={20} className="text-blue-600" /> {t('جدول الأقساط والمدفوعات', 'Payment Schedule')}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">الأقساط القادمة خلال 30 يوم + المتأخرات</p>
+          <p className="text-xs text-slate-500 mt-0.5">{t('الأقساط القادمة خلال 30 يوم + المتأخرات', 'Upcoming installments (30 days) + overdue')}</p>
         </div>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'أقساط قادمة (30 يوم)', value: (upcoming ?? []).length, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', icon: Clock },
-          { label: 'إجمالي القادمة', value: `${(totalUpcoming / 1_000_000).toFixed(2)}M ج.م`, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', icon: CheckCircle },
-          { label: 'أقساط متأخرة', value: (overdue ?? []).length, color: 'text-red-600', bg: 'bg-red-50 border-red-200', icon: AlertTriangle },
-          { label: 'إجمالي المتأخرات', value: `${(totalOverdue / 1_000_000).toFixed(2)}M ج.م`, color: 'text-red-700', bg: 'bg-red-50 border-red-200', icon: AlertTriangle },
+          { label: t('أقساط قادمة (30 يوم)', 'Upcoming (30 days)'), value: (upcoming ?? []).length, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', icon: Clock },
+          { label: t('إجمالي القادمة', 'Upcoming Total'), value: `${(totalUpcoming / 1_000_000).toFixed(2)}M`, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', icon: CheckCircle },
+          { label: t('أقساط متأخرة', 'Overdue'), value: (overdue ?? []).length, color: 'text-red-600', bg: 'bg-red-50 border-red-200', icon: AlertTriangle },
+          { label: t('إجمالي المتأخرات', 'Overdue Total'), value: `${(totalOverdue / 1_000_000).toFixed(2)}M`, color: 'text-red-700', bg: 'bg-red-50 border-red-200', icon: AlertTriangle },
         ].map(k => (
           <div key={k.label} className={`border rounded-2xl p-4 ${k.bg}`}>
             <k.icon size={16} className={k.color} />
@@ -90,7 +90,7 @@ export default async function PaymentSchedulePage() {
         <div className="bg-white rounded-2xl border border-red-200 overflow-hidden shadow-sm">
           <div className="bg-red-50 px-5 py-3 border-b border-red-200 flex items-center gap-2">
             <AlertTriangle size={16} className="text-red-600" />
-            <h2 className="font-black text-red-800">أقساط متأخرة ({(overdue ?? []).length})</h2>
+            <h2 className="font-black text-red-800">{t('أقساط متأخرة', 'Overdue Installments')} ({(overdue ?? []).length})</h2>
           </div>
           <div className="divide-y divide-slate-50">
             {(overdue as Installment[]).map(inst => {
@@ -102,8 +102,8 @@ export default async function PaymentSchedulePage() {
                     <div>
                       <p className="font-bold text-slate-900 text-sm">{deal?.compound ?? 'صفقة'} — {deal?.buyer_name ?? 'العميل'}</p>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        استحق منذ {overdayDiff(inst.due_date)} يوم |
-                        {new Date(inst.due_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {overdayDiff(inst.due_date)} {t('يوم متأخر', 'days overdue')} |
+                        {new Date(inst.due_date).toLocaleDateString(numLocale, { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
@@ -112,7 +112,7 @@ export default async function PaymentSchedulePage() {
                     {deal?.buyer_phone && (
                       <Link href={`https://wa.me/2${deal.buyer_phone.replace(/^0/, '')}`} target="_blank"
                         className="text-[10px] text-emerald-600 font-bold hover:underline">
-                        تواصل واتساب ←
+                        {t('تواصل واتساب', 'WhatsApp')} ←
                       </Link>
                     )}
                   </div>
@@ -127,12 +127,12 @@ export default async function PaymentSchedulePage() {
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
           <CalendarClock size={16} className="text-blue-600" />
-          <h2 className="font-black text-slate-800">الأقساط القادمة — 30 يوماً ({(upcoming ?? []).length})</h2>
+          <h2 className="font-black text-slate-800">{t('الأقساط القادمة — 30 يوماً', 'Upcoming — 30 Days')} ({(upcoming ?? []).length})</h2>
         </div>
         {(upcoming ?? []).length === 0 ? (
           <div className="p-12 text-center text-slate-400">
             <CheckCircle size={32} className="mx-auto mb-2 opacity-30" />
-            <p className="font-bold">لا توجد أقساط مستحقة خلال 30 يوماً</p>
+            <p className="font-bold">{t('لا توجد أقساط مستحقة خلال 30 يوماً', 'No installments due in the next 30 days')}</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-50">
@@ -144,12 +144,12 @@ export default async function PaymentSchedulePage() {
                 <div key={inst.id} className="px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-start gap-3">
                     <span className={`text-xs font-black px-2 py-1 rounded-lg ${urgency} flex-shrink-0`}>
-                      {days === 0 ? 'اليوم' : `${days}ي`}
+                      {days === 0 ? t('اليوم', 'Today') : `${days}${t('ي', 'd')}`}
                     </span>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">{deal?.compound ?? 'صفقة'} — {deal?.buyer_name ?? 'العميل'}</p>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        {new Date(inst.due_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {new Date(inst.due_date).toLocaleDateString(numLocale, { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export default async function PaymentSchedulePage() {
                     {deal?.buyer_phone && (
                       <Link href={`https://wa.me/2${deal.buyer_phone.replace(/^0/, '')}`} target="_blank"
                         className="text-[10px] text-emerald-600 font-bold hover:underline">
-                        تذكير واتساب ←
+                        {t('تذكير واتساب', 'WhatsApp Reminder')} ←
                       </Link>
                     )}
                   </div>

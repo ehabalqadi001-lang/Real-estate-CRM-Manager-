@@ -7,17 +7,10 @@ import { CreateReservationForm, CancelReservationButton, ExtendReservationButton
 
 export const dynamic = 'force-dynamic'
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  active:    { label: 'نشط',      cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
-  cancelled: { label: 'ملغى',     cls: 'bg-red-50 text-red-700 border border-red-200' },
-  expired:   { label: 'منتهي',    cls: 'bg-slate-100 text-slate-500 border border-slate-200' },
-  converted: { label: 'محوّل',    cls: 'bg-sky-50 text-sky-700 border border-sky-200' },
-}
-
-const fmt  = (d: string | null) =>
-  d ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short' }).format(new Date(d)) : '—'
-const fmtN = (n: number | null | undefined) =>
-  n != null ? new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n) : '—'
+const fmt  = (d: string | null, locale: string) =>
+  d ? new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(new Date(d)) : '—'
+const fmtN = (n: number | null | undefined, locale: string) =>
+  n != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(n) : '—'
 
 function hoursLeft(expiresAt: string | null): number {
   if (!expiresAt) return 0
@@ -30,7 +23,13 @@ const ALLOWED_ROLES = [
 ]
 
 export default async function ReservationsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const STATUS_MAP: Record<string, { label: string; cls: string }> = {
+    active:    { label: t('نشط', 'Active'),        cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+    cancelled: { label: t('ملغى', 'Cancelled'),    cls: 'bg-red-50 text-red-700 border border-red-200' },
+    expired:   { label: t('منتهي', 'Expired'),     cls: 'bg-slate-100 text-slate-500 border border-slate-200' },
+    converted: { label: t('محوّل', 'Converted'),   cls: 'bg-sky-50 text-sky-700 border border-sky-200' },
+  }
   const session = await requireSession()
   const { profile } = session
 
@@ -84,10 +83,10 @@ export default async function ReservationsPage() {
   const history        = reservations.filter(r => r.status !== 'active')
 
   const kpis = [
-    { label: 'حجوزات نشطة',       value: active.length,       icon: Bookmark,     color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'تنتهي خلال 24 ساعة', value: expiringSoon.length, icon: Clock,        color: 'text-amber-600',   bg: 'bg-amber-50'   },
-    { label: 'تم الإلغاء',          value: cancelled.length,   icon: XCircle,      color: 'text-red-600',     bg: 'bg-red-50'     },
-    { label: 'محوّل لصفقة',         value: converted.length,   icon: CheckCircle,  color: 'text-sky-600',     bg: 'bg-sky-50'     },
+    { label: t('حجوزات نشطة', 'Active'),           value: active.length,       icon: Bookmark,    color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: t('تنتهي خلال 24 ساعة', 'Expiring <24h'), value: expiringSoon.length, icon: Clock,   color: 'text-amber-600',   bg: 'bg-amber-50'   },
+    { label: t('تم الإلغاء', 'Cancelled'),          value: cancelled.length,    icon: XCircle,     color: 'text-red-600',     bg: 'bg-red-50'     },
+    { label: t('محوّل لصفقة', 'Converted'),         value: converted.length,    icon: CheckCircle, color: 'text-sky-600',     bg: 'bg-sky-50'     },
   ]
 
   return (
@@ -98,9 +97,9 @@ export default async function ReservationsPage() {
           <Bookmark size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-[var(--fi-ink)]">الحجوزات</h1>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('الحجوزات', 'Reservations')}</h1>
           <p className="text-xs text-[var(--fi-muted)]">
-            إدارة حجوزات الوحدات — انتهاء تلقائي بعد 48 ساعة
+            {t('إدارة حجوزات الوحدات — انتهاء تلقائي بعد 48 ساعة', 'Unit reservations — auto-expires after 48 hours')}
           </p>
         </div>
       </div>
@@ -126,16 +125,16 @@ export default async function ReservationsPage() {
           {/* Active */}
           <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-[var(--fi-line)]">
-              <h2 className="font-bold text-[var(--fi-ink)]">الحجوزات النشطة</h2>
+              <h2 className="font-bold text-[var(--fi-ink)]">{t('الحجوزات النشطة', 'Active Reservations')}</h2>
               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg">
-                {active.length} حجز
+                {active.length} {t('حجز', 'reservations')}
               </span>
             </div>
 
             {active.length === 0 ? (
               <div className="p-10 text-center">
                 <Bookmark size={32} className="mx-auto mb-2 opacity-20" />
-                <p className="font-bold text-[var(--fi-ink)]">لا توجد حجوزات نشطة</p>
+                <p className="font-bold text-[var(--fi-ink)]">{t('لا توجد حجوزات نشطة', 'No active reservations')}</p>
               </div>
             ) : (
               <div className="divide-y divide-[var(--fi-line)]">
@@ -149,11 +148,12 @@ export default async function ReservationsPage() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
                           <p className="font-black text-[var(--fi-ink)]">{r.client_name}</p>
+
                           {r.client_phone && (
                             <p className="text-xs text-[var(--fi-muted)]">{r.client_phone}</p>
                           )}
                           <p className="text-xs font-bold text-[var(--fi-muted)]">
-                            وحدة: {unitMap[r.unit_id] ?? r.unit_id?.slice(0, 8)}
+                            {t('وحدة:', 'Unit:')} {unitMap[r.unit_id] ?? r.unit_id?.slice(0, 8)}
                           </p>
                           {r.notes && (
                             <p className="text-xs text-[var(--fi-muted)]">{r.notes}</p>
@@ -161,12 +161,12 @@ export default async function ReservationsPage() {
                           <div className="flex items-center gap-3 pt-1">
                             {r.reservation_fee > 0 && (
                               <span className="text-xs text-[var(--fi-muted)]">
-                                رسوم: {fmtN(r.reservation_fee)} ج.م
+                                {t('رسوم:', 'Fee:')} {fmtN(r.reservation_fee, numLocale)} EGP
                               </span>
                             )}
                             {r.deposit_amount && (
                               <span className="text-xs text-[var(--fi-muted)]">
-                                تأمين: {fmtN(r.deposit_amount)} ج.م
+                                {t('تأمين:', 'Deposit:')} {fmtN(r.deposit_amount, numLocale)} EGP
                               </span>
                             )}
                           </div>
@@ -179,10 +179,10 @@ export default async function ReservationsPage() {
                                       'bg-emerald-50 text-emerald-700'
                           }`}>
                             <Clock size={12} />
-                            {hrs === 0 ? 'منتهي الآن' : `${hrs} ساعة متبقية`}
+                            {hrs === 0 ? t('منتهي الآن', 'Expired') : `${hrs} ${t('ساعة متبقية', 'hrs left')}`}
                           </div>
                           <p className="text-xs text-[var(--fi-muted)]">
-                            تنتهي: {fmt(r.expires_at)}
+                            {t('تنتهي:', 'Expires:')} {fmt(r.expires_at, numLocale)}
                           </p>
                           <div className="flex items-center gap-2 mt-1 flex-wrap justify-end">
                             <ConvertReservationButton reservationId={r.id} />
@@ -207,16 +207,16 @@ export default async function ReservationsPage() {
             <div className="bg-[var(--fi-paper)] border border-[var(--fi-line)] rounded-2xl overflow-hidden">
               <div className="flex items-center gap-3 p-4 border-b border-[var(--fi-line)]">
                 <RefreshCw size={15} className="text-[var(--fi-muted)]" />
-                <h2 className="font-bold text-[var(--fi-ink)]">السجل التاريخي</h2>
+                <h2 className="font-bold text-[var(--fi-ink)]">{t('السجل التاريخي', 'History')}</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-[var(--fi-soft)] text-[var(--fi-muted)] text-xs">
-                      <th className="px-4 py-3 text-right font-black">العميل</th>
-                      <th className="px-4 py-3 text-right font-black">الوحدة</th>
-                      <th className="px-4 py-3 text-right font-black">الحالة</th>
-                      <th className="px-4 py-3 text-right font-black">التاريخ</th>
+                      <th className="px-4 py-3 text-right font-black">{t('العميل','Client')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('الوحدة','Unit')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('الحالة','Status')}</th>
+                      <th className="px-4 py-3 text-right font-black">{t('التاريخ','Date')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--fi-line)]">
@@ -229,7 +229,7 @@ export default async function ReservationsPage() {
                           <td className="px-4 py-3">
                             <span className={`rounded-lg px-2 py-1 text-xs font-black ${st.cls}`}>{st.label}</span>
                           </td>
-                          <td className="px-4 py-3 text-[var(--fi-muted)]">{fmt(r.reserved_at)}</td>
+                          <td className="px-4 py-3 text-[var(--fi-muted)]">{fmt(r.reserved_at, numLocale)}</td>
                         </tr>
                       )
                     })}

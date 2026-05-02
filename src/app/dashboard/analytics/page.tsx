@@ -8,7 +8,7 @@ import { requireAdmin } from '@/lib/require-role'
 export const dynamic = 'force-dynamic'
 
 export default async function AnalyticsPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
   await requireAdmin()
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -83,7 +83,7 @@ export default async function AnalyticsPage() {
     ? Math.round((safeLeads.filter(l => l.status === 'Won').length / safeLeads.length) * 100)
     : 0
 
-  const fmt = (n: number) => new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 
   return (
     <div className="min-h-screen space-y-5 p-4 sm:p-6">
@@ -93,18 +93,18 @@ export default async function AnalyticsPage() {
           <BarChart2 size={18} className="text-white" aria-hidden="true" />
         </div>
         <div>
-          <h1 className="text-lg font-black text-[var(--fi-ink)]">التحليلات المتقدمة</h1>
-          <p className="text-xs text-[var(--fi-muted)]">قمع المبيعات — مصادر العملاء — أسباب الخسارة — الاتجاهات الشهرية</p>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('التحليلات المتقدمة', 'Advanced Analytics')}</h1>
+          <p className="text-xs text-[var(--fi-muted)]">{t('قمع المبيعات — مصادر العملاء — أسباب الخسارة — الاتجاهات الشهرية', 'Sales funnel — Lead sources — Loss reasons — Monthly trends')}</p>
         </div>
       </div>
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { label: 'إجمالي العملاء',  value: fmt(safeLeads.length),  icon: Users,      color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: 'إجمالي الصفقات', value: fmt(safeDeals.length),  icon: Target,     color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-          { label: 'الإيرادات',       value: `${fmt(totalRevenue)} ج.م`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-          { label: 'معدل التحويل',    value: `${conversion}%`,       icon: XCircle,    color: 'text-amber-600',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
+          { label: t('إجمالي العملاء', 'Total Leads'),   value: fmt(safeLeads.length),       icon: Users,      color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: t('إجمالي الصفقات', 'Total Deals'),  value: fmt(safeDeals.length),       icon: Target,     color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+          { label: t('الإيرادات', 'Revenue'),            value: `${fmt(totalRevenue)} EGP`,  icon: TrendingUp, color: 'text-purple-600',  bg: 'bg-purple-50 dark:bg-purple-900/20' },
+          { label: t('معدل التحويل', 'Conversion Rate'), value: `${conversion}%`,            icon: XCircle,    color: 'text-amber-600',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
         ].map(k => {
           const Icon = k.icon
           return (

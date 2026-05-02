@@ -1,4 +1,3 @@
-import { getI18n } from '@/lib/i18n'
 import { TeamManagementClient, type TeamMemberRow } from '@/components/team/TeamManagementClient'
 import { createServerSupabaseClient } from '@/shared/supabase/server'
 import { requireSession } from '@/shared/auth/session'
@@ -7,7 +6,6 @@ import { normalizeRole } from '@/lib/permissions'
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
-  const { dir } = await getI18n()
   const session = await requireSession()
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
