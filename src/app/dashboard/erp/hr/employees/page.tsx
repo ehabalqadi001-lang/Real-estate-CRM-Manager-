@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Users, Search } from 'lucide-react'
 import { nullableUuid } from '@/lib/uuid'
 import type { AppRole } from '@/shared/auth/types'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,6 @@ const HR_ROLES: AppRole[] = [
   'company_admin', 'company_owner',
 ]
 
-const fmt = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
 
 type EmpRow = {
   id: string
@@ -35,6 +35,8 @@ export default async function EmployeeListPage({
 }: {
   searchParams: Promise<{ q?: string; dept?: string; status?: string }>
 }) {
+  const { t, numLocale } = await getI18n()
+  const fmt = new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 })
   const session = await requireSession()
   const { profile } = session
 
@@ -100,17 +102,17 @@ export default async function EmployeeListPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">EMPLOYEE DIRECTORY</p>
-            <h1 className="mt-1 text-2xl font-black text-[var(--fi-ink)]">دليل الموظفين</h1>
+            <h1 className="mt-1 text-2xl font-black text-[var(--fi-ink)]">{t('دليل الموظفين', 'Employee Directory')}</h1>
             <p className="mt-0.5 text-sm font-semibold text-[var(--fi-muted)]">
-              {employees.length} موظف
-              {status === 'active' && ` · ${statusCounts.active} نشط`}
+              {employees.length} {t('موظف', 'employees')}
+              {status === 'active' && ` · ${statusCounts.active} ${t('نشط', 'active')}`}
             </p>
           </div>
           <Link
             href="/dashboard/erp/hr"
             className="flex w-fit items-center gap-2 rounded-xl border border-[var(--fi-line)] px-4 py-2 text-sm font-bold text-[var(--fi-muted)] hover:bg-[var(--fi-soft)] transition-colors"
           >
-            ← لوحة HR
+            ← {t('لوحة HR', 'HR Dashboard')}
           </Link>
         </div>
       </section>
@@ -122,7 +124,7 @@ export default async function EmployeeListPage({
           <input
             name="q"
             defaultValue={q}
-            placeholder="البحث بالاسم أو البريد أو رقم الموظف..."
+            placeholder={t('البحث بالاسم أو البريد أو رقم الموظف...', 'Search by name, email, or employee number...')}
             className="h-10 w-full rounded-lg border border-[var(--fi-line)] bg-white pr-9 pl-3 text-sm font-bold text-[var(--fi-ink)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/5"
           />
         </div>
@@ -131,7 +133,7 @@ export default async function EmployeeListPage({
           defaultValue={dept}
           className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold text-[var(--fi-ink)] outline-none focus:border-emerald-400 dark:bg-white/5"
         >
-          <option value="">كل الأقسام</option>
+          <option value="">{t('كل الأقسام', 'All Departments')}</option>
           {(departments ?? []).map(d => (
             <option key={d.id} value={d.id}>{d.name_ar ?? d.name}</option>
           ))}
@@ -141,23 +143,23 @@ export default async function EmployeeListPage({
           defaultValue={status}
           className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold text-[var(--fi-ink)] outline-none focus:border-emerald-400 dark:bg-white/5"
         >
-          <option value="">كل الحالات</option>
-          <option value="active">نشط</option>
-          <option value="inactive">غير نشط</option>
-          <option value="terminated">منهي الخدمة</option>
+          <option value="">{t('كل الحالات', 'All Statuses')}</option>
+          <option value="active">{t('نشط', 'Active')}</option>
+          <option value="inactive">{t('غير نشط', 'Inactive')}</option>
+          <option value="terminated">{t('منهي الخدمة', 'Terminated')}</option>
         </select>
         <button
           type="submit"
           className="h-10 rounded-lg bg-[var(--fi-emerald)] px-5 text-sm font-black text-white hover:opacity-90 transition-opacity"
         >
-          بحث
+          {t('بحث', 'Search')}
         </button>
         {(q || dept || status) && (
           <Link
             href="/dashboard/erp/hr/employees"
             className="flex h-10 items-center rounded-lg border border-[var(--fi-line)] px-4 text-sm font-bold text-[var(--fi-muted)] hover:bg-[var(--fi-soft)] transition-colors"
           >
-            مسح
+            {t('مسح', 'Clear')}
           </Link>
         )}
       </form>
@@ -168,21 +170,21 @@ export default async function EmployeeListPage({
           <table className="w-full min-w-[820px] text-sm">
             <thead>
               <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
-                <th className="px-4 py-3 text-right">الموظف</th>
-                <th className="px-4 py-3 text-right">القسم / المنصب</th>
-                <th className="px-4 py-3 text-right">تاريخ التعيين</th>
-                <th className="px-4 py-3 text-right">الراتب</th>
-                <th className="px-4 py-3 text-right">عمولة %</th>
-                <th className="px-4 py-3 text-right">الحالة</th>
-                <th className="px-4 py-3 text-right">البيئة</th>
-                <th className="px-4 py-3 text-right">الملف</th>
+                <th className="px-4 py-3 text-right">{t('الموظف', 'Employee')}</th>
+                <th className="px-4 py-3 text-right">{t('القسم / المنصب', 'Dept / Title')}</th>
+                <th className="px-4 py-3 text-right">{t('تاريخ التعيين', 'Hire Date')}</th>
+                <th className="px-4 py-3 text-right">{t('الراتب', 'Salary')}</th>
+                <th className="px-4 py-3 text-right">{t('عمولة %', 'Commission %')}</th>
+                <th className="px-4 py-3 text-right">{t('الحالة', 'Status')}</th>
+                <th className="px-4 py-3 text-right">{t('البيئة', 'Env')}</th>
+                <th className="px-4 py-3 text-right">{t('الملف', 'Profile')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
               {employees.map(e => (
                 <tr key={e.id} className="hover:bg-[var(--fi-soft)]/60 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-black text-[var(--fi-ink)]">{e.profiles?.full_name ?? 'بدون اسم'}</p>
+                    <p className="font-black text-[var(--fi-ink)]">{e.profiles?.full_name ?? t('بدون اسم', 'No name')}</p>
                     <p className="mt-0.5 text-xs text-[var(--fi-muted)]">{e.profiles?.email ?? '—'}</p>
                     <p className="mt-0.5 text-xs font-bold text-indigo-600">{e.employee_number}</p>
                   </td>
@@ -193,10 +195,10 @@ export default async function EmployeeListPage({
                     </p>
                   </td>
                   <td className="px-4 py-3 text-[var(--fi-muted)]">
-                    {e.hire_date ? new Date(e.hire_date).toLocaleDateString('ar-EG') : '—'}
+                    {e.hire_date ? new Date(e.hire_date).toLocaleDateString(numLocale) : '—'}
                   </td>
                   <td className="px-4 py-3 font-black text-[var(--fi-ink)]">
-                    {fmt.format(Number(e.basic_salary ?? e.base_salary ?? 0))} ج.م
+                    {fmt.format(Number(e.basic_salary ?? e.base_salary ?? 0))} {t('ج.م', 'EGP')}
                   </td>
                   <td className="px-4 py-3 font-bold text-emerald-600">
                     {Number(e.commission_rate ?? 0)}%
@@ -207,14 +209,14 @@ export default async function EmployeeListPage({
                       e.status === 'terminated' ? 'bg-red-50 text-red-700' :
                       'bg-slate-100 text-slate-600'
                     }`}>
-                      {e.status === 'active' ? 'نشط' : e.status === 'terminated' ? 'منهي' : e.status ?? '—'}
+                      {e.status === 'active' ? t('نشط', 'Active') : e.status === 'terminated' ? t('منهي', 'Terminated') : e.status ?? '—'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-black ${
                       e.is_env_locked ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                     }`}>
-                      {e.is_env_locked ? 'مربوطة ✓' : 'غير مربوطة'}
+                      {e.is_env_locked ? t('مربوطة ✓', 'Linked ✓') : t('غير مربوطة', 'Unlinked')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -222,7 +224,7 @@ export default async function EmployeeListPage({
                       href={`/dashboard/erp/hr/employees/${e.id}`}
                       className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-black text-indigo-700 hover:bg-indigo-100 transition-colors"
                     >
-                      الملف →
+                      {t('الملف', 'Profile')} →
                     </Link>
                   </td>
                 </tr>
@@ -232,7 +234,7 @@ export default async function EmployeeListPage({
                   <td colSpan={8} className="px-4 py-14 text-center">
                     <Users size={32} className="mx-auto mb-3 opacity-20" />
                     <p className="font-bold text-[var(--fi-muted)]">
-                      {q || dept ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد موظفون بعد'}
+                      {q || dept ? t('لا توجد نتائج مطابقة للبحث', 'No matching results') : t('لا يوجد موظفون بعد', 'No employees yet')}
                     </p>
                   </td>
                 </tr>

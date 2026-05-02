@@ -12,14 +12,12 @@ import { nullableUuid } from '@/lib/uuid'
 
 export const dynamic = 'force-dynamic'
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-
-const fmtFull = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
-
 export default async function ERPOverviewPage() {
-  const { dir } = await getI18n()
+  const { t, numLocale } = await getI18n()
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+  const fmtFull = (n: number) =>
+    new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
   const session = await requireSession()
   const { profile } = session
 
@@ -73,13 +71,13 @@ export default async function ERPOverviewPage() {
   const totalCommissions = (payrollRows ?? []).reduce((s, p) => s + Number(p.total_commissions ?? 0), 0)
 
   const kpis = [
-    { label: 'الموظفون النشطون',  value: String(activeEmployees ?? 0),              icon: Users,          color: 'bg-emerald-50 text-emerald-600' },
-    { label: 'الرواتب هذا الشهر', value: fmt(totalPayroll) + ' ج.م',                icon: BadgeDollarSign, color: 'bg-sky-50 text-sky-600' },
-    { label: 'العمولات المحتسبة', value: fmt(totalCommissions) + ' ج.م',             icon: TrendingUp,     color: 'bg-amber-50 text-amber-600' },
-    { label: 'إجازات معلقة',      value: String(pendingLeaves ?? 0),                icon: CalendarCheck2,  color: 'bg-orange-50 text-orange-600' },
-    { label: 'وثائق قانونية',     value: String(legalDocs ?? 0),                   icon: FileText,        color: 'bg-indigo-50 text-indigo-600' },
-    { label: 'عقود موظفين',       value: String(hrContracts ?? 0),                 icon: UserCheck,       color: 'bg-violet-50 text-violet-600' },
-    { label: 'قيود محاسبية',      value: String(journalCount ?? 0),                icon: BookOpen,        color: 'bg-rose-50 text-rose-600' },
+    { label: t('الموظفون النشطون', 'Active Employees'),  value: String(activeEmployees ?? 0),                               icon: Users,          color: 'bg-emerald-50 text-emerald-600' },
+    { label: t('الرواتب هذا الشهر', 'Monthly Payroll'),  value: fmt(totalPayroll) + ' ' + t('ج.م', 'EGP'),                  icon: BadgeDollarSign, color: 'bg-sky-50 text-sky-600' },
+    { label: t('العمولات المحتسبة', 'Commissions'),       value: fmt(totalCommissions) + ' ' + t('ج.م', 'EGP'),              icon: TrendingUp,     color: 'bg-amber-50 text-amber-600' },
+    { label: t('إجازات معلقة', 'Pending Leaves'),         value: String(pendingLeaves ?? 0),                                 icon: CalendarCheck2,  color: 'bg-orange-50 text-orange-600' },
+    { label: t('وثائق قانونية', 'Legal Documents'),       value: String(legalDocs ?? 0),                                    icon: FileText,        color: 'bg-indigo-50 text-indigo-600' },
+    { label: t('عقود موظفين', 'Employee Contracts'),      value: String(hrContracts ?? 0),                                  icon: UserCheck,       color: 'bg-violet-50 text-violet-600' },
+    { label: t('قيود محاسبية', 'Journal Entries'),        value: String(journalCount ?? 0),                                 icon: BookOpen,        color: 'bg-rose-50 text-rose-600' },
   ]
 
   const modules = [
@@ -87,25 +85,25 @@ export default async function ERPOverviewPage() {
       href:      '/dashboard/erp/hr',
       icon:      Users,
       gradient:  'from-emerald-500 to-teal-600',
-      title:     'الموارد البشرية',
-      subtitle:  'موظفون · رواتب · حضور · عمولات · مسارات تعليمية',
-      stat:      `${activeEmployees ?? 0} موظف نشط`,
+      title:     t('الموارد البشرية', 'Human Resources'),
+      subtitle:  t('موظفون · رواتب · حضور · عمولات · مسارات تعليمية', 'Employees · Payroll · Attendance · Commissions · Learning'),
+      stat:      `${activeEmployees ?? 0} ${t('موظف نشط', 'active employees')}`,
     },
     {
       href:      '/dashboard/erp/finance',
       icon:      TrendingUp,
       gradient:  'from-sky-500 to-blue-600',
-      title:     'المحاسبة والمالية',
-      subtitle:  'دفتر أستاذ · ذمم مدينة/دائنة · ميزانية · دليل حسابات',
-      stat:      `${fmt(totalPayroll)} ج.م رواتب`,
+      title:     t('المحاسبة والمالية', 'Accounting & Finance'),
+      subtitle:  t('دفتر أستاذ · ذمم مدينة/دائنة · ميزانية · دليل حسابات', 'General Ledger · AR/AP · Budget · Chart of Accounts'),
+      stat:      `${fmt(totalPayroll)} ${t('ج.م', 'EGP')} ${t('رواتب', 'payroll')}`,
     },
     {
       href:      '/dashboard/erp/legal',
       icon:      ShieldCheck,
       gradient:  'from-indigo-500 to-violet-600',
-      title:     'العقود والوثائق القانونية',
-      subtitle:  'وثائق قانونية · عقود موظفين · قوالب · سجل تدقيق',
-      stat:      `${(legalDocs ?? 0) + (hrContracts ?? 0)} وثيقة وعقد`,
+      title:     t('العقود والوثائق القانونية', 'Legal Documents & Contracts'),
+      subtitle:  t('وثائق قانونية · عقود موظفين · قوالب · سجل تدقيق', 'Legal Docs · Employee Contracts · Templates · Audit Log'),
+      stat:      `${(legalDocs ?? 0) + (hrContracts ?? 0)} ${t('وثيقة وعقد', 'docs & contracts')}`,
     },
   ]
 
@@ -120,9 +118,9 @@ export default async function ERPOverviewPage() {
             </div>
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">ENTERPRISE RESOURCE PLANNING</p>
-              <h1 className="text-2xl font-black text-[var(--fi-ink)]">نظام تخطيط موارد المؤسسة</h1>
+              <h1 className="text-2xl font-black text-[var(--fi-ink)]">{t('نظام تخطيط موارد المؤسسة', 'Enterprise Resource Planning')}</h1>
               <p className="text-xs text-[var(--fi-muted)] mt-0.5">
-                HR · محاسبة · قانوني — لوحة مركزية موحدة لـ {month}/{year}
+                {t('HR · محاسبة · قانوني — لوحة مركزية موحدة لـ', 'HR · Accounting · Legal — Central dashboard for')} {month}/{year}
               </p>
             </div>
           </div>
@@ -130,7 +128,7 @@ export default async function ERPOverviewPage() {
             href="/dashboard"
             className="flex w-fit items-center gap-2 rounded-xl border border-[var(--fi-line)] px-4 py-2 text-sm font-bold text-[var(--fi-muted)] hover:bg-[var(--fi-soft)] transition-colors"
           >
-            لوحة CRM →
+            {t('لوحة CRM', 'CRM Dashboard')} →
           </Link>
         </div>
       </div>
@@ -175,10 +173,10 @@ export default async function ERPOverviewPage() {
           <div className="p-4 border-b border-[var(--fi-line)] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookOpen size={16} className="text-[var(--fi-muted)]" />
-              <h2 className="font-bold text-[var(--fi-ink)]">آخر القيود المحاسبية</h2>
+              <h2 className="font-bold text-[var(--fi-ink)]">{t('آخر القيود المحاسبية', 'Recent Journal Entries')}</h2>
             </div>
             <Link href="/dashboard/erp/finance" className="text-xs font-black text-indigo-600 hover:underline">
-              عرض الكل →
+              {t('عرض الكل', 'View all')} →
             </Link>
           </div>
           <div className="divide-y divide-[var(--fi-line)]">
@@ -187,15 +185,15 @@ export default async function ERPOverviewPage() {
                 <div>
                   <p className="font-semibold text-[var(--fi-ink)] text-sm">{je.description}</p>
                   <p className="text-xs text-[var(--fi-muted)]">
-                    {je.entry_number} · {je.entry_date ? new Date(je.entry_date).toLocaleDateString('ar-EG') : '—'}
+                    {je.entry_number} · {je.entry_date ? new Date(je.entry_date).toLocaleDateString(numLocale) : '—'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-black text-sm text-[var(--fi-ink)]">
-                    {fmtFull(Number(je.total_debit ?? 0))} ج.م
+                    {fmtFull(Number(je.total_debit ?? 0))} {t('ج.م', 'EGP')}
                   </span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${je.is_posted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {je.is_posted ? 'مرحَّل' : 'مسودة'}
+                    {je.is_posted ? t('مرحَّل', 'Posted') : t('مسودة', 'Draft')}
                   </span>
                 </div>
               </div>
