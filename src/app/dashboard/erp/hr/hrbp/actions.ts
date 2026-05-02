@@ -4,39 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
 import type { AppRole } from '@/shared/auth/types'
+import { calculateBurnoutScore } from './utils'
 
 export type HRBPActionState = { ok: boolean; message: string }
 
 const HR_WRITE_ROLES: AppRole[] = ['super_admin', 'platform_admin', 'hr_manager', 'hr_staff', 'hr_officer']
-
-// Burnout score algorithm:
-// Inputs (0–10 each): workload, overtime_hours (normalized), absence_days, late_checkins, missed_targets
-// Weights: workload*0.25 + overtime*0.20 + absence*0.20 + late*0.15 + targets*0.20
-export function calculateBurnoutScore({
-  workloadScore,
-  overtimeHours,
-  absenceDays,
-  lateCheckIns,
-  missedTargetsPct,
-}: {
-  workloadScore: number
-  overtimeHours: number
-  absenceDays: number
-  lateCheckIns: number
-  missedTargetsPct: number
-}): number {
-  const overtime = Math.min(10, overtimeHours / 4)     // 40h/week overtime → 10
-  const absence = Math.min(10, absenceDays * 1.5)      // 7 days → 10
-  const late = Math.min(10, lateCheckIns * 1.0)        // 10 lates → 10
-  const targets = Math.min(10, (missedTargetsPct / 10)) // 100% missed → 10
-  return Math.round(
-    workloadScore * 0.25 +
-    overtime * 0.20 +
-    absence * 0.20 +
-    late * 0.15 +
-    targets * 0.20
-  )
-}
 
 export async function saveBurnoutIndicatorAction(
   _prev: HRBPActionState,
