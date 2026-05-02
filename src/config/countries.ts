@@ -45,5 +45,17 @@ export function isCountryCode(value: string | null | undefined): value is Countr
 export function localeForCountry(countryCode: CountryCode) {
   if (countryCode === 'AE') return 'ar-AE'
   if (countryCode === 'SA') return 'ar-SA'
-  return 'ar'
+  return 'ar-EG'
+}
+
+export const SUPPORTED_LOCALES = ['ar-EG', 'ar-SA', 'ar-AE', 'en-US', 'ar', 'en'] as const
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
+
+export function isRTLLocale(locale: string): boolean {
+  return locale.startsWith('ar')
+}
+
+export function getMessageFile(locale: string): string {
+  const aliases: Record<string, string> = { ar: 'ar-EG', en: 'en-US' }
+  return aliases[locale] ?? locale
 }

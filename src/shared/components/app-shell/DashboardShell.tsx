@@ -21,7 +21,7 @@ export function DashboardShell({ children, profile, companyOptions = [] }: Dashb
     : undefined
 
   return (
-    <div className="fi-shell-bg h-screen overflow-hidden text-[var(--fi-ink)]" dir="rtl" style={shellStyle}>
+    <div className="fi-shell-bg h-screen overflow-hidden text-[var(--fi-ink)]" style={shellStyle}>
       <div className="flex h-full">
         <EnterpriseSidebar profile={profile} />
         <main className="min-w-0 flex-1 overflow-y-auto pb-24 lg:pb-6" style={{ paddingBottom: 'max(6rem, calc(6rem + env(safe-area-inset-bottom)))' }}>

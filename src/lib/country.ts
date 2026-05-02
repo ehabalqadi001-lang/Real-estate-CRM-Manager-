@@ -10,6 +10,8 @@ export async function getCountryCode(): Promise<CountryCode> {
 export async function getLocaleFromCookies() {
   const cookieStore = await cookies()
   const locale = cookieStore.get('locale')?.value
-  if (locale === 'en' || locale === 'ar' || locale === 'ar-AE' || locale === 'ar-SA') return locale
+  if (locale === 'ar-EG' || locale === 'ar-SA' || locale === 'ar-AE' || locale === 'en-US' || locale === 'ar' || locale === 'en') {
+    return locale
+  }
   return localeForCountry(await getCountryCode())
 }

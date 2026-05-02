@@ -7,6 +7,7 @@ import type { AppProfile } from '@/shared/auth/types'
 import type { CompanyOption } from '@/shared/company-context/server'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { UserProfileDropdown } from './UserProfileDropdown'
+import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 
 export function EnterpriseTopbar({
   profile,
@@ -76,8 +77,9 @@ export function EnterpriseTopbar({
           </button>
         </div>
 
-        {/* Right: Notifications & Profile */}
+        {/* Right: Locale Switcher, Notifications & Profile */}
         <div className="flex shrink-0 items-center gap-2 justify-end w-auto">
+          <LocaleSwitcher />
           <NotificationBell userId={profile.id} />
           <UserProfileDropdown profile={profile} companyOptions={companyOptions} />
         </div>

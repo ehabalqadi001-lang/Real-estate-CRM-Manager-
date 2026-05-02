@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Building2,
@@ -16,12 +17,12 @@ import {
 import { dashboardNavigation } from '@/shared/config/navigation'
 import type { AppProfile } from '@/shared/auth/types'
 import { hasPermission } from '@/shared/rbac/permissions'
+import { isRTLLocale } from '@/config/countries'
 
 interface EnterpriseSidebarProps {
   profile: AppProfile
 }
 
-// Fixed hrefs shown in the mobile bottom bar — most-used pages
 const MOBILE_BOTTOM_HREFS = [
   '/dashboard',
   '/dashboard/leads',
@@ -37,6 +38,10 @@ function isActiveRoute(pathname: string, href: string) {
 
 export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   const pathname = usePathname()
+  const locale = useLocale()
+  const isRTL = isRTLLocale(locale)
+  const t = useTranslations('nav')
+
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
@@ -47,10 +52,19 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     return () => window.removeEventListener('fi:open-sidebar', open)
   }, [])
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileOpen(false)
   }, [pathname])
+
+  function getGroupTitle(group: (typeof dashboardNavigation)[number]): string {
+    if (!group.titleKey) return group.title
+    try { return t(`groups.${group.titleKey}`) } catch { return group.title }
+  }
+
+  function getItemTitle(item: (typeof dashboardNavigation)[number]['items'][number]): string {
+    if (!item.titleKey) return item.title
+    try { return t(`items.${item.titleKey}`) } catch { return item.title }
+  }
 
   const visibleGroups = dashboardNavigation
     .filter((group) => !group.items.every((item) => item.href.startsWith('/admin')))
@@ -70,9 +84,11 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     ? [
         {
           title: 'المنصة',
+          titleKey: 'platform',
           items: [
             {
               title: 'لوحة إدارة المنصة',
+              titleKey: 'adminDashboard',
               href: '/admin',
               permission: 'admin.view' as const,
               icon: Settings,
@@ -85,7 +101,6 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   const navigationGroups = [...visibleGroups, ...platformGroup]
   const allNavItems = navigationGroups.flatMap((g) => g.items)
 
-  // Pick the fixed bottom-nav items the user actually has access to
   const mobileItems = MOBILE_BOTTOM_HREFS.map((href) =>
     allNavItems.find((item) => item.href === href),
   ).filter(Boolean) as typeof allNavItems
@@ -96,7 +111,14 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     ? { backgroundImage: `url(${JSON.stringify(tenantLogoUrl)})` }
     : undefined
 
-  /* ─── Sidebar inner content (shared between desktop + mobile drawer) ─── */
+  // In RTL (Arabic): sidebar slides from the end (positive x = from right off-screen)
+  // In LTR (English): sidebar slides from the start (negative x = from left off-screen)
+  const mobileDrawerInitialX = isRTL ? 280 : -280
+
+  // Collapse/expand icons differ by layout direction
+  const CollapseIcon = isRTL ? ChevronRight : ChevronLeft
+  const ExpandIcon = isRTL ? ChevronLeft : ChevronRight
+
   const SidebarInner = ({
     onNavigate,
     isCollapsed = false,
@@ -106,7 +128,10 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     isCollapsed?: boolean
     onToggleCollapse?: () => void
   }) => (
-    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-950 border-r border-[var(--fi-line)]">
+    // Keep dir="ltr" to preserve icon-left layout regardless of page direction.
+    // The sidebar POSITION on screen (left vs right) is controlled by the flex
+    // parent which inherits the root HTML direction.
+    <div dir="ltr" className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-950 border-e border-[var(--fi-line)] rtl:border-e-0 rtl:border-s">
       {/* ── Logo bar ── */}
       <div
         className={`flex h-[64px] shrink-0 items-center border-b border-[var(--fi-line)] ${
@@ -137,10 +162,11 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             </Link>
             <button
               onClick={onToggleCollapse}
-              title="طي القائمة"
+              title={t('groups.dashboard')}
               className="hidden lg:flex size-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              aria-label="Collapse menu"
             >
-              <ChevronLeft className="size-4" />
+              <CollapseIcon className="size-4" />
             </button>
           </>
         ) : (
@@ -149,27 +175,27 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             title={tenantName}
             className="flex size-9 items-center justify-center overflow-hidden rounded-xl bg-contain bg-center bg-no-repeat shadow-sm border border-[var(--fi-line)]"
             style={tenantLogoStyle ?? { background: 'linear-gradient(135deg, #00c27c 0%, #0081cc 100%)' }}
+            aria-label="Expand menu"
           >
             {!tenantLogoUrl && <Building2 className="size-4 text-white" aria-hidden />}
           </button>
         )}
       </div>
 
-      {/* Expand button (collapsed mode only, desktop) */}
+      {/* Expand button (collapsed mode, desktop only) */}
       {isCollapsed && (
         <button
           onClick={onToggleCollapse}
-          title="توسيع القائمة"
           className="hidden lg:flex justify-center py-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+          aria-label="Expand menu"
         >
-          <ChevronRight className="size-4" />
+          <ExpandIcon className="size-4" />
         </button>
       )}
 
       {/* ── Navigation ── */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 no-scrollbar">
         {isCollapsed ? (
-          /* Icon-only mode when collapsed */
           <div className="space-y-1">
             {allNavItems.map((item) => {
               const Icon = item.icon
@@ -179,7 +205,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
-                  title={item.title}
+                  title={getItemTitle(item)}
                   className={`relative flex justify-center rounded-xl py-3 transition-all duration-150 ${
                     active
                       ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
@@ -187,7 +213,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
                   }`}
                 >
                   {active && (
-                    <span className="absolute right-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-l-full bg-emerald-500" />
+                    <span className="absolute end-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-s-full bg-emerald-500" />
                   )}
                   <Icon className="size-5 shrink-0" aria-hidden />
                 </Link>
@@ -195,13 +221,14 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             })}
           </div>
         ) : (
-          /* Full labeled navigation */
           <div className="space-y-6">
             {navigationGroups.map((group, index) => (
               <SidebarGroup
                 key={group.title}
                 group={group}
                 pathname={pathname}
+                groupTitle={getGroupTitle(group)}
+                getItemTitle={getItemTitle}
                 defaultOpen={index < 2}
                 open={openGroups[group.title]}
                 onToggle={() =>
@@ -223,13 +250,12 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
     <>
       {/* ── Desktop sidebar (collapsible) ── */}
       <motion.aside
-        initial={{ x: 16, opacity: 0 }}
+        initial={{ x: isRTL ? -16 : 16, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
         className="hidden h-screen shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out lg:block bg-white dark:bg-slate-950"
         // eslint-disable-next-line no-inline-styles/no-inline-styles
         style={{ width: collapsed ? 72 : 280 }}
-        dir="ltr"
       >
         <div className="h-full overflow-hidden">
           <SidebarInner
@@ -242,7 +268,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       {/* ── Mobile drawer ── */}
       <AnimatePresence>
         {mobileOpen && (
-          <div className="fixed inset-0 z-[60] lg:hidden" dir="ltr">
+          <div className="fixed inset-0 z-[60] lg:hidden">
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
@@ -255,11 +281,11 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
             />
             <motion.aside
               key="drawer"
-              initial={{ x: 280 }}
+              initial={{ x: mobileDrawerInitialX }}
               animate={{ x: 0 }}
-              exit={{ x: 280 }}
+              exit={{ x: mobileDrawerInitialX }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="absolute inset-y-0 right-0 flex w-[280px] flex-col shadow-2xl bg-white dark:bg-slate-950"
+              className="absolute inset-y-0 start-0 flex w-[280px] flex-col shadow-2xl bg-white dark:bg-slate-950"
             >
               <SidebarInner onNavigate={() => setMobileOpen(false)} />
             </motion.aside>
@@ -270,8 +296,8 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               transition={{ delay: 0.1 }}
               type="button"
               onClick={() => setMobileOpen(false)}
-              aria-label="إغلاق القائمة"
-              className="absolute right-[292px] top-4 flex size-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-md hover:bg-slate-50 dark:bg-slate-800 dark:text-white"
+              aria-label="Close menu"
+              className="absolute start-[292px] top-4 flex size-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-md hover:bg-slate-50 dark:bg-slate-800 dark:text-white"
             >
               <X className="size-5" />
             </motion.button>
@@ -285,8 +311,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
           className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid gap-1 rounded-xl p-1 lg:hidden border border-[var(--fi-line)] bg-white/90 backdrop-blur-md shadow-lg dark:bg-slate-950/90"
           // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ gridTemplateColumns: `repeat(${mobileItems.length}, 1fr)` }}
-          dir="rtl"
-          aria-label="التنقل السريع"
+          aria-label="Quick navigation"
         >
           {mobileItems.map((item) => {
             const Icon = item.icon
@@ -302,7 +327,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
                 }`}
               >
                 <Icon className="size-4" aria-hidden />
-                <span className="max-w-full truncate">{item.title}</span>
+                <span className="max-w-full truncate">{getItemTitle(item)}</span>
               </Link>
             )
           })}
@@ -319,6 +344,8 @@ type SidebarNavigationGroup = (typeof dashboardNavigation)[number]
 function SidebarGroup({
   group,
   pathname,
+  groupTitle,
+  getItemTitle,
   defaultOpen,
   open,
   onToggle,
@@ -326,6 +353,8 @@ function SidebarGroup({
 }: {
   group: SidebarNavigationGroup
   pathname: string
+  groupTitle: string
+  getItemTitle: (item: SidebarNavigationGroup['items'][number]) => string
   defaultOpen: boolean
   open: boolean | undefined
   onToggle: () => void
@@ -340,7 +369,7 @@ function SidebarGroup({
         onClick={onToggle}
         className="mb-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-300"
       >
-        <span className="truncate">{group.title}</span>
+        <span className="truncate">{groupTitle}</span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
@@ -378,7 +407,7 @@ function SidebarGroup({
                       {active && (
                         <motion.span
                           layoutId="active-pill"
-                          className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-l-full bg-emerald-500"
+                          className="absolute end-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-s-full bg-emerald-500"
                         />
                       )}
                       <Icon
@@ -387,7 +416,7 @@ function SidebarGroup({
                         }`}
                         aria-hidden
                       />
-                      <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                      <span className="min-w-0 flex-1 truncate">{getItemTitle(item)}</span>
                     </Link>
                   </motion.div>
                 )

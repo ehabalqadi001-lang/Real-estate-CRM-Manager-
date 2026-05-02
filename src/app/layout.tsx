@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { getLocaleFromCookies } from '@/lib/country'
+import { isRTLLocale } from '@/config/countries'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -40,11 +41,12 @@ export default async function RootLayout({
 }) {
   const locale = await getLocaleFromCookies()
   const messages = await getMessages()
+  const dir = isRTLLocale(locale) ? 'rtl' : 'ltr'
 
   return (
     <html
-      lang="en"
-      dir="ltr"
+      lang={locale}
+      dir={dir}
       className={cn(cairo.variable, inter.variable, geist.variable, 'font-cairo')}
       suppressHydrationWarning
     >
