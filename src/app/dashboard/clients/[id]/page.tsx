@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, Briefcase, Mic2, PhoneCall, TrendingUp, User, Phone, Globe, MapPin, BadgeCheck } from 'lucide-react'
 import { getClientDetail } from '@/domains/clients/queries'
+import { getI18n } from '@/lib/i18n'
 import { WhatsAppButton } from '@/components/whatsapp/whatsapp-button'
 import type { ClientCallSummary } from '@/domains/clients/types'
 
@@ -30,7 +31,7 @@ function InfoItem({ label, value, dir: d }: { label: string; value: string | nul
   return (
     <div className="flex flex-col gap-1">
       <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">{label}</span>
-      <span className="text-sm font-bold text-[var(--fi-ink)]" dir={d}>{value || 'غير محدد'}</span>
+      <span className="text-sm font-bold text-[var(--fi-ink)]" dir={d}>{value || '—'}</span>
     </div>
   )
 }
@@ -49,14 +50,17 @@ function SectionCard({ title, icon: Icon, children }: { title: string; icon: Rea
   )
 }
 
-const PAYMENT_LABELS: Record<string, string> = {
-  downpayment: 'مقدم (كاش)',
-  installments: 'أقساط',
-}
-
 export default async function ClientProfilePage({ params }: PageProps) {
   const { id } = await params
-  const { client, deals, calls, error } = await getClientDetail(id)
+  const [{ client, deals, calls, error }, { t, numLocale }] = await Promise.all([
+    getClientDetail(id),
+    getI18n(),
+  ])
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    downpayment: t('مقدم (كاش)', 'Down Payment (Cash)'),
+    installments: t('أقساط', 'Installments'),
+  }
 
   if (!client && !error) notFound()
 
@@ -64,10 +68,10 @@ export default async function ClientProfilePage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 sm:p-8" dir="rtl">
         <div className="rounded-2xl border border-red-100 bg-white p-4 sm:p-8 text-center shadow-sm">
-          <p className="font-black text-red-700">تعذر تحميل ملف العميل</p>
-          <p className="mt-2 text-sm text-red-600">{error ?? 'العميل غير موجود'}</p>
+          <p className="font-black text-red-700">{t('تعذر تحميل ملف العميل', 'Failed to load client profile')}</p>
+          <p className="mt-2 text-sm text-red-600">{error ?? t('العميل غير موجود', 'Client not found')}</p>
           <Link href="/dashboard/clients" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
-            <ArrowRight size={16} /> العودة للعملاء
+            <ArrowRight size={16} /> {t('العودة للعملاء', 'Back to Clients')}
           </Link>
         </div>
       </div>
@@ -85,10 +89,9 @@ export default async function ClientProfilePage({ params }: PageProps) {
   return (
     <div className="min-h-screen space-y-5 p-4 sm:p-6" dir="rtl">
 
-      {/* Breadcrumb */}
       <Link href="/dashboard/clients" className="inline-flex items-center gap-2 text-sm font-bold text-[var(--fi-emerald)]">
         <ArrowRight size={15} />
-        العودة لدليل العملاء
+        {t('العودة لدليل العملاء', 'Back to Clients')}
       </Link>
 
       {/* Profile header */}
@@ -107,7 +110,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
                   <BadgeCheck className="size-3.5 text-[var(--fi-emerald)]" />
                   {clientCode}
                 </span>
-                {client.client_type && <span>{client.client_type === 'Buyer' ? 'مشتري' : 'مستثمر'}</span>}
+                {client.client_type && <span>{client.client_type === 'Buyer' ? t('مشتري', 'Buyer') : t('مستثمر', 'Investor')}</span>}
                 {client.nationality && <span className="flex items-center gap-1"><Globe className="size-3.5" />{client.nationality}</span>}
               </div>
             </div>
@@ -119,12 +122,11 @@ export default async function ClientProfilePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* KPI strip */}
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { label: 'إجمالي الصفقات', value: deals.length.toString() },
-            { label: 'قيمة الاستثمارات', value: totalInvestment > 0 ? formatMoney(totalInvestment) : '—' },
-            { label: 'صفقات مكتملة', value: completedDeals.toString() },
+            { label: t('إجمالي الصفقات', 'Total Deals'), value: deals.length.toString() },
+            { label: t('قيمة الاستثمارات', 'Investment Value'), value: totalInvestment > 0 ? formatMoney(totalInvestment) : '—' },
+            { label: t('صفقات مكتملة', 'Completed Deals'), value: completedDeals.toString() },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
               <p className="text-lg font-black text-[var(--fi-emerald)]">{value}</p>
@@ -136,46 +138,43 @@ export default async function ClientProfilePage({ params }: PageProps) {
 
       <div className="grid gap-5 lg:grid-cols-2">
 
-        {/* Contact info */}
-        <SectionCard title="بيانات التواصل" icon={Phone}>
+        <SectionCard title={t('بيانات التواصل', 'Contact Details')} icon={Phone}>
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-            <InfoItem label="رقم الهاتف الرئيسي" value={client.phone_country_code ? `${client.phone_country_code} ${phone}` : phone} dir="ltr" />
-            <InfoItem label="رقم الهاتف الثاني" value={client.secondary_phone ? `${client.secondary_phone_country_code ?? ''} ${client.secondary_phone}`.trim() : null} dir="ltr" />
-            <InfoItem label="البريد الإلكتروني" value={client.email} dir="ltr" />
-            <InfoItem label="الرقم القومي" value={client.national_id} />
+            <InfoItem label={t('رقم الهاتف الرئيسي', 'Primary Phone')} value={client.phone_country_code ? `${client.phone_country_code} ${phone}` : phone} dir="ltr" />
+            <InfoItem label={t('رقم الهاتف الثاني', 'Secondary Phone')} value={client.secondary_phone ? `${client.secondary_phone_country_code ?? ''} ${client.secondary_phone}`.trim() : null} dir="ltr" />
+            <InfoItem label={t('البريد الإلكتروني', 'Email')} value={client.email} dir="ltr" />
+            <InfoItem label={t('الرقم القومي', 'National ID')} value={client.national_id} />
           </div>
         </SectionCard>
 
-        {/* Personal info */}
-        <SectionCard title="البيانات الشخصية" icon={User}>
+        <SectionCard title={t('البيانات الشخصية', 'Personal Info')} icon={User}>
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-            <InfoItem label="الجنسية" value={client.nationality} />
-            <InfoItem label="مكان الإقامة" value={client.residence_country} />
-            <InfoItem label="العنوان" value={client.address} />
-            <InfoItem label="مصدر العميل" value={client.source} />
+            <InfoItem label={t('الجنسية', 'Nationality')} value={client.nationality} />
+            <InfoItem label={t('مكان الإقامة', 'Residence')} value={client.residence_country} />
+            <InfoItem label={t('العنوان', 'Address')} value={client.address} />
+            <InfoItem label={t('مصدر العميل', 'Source')} value={client.source} />
           </div>
         </SectionCard>
 
-        {/* Investment profile */}
-        <SectionCard title="ملف الاستثمار" icon={TrendingUp}>
+        <SectionCard title={t('ملف الاستثمار', 'Investment Profile')} icon={TrendingUp}>
           <div className="space-y-4">
             {client.investment_types?.length ? (
               <div>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">نوع الاستثمار</p>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">{t('نوع الاستثمار', 'Investment Type')}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {client.investment_types.map((t) => (
-                    <span key={t} className="rounded-lg bg-[var(--fi-emerald)]/10 px-2.5 py-1 text-xs font-bold text-[var(--fi-emerald)]">{t}</span>
+                  {client.investment_types.map((inv) => (
+                    <span key={inv} className="rounded-lg bg-[var(--fi-emerald)]/10 px-2.5 py-1 text-xs font-bold text-[var(--fi-emerald)]">{inv}</span>
                   ))}
                 </div>
               </div>
             ) : null}
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-              <InfoItem label="قيمة الاستثمار" value={client.investment_budget ? formatMoney(client.investment_budget) : null} />
-              <InfoItem label="طريقة الدفع" value={PAYMENT_LABELS[client.payment_method ?? ''] ?? client.payment_method} />
+              <InfoItem label={t('قيمة الاستثمار', 'Investment Budget')} value={client.investment_budget ? formatMoney(client.investment_budget) : null} />
+              <InfoItem label={t('طريقة الدفع', 'Payment Method')} value={PAYMENT_LABELS[client.payment_method ?? ''] ?? client.payment_method} />
             </div>
             {client.investment_locations?.length ? (
               <div>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">مناطق الاستثمار المفضلة</p>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">{t('مناطق الاستثمار المفضلة', 'Preferred Investment Areas')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {client.investment_locations.map((l) => (
                     <span key={l} className="flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-[var(--fi-muted)]">
@@ -188,10 +187,9 @@ export default async function ClientProfilePage({ params }: PageProps) {
           </div>
         </SectionCard>
 
-        {/* Deals */}
-        <SectionCard title={`سجل الصفقات (${deals.length})`} icon={Briefcase}>
+        <SectionCard title={`${t('سجل الصفقات', 'Deal History')} (${deals.length})`} icon={Briefcase}>
           {deals.length === 0 ? (
-            <p className="py-6 text-center text-sm font-bold text-[var(--fi-muted)]">لم يقم هذا العميل بأي صفقات حتى الآن.</p>
+            <p className="py-6 text-center text-sm font-bold text-[var(--fi-muted)]">{t('لم يقم هذا العميل بأي صفقات حتى الآن.', 'This client has no deals yet.')}</p>
           ) : (
             <div className="space-y-3">
               {deals.map((deal) => {
@@ -200,7 +198,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
                   <div key={deal.id} className="rounded-xl border border-[var(--fi-line)] p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-black text-[var(--fi-ink)]">{deal.title ?? 'صفقة'}</p>
+                        <p className="font-black text-[var(--fi-ink)]">{deal.title ?? t('صفقة', 'Deal')}</p>
                         <p className="mt-0.5 text-xs text-[var(--fi-muted)]">
                           {deal.developer_name ?? '—'} · {deal.property_type ?? '—'}
                         </p>
@@ -221,15 +219,14 @@ export default async function ClientProfilePage({ params }: PageProps) {
 
       </div>
 
-      {/* Calls */}
-      <SectionCard title={`سجل المكالمات (${calls.length})`} icon={PhoneCall}>
+      <SectionCard title={`${t('سجل المكالمات', 'Call History')} (${calls.length})`} icon={PhoneCall}>
         {calls.length === 0 ? (
           <p className="py-6 text-center text-sm font-bold text-[var(--fi-muted)]">
-            لا توجد مكالمات مسجلة لهذا العميل حتى الآن.
+            {t('لا توجد مكالمات مسجلة لهذا العميل حتى الآن.', 'No calls recorded for this client yet.')}
           </p>
         ) : (
           <div className="space-y-3">
-            {calls.map((call) => <CallCard key={call.id} call={call} />)}
+            {calls.map((call) => <CallCard key={call.id} call={call} t={t} />)}
           </div>
         )}
       </SectionCard>
@@ -238,7 +235,7 @@ export default async function ClientProfilePage({ params }: PageProps) {
   )
 }
 
-function CallCard({ call }: { call: ClientCallSummary }) {
+function CallCard({ call, t }: { call: ClientCallSummary; t: (ar: string, en: string) => string }) {
   const STATUS_CLS: Record<string, string> = {
     completed:   'bg-emerald-50 text-emerald-700',
     in_progress: 'bg-blue-50 text-blue-700',
@@ -249,17 +246,24 @@ function CallCard({ call }: { call: ClientCallSummary }) {
     busy:        'bg-red-50 text-red-600',
   }
   const STATUS_LABELS: Record<string, string> = {
-    completed: 'مكتملة', in_progress: 'جارية', ringing: 'يرن',
-    queued: 'في الانتظار', failed: 'فشلت', no_answer: 'لم يتم الرد', busy: 'مشغول',
+    completed:   t('مكتملة', 'Completed'),
+    in_progress: t('جارية', 'In Progress'),
+    ringing:     t('يرن', 'Ringing'),
+    queued:      t('في الانتظار', 'Queued'),
+    failed:      t('فشلت', 'Failed'),
+    no_answer:   t('لم يتم الرد', 'No Answer'),
+    busy:        t('مشغول', 'Busy'),
   }
   const DIR_LABELS: Record<string, string> = {
-    agent_to_client: 'من الوكيل', developer_to_client: 'من المطور',
-    client_to_agent: 'من العميل', client_to_developer: 'من العميل للمطور',
+    agent_to_client:      t('من الوكيل', 'Agent to Client'),
+    developer_to_client:  t('من المطور', 'Developer to Client'),
+    client_to_agent:      t('من العميل', 'Client to Agent'),
+    client_to_developer:  t('من العميل للمطور', 'Client to Developer'),
   }
 
   const duration = call.duration_seconds
-    ? `${Math.floor(call.duration_seconds / 60)}د ${call.duration_seconds % 60}ث`
-    : 'لم تبدأ'
+    ? `${Math.floor(call.duration_seconds / 60)}m ${call.duration_seconds % 60}s`
+    : t('لم تبدأ', 'Not started')
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--fi-line)] p-3">
@@ -274,10 +278,10 @@ function CallCard({ call }: { call: ClientCallSummary }) {
       {call.recording_url ? (
         <a href={call.recording_url} target="_blank" rel="noreferrer"
           className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-black text-white">
-          <Mic2 size={13} /> تسجيل
+          <Mic2 size={13} /> {t('تسجيل', 'Recording')}
         </a>
       ) : (
-        <span className="text-xs font-bold text-[var(--fi-muted)]">لا يوجد تسجيل</span>
+        <span className="text-xs font-bold text-[var(--fi-muted)]">{t('لا يوجد تسجيل', 'No recording')}</span>
       )}
     </div>
   )

@@ -7,6 +7,7 @@ import { hasPermission } from '@/shared/rbac/permissions'
 import { nullableUuid } from '@/lib/uuid'
 import { BatchProcessButton } from '../../BatchProcessButton'
 import { MappingReviewForm } from './MappingReviewForm'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,12 +37,23 @@ type IngestionRow = {
 }
 
 export default async function InventoryBatchReviewPage({ params }: RouteProps) {
-  const session = await requireSession()
+  const [session, { t, numLocale }] = await Promise.all([requireSession(), getI18n()])
   if (!hasPermission(session.profile.role, 'inventory.import')) redirect('/dashboard')
 
   const { batchId: rawBatchId } = await params
   const batchId = nullableUuid(rawBatchId)
   if (!batchId) redirect('/dashboard/integrations')
+
+  const labelStatus = (status: string) => {
+    const labels: Record<string, string> = {
+      pending:             t('بانتظار المراجعة', 'Pending Review'),
+      processing:          t('قيد المعالجة', 'Processing'),
+      completed:           t('مكتمل', 'Completed'),
+      failed:              t('فشل', 'Failed'),
+      partially_completed: t('مكتمل جزئياً', 'Partially Completed'),
+    }
+    return labels[status] ?? status
+  }
 
   const service = createServiceRoleClient()
   const [batchResult, rowsResult] = await Promise.all([
@@ -59,7 +71,7 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
   ])
 
   if (batchResult.error || rowsResult.error) {
-    const message = batchResult.error?.message ?? rowsResult.error?.message ?? 'تعذر تحميل ملف الاستيراد.'
+    const message = batchResult.error?.message ?? rowsResult.error?.message ?? t('تعذر تحميل ملف الاستيراد.', 'Failed to load import file.')
     return <ErrorState message={message} />
   }
 
@@ -76,7 +88,7 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
       <section className="ds-card p-5 sm:p-6">
         <Link href="/dashboard/integrations" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-[var(--fi-emerald)]">
           <ArrowRight className="size-4" aria-hidden="true" />
-          العودة للتكاملات
+          {t('العودة للتكاملات', 'Back to Integrations')}
         </Link>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-3">
@@ -85,9 +97,9 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
             </div>
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">SMART CSV / EXCEL REVIEW</p>
-              <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)]">{batch.source_name ?? 'ملف استيراد'}</h1>
+              <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)]">{batch.source_name ?? t('ملف استيراد', 'Import File')}</h1>
               <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">
-                {labelSource(batch.source_type)} · {batch.total_rows} صف · الحالة: {labelStatus(batch.status)}
+                {labelSource(batch.source_type)} · {batch.total_rows} {t('صف', 'rows')} · {t('الحالة:', 'Status:')} {labelStatus(batch.status)}
               </p>
             </div>
           </div>
@@ -99,21 +111,21 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
 
       <section className="ds-card overflow-hidden">
         <div className="border-b border-[var(--fi-line)] p-5">
-          <h2 className="text-xl font-black text-[var(--fi-ink)]">معاينة الصفوف</h2>
-          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">أول 50 صف بعد تطبيق mapping الحالي.</p>
+          <h2 className="text-xl font-black text-[var(--fi-ink)]">{t('معاينة الصفوف', 'Row Preview')}</h2>
+          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">{t('أول 50 صف بعد تطبيق mapping الحالي.', 'First 50 rows after applying the current mapping.')}</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
                 <th className="px-4 py-3 text-right">#</th>
-                <th className="px-4 py-3 text-right">المشروع</th>
-                <th className="px-4 py-3 text-right">الوحدة</th>
-                <th className="px-4 py-3 text-right">النوع</th>
-                <th className="px-4 py-3 text-right">المساحة</th>
-                <th className="px-4 py-3 text-right">السعر</th>
-                <th className="px-4 py-3 text-right">الحالة</th>
-                <th className="px-4 py-3 text-right">المراجعة</th>
+                <th className="px-4 py-3 text-right">{t('المشروع', 'Project')}</th>
+                <th className="px-4 py-3 text-right">{t('الوحدة', 'Unit')}</th>
+                <th className="px-4 py-3 text-right">{t('النوع', 'Type')}</th>
+                <th className="px-4 py-3 text-right">{t('المساحة', 'Area')}</th>
+                <th className="px-4 py-3 text-right">{t('السعر', 'Price')}</th>
+                <th className="px-4 py-3 text-right">{t('الحالة', 'Status')}</th>
+                <th className="px-4 py-3 text-right">{t('المراجعة', 'Review')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--fi-line)]">
@@ -127,12 +139,12 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
                     <td className="px-4 py-3 font-bold">{String(mapped.unit_number ?? '-')}</td>
                     <td className="px-4 py-3 font-bold">{String(mapped.unit_type ?? '-')}</td>
                     <td className="px-4 py-3 font-bold">{String(mapped.area_sqm ?? '-')}</td>
-                    <td className="px-4 py-3 font-black">{Number(mapped.price ?? 0).toLocaleString('ar-EG')} ج.م</td>
+                    <td className="px-4 py-3 font-black">{Number(mapped.price ?? 0).toLocaleString(numLocale)} {t('ج.م', 'EGP')}</td>
                     <td className="px-4 py-3 font-bold">{String(mapped.status ?? '-')}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black ${valid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
                         {valid ? <CheckCircle2 className="size-3" aria-hidden="true" /> : null}
-                        {valid ? 'جاهز' : row.error_message ?? 'ناقص'}
+                        {valid ? t('جاهز', 'Ready') : row.error_message ?? t('ناقص', 'Incomplete')}
                       </span>
                     </td>
                   </tr>
@@ -141,7 +153,7 @@ export default async function InventoryBatchReviewPage({ params }: RouteProps) {
               {!rows.length ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-sm font-bold text-[var(--fi-muted)]">
-                    لا توجد صفوف داخل هذا الملف.
+                    {t('لا توجد صفوف داخل هذا الملف.', 'No rows in this file.')}
                   </td>
                 </tr>
               ) : null}
@@ -163,16 +175,4 @@ function ErrorState({ message }: { message: string }) {
 
 function labelSource(source: string) {
   return source === 'excel' ? 'Excel' : source.toUpperCase()
-}
-
-function labelStatus(status: string) {
-  const labels: Record<string, string> = {
-    pending: 'بانتظار المراجعة',
-    processing: 'قيد المعالجة',
-    completed: 'مكتمل',
-    failed: 'فشل',
-    partially_completed: 'مكتمل جزئياً',
-  }
-
-  return labels[status] ?? status
 }

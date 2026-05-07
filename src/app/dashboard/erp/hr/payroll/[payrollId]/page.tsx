@@ -15,40 +15,41 @@ import {
   User,
 } from 'lucide-react'
 import { PrintButton } from './PrintButton'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
 const HR_ROLES: AppRole[] = ['super_admin', 'platform_admin', 'hr_manager', 'hr_staff', 'hr_officer', 'finance_manager']
-
-const MONTH_NAMES: Record<number, string> = {
-  1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل',
-  5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس',
-  9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر',
-}
-
-const fmt = (n: number | null | undefined) =>
-  n != null ? new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(n) : '٠'
-
-const statusLabel: Record<string, string> = {
-  draft:    'مسودة',
-  approved: 'مُقرَّر',
-  paid:     'مدفوع',
-}
-
-const statusCls: Record<string, string> = {
-  draft:    'bg-amber-50 text-amber-700 border-amber-200',
-  approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  paid:     'bg-blue-50 text-blue-700 border-blue-200',
-}
 
 export default async function PayslipPage({
   params,
 }: {
   params: Promise<{ payrollId: string }>
 }) {
-  const session = await requireSession()
+  const [session, { t, numLocale }] = await Promise.all([requireSession(), getI18n()])
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
+
+  const MONTH_NAMES: Record<number, string> = {
+    1: t('يناير', 'January'), 2: t('فبراير', 'February'), 3: t('مارس', 'March'), 4: t('أبريل', 'April'),
+    5: t('مايو', 'May'), 6: t('يونيو', 'June'), 7: t('يوليو', 'July'), 8: t('أغسطس', 'August'),
+    9: t('سبتمبر', 'September'), 10: t('أكتوبر', 'October'), 11: t('نوفمبر', 'November'), 12: t('ديسمبر', 'December'),
+  }
+
+  const fmt = (n: number | null | undefined) =>
+    n != null ? new Intl.NumberFormat(numLocale, { maximumFractionDigits: 2 }).format(n) : '0'
+
+  const statusLabel: Record<string, string> = {
+    draft:    t('مسودة', 'Draft'),
+    approved: t('مُقرَّر', 'Approved'),
+    paid:     t('مدفوع', 'Paid'),
+  }
+
+  const statusCls: Record<string, string> = {
+    draft:    'bg-amber-50 text-amber-700 border-amber-200',
+    approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    paid:     'bg-blue-50 text-blue-700 border-blue-200',
+  }
 
   const { payrollId } = await params
   const supabase   = await createRawClient()
@@ -89,11 +90,11 @@ export default async function PayslipPage({
   const emp = Array.isArray(rawRow.employees) ? rawRow.employees[0] : rawRow.employees
   const empProfile = emp ? (Array.isArray(emp.profiles) ? emp.profiles[0] : emp.profiles) : null
 
-  const employeeName = empProfile?.full_name ?? 'موظف'
+  const employeeName = empProfile?.full_name ?? t('موظف', 'Employee')
   const jobTitle     = emp?.job_title ?? '—'
   const nationalId   = emp?.national_id ?? '—'
   const hireDate     = emp?.hire_date
-    ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(emp.hire_date))
+    ? new Intl.DateTimeFormat(numLocale, { dateStyle: 'medium' }).format(new Date(emp.hire_date))
     : '—'
   const bankName     = emp?.bank_name ?? '—'
   const bankAccount  = emp?.bank_account ?? '—'
@@ -123,7 +124,7 @@ export default async function PayslipPage({
           className="flex items-center gap-2 text-sm font-bold text-[var(--fi-muted)] hover:text-[var(--fi-ink)] transition"
         >
           <ArrowRight size={16} />
-          العودة لمسيرة الرواتب
+          {t('العودة لمسيرة الرواتب', 'Back to Payroll')}
         </Link>
         <PrintButton />
       </div>
@@ -140,7 +141,7 @@ export default async function PayslipPage({
               </div>
               <div>
                 <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest">FAST INVESTMENT</p>
-                <p className="text-white font-black text-lg mt-0.5">كشف راتب</p>
+                <p className="text-white font-black text-lg mt-0.5">{t('كشف راتب', 'Payslip')}</p>
                 <p className="text-emerald-200 text-sm">
                   {MONTH_NAMES[row.month]} {row.year}
                 </p>
@@ -157,45 +158,45 @@ export default async function PayslipPage({
           <div className="p-5 space-y-3">
             <div className="flex items-center gap-2 text-xs font-black text-[var(--fi-muted)] uppercase tracking-widest">
               <User size={13} />
-              بيانات الموظف
+              {t('بيانات الموظف', 'Employee Details')}
             </div>
             <div className="space-y-2">
-              <InfoRow label="الاسم"           value={employeeName} bold />
-              <InfoRow label="المسمى الوظيفي"  value={jobTitle} />
-              <InfoRow label="الرقم القومي"    value={nationalId} />
-              <InfoRow label="تاريخ التعيين"   value={hireDate} />
+              <InfoRow label={t('الاسم', 'Name')}              value={employeeName} bold />
+              <InfoRow label={t('المسمى الوظيفي', 'Job Title')} value={jobTitle} />
+              <InfoRow label={t('الرقم القومي', 'National ID')} value={nationalId} />
+              <InfoRow label={t('تاريخ التعيين', 'Hire Date')} value={hireDate} />
             </div>
           </div>
           <div className="p-5 space-y-3">
             <div className="flex items-center gap-2 text-xs font-black text-[var(--fi-muted)] uppercase tracking-widest">
               <CalendarDays size={13} />
-              بيانات الدوام
+              {t('بيانات الدوام', 'Attendance')}
             </div>
             <div className="space-y-2">
-              <InfoRow label="أيام الحضور"   value={`${row.present_days ?? 0} يوم`} />
-              <InfoRow label="أيام الغياب"   value={`${row.absent_days  ?? 0} يوم`} />
-              <InfoRow label="مرات التأخير"  value={`${row.late_count   ?? 0} مرة`} />
-              <InfoRow label="إجازات بدون راتب" value={`${row.unpaid_leave_days ?? 0} يوم`} />
+              <InfoRow label={t('أيام الحضور', 'Present Days')}         value={`${row.present_days ?? 0} ${t('يوم', 'days')}`} />
+              <InfoRow label={t('أيام الغياب', 'Absent Days')}          value={`${row.absent_days  ?? 0} ${t('يوم', 'days')}`} />
+              <InfoRow label={t('مرات التأخير', 'Late Count')}          value={`${row.late_count   ?? 0} ${t('مرة', 'times')}`} />
+              <InfoRow label={t('إجازات بدون راتب', 'Unpaid Leave')}    value={`${row.unpaid_leave_days ?? 0} ${t('يوم', 'days')}`} />
             </div>
           </div>
         </div>
 
         {/* Earnings */}
         <div className="p-5 space-y-3">
-          <SectionTitle icon={<WalletCards size={15} />} label="المستحقات" color="text-emerald-600" />
+          <SectionTitle icon={<WalletCards size={15} />} label={t('المستحقات', 'Earnings')} color="text-emerald-600" />
           <table className="w-full text-sm">
             <tbody className="divide-y divide-[var(--fi-line)]">
-              <PayslipRow label="الراتب الأساسي"    value={row.basic_salary}    color="text-[var(--fi-ink)]" />
-              <PayslipRow label="البدلات"            value={row.allowances}      color="text-[var(--fi-ink)]" />
-              <PayslipRow label="العلاوات والحوافز" value={row.bonus}            color="text-[var(--fi-ink)]" />
-              <PayslipRow label="أوفر تايم"          value={row.overtime_amount} color="text-[var(--fi-ink)]" />
-              <PayslipRow label="العمولات"           value={row.total_commissions} color="text-emerald-600" />
+              <PayslipRow label={t('الراتب الأساسي', 'Basic Salary')}    value={row.basic_salary}      color="text-[var(--fi-ink)]" t={t} />
+              <PayslipRow label={t('البدلات', 'Allowances')}             value={row.allowances}         color="text-[var(--fi-ink)]" t={t} />
+              <PayslipRow label={t('العلاوات والحوافز', 'Bonuses')}      value={row.bonus}              color="text-[var(--fi-ink)]" t={t} />
+              <PayslipRow label={t('أوفر تايم', 'Overtime')}             value={row.overtime_amount}    color="text-[var(--fi-ink)]" t={t} />
+              <PayslipRow label={t('العمولات', 'Commissions')}           value={row.total_commissions}  color="text-emerald-600"     t={t} />
             </tbody>
             <tfoot>
               <tr className="bg-emerald-50">
-                <td className="px-3 py-2.5 font-black text-emerald-700">إجمالي المستحقات</td>
+                <td className="px-3 py-2.5 font-black text-emerald-700">{t('إجمالي المستحقات', 'Total Earnings')}</td>
                 <td className="px-3 py-2.5 text-left font-black text-emerald-700">
-                  {fmt(row.gross_salary)} ج.م
+                  {fmt(row.gross_salary)} {t('ج.م', 'EGP')}
                 </td>
               </tr>
             </tfoot>
@@ -204,19 +205,19 @@ export default async function PayslipPage({
 
         {/* Deductions */}
         <div className="p-5 space-y-3 border-t border-[var(--fi-line)]">
-          <SectionTitle icon={<TrendingDown size={15} />} label="الخصومات" color="text-red-600" />
+          <SectionTitle icon={<TrendingDown size={15} />} label={t('الخصومات', 'Deductions')} color="text-red-600" />
           <table className="w-full text-sm">
             <tbody className="divide-y divide-[var(--fi-line)]">
-              <PayslipRow label="التأمينات الاجتماعية (11%)" value={row.social_ins_emp}      color="text-red-600" />
-              <PayslipRow label="ضريبة الدخل"                value={row.tax_amount}          color="text-red-600" />
+              <PayslipRow label={t('التأمينات الاجتماعية (11%)', 'Social Insurance (11%)')} value={row.social_ins_emp}      color="text-red-600" t={t} />
+              <PayslipRow label={t('ضريبة الدخل', 'Income Tax')}                            value={row.tax_amount}          color="text-red-600" t={t} />
               {absentDeduct > 0 && (
-                <PayslipRow label="خصم الغياب"               value={absentDeduct}             color="text-red-600" />
+                <PayslipRow label={t('خصم الغياب', 'Absence Deduction')}                   value={absentDeduct}            color="text-red-600" t={t} />
               )}
               {Number(row.unpaid_leave_deduct ?? 0) > 0 && (
-                <PayslipRow label="خصم إجازات بدون راتب"     value={row.unpaid_leave_deduct}  color="text-red-600" />
+                <PayslipRow label={t('خصم إجازات بدون راتب', 'Unpaid Leave Deduction')}   value={row.unpaid_leave_deduct}  color="text-red-600" t={t} />
               )}
               {Number(row.deductions ?? 0) > 0 && (
-                <PayslipRow label="خصومات أخرى"              value={row.deductions}           color="text-red-600" />
+                <PayslipRow label={t('خصومات أخرى', 'Other Deductions')}                  value={row.deductions}           color="text-red-600" t={t} />
               )}
             </tbody>
           </table>
@@ -225,28 +226,28 @@ export default async function PayslipPage({
         {/* Net salary */}
         <div className="p-5 border-t border-[var(--fi-line)]">
           <div className="flex items-center justify-between rounded-2xl bg-gradient-to-l from-[var(--fi-emerald)] to-emerald-700 px-6 py-4 text-white">
-            <span className="text-sm font-black">صافي الراتب</span>
-            <span className="text-2xl font-black">{fmt(row.net_salary)} ج.م</span>
+            <span className="text-sm font-black">{t('صافي الراتب', 'Net Salary')}</span>
+            <span className="text-2xl font-black">{fmt(row.net_salary)} {t('ج.م', 'EGP')}</span>
           </div>
         </div>
 
         {/* Bank details */}
         {(bankName !== '—' || bankAccount !== '—') && (
           <div className="p-5 border-t border-[var(--fi-line)] space-y-3">
-            <SectionTitle icon={<Receipt size={15} />} label="بيانات التحويل البنكي" color="text-blue-600" />
+            <SectionTitle icon={<Receipt size={15} />} label={t('بيانات التحويل البنكي', 'Bank Transfer Details')} color="text-blue-600" />
             <div className="flex flex-col sm:flex-row gap-4">
-              <InfoRow label="البنك"   value={bankName}    />
-              <InfoRow label="رقم الحساب" value={bankAccount} />
+              <InfoRow label={t('البنك', 'Bank')}          value={bankName}    />
+              <InfoRow label={t('رقم الحساب', 'Account No.')} value={bankAccount} />
             </div>
           </div>
         )}
 
         {/* Footer */}
         <div className="border-t border-[var(--fi-line)] bg-[var(--fi-soft)] px-5 py-3 flex items-center justify-between text-xs text-[var(--fi-muted)]">
-          <span>تاريخ الإصدار: {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date())}</span>
+          <span>{t('تاريخ الإصدار:', 'Issue Date:')} {new Intl.DateTimeFormat(numLocale, { dateStyle: 'medium' }).format(new Date())}</span>
           <span className="flex items-center gap-1">
             <ShieldCheck size={12} className="text-emerald-500" />
-            وثيقة رسمية صادرة من نظام FAST INVESTMENT CRM
+            {t('وثيقة رسمية صادرة من نظام FAST INVESTMENT CRM', 'Official document issued by FAST INVESTMENT CRM')}
           </span>
         </div>
       </div>
@@ -278,18 +279,22 @@ function PayslipRow({
   label,
   value,
   color,
+  t,
 }: {
   label: string
   value: number | null | undefined
   color: string
+  t: (ar: string, en: string) => string
 }) {
   const n = Number(value ?? 0)
   if (n === 0) return null
 
+  const fmt = (x: number) => new Intl.NumberFormat().format(x)
+
   return (
     <tr>
       <td className="px-3 py-2 text-[var(--fi-muted)]">{label}</td>
-      <td className={`px-3 py-2 text-left font-bold ${color}`}>{fmt(n)} ج.م</td>
+      <td className={`px-3 py-2 text-left font-bold ${color}`}>{fmt(n)} {t('ج.م', 'EGP')}</td>
     </tr>
   )
 }

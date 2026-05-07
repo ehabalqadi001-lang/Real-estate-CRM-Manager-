@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useI18n } from '@/hooks/use-i18n';
 
 interface DealRecord {
   id: string
@@ -86,6 +87,7 @@ const CSS_STYLES = `
 export default function DealDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { t, numLocale } = useI18n();
 
   const [deal, setDeal] = useState<DealRecord | null>(null);
   const [installments, setInstallments] = useState<Installment[]>([]);
@@ -167,14 +169,15 @@ export default function DealDetailsPage() {
   };
 
   // eslint-disable-next-line no-inline-styles/no-inline-styles
-  if (loading) return <div style={{padding: '50px', textAlign: 'center'}}>جاري فتح ملف الصفقة...</div>;
   // eslint-disable-next-line no-inline-styles/no-inline-styles
-  if (!deal) return <div style={{padding: '50px', textAlign: 'center'}}>لم يتم العثور على الصفقة.</div>;
+  if (loading) return <div style={{padding: '50px', textAlign: 'center'}}>{t('جاري فتح ملف الصفقة...', 'Loading deal...')}</div>;
+  // eslint-disable-next-line no-inline-styles/no-inline-styles
+  if (!deal) return <div style={{padding: '50px', textAlign: 'center'}}>{t('لم يتم العثور على الصفقة.', 'Deal not found.')}</div>;
 
   const today = new Date();
   const developerName = typeof deal.developer === 'object' && deal.developer?.name
     ? deal.developer.name
-    : typeof deal.developer === 'string' ? deal.developer : 'غير محدد';
+    : typeof deal.developer === 'string' ? deal.developer : t('غير محدد', 'Unknown');
   const clientName = typeof deal.client === 'object' && deal.client?.full_name
     ? deal.client.full_name
     : deal.buyer_name ?? '';
@@ -185,7 +188,7 @@ export default function DealDetailsPage() {
       <div className="main-content">
         <div className="header-actions">
           <button onClick={() => router.back()} className="btn-back">
-            ← العودة لقائمة المبيعات
+            ← {t('العودة لقائمة المبيعات', 'Back to Deals')}
           </button>
         </div>
 
@@ -194,8 +197,8 @@ export default function DealDetailsPage() {
             <h1 className="deal-title">{deal.compound} - {deal.property_type}</h1>
             <div className="deal-subtitle">
               {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-              المطور: <span style={{color:'#185FA5', fontWeight:800}}>{developerName}</span> |
-              العميل: {clientName}
+              {t('المطور:', 'Developer:')} <span style={{color:'#185FA5', fontWeight:800}}>{developerName}</span> |
+              {t('العميل:', 'Client:')} {clientName}
             </div>
           </div>
           {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
@@ -218,15 +221,15 @@ export default function DealDetailsPage() {
               // eslint-disable-next-line no-inline-styles/no-inline-styles
               style={{cursor: 'pointer', outline: 'none'}}
             >
-              <option value="EOI">اهتمام (EOI)</option>
-              <option value="Reservation">حجز (Reservation)</option>
-              <option value="Contracted">تعاقد (Contracted)</option>
-              <option value="Registration">شهر عقاري (Registration)</option>
-              <option value="Handover">تسليم (Handover)</option>
+              <option value="EOI">EOI</option>
+              <option value="Reservation">{t('حجز', 'Reservation')}</option>
+              <option value="Contracted">{t('تعاقد', 'Contracted')}</option>
+              <option value="Registration">{t('شهر عقاري', 'Registration')}</option>
+              <option value="Handover">{t('تسليم', 'Handover')}</option>
             </select>
             {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
             <div style={{fontSize: '12px', color: '#64748b'}}>
-              تاريخ التسجيل: {deal.created_at ? new Date(deal.created_at).toLocaleDateString('ar-EG') : '—'}
+              {t('تاريخ التسجيل:', 'Created:')} {deal.created_at ? new Date(deal.created_at).toLocaleDateString(numLocale) : '—'}
             </div>
           </div>
         </div>
@@ -234,35 +237,35 @@ export default function DealDetailsPage() {
         <div className="grid-layout">
           <div>
             <div className="card-section">
-              <div className="section-title">🏢 بيانات الوحدة والعميل</div>
+              <div className="section-title">🏢 {t('بيانات الوحدة والعميل', 'Unit & Client Details')}</div>
               <div className="info-grid">
-                <div className="info-item"><span className="info-label">اسم العميل المشتري</span><span className="info-value">{deal.buyer_name}</span></div>
+                <div className="info-item"><span className="info-label">{t('اسم العميل المشتري', 'Buyer Name')}</span><span className="info-value">{deal.buyer_name}</span></div>
                 {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-                <div className="info-item"><span className="info-label">رقم هاتف العميل</span><span className="info-value" style={{direction: 'ltr', textAlign: 'right'}}>{deal.buyer_phone}</span></div>
-                <div className="info-item"><span className="info-label">المشروع / الكومباوند</span><span className="info-value">{deal.compound}</span></div>
-                <div className="info-item"><span className="info-label">المطور العقاري</span><span className="info-value">{developerName}</span></div>
+                <div className="info-item"><span className="info-label">{t('رقم هاتف العميل', 'Client Phone')}</span><span className="info-value" style={{direction: 'ltr', textAlign: 'right'}}>{deal.buyer_phone}</span></div>
+                <div className="info-item"><span className="info-label">{t('المشروع / الكومباوند', 'Project / Compound')}</span><span className="info-value">{deal.compound}</span></div>
+                <div className="info-item"><span className="info-label">{t('المطور العقاري', 'Developer')}</span><span className="info-value">{developerName}</span></div>
                 {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-                <div className="info-item"><span className="info-label">إجمالي قيمة الوحدة</span><span className="info-value" style={{color: '#185FA5'}}>{Number(deal.unit_value ?? 0).toLocaleString()} EGP</span></div>
+                <div className="info-item"><span className="info-label">{t('إجمالي قيمة الوحدة', 'Unit Total Value')}</span><span className="info-value" style={{color: '#185FA5'}}>{Number(deal.unit_value ?? 0).toLocaleString(numLocale)} EGP</span></div>
                 {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-                <div className="info-item"><span className="info-label">المقدم المدفوع</span><span className="info-value" style={{color: '#10B981'}}>{Number(deal.amount_paid ?? 0).toLocaleString()} EGP</span></div>
-                <div className="info-item"><span className="info-label">المحافظة</span><span className="info-value">{deal.governorate}</span></div>
-                <div className="info-item"><span className="info-label">حالة الشهر العقاري</span><span className="info-value">{deal.registration_status}</span></div>
+                <div className="info-item"><span className="info-label">{t('المقدم المدفوع', 'Down Payment')}</span><span className="info-value" style={{color: '#10B981'}}>{Number(deal.amount_paid ?? 0).toLocaleString(numLocale)} EGP</span></div>
+                <div className="info-item"><span className="info-label">{t('المحافظة', 'Governorate')}</span><span className="info-value">{deal.governorate}</span></div>
+                <div className="info-item"><span className="info-label">{t('حالة الشهر العقاري', 'Registration Status')}</span><span className="info-value">{deal.registration_status}</span></div>
               </div>
             </div>
 
             <div className="card-section">
-              <div className="section-title">📅 جدول الأقساط (Installments)</div>
+              <div className="section-title">📅 {t('جدول الأقساط', 'Installment Schedule')}</div>
               {installments.length === 0 ? (
                 // eslint-disable-next-line no-inline-styles/no-inline-styles
-                <div style={{textAlign: 'center', color: '#64748b', padding: '20px'}}>لم يتم إعداد جدول أقساط لهذه الصفقة بعد.</div>
+                <div style={{textAlign: 'center', color: '#64748b', padding: '20px'}}>{t('لم يتم إعداد جدول أقساط لهذه الصفقة بعد.', 'No installment schedule has been set up for this deal yet.')}</div>
               ) : (
                 <div className="overflow-x-auto w-full rounded-xl"><table>
                   <thead>
                     <tr>
-                      <th>تاريخ الاستحقاق</th>
-                      <th>القيمة (EGP)</th>
-                      <th>الحالة</th>
-                      <th>إجراء</th>
+                      <th>{t('تاريخ الاستحقاق', 'Due Date')}</th>
+                      <th>{t('القيمة (EGP)', 'Amount (EGP)')}</th>
+                      <th>{t('الحالة', 'Status')}</th>
+                      <th>{t('إجراء', 'Action')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -272,9 +275,9 @@ export default function DealDetailsPage() {
                       return (
                         <tr key={inst.id} className={isOverdue ? 'overdue-row' : ''}>
                           {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-                          <td className={isOverdue ? 'overdue-text' : ''} style={{direction: 'ltr', textAlign: 'right'}}>{dueDate.toLocaleDateString('ar-EG')}</td>
+                          <td className={isOverdue ? 'overdue-text' : ''} style={{direction: 'ltr', textAlign: 'right'}}>{dueDate.toLocaleDateString(numLocale)}</td>
                           {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
-                          <td className={isOverdue ? 'overdue-text' : ''} style={{fontWeight: 800}}>{Number(inst.amount).toLocaleString()}</td>
+                          <td className={isOverdue ? 'overdue-text' : ''} style={{fontWeight: 800}}>{Number(inst.amount).toLocaleString(numLocale)}</td>
                           <td>
                             {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                             <span style={{
@@ -282,11 +285,11 @@ export default function DealDetailsPage() {
                               color: inst.status === 'Paid' ? '#10B981' : isOverdue ? '#DC2626' : '#F59E0B',
                               padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 800
                             }}>
-                              {inst.status === 'Paid' ? '✓ مُسدد' : isOverdue ? '⚠️ متأخر' : '⏳ مستحق'}
+                              {inst.status === 'Paid' ? `✓ ${t('مُسدد', 'Paid')}` : isOverdue ? `⚠️ ${t('متأخر', 'Overdue')}` : `⏳ ${t('مستحق', 'Due')}`}
                             </span>
                           </td>
                           <td>
-                            {inst.status !== 'Paid' && <button className="btn-pay">تسديد</button>}
+                            {inst.status !== 'Paid' && <button className="btn-pay">{t('تسديد', 'Pay')}</button>}
                           </td>
                         </tr>
                       );
@@ -300,13 +303,13 @@ export default function DealDetailsPage() {
           <div>
             {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
             <div className="card-section" style={{background: '#f8fafc'}}>
-              <div className="section-title">📝 سجل النشاط والملاحظات</div>
+              <div className="section-title">📝 {t('سجل النشاط والملاحظات', 'Activity Log & Notes')}</div>
               {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
               <form onSubmit={handleAddNote} style={{marginBottom: '20px'}}>
                 <textarea
                   required
-                  aria-label="إضافة ملاحظة"
-                  placeholder="أضف ملاحظة أو تحديث حول هذه الصفقة..."
+                  aria-label={t('إضافة ملاحظة', 'Add note')}
+                  placeholder={t('أضف ملاحظة أو تحديث حول هذه الصفقة...', 'Add a note or update about this deal...')}
                   value={newNote}
                   onChange={e => setNewNote(e.target.value)}
                   // eslint-disable-next-line no-inline-styles/no-inline-styles
@@ -314,19 +317,19 @@ export default function DealDetailsPage() {
                 />
                 {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <button type="submit" style={{width: '100%', background: '#0f1c2e', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', marginTop: '10px'}}>
-                  حفظ الملاحظة
+                  {t('حفظ الملاحظة', 'Save Note')}
                 </button>
               </form>
               <div className="activity-log">
                 {activities.length === 0 ? (
                   // eslint-disable-next-line no-inline-styles/no-inline-styles
-                  <div style={{color: '#94a3b8', fontSize: '12px', textAlign: 'center'}}>لا توجد نشاطات مسجلة بعد.</div>
+                  <div style={{color: '#94a3b8', fontSize: '12px', textAlign: 'center'}}>{t('لا توجد نشاطات مسجلة بعد.', 'No activities recorded yet.')}</div>
                 ) : (
                   activities.map(act => (
                     <div key={act.id} className="log-item">
-                      <div className="log-date">{new Date(act.created_at).toLocaleString('ar-EG')}</div>
+                      <div className="log-date">{new Date(act.created_at).toLocaleString(numLocale)}</div>
                       <div className="log-desc">{act.description}</div>
-                      <div className="log-user">بواسطة: {act.user?.full_name ?? 'النظام'}</div>
+                      <div className="log-user">{t('بواسطة:', 'By:')} {act.user?.full_name ?? t('النظام', 'System')}</div>
                     </div>
                   ))
                 )}

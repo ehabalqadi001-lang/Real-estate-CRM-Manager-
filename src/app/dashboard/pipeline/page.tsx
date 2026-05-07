@@ -1,3 +1,4 @@
+import { getI18n } from '@/lib/i18n'
 import { PipelineBoard, normalizeStage, type DealActivityItem, type PipelineAgentOption, type PipelineDeal, type PipelineLeadOption, type PipelineUnitOption } from '@/components/pipeline/PipelineBoard'
 import type { Deal, Lead, Profile, Unit } from '@/lib/types/db'
 import { requireSession } from '@/shared/auth/session'
@@ -6,17 +7,19 @@ import { addDealActivity, createPipelineDeal, updatePipelineDeal, updatePipeline
 
 export const dynamic = 'force-dynamic'
 
+type T = (ar: string, en: string) => string
+
 export default async function PipelinePage() {
-  const session = await requireSession()
+  const [session, { t }] = await Promise.all([requireSession(), getI18n()])
   const supabase = await createServerSupabaseClient()
   const companyId = session.profile.company_id ?? session.user.id
   const canAssignAgents = ['super_admin', 'admin', 'company_admin', 'company', 'branch_manager', 'senior_agent'].includes(session.profile.role)
 
   const [deals, leads, units, agents, activities] = await Promise.all([
-    getDeals(supabase, companyId),
-    getLeads(supabase, companyId),
-    getUnits(supabase, companyId),
-    getAgents(supabase, companyId),
+    getDeals(supabase, companyId, t),
+    getLeads(supabase, companyId, t),
+    getUnits(supabase, companyId, t),
+    getAgents(supabase, companyId, t),
     getDealActivities(supabase),
   ])
 
@@ -42,7 +45,7 @@ export default async function PipelinePage() {
 
 type ServerSupabase = Awaited<ReturnType<typeof createServerSupabaseClient>>
 
-async function getDeals(supabase: ServerSupabase, companyId: string | null): Promise<PipelineDeal[]> {
+async function getDeals(supabase: ServerSupabase, companyId: string | null, t: T): Promise<PipelineDeal[]> {
   let query = supabase
     .from('deals')
     .select('id, lead_id, unit_id, agent_id, stage, title, client_name, buyer_name, project_name, value, amount, unit_value, final_price, expected_close_date, notes, created_at, updated_at, company_id')
@@ -58,9 +61,9 @@ async function getDeals(supabase: ServerSupabase, companyId: string | null): Pro
   const agentIds = Array.from(new Set(rows.map((deal) => deal.agent_id).filter(Boolean))) as string[]
 
   const [leadMap, unitMap, agentMap] = await Promise.all([
-    getLeadMap(supabase, leadIds),
-    getUnitMap(supabase, unitIds),
-    getAgentMap(supabase, agentIds),
+    getLeadMap(supabase, leadIds, t),
+    getUnitMap(supabase, unitIds, t),
+    getAgentMap(supabase, agentIds, t),
   ])
 
   return rows.map((deal) => {
@@ -75,21 +78,21 @@ async function getDeals(supabase: ServerSupabase, companyId: string | null): Pro
       unitId: deal.unit_id,
       agentId: deal.agent_id,
       stage: normalizeStage(deal.stage ?? 'new'),
-      title: deal.title ?? lead?.name ?? deal.client_name ?? deal.buyer_name ?? 'صفقة عقارية',
-      clientName: lead?.name ?? deal.client_name ?? deal.buyer_name ?? deal.title ?? 'عميل غير محدد',
+      title: deal.title ?? lead?.name ?? deal.client_name ?? deal.buyer_name ?? t('صفقة عقارية', 'Real Estate Deal'),
+      clientName: lead?.name ?? deal.client_name ?? deal.buyer_name ?? deal.title ?? t('عميل غير محدد', 'Unknown Client'),
       projectName: unit?.projectName ?? deal.project_name ?? '',
       unitName: unit?.label ?? deal.project_name ?? '',
       value,
       expectedCloseDate: deal.expected_close_date ?? null,
       notes: deal.notes,
-      agentName: agent?.name ?? 'غير معين',
+      agentName: agent?.name ?? t('غير معين', 'Unassigned'),
       createdAt: deal.created_at,
       updatedAt: deal.updated_at ?? null,
     }
   })
 }
 
-async function getLeads(supabase: ServerSupabase, companyId: string | null): Promise<PipelineLeadOption[]> {
+async function getLeads(supabase: ServerSupabase, companyId: string | null, t: T): Promise<PipelineLeadOption[]> {
   let query = supabase
     .from('leads')
     .select('id, client_name, full_name, name, phone, company_id')
@@ -101,12 +104,12 @@ async function getLeads(supabase: ServerSupabase, companyId: string | null): Pro
 
   return ((data ?? []) as unknown as Lead[]).map((lead) => ({
     id: lead.id,
-    name: lead.client_name ?? lead.full_name ?? lead.name ?? 'عميل بدون اسم',
+    name: lead.client_name ?? lead.full_name ?? lead.name ?? t('عميل بدون اسم', 'Unnamed Client'),
     phone: lead.phone,
   }))
 }
 
-async function getUnits(supabase: ServerSupabase, companyId: string | null): Promise<PipelineUnitOption[]> {
+async function getUnits(supabase: ServerSupabase, companyId: string | null, t: T): Promise<PipelineUnitOption[]> {
   let query = supabase
     .from('units')
     .select('id, unit_number, unit_type, price, project_id, company_id')
@@ -121,13 +124,13 @@ async function getUnits(supabase: ServerSupabase, companyId: string | null): Pro
 
   return rows.map((unit) => ({
     id: unit.id,
-    label: [unit.unit_type, unit.unit_number].filter(Boolean).join(' - ') || 'وحدة',
-    projectName: unit.project_id ? projectNames.get(unit.project_id) ?? 'مشروع' : 'مشروع',
+    label: [unit.unit_type, unit.unit_number].filter(Boolean).join(' - ') || t('وحدة', 'Unit'),
+    projectName: unit.project_id ? projectNames.get(unit.project_id) ?? t('مشروع', 'Project') : t('مشروع', 'Project'),
     price: Number(unit.price ?? 0),
   }))
 }
 
-async function getAgents(supabase: ServerSupabase, companyId: string | null): Promise<PipelineAgentOption[]> {
+async function getAgents(supabase: ServerSupabase, companyId: string | null, t: T): Promise<PipelineAgentOption[]> {
   let query = supabase
     .from('profiles')
     .select('id, full_name, role, company_id')
@@ -139,7 +142,7 @@ async function getAgents(supabase: ServerSupabase, companyId: string | null): Pr
 
   return ((data ?? []) as unknown as Profile[]).map((profile) => ({
     id: profile.id,
-    name: profile.full_name ?? 'عضو فريق',
+    name: profile.full_name ?? t('عضو فريق', 'Team Member'),
   }))
 }
 
@@ -159,7 +162,7 @@ async function getDealActivities(supabase: ServerSupabase): Promise<DealActivity
   }))
 }
 
-async function getLeadMap(supabase: ServerSupabase, ids: string[]) {
+async function getLeadMap(supabase: ServerSupabase, ids: string[], t: T) {
   if (ids.length === 0) return new Map<string, PipelineLeadOption>()
   const { data } = await supabase
     .from('leads')
@@ -167,12 +170,12 @@ async function getLeadMap(supabase: ServerSupabase, ids: string[]) {
     .in('id', ids)
   return new Map(((data ?? []) as unknown as Lead[]).map((lead) => [lead.id, {
     id: lead.id,
-    name: lead.client_name ?? lead.full_name ?? lead.name ?? 'عميل بدون اسم',
+    name: lead.client_name ?? lead.full_name ?? lead.name ?? t('عميل بدون اسم', 'Unnamed Client'),
     phone: lead.phone,
   }]))
 }
 
-async function getUnitMap(supabase: ServerSupabase, ids: string[]) {
+async function getUnitMap(supabase: ServerSupabase, ids: string[], t: T) {
   if (ids.length === 0) return new Map<string, PipelineUnitOption>()
   const { data } = await supabase
     .from('units')
@@ -183,13 +186,13 @@ async function getUnitMap(supabase: ServerSupabase, ids: string[]) {
   const projectNames = await getProjectNames(supabase, projectIds)
   return new Map(units.map((unit) => [unit.id, {
     id: unit.id,
-    label: [unit.unit_type, unit.unit_number].filter(Boolean).join(' - ') || 'وحدة',
-    projectName: unit.project_id ? projectNames.get(unit.project_id) ?? 'مشروع' : 'مشروع',
+    label: [unit.unit_type, unit.unit_number].filter(Boolean).join(' - ') || t('وحدة', 'Unit'),
+    projectName: unit.project_id ? projectNames.get(unit.project_id) ?? t('مشروع', 'Project') : t('مشروع', 'Project'),
     price: Number(unit.price ?? 0),
   }]))
 }
 
-async function getAgentMap(supabase: ServerSupabase, ids: string[]) {
+async function getAgentMap(supabase: ServerSupabase, ids: string[], t: T) {
   if (ids.length === 0) return new Map<string, PipelineAgentOption>()
   const { data } = await supabase
     .from('profiles')
@@ -197,7 +200,7 @@ async function getAgentMap(supabase: ServerSupabase, ids: string[]) {
     .in('id', ids)
   return new Map(((data ?? []) as unknown as Profile[]).map((profile) => [profile.id, {
     id: profile.id,
-    name: profile.full_name ?? 'عضو فريق',
+    name: profile.full_name ?? t('عضو فريق', 'Team Member'),
   }]))
 }
 

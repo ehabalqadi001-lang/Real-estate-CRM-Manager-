@@ -8,6 +8,7 @@ import {
 import { createServiceRoleClient } from '@/lib/supabase/service'
 import { requireSession } from '@/shared/auth/session'
 import { hasPermission } from '@/shared/rbac/permissions'
+import { getI18n } from '@/lib/i18n'
 import {
   TabNav, HoldPanel, CommissionPanel, PasswordResetPanel, BackButton,
   type Tab,
@@ -22,50 +23,7 @@ interface PageProps {
 
 /* ─── helpers ──────────────────────────────────────────────────── */
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n)
-
-const fmtMoney = (n: number) =>
-  new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
-
-const fmtDate = (d: string | null) =>
-  d ? new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(new Date(d)) : '—'
-
-const TIER_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  platinum: { label: 'بلاتينيوم', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200' },
-  gold:     { label: 'ذهبي',      color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
-  silver:   { label: 'فضي',       color: 'text-slate-600',  bg: 'bg-slate-100', border: 'border-slate-200' },
-  bronze:   { label: 'برونزي',    color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200' },
-}
-
-const STATUS_CFG: Record<string, { label: string; color: string; bg: string }> = {
-  verified:    { label: 'موثّق ومعتمد',   color: 'text-emerald-700', bg: 'bg-emerald-50' },
-  pending:     { label: 'في انتظار المراجعة', color: 'text-amber-700',  bg: 'bg-amber-50' },
-  under_review:{ label: 'قيد المراجعة',   color: 'text-blue-700',   bg: 'bg-blue-50' },
-  rejected:    { label: 'مرفوض',          color: 'text-red-700',    bg: 'bg-red-50' },
-  suspended:   { label: 'موقوف',          color: 'text-orange-700', bg: 'bg-orange-50' },
-}
-
-const SALE_STATUS: Record<string, { label: string; cls: string }> = {
-  submitted:    { label: 'قيد المراجعة',  cls: 'bg-amber-50 text-amber-700' },
-  under_review: { label: 'جارٍ المراجعة', cls: 'bg-blue-50 text-blue-700' },
-  approved:     { label: 'معتمدة',        cls: 'bg-emerald-50 text-emerald-700' },
-  rejected:     { label: 'مرفوضة',        cls: 'bg-red-50 text-red-600' },
-}
-
-const STAGE_LABELS: Record<string, string> = {
-  eoi: 'EOI', reservation: 'حجز', contract: 'عقد',
-}
-
-const LIFECYCLE_LABELS: Record<string, string> = {
-  sale_submitted: 'تم رفع البيع',
-  sale_approved: 'تم اعتماد البيع',
-  claim_submitted_to_developer: 'مطالبة المطور',
-  developer_commission_collected: 'تم تحصيل عمولة المطور',
-  broker_payout_scheduled: 'موعد الصرف محدد',
-  broker_paid: 'تم الصرف للشريك',
-  rejected: 'مرفوض',
-}
+/* ─── helpers ──────────────────────────────────────────────────── */
 
 function SectionCard({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
@@ -93,7 +51,47 @@ function InfoItem({ label, value, dir: d }: { label: string; value: string | nul
 /* ─── Page ─────────────────────────────────────────────────────── */
 
 export default async function BrokerProfilePage({ params, searchParams }: PageProps) {
-  const [{ id }, sp, session] = await Promise.all([params, searchParams, requireSession()])
+  const [{ id }, sp, session, { t, numLocale }] = await Promise.all([params, searchParams, requireSession(), getI18n()])
+
+  const fmt = (n: number) => new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(n)
+  const fmtMoney = (n: number) => new Intl.NumberFormat(numLocale, { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(n)
+  const fmtDate = (d: string | null) => d ? new Intl.DateTimeFormat(numLocale, { dateStyle: 'medium' }).format(new Date(d)) : '—'
+
+  const TIER_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    platinum: { label: t('بلاتينيوم', 'Platinum'), color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200' },
+    gold:     { label: t('ذهبي', 'Gold'),           color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
+    silver:   { label: t('فضي', 'Silver'),          color: 'text-slate-600',  bg: 'bg-slate-100', border: 'border-slate-200' },
+    bronze:   { label: t('برونزي', 'Bronze'),       color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200' },
+  }
+
+  const STATUS_CFG: Record<string, { label: string; color: string; bg: string }> = {
+    verified:     { label: t('موثّق ومعتمد', 'Verified'),          color: 'text-emerald-700', bg: 'bg-emerald-50' },
+    pending:      { label: t('في انتظار المراجعة', 'Pending Review'), color: 'text-amber-700',  bg: 'bg-amber-50' },
+    under_review: { label: t('قيد المراجعة', 'Under Review'),     color: 'text-blue-700',   bg: 'bg-blue-50' },
+    rejected:     { label: t('مرفوض', 'Rejected'),                 color: 'text-red-700',    bg: 'bg-red-50' },
+    suspended:    { label: t('موقوف', 'Suspended'),                color: 'text-orange-700', bg: 'bg-orange-50' },
+  }
+
+  const SALE_STATUS: Record<string, { label: string; cls: string }> = {
+    submitted:    { label: t('قيد المراجعة', 'Under Review'),  cls: 'bg-amber-50 text-amber-700' },
+    under_review: { label: t('جارٍ المراجعة', 'In Review'),    cls: 'bg-blue-50 text-blue-700' },
+    approved:     { label: t('معتمدة', 'Approved'),            cls: 'bg-emerald-50 text-emerald-700' },
+    rejected:     { label: t('مرفوضة', 'Rejected'),            cls: 'bg-red-50 text-red-600' },
+  }
+
+  const STAGE_LABELS: Record<string, string> = {
+    eoi: 'EOI', reservation: t('حجز', 'Reservation'), contract: t('عقد', 'Contract'),
+  }
+
+  const LIFECYCLE_LABELS: Record<string, string> = {
+    sale_submitted:               t('تم رفع البيع', 'Sale Submitted'),
+    sale_approved:                t('تم اعتماد البيع', 'Sale Approved'),
+    claim_submitted_to_developer: t('مطالبة المطور', 'Claim Submitted'),
+    developer_commission_collected: t('تم تحصيل عمولة المطور', 'Developer Commission Collected'),
+    broker_payout_scheduled:      t('موعد الصرف محدد', 'Payout Scheduled'),
+    broker_paid:                  t('تم الصرف للشريك', 'Partner Paid'),
+    rejected:                     t('مرفوض', 'Rejected'),
+  }
 
   if (!hasPermission(session.profile.role, 'broker.view.company') && !hasPermission(session.profile.role, 'account_manager.view_portfolio')) {
     redirect('/dashboard')
@@ -182,7 +180,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
         {isHeld && (
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-bold text-orange-800">
             <AlertTriangle className="size-4 shrink-0" />
-            هذا الحساب موقوف — {broker.hold_reason ?? ''}
+            {t('هذا الحساب موقوف —', 'This account is suspended —')} {broker.hold_reason ?? ''}
           </div>
         )}
 
@@ -234,13 +232,12 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
           </div>
         </div>
 
-        {/* KPI strip */}
         <div className="mt-5 grid grid-cols-1 xs:grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: 'إجمالي الصفقات', value: fmt(brokerTotalDeals), icon: Briefcase },
-            { label: 'إجمالي المبيعات', value: brokerTotalSales > 0 ? fmtMoney(brokerTotalSales) : fmt(totalSales) + ' ج.م', icon: DollarSign },
-            { label: 'عمولة معلقة', value: fmtMoney(pendingCommission), icon: TrendingUp },
-            { label: 'وثائق مرفوعة', value: fmt(brokerDocs.length), icon: FileText },
+            { label: t('إجمالي الصفقات', 'Total Deals'),   value: fmt(brokerTotalDeals), icon: Briefcase },
+            { label: t('إجمالي المبيعات', 'Total Sales'),  value: brokerTotalSales > 0 ? fmtMoney(brokerTotalSales) : `${fmt(totalSales)} ${t('ج.م', 'EGP')}`, icon: DollarSign },
+            { label: t('عمولة معلقة', 'Pending Commission'), value: fmtMoney(pendingCommission), icon: TrendingUp },
+            { label: t('وثائق مرفوعة', 'Documents Uploaded'), value: fmt(brokerDocs.length), icon: FileText },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
               <div className="flex items-center gap-2 mb-1">
@@ -261,31 +258,31 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
       {/* ── PROFILE TAB ── */}
       {tab === 'profile' && (
         <div className="grid gap-5 lg:grid-cols-2">
-          <SectionCard title="البيانات الشخصية" icon={User}>
+          <SectionCard title={t('البيانات الشخصية', 'Personal Details')} icon={User}>
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-              <InfoItem label="الاسم الكامل" value={broker.full_name} />
-              <InfoItem label="اسم العرض" value={broker.display_name} />
-              <InfoItem label="رقم الهاتف" value={broker.phone} dir="ltr" />
-              <InfoItem label="البريد الإلكتروني" value={broker.email} dir="ltr" />
-              <InfoItem label="الرقم القومي" value={broker.national_id} />
-              <InfoItem label="تاريخ الانضمام" value={fmtDate(broker.join_date ?? broker.created_at)} />
+              <InfoItem label={t('الاسم الكامل', 'Full Name')} value={broker.full_name} />
+              <InfoItem label={t('اسم العرض', 'Display Name')} value={broker.display_name} />
+              <InfoItem label={t('رقم الهاتف', 'Phone')} value={broker.phone} dir="ltr" />
+              <InfoItem label={t('البريد الإلكتروني', 'Email')} value={broker.email} dir="ltr" />
+              <InfoItem label={t('الرقم القومي', 'National ID')} value={broker.national_id} />
+              <InfoItem label={t('تاريخ الانضمام', 'Join Date')} value={fmtDate(broker.join_date ?? broker.created_at)} />
             </div>
           </SectionCard>
 
-          <SectionCard title="بيانات الأعمال" icon={Building2}>
+          <SectionCard title={t('بيانات الأعمال', 'Business Details')} icon={Building2}>
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-              <InfoItem label="كود الشريك" value={brokerCode} />
-              <InfoItem label="المستوى" value={tier.label} />
-              <InfoItem label="نسبة العمولة" value={`${broker.broker_commission_rate ?? broker.commission_rate ?? 0}%`} />
-              <InfoItem label="نسبة المطور" value={`${broker.developer_commission_rate ?? 0}%`} />
-              <InfoItem label="البنك" value={broker.bank_name} />
-              <InfoItem label="اسم صاحب الحساب" value={broker.bank_account_name} />
-              <InfoItem label="رقم الحساب البنكي" value={broker.bank_account_number} dir="ltr" />
+              <InfoItem label={t('كود الشريك', 'Partner Code')} value={brokerCode} />
+              <InfoItem label={t('المستوى', 'Tier')} value={tier.label} />
+              <InfoItem label={t('نسبة العمولة', 'Commission Rate')} value={`${broker.broker_commission_rate ?? broker.commission_rate ?? 0}%`} />
+              <InfoItem label={t('نسبة المطور', 'Developer Rate')} value={`${broker.developer_commission_rate ?? 0}%`} />
+              <InfoItem label={t('البنك', 'Bank')} value={broker.bank_name} />
+              <InfoItem label={t('اسم صاحب الحساب', 'Account Holder')} value={broker.bank_account_name} />
+              <InfoItem label={t('رقم الحساب البنكي', 'Account Number')} value={broker.bank_account_number} dir="ltr" />
               <InfoItem label="IBAN" value={broker.bank_iban} dir="ltr" />
             </div>
             {broker.specialties?.length > 0 && (
               <div className="mt-4">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">التخصصات</p>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--fi-muted)]">{t('التخصصات', 'Specialties')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {broker.specialties.map((s: string) => (
                     <span key={s} className="rounded-lg bg-[var(--fi-emerald)]/10 px-2.5 py-1 text-xs font-bold text-[var(--fi-emerald)]">{s}</span>
@@ -295,11 +292,10 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
             )}
           </SectionCard>
 
-          {/* Recent sales preview */}
           <div className="lg:col-span-2">
-            <SectionCard title={`آخر المبيعات (${sales.slice(0, 5).length})`} icon={Briefcase}>
+            <SectionCard title={`${t('آخر المبيعات', 'Recent Sales')} (${sales.slice(0, 5).length})`} icon={Briefcase}>
               {sales.length === 0 ? (
-                <p className="py-4 text-center text-sm text-[var(--fi-muted)]">لا توجد مبيعات مسجلة بعد</p>
+                <p className="py-4 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد مبيعات مسجلة بعد', 'No sales recorded yet')}</p>
               ) : (
                 <div className="space-y-2">
                   {sales.slice(0, 5).map((sale) => {
@@ -321,7 +317,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                   })}
                   {sales.length > 5 && (
                     <Link href="?tab=sales" className="block pt-2 text-center text-xs font-bold text-[var(--fi-emerald)]">
-                      عرض جميع المبيعات ({sales.length}) ←
+                      {t('عرض جميع المبيعات', 'View all sales')} ({sales.length}) ←
                     </Link>
                   )}
                 </div>
@@ -333,18 +329,17 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
 
       {/* ── SALES TAB ── */}
       {tab === 'sales' && (
-        <SectionCard title={`جميع المبيعات (${sales.length})`} icon={Briefcase}>
+        <SectionCard title={`${t('جميع المبيعات', 'All Sales')} (${sales.length})`} icon={Briefcase}>
           {sales.length === 0 ? (
-            <p className="py-10 text-center text-sm text-[var(--fi-muted)]">لا توجد مبيعات مسجلة لهذا الشريك</p>
+            <p className="py-10 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد مبيعات مسجلة لهذا الشريك', 'No sales recorded for this partner')}</p>
           ) : (
             <>
-              {/* Summary strip */}
               <div className="mb-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
-                  { label: 'إجمالي', value: sales.length },
-                  { label: 'معتمدة', value: sales.filter(s => s.status === 'approved').length },
-                  { label: 'قيد المراجعة', value: sales.filter(s => s.status === 'submitted' || s.status === 'under_review').length },
-                  { label: 'مرفوضة', value: sales.filter(s => s.status === 'rejected').length },
+                  { label: t('إجمالي', 'Total'), value: sales.length },
+                  { label: t('معتمدة', 'Approved'), value: sales.filter(s => s.status === 'approved').length },
+                  { label: t('قيد المراجعة', 'Under Review'), value: sales.filter(s => s.status === 'submitted' || s.status === 'under_review').length },
+                  { label: t('مرفوضة', 'Rejected'), value: sales.filter(s => s.status === 'rejected').length },
                 ].map(({ label, value }) => (
                   <div key={label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3 text-center">
                     <p className="text-lg font-black text-[var(--fi-ink)]">{value}</p>
@@ -357,7 +352,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                 <table className="w-full min-w-[900px] text-right text-sm">
                   <thead className="bg-[var(--fi-soft)]">
                     <tr>
-                      {['كود البيعة', 'اسم العميل', 'المرحلة', 'قيمة الصفقة', 'عمولة الشريك', 'الحالة', 'مسار العملية', 'التاريخ'].map(h => (
+                      {[t('كود البيعة', 'Sale Code'), t('اسم العميل', 'Client Name'), t('المرحلة', 'Stage'), t('قيمة الصفقة', 'Deal Value'), t('عمولة الشريك', 'Commission'), t('الحالة', 'Status'), t('مسار العملية', 'Lifecycle'), t('التاريخ', 'Date')].map(h => (
                         <th key={h} className="px-4 py-3 text-right text-xs font-black text-[var(--fi-muted)] uppercase tracking-wide">{h}</th>
                       ))}
                     </tr>
@@ -395,15 +390,15 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
 
       {/* ── DOCUMENTS TAB ── */}
       {tab === 'documents' && (
-        <SectionCard title={`وثائق الشريك (${brokerDocs.length})`} icon={FileText}>
+        <SectionCard title={`${t('وثائق الشريك', 'Partner Documents')} (${brokerDocs.length})`} icon={FileText}>
           {brokerDocs.length === 0 ? (
-            <p className="py-10 text-center text-sm text-[var(--fi-muted)]">لا توجد وثائق مرفوعة لهذا الشريك</p>
+            <p className="py-10 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد وثائق مرفوعة لهذا الشريك', 'No documents uploaded for this partner')}</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {brokerDocs.map((doc) => {
                 const docStatus = String(doc.status ?? 'pending')
                 const statusCls = docStatus === 'approved' ? 'text-emerald-700 bg-emerald-50' : docStatus === 'rejected' ? 'text-red-600 bg-red-50' : 'text-amber-700 bg-amber-50'
-                const statusLabel = docStatus === 'approved' ? 'معتمد' : docStatus === 'rejected' ? 'مرفوض' : 'قيد المراجعة'
+                const statusLabel = docStatus === 'approved' ? t('معتمد', 'Approved') : docStatus === 'rejected' ? t('مرفوض', 'Rejected') : t('قيد المراجعة', 'Under Review')
                 return (
                   <div key={String(doc.id)} className="flex items-center justify-between rounded-xl border border-[var(--fi-line)] p-4">
                     <div className="flex items-center gap-3">
@@ -418,7 +413,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                       {doc.url ? (
                         <a href={String(doc.url)} target="_blank" rel="noreferrer"
                           className="rounded-lg border border-[var(--fi-line)] px-2 py-1 text-xs font-bold text-[var(--fi-muted)] transition hover:bg-[var(--fi-soft)]">
-                          عرض
+                          {t('عرض', 'View')}
                         </a>
                       ) : null}
                     </div>
@@ -433,7 +428,7 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
       {/* ── COMMISSION TAB ── */}
       {tab === 'commission' && (
         <div className="space-y-5">
-          <SectionCard title="لوحة تحكم العمولة" icon={TrendingUp}>
+          <SectionCard title={t('لوحة تحكم العمولة', 'Commission Dashboard')} icon={TrendingUp}>
             {canManage ? (
               <CommissionPanel
                 brokerId={broker.id}
@@ -441,34 +436,34 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
                 currentBrokerRate={Number(broker.broker_commission_rate ?? broker.commission_rate ?? 2)}
               />
             ) : (
-              <div className="py-6 text-center text-sm text-[var(--fi-muted)]">لا تملك صلاحية تعديل العمولة</div>
+              <div className="py-6 text-center text-sm text-[var(--fi-muted)]">{t('لا تملك صلاحية تعديل العمولة', 'You do not have permission to edit commissions')}</div>
             )}
           </SectionCard>
 
-          <SectionCard title="تاريخ العمولات" icon={DollarSign}>
+          <SectionCard title={t('تاريخ العمولات', 'Commission History')} icon={DollarSign}>
             {sales.length === 0 ? (
-              <p className="py-6 text-center text-sm text-[var(--fi-muted)]">لا توجد مبيعات مسجلة</p>
+              <p className="py-6 text-center text-sm text-[var(--fi-muted)]">{t('لا توجد مبيعات مسجلة', 'No sales recorded')}</p>
             ) : (
               <>
                 <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
                     <p className="text-lg font-black text-[var(--fi-emerald)]">{fmtMoney(approvedSales.reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
-                    <p className="text-xs font-bold text-[var(--fi-muted)]">عمولة معتمدة</p>
+                    <p className="text-xs font-bold text-[var(--fi-muted)]">{t('عمولة معتمدة', 'Approved Commission')}</p>
                   </div>
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
                     <p className="text-lg font-black text-amber-600">{fmtMoney(sales.filter(s => s.status === 'submitted' || s.status === 'under_review').reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
-                    <p className="text-xs font-bold text-[var(--fi-muted)]">عمولة معلقة</p>
+                    <p className="text-xs font-bold text-[var(--fi-muted)]">{t('عمولة معلقة', 'Pending Commission')}</p>
                   </div>
                   <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-center">
                     <p className="text-lg font-black text-[var(--fi-ink)]">{fmtMoney(sales.filter(s => s.commission_lifecycle_stage === 'broker_paid').reduce((s, sale) => s + Number(sale.broker_commission_amount ?? 0), 0))}</p>
-                    <p className="text-xs font-bold text-[var(--fi-muted)]">تم صرفها</p>
+                    <p className="text-xs font-bold text-[var(--fi-muted)]">{t('تم صرفها', 'Paid Out')}</p>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-right text-sm">
                     <thead className="bg-[var(--fi-soft)]">
                       <tr>
-                        {['كود البيعة', 'العميل', 'قيمة الصفقة', 'نسبة العمولة', 'مبلغ العمولة', 'حالة الصرف'].map(h => (
+                        {[t('كود البيعة', 'Sale Code'), t('العميل', 'Client'), t('قيمة الصفقة', 'Deal Value'), t('نسبة العمولة', 'Rate'), t('مبلغ العمولة', 'Commission Amount'), t('حالة الصرف', 'Payout Status')].map(h => (
                           <th key={h} className="px-4 py-3 text-right text-xs font-black text-[var(--fi-muted)]">{h}</th>
                         ))}
                       </tr>
@@ -502,35 +497,35 @@ export default async function BrokerProfilePage({ params, searchParams }: PagePr
         <div className="grid gap-5 lg:grid-cols-2">
           {canManage && (
             <>
-              <SectionCard title="تعليق الحساب / رفع التعليق" icon={PauseCircle}>
+              <SectionCard title={t('تعليق الحساب / رفع التعليق', 'Suspend / Unsuspend Account')} icon={PauseCircle}>
                 <HoldPanel brokerId={broker.id} isHeld={isHeld} holdReason={broker.hold_reason} />
               </SectionCard>
 
               {broker.email && (
-                <SectionCard title="إعادة تعيين كلمة المرور" icon={Settings}>
+                <SectionCard title={t('إعادة تعيين كلمة المرور', 'Reset Password')} icon={Settings}>
                   <PasswordResetPanel brokerEmail={broker.email} />
                 </SectionCard>
               )}
             </>
           )}
 
-          <SectionCard title="معلومات الحساب" icon={Shield}>
+          <SectionCard title={t('معلومات الحساب', 'Account Info')} icon={Shield}>
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-              <InfoItem label="كود الشريك" value={brokerCode} />
-              <InfoItem label="معرّف النظام (ID)" value={broker.id} dir="ltr" />
+              <InfoItem label={t('كود الشريك', 'Partner Code')} value={brokerCode} />
+              <InfoItem label={t('معرّف النظام', 'System ID')} value={broker.id} dir="ltr" />
               <InfoItem label="Profile ID" value={profileId ?? '—'} dir="ltr" />
-              <InfoItem label="تاريخ الإنشاء" value={fmtDate(broker.created_at)} />
-              <InfoItem label="آخر تعديل" value={fmtDate(broker.updated_at)} />
-              {broker.held_at && <InfoItem label="تاريخ التعليق" value={fmtDate(broker.held_at)} />}
+              <InfoItem label={t('تاريخ الإنشاء', 'Created At')} value={fmtDate(broker.created_at)} />
+              <InfoItem label={t('آخر تعديل', 'Last Updated')} value={fmtDate(broker.updated_at)} />
+              {broker.held_at && <InfoItem label={t('تاريخ التعليق', 'Suspended At')} value={fmtDate(broker.held_at)} />}
             </div>
           </SectionCard>
 
           {isHeld && (
-            <SectionCard title="معلومات التعليق" icon={AlertTriangle}>
+            <SectionCard title={t('معلومات التعليق', 'Suspension Info')} icon={AlertTriangle}>
               <div className="space-y-3">
-                <InfoItem label="سبب التعليق" value={broker.hold_reason} />
-                <InfoItem label="تاريخ التعليق" value={fmtDate(broker.held_at)} />
-                <p className="text-xs text-[var(--fi-muted)]">جميع بيانات الشريك محفوظة ولن تُحذف</p>
+                <InfoItem label={t('سبب التعليق', 'Suspension Reason')} value={broker.hold_reason} />
+                <InfoItem label={t('تاريخ التعليق', 'Suspended At')} value={fmtDate(broker.held_at)} />
+                <p className="text-xs text-[var(--fi-muted)]">{t('جميع بيانات الشريك محفوظة ولن تُحذف', "All partner data is preserved and won't be deleted")}</p>
               </div>
             </SectionCard>
           )}

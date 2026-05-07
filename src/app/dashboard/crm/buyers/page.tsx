@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { Users, Search, DollarSign, MapPin, ArrowUpRight } from 'lucide-react'
 import { getBuyers } from '@/domains/crm/actions'
+import { getI18n } from '@/lib/i18n'
 import { scoreColor, scoreLabel } from '@/app/dashboard/leads/score-utils'
 
 export const dynamic = 'force-dynamic'
@@ -10,26 +11,29 @@ interface PageProps {
   searchParams: Promise<{ query?: string; page?: string }>
 }
 
-const TIMELINE_LABELS: Record<string, string> = {
-  urgent: 'عاجل',
-  '3_months': '3 أشهر',
-  '6_months': '6 أشهر',
-  flexible: 'مرن',
-}
-
-const PURPOSE_LABELS: Record<string, string> = {
-  سكن: '🏠 سكن',
-  استثمار: '📈 استثمار',
-  تأجير: '🔑 إيجار',
-}
-
 export default async function BuyersPage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
-  const { buyers, total } = await getBuyers({ query: params.query, page })
+  const [{ buyers, total }, { t, numLocale }] = await Promise.all([
+    getBuyers({ query: params.query, page }),
+    getI18n(),
+  ])
+
+  const TIMELINE_LABELS: Record<string, string> = {
+    urgent:    t('عاجل', 'Urgent'),
+    '3_months': t('3 أشهر', '3 Months'),
+    '6_months': t('6 أشهر', '6 Months'),
+    flexible:  t('مرن', 'Flexible'),
+  }
+
+  const PURPOSE_LABELS: Record<string, string> = {
+    سكن:     `🏠 ${t('سكن', 'Residential')}`,
+    استثمار: `📈 ${t('استثمار', 'Investment')}`,
+    تأجير:   `🔑 ${t('تأجير', 'Rental')}`,
+  }
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+    new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 
   return (
     <div className="p-6 space-y-5" dir="rtl">
@@ -40,8 +44,8 @@ export default async function BuyersPage({ searchParams }: PageProps) {
             <Users size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-[var(--fi-ink)]">المشترون المؤهلون</h1>
-            <p className="text-xs text-[var(--fi-muted)]">{total} مشتري مهتم · عملاء في مراحل متقدمة</p>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">{t('المشترون المؤهلون', 'Qualified Buyers')}</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{total} {t('مشتري مهتم · عملاء في مراحل متقدمة', 'interested buyers · clients in advanced stages')}</p>
           </div>
         </div>
         <form method="GET">
@@ -50,7 +54,7 @@ export default async function BuyersPage({ searchParams }: PageProps) {
             <input
               name="query"
               defaultValue={params.query}
-              placeholder="ابحث بالاسم أو الهاتف..."
+              placeholder={t('ابحث بالاسم أو الهاتف...', 'Search by name or phone...')}
               className="bg-transparent text-sm text-[var(--fi-ink)] placeholder-slate-400 outline-none w-48"
             />
           </div>
@@ -61,16 +65,16 @@ export default async function BuyersPage({ searchParams }: PageProps) {
       {buyers.length === 0 ? (
         <div className="bg-[var(--fi-paper)] rounded-2xl border border-dashed border-[var(--fi-line)] p-16 text-center">
           <Users size={48} className="mx-auto text-slate-200 mb-3" />
-          <p className="font-bold text-[var(--fi-muted)]">لا يوجد مشترون مؤهلون حالياً</p>
-          <p className="text-sm text-[var(--fi-muted)] mt-1">سيظهر هنا العملاء الذين وصلوا لمرحلة الاهتمام وما بعدها</p>
+          <p className="font-bold text-[var(--fi-muted)]">{t('لا يوجد مشترون مؤهلون حالياً', 'No qualified buyers yet')}</p>
+          <p className="text-sm text-[var(--fi-muted)] mt-1">{t('سيظهر هنا العملاء الذين وصلوا لمرحلة الاهتمام وما بعدها', 'Clients who reached the Interested stage will appear here')}</p>
           <Link href="/dashboard/crm/leads" className="inline-flex items-center gap-2 mt-4 text-sm text-blue-600 font-bold hover:underline">
-            عرض جميع العملاء المحتملين
+            {t('عرض جميع العملاء المحتملين', 'View all leads')}
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {buyers.map((buyer: any) => {
-            const name = buyer.full_name || buyer.client_name || 'مشتري'
+            const name = buyer.full_name || buyer.client_name || t('مشتري', 'Buyer')
             const req  = buyer.buyer_requirements?.[0]
             const score = buyer.score ?? 0
 
@@ -114,8 +118,8 @@ export default async function BuyersPage({ searchParams }: PageProps) {
                   <div className="space-y-1.5 text-[11px] text-[var(--fi-muted)]">
                     {req.property_types?.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {req.property_types.slice(0, 3).map((t: string) => (
-                          <span key={t} className="bg-slate-100 px-2 py-0.5 rounded-md font-semibold">{t}</span>
+                        {req.property_types.slice(0, 3).map((pt: string) => (
+                          <span key={pt} className="bg-slate-100 px-2 py-0.5 rounded-md font-semibold">{pt}</span>
                         ))}
                       </div>
                     )}
@@ -132,23 +136,23 @@ export default async function BuyersPage({ searchParams }: PageProps) {
                     )}
                     {req.timeline && (
                       <div className="text-[var(--fi-muted)]">
-                        الجدول الزمني: {TIMELINE_LABELS[req.timeline] ?? req.timeline}
+                        {t('الجدول الزمني', 'Timeline')}: {TIMELINE_LABELS[req.timeline] ?? req.timeline}
                       </div>
                     )}
                   </div>
                 )}
 
                 {!req && (
-                  <p className="text-xs text-slate-300 italic">لم يتم تسجيل متطلبات الشراء بعد</p>
+                  <p className="text-xs text-slate-300 italic">{t('لم يتم تسجيل متطلبات الشراء بعد', 'No purchase requirements recorded yet')}</p>
                 )}
 
                 {/* Footer */}
                 <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
                   <span className="text-[10px] text-[var(--fi-muted)]">
-                    {new Date(buyer.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
+                    {new Date(buyer.created_at).toLocaleDateString(numLocale, { day: 'numeric', month: 'short' })}
                   </span>
                   <span className="flex items-center gap-1 text-[11px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                    عرض الملف <ArrowUpRight size={11} />
+                    {t('عرض الملف', 'View Profile')} <ArrowUpRight size={11} />
                   </span>
                 </div>
               </Link>
@@ -163,16 +167,16 @@ export default async function BuyersPage({ searchParams }: PageProps) {
           {page > 1 && (
             <Link href={`?query=${params.query ?? ''}&page=${page - 1}`}
               className="px-4 py-2 rounded-xl text-sm font-bold bg-[var(--fi-paper)] border border-[var(--fi-line)] text-[var(--fi-muted)] hover:bg-[var(--fi-soft)]">
-              السابق
+              {t('السابق', 'Previous')}
             </Link>
           )}
           <span className="px-4 py-2 text-sm font-bold text-[var(--fi-muted)]">
-            صفحة {page} · {total} نتيجة
+            {t('صفحة', 'Page')} {page} · {total} {t('نتيجة', 'results')}
           </span>
           {page * 40 < total && (
             <Link href={`?query=${params.query ?? ''}&page=${page + 1}`}
               className="px-4 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700">
-              التالي
+              {t('التالي', 'Next')}
             </Link>
           )}
         </div>

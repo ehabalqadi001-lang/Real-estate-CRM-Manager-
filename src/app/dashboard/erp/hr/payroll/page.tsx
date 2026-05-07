@@ -8,6 +8,7 @@ import { nullableUuid } from '@/lib/uuid'
 import { BentoGrid, BentoKpiCard } from '@/components/dashboard/BentoDashboardLayout'
 import { AnimatedCount } from '@/components/design-system/animated-count'
 import { RunPayrollForm, ApprovePayrollButton, ApproveAllButton, MarkAsPaidButton } from './PayrollControls'
+import { getI18n } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,27 +43,27 @@ type PayrollRow = {
   } | null
 }
 
-const formatter = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 })
-
-const statusBadge: Record<string, string> = {
-  draft: 'bg-amber-50 text-amber-700',
-  approved: 'bg-emerald-50 text-emerald-700',
-  paid: 'bg-blue-50 text-blue-700',
-}
-const statusLabel: Record<string, string> = {
-  draft: 'مسودة',
-  approved: 'مُقرَّر',
-  paid: 'مدفوع',
-}
-
 export default async function PayrollPage({
   searchParams,
 }: {
   searchParams: Promise<{ month?: string; year?: string }>
 }) {
-  const session = await requireSession()
+  const [session, { t, numLocale }] = await Promise.all([requireSession(), getI18n()])
   const { profile } = session
   if (!HR_ROLES.includes(profile.role)) redirect('/dashboard')
+
+  const formatter = new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 })
+
+  const statusBadge: Record<string, string> = {
+    draft:    'bg-amber-50 text-amber-700',
+    approved: 'bg-emerald-50 text-emerald-700',
+    paid:     'bg-blue-50 text-blue-700',
+  }
+  const statusLabel: Record<string, string> = {
+    draft:    t('مسودة', 'Draft'),
+    approved: t('مُقرَّر', 'Approved'),
+    paid:     t('مدفوع', 'Paid'),
+  }
 
   const params = await searchParams
   const now = new Date()
@@ -115,11 +116,13 @@ export default async function PayrollPage({
   const draftCount = payroll.filter((p) => p.status === 'draft').length
   const approvedOnlyCount = payroll.filter((p) => p.status === 'approved').length
 
-  // Month navigation
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
   const nextMonth = month === 12 ? 1 : month + 1
   const nextYear = month === 12 ? year + 1 : year
+
+  const fmtMonth = (m: number, y: number) =>
+    new Date(y, m - 1).toLocaleDateString(numLocale, { month: 'long', year: 'numeric' })
 
   return (
     <main className="space-y-6 p-4 sm:p-6">
@@ -127,9 +130,9 @@ export default async function PayrollPage({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--fi-emerald)]">PAYROLL MANAGEMENT</p>
-            <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">مسيرة رواتب</h1>
+            <h1 className="mt-2 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">{t('مسيرة رواتب', 'Payroll')}</h1>
             <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-              الراتب الأساسي + العمولات المُقرَّرة — خصم الغياب والتأخير تلقائياً.
+              {t('الراتب الأساسي + العمولات المُقرَّرة — خصم الغياب والتأخير تلقائياً.', 'Base salary + approved commissions — absence and lateness deducted automatically.')}
             </p>
           </div>
           {/* Month selector */}
@@ -138,7 +141,7 @@ export default async function PayrollPage({
               ›
             </Link>
             <span className="min-w-[120px] text-center text-sm font-black text-[var(--fi-ink)]">
-              {new Date(year, month - 1).toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' })}
+              {fmtMonth(month, year)}
             </span>
             <Link href={`?month=${nextMonth}&year=${nextYear}`} className="text-[var(--fi-muted)] transition hover:text-[var(--fi-ink)]">
               ‹
@@ -149,33 +152,33 @@ export default async function PayrollPage({
 
       {payrollError && (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-          تعذر تحميل بيانات المسيرة: {payrollError.message}
+          {t('تعذر تحميل بيانات المسيرة:', 'Failed to load payroll data:')} {payrollError.message}
         </section>
       )}
 
       <BentoGrid>
         <BentoKpiCard
-          title="إجمالي صافي الرواتب"
-          value={<><AnimatedCount value={totalNetSalary} /> <span className="text-base">ج.م</span></>}
+          title={t('إجمالي صافي الرواتب', 'Total Net Salaries')}
+          value={<><AnimatedCount value={totalNetSalary} /> <span className="text-base">{t('ج.م', 'EGP')}</span></>}
           hint={`${month}/${year}`}
           icon={<WalletCards className="size-5" />}
         />
         <BentoKpiCard
-          title="إجمالي العمولات"
-          value={<><AnimatedCount value={totalCommissions} /> <span className="text-base">ج.م</span></>}
-          hint="مُقرَّرة ومحتسبة"
+          title={t('إجمالي العمولات', 'Total Commissions')}
+          value={<><AnimatedCount value={totalCommissions} /> <span className="text-base">{t('ج.م', 'EGP')}</span></>}
+          hint={t('مُقرَّرة ومحتسبة', 'Approved & calculated')}
           icon={<BadgeDollarSign className="size-5" />}
         />
         <BentoKpiCard
-          title="موظفون مُقرَّرة رواتبهم"
+          title={t('موظفون مُقرَّرة رواتبهم', 'Employees with Approved Payroll')}
           value={<AnimatedCount value={approvedCount} />}
-          hint={`${draftCount} مسودة`}
+          hint={`${draftCount} ${t('مسودة', 'draft')}`}
           icon={<CheckCircle2 className="size-5" />}
         />
         <BentoKpiCard
-          title="ضريبة + تأمينات"
-          value={<><AnimatedCount value={totalTax + totalSocialIns} /> <span className="text-base">ج.م</span></>}
-          hint={`ضريبة ${formatter.format(totalTax)} — تأمين ${formatter.format(totalSocialIns)}`}
+          title={t('ضريبة + تأمينات', 'Tax + Insurance')}
+          value={<><AnimatedCount value={totalTax + totalSocialIns} /> <span className="text-base">{t('ج.م', 'EGP')}</span></>}
+          hint={`${t('ضريبة', 'Tax')} ${formatter.format(totalTax)} — ${t('تأمين', 'Ins.')} ${formatter.format(totalSocialIns)}`}
           icon={<Users className="size-5" />}
         />
       </BentoGrid>
@@ -184,18 +187,18 @@ export default async function PayrollPage({
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(280px,auto)]">
           <RunPayrollForm defaultMonth={month} defaultYear={year} />
           <section className="ds-card p-5">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">آلية الاحتساب</p>
-            <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">قواعد المسيرة</h2>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">{t('آلية الاحتساب', 'Calculation Logic')}</p>
+            <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">{t('قواعد المسيرة', 'Payroll Rules')}</h2>
             <div className="mt-4 space-y-3 text-sm font-bold text-[var(--fi-muted)]">
-              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> الراتب الأساسي</div>
-              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> البدلات + الحوافز + الأوفر تايم</div>
-              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> عمولات HR + CRM المُقرَّرة</div>
-              <div className="flex gap-2"><span className="text-red-500">−</span> يوم راتب لكل يوم غياب</div>
-              <div className="flex gap-2"><span className="text-red-500">−</span> إجازة غير مدفوعة × معدل اليوم</div>
-              <div className="flex gap-2"><span className="text-red-500">−</span> تأمينات 11% من الأساسي</div>
-              <div className="flex gap-2"><span className="text-red-500">−</span> ضريبة دخل تصاعدية (ق. 91/2005)</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> {t('الراتب الأساسي', 'Basic Salary')}</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> {t('البدلات + الحوافز + الأوفر تايم', 'Allowances + Bonuses + Overtime')}</div>
+              <div className="flex gap-2"><span className="text-[var(--fi-emerald)]">+</span> {t('عمولات HR + CRM المُقرَّرة', 'Approved HR + CRM Commissions')}</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> {t('يوم راتب لكل يوم غياب', '1 day salary per absence day')}</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> {t('إجازة غير مدفوعة × معدل اليوم', 'Unpaid leave × daily rate')}</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> {t('تأمينات 11% من الأساسي', '11% social insurance on basic')}</div>
+              <div className="flex gap-2"><span className="text-red-500">−</span> {t('ضريبة دخل تصاعدية (ق. 91/2005)', 'Progressive income tax (Law 91/2005)')}</div>
               <div className="mt-3 rounded-lg bg-[var(--fi-soft)] p-3 text-xs">
-                معدل اليوم = الأساسي ÷ أيام العمل (22 افتراضياً)
+                {t('معدل اليوم = الأساسي ÷ أيام العمل (22 افتراضياً)', 'Daily rate = Basic ÷ working days (22 default)')}
               </div>
             </div>
           </section>
@@ -207,9 +210,9 @@ export default async function PayrollPage({
           <div className="flex flex-col gap-3 border-b border-[var(--fi-line)] p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-black text-[var(--fi-ink)]">
-                مسيرة {new Date(year, month - 1).toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' })}
+                {t('مسيرة', 'Payroll')} {fmtMonth(month, year)}
               </h2>
-              <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">{payroll.length} موظف</p>
+              <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">{payroll.length} {t('موظف', 'employees')}</p>
             </div>
             <div className="flex flex-wrap gap-3">
               {canRun && draftCount > 0 && companyId && (
@@ -224,7 +227,7 @@ export default async function PayrollPage({
                 className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-white px-4 text-sm font-black text-[var(--fi-ink)] transition hover:border-[var(--fi-emerald)] dark:bg-white/5"
               >
                 <Download className="size-4" />
-                تصدير PDF
+                {t('تصدير PDF', 'Export PDF')}
               </Link>
             </div>
           </div>
@@ -233,18 +236,18 @@ export default async function PayrollPage({
             <table className="w-full min-w-[1200px] text-sm">
               <thead>
                 <tr className="bg-[var(--fi-soft)] text-xs font-black text-[var(--fi-muted)]">
-                  <th className="px-4 py-3 text-right">الموظف</th>
-                  <th className="px-4 py-3 text-right">حضور / غياب</th>
-                  <th className="px-4 py-3 text-right">الأساسي</th>
-                  <th className="px-4 py-3 text-right">بدلات + حوافز</th>
-                  <th className="px-4 py-3 text-right">عمولات</th>
-                  <th className="px-4 py-3 text-right">خصومات</th>
-                  <th className="px-4 py-3 text-right">تأمينات</th>
-                  <th className="px-4 py-3 text-right">ضريبة</th>
-                  <th className="px-4 py-3 text-right">الإجمالي</th>
-                  <th className="px-4 py-3 text-right">الصافي</th>
-                  <th className="px-4 py-3 text-right">الحالة</th>
-                  {canRun && <th className="px-4 py-3 text-right">إجراء</th>}
+                  <th className="px-4 py-3 text-right">{t('الموظف', 'Employee')}</th>
+                  <th className="px-4 py-3 text-right">{t('حضور / غياب', 'Present / Absent')}</th>
+                  <th className="px-4 py-3 text-right">{t('الأساسي', 'Basic')}</th>
+                  <th className="px-4 py-3 text-right">{t('بدلات + حوافز', 'Allow. + Bonuses')}</th>
+                  <th className="px-4 py-3 text-right">{t('عمولات', 'Commissions')}</th>
+                  <th className="px-4 py-3 text-right">{t('خصومات', 'Deductions')}</th>
+                  <th className="px-4 py-3 text-right">{t('تأمينات', 'Insurance')}</th>
+                  <th className="px-4 py-3 text-right">{t('ضريبة', 'Tax')}</th>
+                  <th className="px-4 py-3 text-right">{t('الإجمالي', 'Gross')}</th>
+                  <th className="px-4 py-3 text-right">{t('الصافي', 'Net')}</th>
+                  <th className="px-4 py-3 text-right">{t('الحالة', 'Status')}</th>
+                  {canRun && <th className="px-4 py-3 text-right">{t('إجراء', 'Action')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--fi-line)]">
@@ -256,7 +259,7 @@ export default async function PayrollPage({
                         className="group flex items-center gap-1.5 hover:text-[var(--fi-emerald)] transition-colors"
                       >
                         <p className="font-black text-[var(--fi-ink)] group-hover:text-[var(--fi-emerald)]">
-                          {p.employees?.profiles?.full_name ?? 'غير محدد'}
+                          {p.employees?.profiles?.full_name ?? t('غير محدد', 'Unknown')}
                         </p>
                         <ExternalLink size={12} className="shrink-0 opacity-0 group-hover:opacity-60" />
                       </Link>
@@ -267,29 +270,29 @@ export default async function PayrollPage({
                       <span className="mx-1 text-[var(--fi-muted)]">/</span>
                       <span className="font-bold text-red-500">{p.absent_days ?? 0}✗</span>
                       {(p.late_count ?? 0) > 0 && (
-                        <span className="mr-1 text-xs font-bold text-amber-600">({p.late_count}م)</span>
+                        <span className="mr-1 text-xs font-bold text-amber-600">({p.late_count}{t('م', 'L')})</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.basic_salary)} ج.م</td>
+                    <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.basic_salary)} {t('ج.م', 'EGP')}</td>
                     <td className="px-4 py-3 font-bold text-violet-600">
                       {(Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0)) > 0
-                        ? `${formatter.format(Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0))} ج.م`
+                        ? `${formatter.format(Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0))} ${t('ج.م', 'EGP')}`
                         : '—'}
                     </td>
                     <td className="px-4 py-3 font-black text-emerald-600">
-                      {(p.total_commissions ?? 0) > 0 ? `${formatter.format(p.total_commissions)} ج.م` : '—'}
+                      {(p.total_commissions ?? 0) > 0 ? `${formatter.format(p.total_commissions)} ${t('ج.م', 'EGP')}` : '—'}
                     </td>
                     <td className="px-4 py-3 font-bold text-red-500">
-                      {(p.deductions ?? 0) > 0 ? `(${formatter.format(p.deductions)}) ج.م` : '—'}
+                      {(p.deductions ?? 0) > 0 ? `(${formatter.format(p.deductions)}) ${t('ج.م', 'EGP')}` : '—'}
                     </td>
                     <td className="px-4 py-3 font-bold text-orange-600">
-                      {(p.social_ins_emp ?? 0) > 0 ? `(${formatter.format(p.social_ins_emp)}) ج.م` : '—'}
+                      {(p.social_ins_emp ?? 0) > 0 ? `(${formatter.format(p.social_ins_emp)}) ${t('ج.م', 'EGP')}` : '—'}
                     </td>
                     <td className="px-4 py-3 font-bold text-rose-600">
-                      {(p.tax_amount ?? 0) > 0 ? `(${formatter.format(p.tax_amount)}) ج.م` : '—'}
+                      {(p.tax_amount ?? 0) > 0 ? `(${formatter.format(p.tax_amount)}) ${t('ج.م', 'EGP')}` : '—'}
                     </td>
-                    <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.gross_salary)} ج.م</td>
-                    <td className="px-4 py-3 font-black text-emerald-700 text-base">{formatter.format(p.net_salary)} ج.م</td>
+                    <td className="px-4 py-3 font-bold text-[var(--fi-ink)]">{formatter.format(p.gross_salary)} {t('ج.م', 'EGP')}</td>
+                    <td className="px-4 py-3 font-black text-emerald-700 text-base">{formatter.format(p.net_salary)} {t('ج.م', 'EGP')}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-3 py-1 text-xs font-black ${statusBadge[p.status] ?? 'bg-slate-100 text-slate-600'}`}>
                         {statusLabel[p.status] ?? p.status}
@@ -307,15 +310,15 @@ export default async function PayrollPage({
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-[var(--fi-line)] bg-[var(--fi-soft)] font-black">
-                  <td className="px-4 py-3 text-[var(--fi-ink)]" colSpan={2}>الإجماليات</td>
-                  <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.basic_salary, 0))} ج.م</td>
-                  <td className="px-4 py-3 text-violet-600">{formatter.format(payroll.reduce((s, p) => s + Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0), 0))} ج.م</td>
-                  <td className="px-4 py-3 text-emerald-600">{formatter.format(totalCommissions)} ج.م</td>
-                  <td className="px-4 py-3 text-red-500">({formatter.format(totalDeductions)}) ج.م</td>
-                  <td className="px-4 py-3 text-orange-600">({formatter.format(totalSocialIns)}) ج.م</td>
-                  <td className="px-4 py-3 text-rose-600">({formatter.format(totalTax)}) ج.م</td>
-                  <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.gross_salary, 0))} ج.م</td>
-                  <td className="px-4 py-3 text-emerald-700 text-base">{formatter.format(totalNetSalary)} ج.م</td>
+                  <td className="px-4 py-3 text-[var(--fi-ink)]" colSpan={2}>{t('الإجماليات', 'Totals')}</td>
+                  <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.basic_salary, 0))} {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-violet-600">{formatter.format(payroll.reduce((s, p) => s + Number(p.allowances ?? 0) + Number(p.bonus ?? 0) + Number(p.overtime_amount ?? 0), 0))} {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-emerald-600">{formatter.format(totalCommissions)} {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-red-500">({formatter.format(totalDeductions)}) {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-orange-600">({formatter.format(totalSocialIns)}) {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-rose-600">({formatter.format(totalTax)}) {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-[var(--fi-ink)]">{formatter.format(payroll.reduce((s, p) => s + p.gross_salary, 0))} {t('ج.م', 'EGP')}</td>
+                  <td className="px-4 py-3 text-emerald-700 text-base">{formatter.format(totalNetSalary)} {t('ج.م', 'EGP')}</td>
                   <td colSpan={canRun ? 2 : 1} />
                 </tr>
               </tfoot>
@@ -327,9 +330,11 @@ export default async function PayrollPage({
       {!payroll.length && !payrollError && (
         <section className="ds-card p-10 text-center">
           <WalletCards className="mx-auto mb-3 size-10 text-[var(--fi-muted)]" />
-          <p className="font-black text-[var(--fi-ink)]">لا توجد مسيرة لهذا الشهر</p>
+          <p className="font-black text-[var(--fi-ink)]">{t('لا توجد مسيرة لهذا الشهر', 'No payroll for this month')}</p>
           <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">
-            {canRun ? 'استخدم نموذج الإصدار أعلاه لإنشاء المسيرة.' : 'تواصل مع مدير الموارد البشرية لإصدار المسيرة.'}
+            {canRun
+              ? t('استخدم نموذج الإصدار أعلاه لإنشاء المسيرة.', 'Use the form above to generate the payroll.')
+              : t('تواصل مع مدير الموارد البشرية لإصدار المسيرة.', 'Contact the HR manager to issue the payroll.')}
           </p>
         </section>
       )}
