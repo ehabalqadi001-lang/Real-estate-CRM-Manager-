@@ -1,6 +1,7 @@
 'use client'
 
 import { Phone, Users, FileText, MessageCircle, Mail, MapPin, RefreshCw, Clock } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Activity {
   id: string
@@ -12,31 +13,33 @@ interface Activity {
   profiles?: { full_name?: string } | null
 }
 
-const TYPE_CONFIG: Record<string, { icon: typeof Phone; label: string; color: string; bg: string }> = {
-  call:          { icon: Phone,         label: 'مكالمة',      color: 'text-blue-600',    bg: 'bg-blue-50' },
-  meeting:       { icon: Users,         label: 'اجتماع',      color: 'text-purple-600',  bg: 'bg-purple-50' },
-  note:          { icon: FileText,      label: 'ملاحظة',      color: 'text-slate-600',   bg: 'bg-slate-50' },
-  whatsapp:      { icon: MessageCircle, label: 'واتساب',      color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  email:         { icon: Mail,          label: 'بريد',        color: 'text-indigo-600',  bg: 'bg-indigo-50' },
-  site_visit:    { icon: MapPin,        label: 'زيارة موقع',  color: 'text-orange-600',  bg: 'bg-orange-50' },
-  status_change: { icon: RefreshCw,     label: 'تغيير حالة',  color: 'text-amber-600',   bg: 'bg-amber-50' },
-}
-
-const OUTCOME_LABELS: Record<string, { label: string; color: string }> = {
-  answered:       { label: 'رد',             color: 'text-emerald-600 bg-emerald-50' },
-  no_answer:      { label: 'لم يرد',         color: 'text-red-600 bg-red-50' },
-  busy:           { label: 'مشغول',          color: 'text-amber-600 bg-amber-50' },
-  interested:     { label: 'مهتم',           color: 'text-purple-600 bg-purple-50' },
-  not_interested: { label: 'غير مهتم',       color: 'text-slate-500 bg-slate-100' },
-}
-
 export default function ActivityTimeline({ activities }: { activities: Activity[] }) {
+  const { t, numLocale } = useI18n()
+
+  const TYPE_CONFIG: Record<string, { icon: typeof Phone; label: string; color: string; bg: string }> = {
+    call:          { icon: Phone,         label: t('مكالمة', 'Call'),          color: 'text-blue-600',    bg: 'bg-blue-50' },
+    meeting:       { icon: Users,         label: t('اجتماع', 'Meeting'),        color: 'text-purple-600',  bg: 'bg-purple-50' },
+    note:          { icon: FileText,      label: t('ملاحظة', 'Note'),           color: 'text-slate-600',   bg: 'bg-slate-50' },
+    whatsapp:      { icon: MessageCircle, label: t('واتساب', 'WhatsApp'),       color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    email:         { icon: Mail,          label: t('بريد', 'Email'),            color: 'text-indigo-600',  bg: 'bg-indigo-50' },
+    site_visit:    { icon: MapPin,        label: t('زيارة موقع', 'Site Visit'), color: 'text-orange-600',  bg: 'bg-orange-50' },
+    status_change: { icon: RefreshCw,     label: t('تغيير حالة', 'Status Change'), color: 'text-amber-600', bg: 'bg-amber-50' },
+  }
+
+  const OUTCOME_LABELS: Record<string, { label: string; color: string }> = {
+    answered:       { label: t('رد', 'Answered'),              color: 'text-emerald-600 bg-emerald-50' },
+    no_answer:      { label: t('لم يرد', 'No Answer'),         color: 'text-red-600 bg-red-50' },
+    busy:           { label: t('مشغول', 'Busy'),               color: 'text-amber-600 bg-amber-50' },
+    interested:     { label: t('مهتم', 'Interested'),          color: 'text-purple-600 bg-purple-50' },
+    not_interested: { label: t('غير مهتم', 'Not Interested'),  color: 'text-slate-500 bg-slate-100' },
+  }
+
   if (!activities.length) {
     return (
       <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
         <Clock size={32} className="mx-auto text-slate-200 mb-2" />
-        <p className="text-sm font-bold text-slate-500">لا توجد أنشطة مسجلة بعد</p>
-        <p className="text-xs text-slate-400 mt-0.5">سجّل مكالمة أو زيارة أو ملاحظة لهذا العميل</p>
+        <p className="text-sm font-bold text-slate-500">{t('لا توجد أنشطة مسجلة بعد', 'No activities recorded yet')}</p>
+        <p className="text-xs text-slate-400 mt-0.5">{t('سجّل مكالمة أو زيارة أو ملاحظة لهذا العميل', 'Log a call, visit, or note for this client')}</p>
       </div>
     )
   }
@@ -63,11 +66,11 @@ export default function ActivityTimeline({ activities }: { activities: Activity[
                     </span>
                   )}
                   {activity.duration_min && (
-                    <span className="text-[11px] text-slate-400">{activity.duration_min} دقيقة</span>
+                    <span className="text-[11px] text-slate-400">{activity.duration_min} {t('دقيقة', 'min')}</span>
                   )}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  {new Date(activity.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(activity.created_at).toLocaleDateString(numLocale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
               {activity.note && (

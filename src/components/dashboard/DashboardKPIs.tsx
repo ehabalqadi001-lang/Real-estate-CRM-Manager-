@@ -17,22 +17,27 @@ import {
   useDashboardData,
 } from './useDashboardData'
 import { useCountUp } from '@/hooks/use-count-up'
+import { useI18n } from '@/hooks/use-i18n'
 
 type DashboardKPIsProps = {
   initialData: DashboardData
   context: DashboardQueryContext
 }
 
-const QUICK_ACTIONS = [
-  { label: 'عميل جديد', href: '/dashboard/leads/new', icon: Users, description: 'إضافة عميل محتمل وربطه بالوسيط المناسب.' },
-  { label: 'صفقة جديدة', href: '/dashboard/pipeline/new', icon: WalletCards, description: 'تسجيل فرصة بيع جديدة داخل خط المبيعات.' },
-  { label: 'مهمة جديدة', href: '/dashboard/tasks/new', icon: Check, description: 'إنشاء متابعة أو تذكير لفريق المبيعات.' },
-]
-
 export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
+  const { t, numLocale } = useI18n()
   const { data, range, setRange, isLoading, error, refresh } = useDashboardData(initialData, context)
-  const [sheetAction, setSheetAction] = useState<(typeof QUICK_ACTIONS)[number] | null>(null)
+  const [sheetAction, setSheetAction] = useState<{ label: string; href: string; icon: React.ElementType; description: string } | null>(null)
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => new Set())
+
+  const QUICK_ACTIONS = [
+    { label: t('عميل جديد', 'New Client'), href: '/dashboard/leads/new', icon: Users, description: t('إضافة عميل محتمل وربطه بالوسيط المناسب.', 'Add a potential client and link them to the right broker.') },
+    { label: t('صفقة جديدة', 'New Deal'), href: '/dashboard/pipeline/new', icon: WalletCards, description: t('تسجيل فرصة بيع جديدة داخل خط المبيعات.', 'Register a new sales opportunity in the pipeline.') },
+    { label: t('مهمة جديدة', 'New Task'), href: '/dashboard/tasks/new', icon: Check, description: t('إنشاء متابعة أو تذكير لفريق المبيعات.', 'Create a follow-up or reminder for the sales team.') },
+  ]
+
+  const formatMoney = (value: number) =>
+    `${new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(value)} ${t('ج.م', 'EGP')}`
 
   const visibleAlerts = useMemo(
     () => data.alerts.filter((alert) => !dismissedAlerts.has(alert.id)).slice(0, 3),
@@ -41,38 +46,38 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
 
   const cards = [
     {
-      label: 'إجمالي العملاء',
-      value: data.kpis.totalClients.toLocaleString('ar-EG'),
+      label: t('إجمالي العملاء', 'Total Clients'),
+      value: data.kpis.totalClients.toLocaleString(numLocale),
       countValue: data.kpis.totalClients,
       suffix: '',
-      detail: 'مقارنة بالفترة السابقة',
+      detail: t('مقارنة بالفترة السابقة', 'Compared to previous period'),
       change: data.kpis.clientsChange,
       icon: Users,
     },
     {
-      label: 'صفقات نشطة',
-      value: data.kpis.activeDeals.toLocaleString('ar-EG'),
+      label: t('صفقات نشطة', 'Active Deals'),
+      value: data.kpis.activeDeals.toLocaleString(numLocale),
       countValue: data.kpis.activeDeals,
       suffix: '',
-      detail: 'داخل خط المبيعات',
+      detail: t('داخل خط المبيعات', 'In the sales pipeline'),
       change: null,
       icon: Target,
     },
     {
-      label: 'العمولات المستحقة',
+      label: t('العمولات المستحقة', 'Pending Commissions'),
       value: formatMoney(data.kpis.pendingCommissions),
       countValue: null,
       suffix: '',
-      detail: 'معلقة أو معتمدة',
+      detail: t('معلقة أو معتمدة', 'Pending or approved'),
       change: null,
       icon: CircleDollarSign,
     },
     {
-      label: 'معدل التحويل',
-      value: `${data.kpis.conversionRate.toLocaleString('ar-EG')}٪`,
+      label: t('معدل التحويل', 'Conversion Rate'),
+      value: `${data.kpis.conversionRate.toLocaleString(numLocale)}٪`,
       countValue: data.kpis.conversionRate,
       suffix: '٪',
-      detail: 'من العملاء إلى صفقات',
+      detail: t('من العملاء إلى صفقات', 'From clients to deals'),
       change: null,
       icon: WalletCards,
     },
@@ -84,9 +89,9 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
         <CardHeader className="gap-4 lg:grid-cols-[1fr_auto]">
           <div>
             <Badge className="bg-[var(--fi-soft)] text-[var(--fi-emerald)] hover:bg-[var(--fi-soft)]">FAST INVESTMENT CRM</Badge>
-            <CardTitle className="mt-3 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">لوحة القيادة التنفيذية</CardTitle>
+            <CardTitle className="mt-3 text-2xl font-black text-[var(--fi-ink)] sm:text-3xl">{t('لوحة القيادة التنفيذية', 'Executive Dashboard')}</CardTitle>
             <CardDescription className="mt-2 max-w-2xl font-semibold leading-7 text-[var(--fi-muted)]">
-              مؤشرات المبيعات والعملاء والعمولات متصلة ببيانات Supabase الحية وتتغير حسب الفترة المختارة.
+              {t('مؤشرات المبيعات والعملاء والعمولات متصلة ببيانات Supabase الحية وتتغير حسب الفترة المختارة.', 'Sales, client, and commission indicators connected to live Supabase data and change based on the selected period.')}
             </CardDescription>
           </div>
 
@@ -125,7 +130,7 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
             <div className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700 sm:flex-row sm:items-center sm:justify-between">
               <span>{error}</span>
               <Button type="button" variant="outline" className="bg-white" onClick={() => void refresh()}>
-                إعادة المحاولة
+                {t('إعادة المحاولة', 'Retry')}
               </Button>
             </div>
           )}
@@ -178,15 +183,15 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
                 <Bot className="size-5" />
               </span>
               <div>
-                <CardTitle className="text-base font-black text-[var(--fi-ink)]">تنبيهات الذكاء الاصطناعي</CardTitle>
-                <CardDescription className="font-semibold text-[var(--fi-muted)]">أكثر 3 تنبيهات إلحاحا</CardDescription>
+                <CardTitle className="text-base font-black text-[var(--fi-ink)]">{t('تنبيهات الذكاء الاصطناعي', 'AI Alerts')}</CardTitle>
+                <CardDescription className="font-semibold text-[var(--fi-muted)]">{t('أكثر 3 تنبيهات إلحاحا', 'Top 3 most urgent alerts')}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {visibleAlerts.length === 0 ? (
               <div className="rounded-lg border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] p-6 text-center text-sm font-bold text-[var(--fi-muted)]">
-                لا توجد تنبيهات عاجلة الآن
+                {t('لا توجد تنبيهات عاجلة الآن', 'No urgent alerts right now')}
               </div>
             ) : visibleAlerts.map((alert) => (
               <div key={alert.id} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3">
@@ -202,7 +207,7 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="إخفاء التنبيه"
+                    aria-label={t('إخفاء التنبيه', 'Dismiss alert')}
                     onClick={() => setDismissedAlerts((prev) => new Set(prev).add(alert.id))}
                   >
                     <X className="size-4" />
@@ -232,13 +237,13 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
               </SheetHeader>
               <div className="px-4">
                 <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-sm font-semibold leading-7 text-[var(--fi-muted)]">
-                  هذه النسخة تفتح المسار المخصص داخل لوحة التحكم. يمكن لاحقا استبدال المحتوى هنا بنموذج مضمن دون تغيير تجربة المستخدم.
+                  {t('هذه النسخة تفتح المسار المخصص داخل لوحة التحكم. يمكن لاحقا استبدال المحتوى هنا بنموذج مضمن دون تغيير تجربة المستخدم.', 'This version opens the dedicated path inside the dashboard. Content can later be replaced with an embedded form without changing the user experience.')}
                 </div>
                 <Link
                   href={sheetAction.href}
                   className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-lg bg-[var(--fi-emerald)] px-4 text-sm font-black text-white"
                 >
-                  فتح {sheetAction.label}
+                  {t('فتح', 'Open')} {sheetAction.label}
                 </Link>
               </div>
             </>
@@ -250,21 +255,19 @@ export function DashboardKPIs({ initialData, context }: DashboardKPIsProps) {
 }
 
 function TrendBadge({ value }: { value: number }) {
+  const { numLocale } = useI18n()
   const isUp = value >= 0
 
   return (
     <span className={isUp ? 'inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-700' : 'inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-black text-red-700'}>
       {isUp ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
-      {Math.abs(value).toLocaleString('ar-EG')}٪
+      {Math.abs(value).toLocaleString(numLocale)}٪
     </span>
   )
 }
 
 function CountUpValue({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const { numLocale } = useI18n()
   const current = useCountUp(value)
-  return <>{current.toLocaleString('ar-EG')}{suffix}</>
-}
-
-function formatMoney(value: number) {
-  return `${new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(value)} ج.م`
+  return <>{current.toLocaleString(numLocale)}{suffix}</>
 }

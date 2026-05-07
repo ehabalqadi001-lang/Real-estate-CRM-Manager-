@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Clock, X, CheckCircle, AlertCircle, XCircle } from 'lucide-react'
 import { createReservation, cancelReservation } from './reserve-action'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Props {
   unitId: string
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function ReserveButton({ unitId, isReserved, reservedFor, expiresAt }: Props) {
+  const { t, numLocale } = useI18n()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null)
@@ -25,7 +27,12 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
         fd.get('client_name') as string,
         fd.get('client_phone') as string,
       )
-      setFeedback({ ok: result.ok, msg: result.ok ? 'تم الحجز بنجاح لمدة 48 ساعة' : result.error ?? 'حدث خطأ' })
+      setFeedback({
+        ok: result.ok,
+        msg: result.ok
+          ? t('تم الحجز بنجاح لمدة 48 ساعة', 'Reserved successfully for 48 hours')
+          : result.error ?? t('حدث خطأ', 'An error occurred'),
+      })
       if (result.ok) setTimeout(() => { setOpen(false); setFeedback(null) }, 1500)
     })
   }
@@ -40,11 +47,11 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5 text-xs text-amber-600 font-bold">
-          <Clock size={13} /> محجوزة لـ: {reservedFor ?? 'عميل'}
+          <Clock size={13} /> {t('محجوزة لـ:', 'Reserved for:')} {reservedFor ?? t('عميل', 'Client')}
         </div>
         {expiresAt && (
           <p className="text-[10px] text-amber-500">
-            تنتهي: {new Date(expiresAt).toLocaleString('ar-EG')}
+            {t('تنتهي:', 'Expires:')} {new Date(expiresAt).toLocaleString(numLocale)}
           </p>
         )}
         <button
@@ -52,7 +59,7 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
           disabled={pending}
           className="flex items-center justify-center gap-1.5 w-full border border-red-200 text-red-600 hover:bg-red-50 font-medium py-2 rounded-xl text-xs transition-colors disabled:opacity-60"
         >
-          <XCircle size={13} /> إلغاء الحجز
+          <XCircle size={13} /> {t('إلغاء الحجز', 'Cancel Reservation')}
         </button>
       </div>
     )
@@ -64,7 +71,7 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
         onClick={() => setOpen(true)}
         className="flex items-center justify-center gap-2 w-full border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium py-2.5 rounded-xl text-sm transition-colors"
       >
-        <Clock size={15} /> حجز مؤقت (٤٨ ساعة)
+        <Clock size={15} /> {t('حجز مؤقت (٤٨ ساعة)', 'Temporary Hold (48h)')}
       </button>
 
       {open && (
@@ -72,8 +79,8 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-base font-black text-slate-900">حجز مؤقت</h2>
-                <p className="text-xs text-slate-400 mt-0.5">يُحجز لمدة 48 ساعة — قابل للإلغاء</p>
+                <h2 className="text-base font-black text-slate-900">{t('حجز مؤقت', 'Temporary Hold')}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{t('يُحجز لمدة 48 ساعة — قابل للإلغاء', 'Reserved for 48 hours — cancellable')}</p>
               </div>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
             </div>
@@ -87,23 +94,23 @@ export default function ReserveButton({ unitId, isReserved, reservedFor, expires
 
             <form onSubmit={handleReserve} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">اسم العميل *</label>
+                <label className="text-xs font-bold text-slate-600 block mb-1">{t('اسم العميل *', 'Client Name *')}</label>
                 <input name="client_name" required
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">رقم الهاتف</label>
+                <label className="text-xs font-bold text-slate-600 block mb-1">{t('رقم الهاتف', 'Phone Number')}</label>
                 <input name="client_phone" type="tel" dir="ltr"
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="submit" disabled={pending}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white py-2.5 rounded-xl font-bold text-sm">
-                  {pending ? 'جاري الحجز...' : 'تأكيد الحجز'}
+                  {pending ? t('جاري الحجز...', 'Reserving...') : t('تأكيد الحجز', 'Confirm Reservation')}
                 </button>
                 <button type="button" onClick={() => setOpen(false)}
                   className="px-4 border border-slate-200 rounded-xl font-bold text-sm text-slate-600">
-                  إلغاء
+                  {t('إلغاء', 'Cancel')}
                 </button>
               </div>
             </form>

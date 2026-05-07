@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { PlusIcon, X, User, Phone, TrendingUp, ChevronDown } from 'lucide-react'
 import { addClient } from '@/app/dashboard/clients/actions'
 import { COUNTRIES, INVESTMENT_TYPES, INVESTMENT_LOCATIONS } from '@/shared/config/countries'
+import { useI18n } from '@/hooks/use-i18n'
 
 type Step = 1 | 2 | 3
 
@@ -103,17 +104,18 @@ function ScrollableCheckboxList({ name, options, label }: { name: string; option
   )
 }
 
-const STEPS: { label: string; icon: React.ElementType }[] = [
-  { label: 'البيانات الشخصية', icon: User },
-  { label: 'بيانات التواصل', icon: Phone },
-  { label: 'بيانات الاستثمار', icon: TrendingUp },
-]
-
 export default function AddClientButton() {
+  const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [step, setStep] = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const STEPS: { label: string; icon: React.ElementType }[] = [
+    { label: t('البيانات الشخصية', 'Personal Data'), icon: User },
+    { label: t('بيانات التواصل', 'Contact Info'), icon: Phone },
+    { label: t('بيانات الاستثمار', 'Investment Data'), icon: TrendingUp },
+  ]
 
   const close = () => { setIsOpen(false); setStep(1); setError(null) }
 
@@ -125,13 +127,13 @@ export default function AddClientButton() {
     try {
       const result = await addClient(formData)
       if (!result.ok) {
-        setError(result.error ?? 'حدث خطأ أثناء الإضافة')
+        setError(result.error ?? t('حدث خطأ أثناء الإضافة', 'An error occurred while adding'))
         setLoading(false)
         return
       }
       close()
     } catch {
-      setError('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى')
+      setError(t('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى', 'An unexpected error occurred, please try again'))
       setLoading(false)
     }
   }
@@ -143,7 +145,7 @@ export default function AddClientButton() {
         className="flex items-center gap-2 rounded-xl bg-[var(--fi-emerald)] px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-[var(--fi-emerald)]/25 transition hover:opacity-90"
       >
         <PlusIcon size={16} />
-        إضافة عميل
+        {t('إضافة عميل', 'Add Client')}
       </button>
 
       {isOpen && (
@@ -152,7 +154,7 @@ export default function AddClientButton() {
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
-              <h3 className="text-base font-black text-[var(--fi-ink)]">إضافة عميل جديد</h3>
+              <h3 className="text-base font-black text-[var(--fi-ink)]">{t('إضافة عميل جديد', 'Add New Client')}</h3>
               <button onClick={close} className="flex size-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-200 hover:text-slate-600">
                 <X size={18} />
               </button>
@@ -190,22 +192,22 @@ export default function AddClientButton() {
                 {/* Step 1: Personal */}
                 {step === 1 && (
                   <div className="space-y-4">
-                    <SectionHeader icon={User} label="البيانات الشخصية" />
-                    <Field label="اسم العميل الكامل" required>
-                      <input name="name" required placeholder="مثال: إيهاب محمد علي" className={inputCls} />
+                    <SectionHeader icon={User} label={t('البيانات الشخصية', 'Personal Data')} />
+                    <Field label={t('اسم العميل الكامل', 'Full Client Name')} required>
+                      <input name="name" required placeholder={t('مثال: إيهاب محمد علي', 'e.g. John Smith')} className={inputCls} />
                     </Field>
-                    <CountrySelect name="nationality" label="جنسية العميل" placeholder="اختر الجنسية..." />
-                    <CountrySelect name="residence_country" label="مكان الإقامة" placeholder="اختر البلد..." />
+                    <CountrySelect name="nationality" label={t('جنسية العميل', 'Client Nationality')} placeholder={t('اختر الجنسية...', 'Select nationality...')} />
+                    <CountrySelect name="residence_country" label={t('مكان الإقامة', 'Country of Residence')} placeholder={t('اختر البلد...', 'Select country...')} />
                   </div>
                 )}
 
                 {/* Step 2: Contact */}
                 {step === 2 && (
                   <div className="space-y-4">
-                    <SectionHeader icon={Phone} label="بيانات التواصل" />
-                    <PhoneField namePrefix="phone" label="رقم التواصل الرئيسي" required />
-                    <PhoneField namePrefix="secondary_phone" label="رقم تواصل آخر (اختياري)" />
-                    <Field label="البريد الإلكتروني (اختياري)">
+                    <SectionHeader icon={Phone} label={t('بيانات التواصل', 'Contact Info')} />
+                    <PhoneField namePrefix="phone" label={t('رقم التواصل الرئيسي', 'Primary Phone Number')} required />
+                    <PhoneField namePrefix="secondary_phone" label={t('رقم تواصل آخر (اختياري)', 'Secondary Phone (optional)')} />
+                    <Field label={t('البريد الإلكتروني (اختياري)', 'Email (optional)')}>
                       <input name="email" type="email" placeholder="mail@example.com" className={inputCls} dir="ltr" />
                     </Field>
                   </div>
@@ -214,16 +216,19 @@ export default function AddClientButton() {
                 {/* Step 3: Investment */}
                 {step === 3 && (
                   <div className="space-y-5">
-                    <SectionHeader icon={TrendingUp} label="بيانات الاستثمار" />
-                    <CheckboxGroup name="investment_types" options={INVESTMENT_TYPES} label="نوع الاستثمار (يمكن اختيار أكثر من نوع)" />
+                    <SectionHeader icon={TrendingUp} label={t('بيانات الاستثمار', 'Investment Data')} />
+                    <CheckboxGroup name="investment_types" options={INVESTMENT_TYPES} label={t('نوع الاستثمار (يمكن اختيار أكثر من نوع)', 'Investment Type (multiple selection allowed)')} />
 
-                    <Field label="قيمة الاستثمار المتوقعة (جنيه مصري)">
-                      <input name="investment_budget" type="number" min="0" step="1000" placeholder="مثال: 2000000" className={inputCls} dir="ltr" />
+                    <Field label={t('قيمة الاستثمار المتوقعة (جنيه مصري)', 'Expected Investment Value (EGP)')}>
+                      <input name="investment_budget" type="number" min="0" step="1000" placeholder={t('مثال: 2000000', 'e.g. 2000000')} className={inputCls} dir="ltr" />
                     </Field>
 
-                    <Field label="طريقة الدفع المفضلة">
+                    <Field label={t('طريقة الدفع المفضلة', 'Preferred Payment Method')}>
                       <div className="flex gap-3">
-                        {[{ v: 'downpayment', l: 'مقدم (كاش)' }, { v: 'installments', l: 'أقساط' }].map(({ v, l }) => (
+                        {[
+                          { v: 'downpayment', l: t('مقدم (كاش)', 'Down Payment (Cash)') },
+                          { v: 'installments', l: t('أقساط', 'Installments') },
+                        ].map(({ v, l }) => (
                           <label key={v} className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-[var(--fi-line)] px-3 py-2.5 transition hover:border-[var(--fi-emerald)]/50 hover:bg-[var(--fi-emerald)]/5">
                             <input type="radio" name="payment_method" value={v} className="accent-[var(--fi-emerald)]" />
                             <span className="text-sm font-semibold text-[var(--fi-ink)]">{l}</span>
@@ -232,7 +237,7 @@ export default function AddClientButton() {
                       </div>
                     </Field>
 
-                    <ScrollableCheckboxList name="investment_locations" options={INVESTMENT_LOCATIONS} label="مكان الاستثمار المفضل" />
+                    <ScrollableCheckboxList name="investment_locations" options={INVESTMENT_LOCATIONS} label={t('مكان الاستثمار المفضل', 'Preferred Investment Location')} />
                   </div>
                 )}
 
@@ -249,19 +254,19 @@ export default function AddClientButton() {
                   {step > 1 && (
                     <button type="button" onClick={() => setStep((s) => (s - 1) as Step)}
                       className="rounded-lg border border-[var(--fi-line)] px-4 py-2 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-slate-100">
-                      السابق
+                      {t('السابق', 'Previous')}
                     </button>
                   )}
                   <button type="button" onClick={close}
                     className="rounded-lg border border-[var(--fi-line)] px-4 py-2 text-sm font-bold text-[var(--fi-muted)] transition hover:bg-slate-100">
-                    إلغاء
+                    {t('إلغاء', 'Cancel')}
                   </button>
                 </div>
 
                 {step < 3 ? (
                   <button type="button" onClick={() => setStep((s) => (s + 1) as Step)}
                     className="rounded-xl bg-[var(--fi-emerald)] px-5 py-2 text-sm font-black text-white transition hover:opacity-90">
-                    التالي
+                    {t('التالي', 'Next')}
                   </button>
                 ) : (
                   <button type="submit" disabled={loading}
@@ -269,9 +274,9 @@ export default function AddClientButton() {
                     {loading ? (
                       <>
                         <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        جاري الحفظ...
+                        {t('جاري الحفظ...', 'Saving...')}
                       </>
-                    ) : 'حفظ بيانات العميل'}
+                    ) : t('حفظ بيانات العميل', 'Save Client Data')}
                   </button>
                 )}
               </div>

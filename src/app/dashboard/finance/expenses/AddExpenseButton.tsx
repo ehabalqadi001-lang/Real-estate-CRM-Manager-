@@ -1,23 +1,14 @@
 'use client'
-import { useI18n } from '@/hooks/use-i18n'
 
 import { useState, useTransition } from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { createExpense } from '@/domains/finance/actions'
 import type { ExpenseCategory } from '@/lib/types/db'
 import { useRouter } from 'next/navigation'
-
-const CATEGORIES = [
-  { value: 'rent',      label: 'إيجار' },
-  { value: 'salary',    label: 'رواتب' },
-  { value: 'marketing', label: 'تسويق' },
-  { value: 'utilities', label: 'خدمات' },
-  { value: 'travel',    label: 'سفر' },
-  { value: 'other',     label: 'أخرى' },
-]
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function AddExpenseButton() {
-  const { dir } = useI18n()
+  const { t, dir } = useI18n()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -26,6 +17,15 @@ export default function AddExpenseButton() {
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState<ExpenseCategory>('other')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+
+  const CATEGORIES = [
+    { value: 'rent',      label: t('إيجار', 'Rent') },
+    { value: 'salary',    label: t('رواتب', 'Salaries') },
+    { value: 'marketing', label: t('تسويق', 'Marketing') },
+    { value: 'utilities', label: t('خدمات', 'Utilities') },
+    { value: 'travel',    label: t('سفر', 'Travel') },
+    { value: 'other',     label: t('أخرى', 'Other') },
+  ]
 
   function handleSubmit() {
     if (!description.trim() || !amount) return
@@ -52,28 +52,28 @@ export default function AddExpenseButton() {
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
       >
-        <Plus size={15} /> مصروف جديد
+        <Plus size={15} /> {t('مصروف جديد', 'New Expense')}
       </button>
 
       {open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 space-y-4" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-black text-slate-900">إضافة مصروف جديد</h3>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 space-y-4" dir={dir} onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-black text-slate-900">{t('إضافة مصروف جديد', 'Add New Expense')}</h3>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-600 mb-1 block">الوصف</label>
+                <label className="text-xs font-bold text-slate-600 mb-1 block">{t('الوصف', 'Description')}</label>
                 <input
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="وصف المصروف..."
+                  placeholder={t('وصف المصروف...', 'Expense description...')}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
               </div>
 
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-600 mb-1 block">المبلغ (ج.م)</label>
+                  <label className="text-xs font-bold text-slate-600 mb-1 block">{t('المبلغ (ج.م)', 'Amount (EGP)')}</label>
                   <input
                     type="number"
                     value={amount}
@@ -83,7 +83,7 @@ export default function AddExpenseButton() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-600 mb-1 block">التصنيف</label>
+                  <label className="text-xs font-bold text-slate-600 mb-1 block">{t('التصنيف', 'Category')}</label>
                   <select
                     value={category}
                     onChange={e => setCategory(e.target.value as ExpenseCategory)}
@@ -97,7 +97,7 @@ export default function AddExpenseButton() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-600 mb-1 block">التاريخ</label>
+                <label className="text-xs font-bold text-slate-600 mb-1 block">{t('التاريخ', 'Date')}</label>
                 <input
                   type="date"
                   value={date}
@@ -114,10 +114,10 @@ export default function AddExpenseButton() {
                 className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 {isPending ? <Loader2 size={16} className="animate-spin" /> : null}
-                إضافة المصروف
+                {t('إضافة المصروف', 'Add Expense')}
               </button>
               <button onClick={() => setOpen(false)} className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
-                إلغاء
+                {t('إلغاء', 'Cancel')}
               </button>
             </div>
           </div>
