@@ -90,7 +90,7 @@ export function BentoKpiCard({
 
 export function BentoSkeleton() {
   return (
-    <section className="ds-bento-grid" dir="rtl" aria-label="جاري تحميل لوحة التحكم">
+    <section className="ds-bento-grid" dir="rtl" aria-label="Loading dashboard">
       <div className="ds-bento-kpi h-32 ds-skeleton" />
       <div className="ds-bento-kpi h-32 ds-skeleton" />
       <div className="ds-bento-kpi h-32 ds-skeleton" />

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WhatsAppComposeSheet } from './whatsapp-compose-sheet'
+import { useI18n } from '@/hooks/use-i18n'
 
 export interface WhatsAppButtonProps {
   phone: string
@@ -22,13 +23,14 @@ export function WhatsAppButton({
   agentId,
   variant = 'default',
 }: WhatsAppButtonProps) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
 
   return (
     <>
       <Button type="button" variant={variant} onClick={() => setOpen(true)} disabled={!phone}>
         <MessageCircle className="size-4" />
-        واتساب
+        {t('واتساب', 'WhatsApp')}
       </Button>
       <WhatsAppComposeSheet
         open={open}

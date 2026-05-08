@@ -4,6 +4,7 @@ import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/hooks/use-i18n'
 
 export interface AdminFinancialExportRow {
   id: string
@@ -179,6 +180,7 @@ function buildPdfReportElement(params: {
 }
 
 export function FinancialExportButtons({ rows, monthly }: FinancialExportButtonsProps) {
+  const { t } = useI18n()
   const [isExporting, setIsExporting] = useState<'excel' | 'pdf' | null>(null)
   const totals = useMemo(() => ({
     paidRevenue: rows.filter((row) => row.status === 'paid').reduce((sum, row) => sum + row.companyAmount, 0),
@@ -231,9 +233,9 @@ export function FinancialExportButtons({ rows, monthly }: FinancialExportButtons
 
       const buffer = await workbook.xlsx.writeBuffer()
       downloadBlob(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `platform-financials-${new Date().toISOString().slice(0, 10)}.xlsx`)
-      toast.success('تم تصدير ملف Excel')
+      toast.success(t('تم تصدير ملف Excel', 'Excel file exported'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'فشل تصدير Excel')
+      toast.error(error instanceof Error ? error.message : t('فشل تصدير Excel', 'Excel export failed'))
     } finally {
       setIsExporting(null)
     }
@@ -252,7 +254,7 @@ export function FinancialExportButtons({ rows, monthly }: FinancialExportButtons
       try {
         await loadArabicPdfFont(doc)
       } catch {
-        toast.warning('تعذر تضمين الخط داخل PDF، سيتم الاعتماد على رسم التقرير كصورة')
+        toast.warning(t('تعذر تضمين الخط داخل PDF، سيتم الاعتماد على رسم التقرير كصورة', 'Could not embed font in PDF, will render report as image'))
       }
 
       try {
@@ -288,9 +290,9 @@ export function FinancialExportButtons({ rows, monthly }: FinancialExportButtons
       }
 
       doc.save(`platform-financials-${new Date().toISOString().slice(0, 10)}.pdf`)
-      toast.success('تم تصدير ملف PDF')
+      toast.success(t('تم تصدير ملف PDF', 'PDF file exported'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'فشل تصدير PDF')
+      toast.error(error instanceof Error ? error.message : t('فشل تصدير PDF', 'PDF export failed'))
     } finally {
       setIsExporting(null)
     }

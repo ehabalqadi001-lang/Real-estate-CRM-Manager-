@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { useI18n } from '@/hooks/use-i18n'
 
 export interface WhatsAppComposeSheetProps {
   open: boolean
@@ -65,6 +66,7 @@ export function WhatsAppComposeSheet({
   leadId,
   agentId,
 }: WhatsAppComposeSheetProps) {
+  const { t, numLocale } = useI18n()
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
   const [messages, setMessages] = useState<WhatsAppMessage[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState('')
@@ -86,17 +88,17 @@ export function WhatsAppComposeSheet({
     void Promise.all([
       fetch('/api/whatsapp/templates').then(async (response) => {
         const payload = await response.json()
-        if (!response.ok) throw new Error(payload.error ?? 'تعذر تحميل القوالب')
+        if (!response.ok) throw new Error(payload.error ?? t('تعذر تحميل القوالب', 'Failed to load templates'))
         setTemplates(payload.templates ?? [])
         if (!selectedTemplate && payload.templates?.[0]?.name) setSelectedTemplate(payload.templates[0].name)
       }),
       fetch(`/api/whatsapp/conversation?phone=${encodeURIComponent(phone)}`).then(async (response) => {
         const payload = await response.json()
-        if (!response.ok) throw new Error(payload.error ?? 'تعذر تحميل المحادثة')
+        if (!response.ok) throw new Error(payload.error ?? t('تعذر تحميل المحادثة', 'Failed to load conversation'))
         setMessages(payload.messages ?? [])
       }),
-    ]).catch((loadError) => setError(loadError instanceof Error ? loadError.message : 'تعذر تحميل بيانات واتساب'))
-  }, [open, phone, selectedTemplate])
+    ]).catch((loadError) => setError(loadError instanceof Error ? loadError.message : t('تعذر تحميل بيانات واتساب', 'Failed to load WhatsApp data')))
+  }, [open, phone, selectedTemplate, t])
 
   useEffect(() => {
     if (!activeTemplate) return
@@ -121,12 +123,12 @@ export function WhatsAppComposeSheet({
         body: JSON.stringify({ phone, leadId, agentId, ...payload }),
       })
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error ?? 'فشل إرسال الرسالة')
-      toast.success(scheduledAt ? 'تم حفظ الإرسال المجدول' : 'تم إرسال رسالة واتساب')
+      if (!response.ok) throw new Error(result.error ?? t('فشل إرسال الرسالة', 'Failed to send message'))
+      toast.success(scheduledAt ? t('تم حفظ الإرسال المجدول', 'Scheduled send saved') : t('تم إرسال رسالة واتساب', 'WhatsApp message sent'))
       setCustomMessage('')
       onOpenChange(false)
     } catch (sendError) {
-      const message = sendError instanceof Error ? sendError.message : 'فشل إرسال الرسالة'
+      const message = sendError instanceof Error ? sendError.message : t('فشل إرسال الرسالة', 'Failed to send message')
       setError(message)
       toast.error(message)
     } finally {
@@ -140,7 +142,7 @@ export function WhatsAppComposeSheet({
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-xl font-black">
             <MessageCircle className="size-5 text-[var(--fi-emerald)]" />
-            واتساب - {clientName}
+            {t('واتساب', 'WhatsApp')} - {clientName}
           </SheetTitle>
           <SheetDescription dir="ltr">{phone}</SheetDescription>
         </SheetHeader>
@@ -154,13 +156,13 @@ export function WhatsAppComposeSheet({
 
           <Tabs defaultValue={context === 'follow_up' ? 'template' : 'custom'} dir="rtl">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="template">قالب معتمد</TabsTrigger>
-              <TabsTrigger value="custom">رسالة مخصصة</TabsTrigger>
+              <TabsTrigger value="template">{t('قالب معتمد', 'Approved Template')}</TabsTrigger>
+              <TabsTrigger value="custom">{t('رسالة مخصصة', 'Custom Message')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="template" className="mt-4 space-y-4">
               <div className="space-y-2">
-                <Label>القالب</Label>
+                <Label>{t('القالب', 'Template')}</Label>
                 <select
                   value={selectedTemplate}
                   onChange={(event) => setSelectedTemplate(event.target.value)}
@@ -179,35 +181,35 @@ export function WhatsAppComposeSheet({
                 </div>
               ))}
 
-              <MessagePreview text={preview || 'اختر قالباً لعرض المعاينة.'} />
+              <MessagePreview text={preview || t('اختر قالباً لعرض المعاينة.', 'Select a template to preview.')} />
               <Button disabled={!activeTemplate || isLoading} onClick={() => sendPayload({ templateName: selectedTemplate, templateParams: templateValues })}>
                 <Send className="size-4" />
-                إرسال القالب
+                {t('إرسال القالب', 'Send Template')}
               </Button>
             </TabsContent>
 
             <TabsContent value="custom" className="mt-4 space-y-4">
               <div className="space-y-2">
-                <Label>نص الرسالة</Label>
-                <Textarea value={customMessage} onChange={(event) => setCustomMessage(event.target.value)} placeholder="اكتب رسالتك للعميل..." rows={5} />
+                <Label>{t('نص الرسالة', 'Message Text')}</Label>
+                <Textarea value={customMessage} onChange={(event) => setCustomMessage(event.target.value)} placeholder={t('اكتب رسالتك للعميل...', 'Write your message to the client...')} rows={5} />
               </div>
               <div className="space-y-2">
-                <Label>إرسال مجدول اختياري</Label>
+                <Label>{t('إرسال مجدول اختياري', 'Optional Scheduled Send')}</Label>
                 <Input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} />
-                <p className="text-xs text-[var(--fi-muted)]">حالياً يتم حفظ الاختيار في الواجهة فقط. يمكن ربطه لاحقاً بجدولة Supabase Cron.</p>
+                <p className="text-xs text-[var(--fi-muted)]">{t('حالياً يتم حفظ الاختيار في الواجهة فقط. يمكن ربطه لاحقاً بجدولة Supabase Cron.', 'Currently saved in UI only. Can be wired to Supabase Cron scheduling later.')}</p>
               </div>
               <Button disabled={!customMessage.trim() || isLoading} onClick={() => sendPayload({ message: customMessage, scheduledAt })}>
                 <Send className="size-4" />
-                إرسال الرسالة
+                {t('إرسال الرسالة', 'Send Message')}
               </Button>
             </TabsContent>
           </Tabs>
 
           <section className="space-y-3">
-            <h3 className="font-black text-[var(--fi-ink)]">سجل المحادثة</h3>
+            <h3 className="font-black text-[var(--fi-ink)]">{t('سجل المحادثة', 'Conversation History')}</h3>
             {messages.length === 0 ? (
               <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-6 text-center text-sm text-[var(--fi-muted)]">
-                لا توجد رسائل محفوظة لهذا العميل.
+                {t('لا توجد رسائل محفوظة لهذا العميل.', 'No saved messages for this client.')}
               </div>
             ) : (
               <div className="space-y-2">
@@ -217,7 +219,7 @@ export function WhatsAppComposeSheet({
                       <p className="whitespace-pre-wrap text-[var(--fi-ink)]">{message.content}</p>
                       <div className="mt-2 flex items-center gap-2 text-xs text-[var(--fi-muted)]">
                         {message.direction === 'outbound' ? statusIcon(message.status) : null}
-                        {new Date(message.sent_at ?? message.created_at ?? Date.now()).toLocaleString('ar-EG')}
+                        {new Date(message.sent_at ?? message.created_at ?? Date.now()).toLocaleString(numLocale)}
                       </div>
                     </div>
                   </div>
