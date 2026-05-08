@@ -3,12 +3,13 @@
 import { useTheme } from 'next-themes'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function ThemeToggle() {
+  const { t } = useI18n()
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
 
-  // منع مشاكل التوافق بين السيرفر والعميل (Hydration Mismatch)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
@@ -23,17 +24,17 @@ export default function ThemeToggle() {
         className={`p-2 rounded-lg flex-1 flex justify-center transition-all ${
           theme === 'light' ? 'bg-white text-gold shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
         }`}
-        title="الوضع المضيء"
+        title={t('الوضع المضيء', 'Light mode')}
       >
         <Sun size={16} />
       </button>
-      
+
       <button
         onClick={() => setTheme('system')}
         className={`p-2 rounded-lg flex-1 flex justify-center transition-all ${
           theme === 'system' ? 'bg-white dark:bg-navy text-teal shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
         }`}
-        title="وضع النظام التلقائي"
+        title={t('وضع النظام التلقائي', 'System mode')}
       >
         <Monitor size={16} />
       </button>
@@ -43,7 +44,7 @@ export default function ThemeToggle() {
         className={`p-2 rounded-lg flex-1 flex justify-center transition-all ${
           theme === 'dark' ? 'bg-navy-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
         }`}
-        title="الوضع المظلم"
+        title={t('الوضع المظلم', 'Dark mode')}
       >
         <Moon size={16} />
       </button>

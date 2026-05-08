@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bell, CheckCircle2, Circle, X } from 'lucide-react'
 import { getMyNotifications, markNotificationAsRead } from '@/app/dashboard/notifications/actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 type NotificationItem = {
   id: string
@@ -14,6 +15,7 @@ type NotificationItem = {
 }
 
 export default function MarketplaceNotificationBell() {
+  const { t } = useI18n()
   const [items, setItems] = useState<NotificationItem[]>([])
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -54,7 +56,7 @@ export default function MarketplaceNotificationBell() {
     <div ref={panelRef} className="relative">
       <button
         type="button"
-        aria-label="الإشعارات"
+        aria-label={t('الإشعارات', 'Notifications')}
         onClick={() => setOpen((value) => !value)}
         className="relative flex size-10 items-center justify-center rounded-lg border border-[#DDE6E4] bg-white text-[#17375E] transition hover:bg-[#EEF6F5]"
       >
@@ -70,12 +72,12 @@ export default function MarketplaceNotificationBell() {
         <div className="absolute left-0 top-full z-50 mt-3 w-80 overflow-hidden rounded-lg border border-[#DDE6E4] bg-white text-right shadow-xl" dir="rtl">
           <div className="flex items-center justify-between border-b border-[#DDE6E4] bg-[#FBFCFA] px-4 py-3">
             <div>
-              <p className="text-sm font-black text-[#102033]">الإشعارات</p>
-              <p className="text-xs font-bold text-[#64748B]">{unread ? `${unread} جديد` : 'لا توجد إشعارات جديدة'}</p>
+              <p className="text-sm font-black text-[#102033]">{t('الإشعارات', 'Notifications')}</p>
+              <p className="text-xs font-bold text-[#64748B]">{unread ? `${unread} ${t('جديد', 'new')}` : t('لا توجد إشعارات جديدة', 'No new notifications')}</p>
             </div>
             <button
               type="button"
-              aria-label="إغلاق"
+              aria-label={t('إغلاق', 'Close')}
               onClick={() => setOpen(false)}
               className="flex size-8 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#EEF6F5]"
             >
@@ -87,7 +89,7 @@ export default function MarketplaceNotificationBell() {
             {items.length === 0 ? (
               <div className="p-6 text-center">
                 <Bell className="mx-auto size-8 text-[#DDE6E4]" />
-                <p className="mt-3 text-sm font-bold text-[#64748B]">لا توجد إشعارات حاليا</p>
+                <p className="mt-3 text-sm font-bold text-[#64748B]">{t('لا توجد إشعارات حاليا', 'No notifications yet')}</p>
               </div>
             ) : (
               items.map((item) => (

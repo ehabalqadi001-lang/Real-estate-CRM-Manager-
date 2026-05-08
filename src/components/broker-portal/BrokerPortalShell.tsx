@@ -11,24 +11,26 @@ import type { AppProfile } from '@/shared/auth/types'
 import { isBrokerRole } from '@/shared/auth/types'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Props {
   profile: AppProfile
   children: React.ReactNode
 }
 
-const NAV_ITEMS = [
-  { href: '/broker-portal',              label: 'لوحة التحكم',    icon: LayoutDashboard },
-  { href: '/broker-portal/sales',        label: 'رفع المبيعات',    icon: FileUp },
-  { href: '/broker-portal/commissions',  label: 'عمولاتي',        icon: DollarSign },
-  { href: '/broker-portal/deals',        label: 'صفقاتي',         icon: Handshake },
-  { href: '/broker-portal/inventory',    label: 'المخزون',        icon: Building2 },
-  { href: '/broker-portal/profile',      label: 'ملفي الشخصي',    icon: User },
-]
-
 export default function BrokerPortalShell({ profile, children }: Props) {
   const pathname = usePathname()
+  const { t } = useI18n()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const NAV_ITEMS = [
+    { href: '/broker-portal',              label: t('لوحة التحكم', 'Dashboard'),      icon: LayoutDashboard },
+    { href: '/broker-portal/sales',        label: t('رفع المبيعات', 'Upload Sales'),   icon: FileUp },
+    { href: '/broker-portal/commissions',  label: t('عمولاتي', 'My Commissions'),      icon: DollarSign },
+    { href: '/broker-portal/deals',        label: t('صفقاتي', 'My Deals'),             icon: Handshake },
+    { href: '/broker-portal/inventory',    label: t('المخزون', 'Inventory'),           icon: Building2 },
+    { href: '/broker-portal/profile',      label: t('ملفي الشخصي', 'My Profile'),      icon: User },
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex" dir="rtl">
@@ -57,7 +59,7 @@ export default function BrokerPortalShell({ profile, children }: Props) {
             </div>
             <div>
               <div className="font-bold text-gray-900 dark:text-white text-sm">FAST INVESTMENT</div>
-              <div className="text-xs text-green-600">بوابة الوسيط</div>
+              <div className="text-xs text-green-600">{t('بوابة الوسيط', 'Broker Portal')}</div>
             </div>
           </div>
         </div>
@@ -78,7 +80,7 @@ export default function BrokerPortalShell({ profile, children }: Props) {
             )}
             <div className="min-w-0">
               <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                {profile.full_name ?? 'وسيط'}
+                {profile.full_name ?? t('وسيط', 'Broker')}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                 {profile.email ?? ''}
@@ -121,13 +123,13 @@ export default function BrokerPortalShell({ profile, children }: Props) {
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <LayoutDashboard className="w-4 h-4" />
-              الانتقال للوحة الرئيسية
+              {t('الانتقال للوحة الرئيسية', 'Go to Main Dashboard')}
             </Link>
           )}
           <form action="/auth/logout" method="post">
             <button type="submit" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full">
               <LogOut className="w-4 h-4" />
-              تسجيل الخروج
+              {t('تسجيل الخروج', 'Sign Out')}
             </button>
           </form>
         </div>
@@ -150,7 +152,7 @@ export default function BrokerPortalShell({ profile, children }: Props) {
                 item.href === '/broker-portal'
                   ? pathname === item.href
                   : pathname.startsWith(item.href)
-              )?.label ?? 'بوابة الوسيط'}
+              )?.label ?? t('بوابة الوسيط', 'Broker Portal')}
             </h1>
           </div>
 

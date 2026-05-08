@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useNotificationStore, AppNotification } from '@/store/notificationStore'
+import { useI18n } from '@/hooks/use-i18n'
 
 function pushDesktop(n: AppNotification) {
   if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -13,6 +14,7 @@ function pushDesktop(n: AppNotification) {
 
 export default function NotificationListener() {
   const supabase = createClient()
+  const { t } = useI18n()
   const [userId, setUserId] = useState<string | null>(null)
   const addNotification = useNotificationStore((s) => s.addNotification)
   const notifChannelRef  = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -42,7 +44,7 @@ export default function NotificationListener() {
           const raw = payload.new as { id: string; title: string; message: string; type?: string; created_at: string }
           const n: AppNotification = {
             id: raw.id,
-            title: raw.title ?? 'إشعار جديد',
+            title: raw.title ?? t('إشعار جديد', 'New notification'),
             message: raw.message ?? '',
             type: (raw.type as AppNotification['type']) ?? 'info',
             read: false,
@@ -56,7 +58,7 @@ export default function NotificationListener() {
 
     notifChannelRef.current = channel
     return () => { if (notifChannelRef.current) void supabase.removeChannel(notifChannelRef.current) }
-  }, [userId, supabase, addNotification])
+  }, [userId, supabase, addNotification, t])
 
   // deals table — stage updates (broadcast to everyone)
   useEffect(() => {
@@ -73,8 +75,8 @@ export default function NotificationListener() {
           if (prev.stage && next.stage && prev.stage !== next.stage) {
             const n: AppNotification = {
               id: `deal-${next.id}-${Date.now()}`,
-              title: 'تحديث مرحلة الصفقة',
-              message: `صفقة "${next.title ?? ''}" انتقلت من ${prev.stage} إلى ${next.stage}`,
+              title: t('تحديث مرحلة الصفقة', 'Deal stage updated'),
+              message: `"${next.title ?? ''}" ${t('انتقلت من', 'moved from')} ${prev.stage} ${t('إلى', 'to')} ${next.stage}`,
               type: 'info',
               read: false,
               created_at: new Date().toISOString(),
@@ -88,7 +90,7 @@ export default function NotificationListener() {
 
     dealsChannelRef.current = channel
     return () => { if (dealsChannelRef.current) void supabase.removeChannel(dealsChannelRef.current) }
-  }, [supabase, addNotification])
+  }, [supabase, addNotification, t])
 
   // leads table — new leads assigned to me
   useEffect(() => {
@@ -104,8 +106,8 @@ export default function NotificationListener() {
           const raw = payload.new as { id?: string; name?: string; phone?: string }
           const n: AppNotification = {
             id: `lead-${raw.id}-${Date.now()}`,
-            title: 'عميل جديد تم تعيينه لك',
-            message: `${raw.name ?? 'عميل'} — ${raw.phone ?? ''}`,
+            title: t('عميل جديد تم تعيينه لك', 'New lead assigned to you'),
+            message: `${raw.name ?? t('عميل', 'Lead')} — ${raw.phone ?? ''}`,
             type: 'success',
             read: false,
             created_at: new Date().toISOString(),
@@ -118,7 +120,7 @@ export default function NotificationListener() {
 
     leadsChannelRef.current = channel
     return () => { if (leadsChannelRef.current) void supabase.removeChannel(leadsChannelRef.current) }
-  }, [userId, supabase, addNotification])
+  }, [userId, supabase, addNotification, t])
 
   return null
 }

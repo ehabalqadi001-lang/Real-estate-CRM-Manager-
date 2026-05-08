@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useTransition, useState } from 'react'
 import { Bell, CheckCheck } from 'lucide-react'
 import { markNotificationReadAction, markAllReadAction } from '@/app/dashboard/notifications/hr-actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export type NotifItem = {
   id: string
@@ -27,6 +28,7 @@ const typeIcon: Record<string, string> = {
 }
 
 export function NotificationBell({ notifications }: { notifications: NotifItem[] }) {
+  const { t, numLocale } = useI18n()
   const unreadCount = notifications.filter((n) => !n.is_read).length
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -50,7 +52,7 @@ export function NotificationBell({ notifications }: { notifications: NotifItem[]
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute left-0 z-50 mt-2 w-80 rounded-xl border border-[var(--fi-line)] bg-white shadow-xl dark:bg-[var(--fi-card)]" dir="rtl">
             <div className="flex items-center justify-between border-b border-[var(--fi-line)] px-4 py-3">
-              <p className="text-sm font-black text-[var(--fi-ink)]">الإشعارات</p>
+              <p className="text-sm font-black text-[var(--fi-ink)]">{t('الإشعارات', 'Notifications')}</p>
               {unreadCount > 0 && (
                 <button
                   disabled={pending}
@@ -58,14 +60,14 @@ export function NotificationBell({ notifications }: { notifications: NotifItem[]
                   className="flex items-center gap-1 text-xs font-bold text-[var(--fi-emerald)] transition hover:underline disabled:opacity-50"
                 >
                   <CheckCheck className="size-3.5" />
-                  قراءة الكل
+                  {t('قراءة الكل', 'Mark all read')}
                 </button>
               )}
             </div>
 
             <div className="max-h-80 overflow-y-auto">
               {notifications.length === 0 && (
-                <p className="px-4 py-8 text-center text-sm font-bold text-[var(--fi-muted)]">لا توجد إشعارات.</p>
+                <p className="px-4 py-8 text-center text-sm font-bold text-[var(--fi-muted)]">{t('لا توجد إشعارات.', 'No notifications.')}</p>
               )}
               {notifications.slice(0, 15).map((n) => (
                 <div
@@ -77,7 +79,7 @@ export function NotificationBell({ notifications }: { notifications: NotifItem[]
                     <p className={`text-sm font-black leading-snug text-[var(--fi-ink)] ${n.is_read ? '' : ''}`}>{n.title}</p>
                     {n.body && <p className="mt-0.5 text-xs text-[var(--fi-muted)] line-clamp-2">{n.body}</p>}
                     <p className="mt-1 text-xs text-[var(--fi-muted)]">
-                      {new Intl.DateTimeFormat('ar-EG', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(n.created_at))}
+                      {new Intl.DateTimeFormat(numLocale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(n.created_at))}
                     </p>
                   </div>
                   {!n.is_read && (
@@ -85,7 +87,7 @@ export function NotificationBell({ notifications }: { notifications: NotifItem[]
                       disabled={pending}
                       onClick={() => startTransition(() => markNotificationReadAction(n.id))}
                       className="mt-1 shrink-0 size-4 rounded-full bg-emerald-500 transition hover:bg-emerald-600 disabled:opacity-50"
-                      title="تحديد كمقروء"
+                      title={t('تحديد كمقروء', 'Mark as read')}
                     />
                   )}
                 </div>
@@ -98,7 +100,7 @@ export function NotificationBell({ notifications }: { notifications: NotifItem[]
                 onClick={() => setOpen(false)}
                 className="block text-center text-xs font-black text-[var(--fi-emerald)] transition hover:underline"
               >
-                عرض كل الإشعارات
+                {t('عرض كل الإشعارات', 'View all notifications')}
               </Link>
             </div>
           </div>

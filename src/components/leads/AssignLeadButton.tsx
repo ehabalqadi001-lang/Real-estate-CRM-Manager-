@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { UserCheck, Loader2 } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function AssignLeadButton({ leadId }: { leadId: string }) {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
 
@@ -18,10 +20,10 @@ export default function AssignLeadButton({ leadId }: { leadId: string }) {
       })
       const data = await res.json() as { ok?: boolean; assignedTo?: string; error?: string }
       if (data.ok) {
-        setResult(`تم التعيين لـ: ${data.assignedTo}`)
+        setResult(`${t('تم التعيين لـ:', 'Assigned to:')} ${data.assignedTo}`)
         setTimeout(() => window.location.reload(), 1200)
       } else {
-        setResult(data.error ?? 'خطأ')
+        setResult(data.error ?? t('خطأ', 'Error'))
       }
     } finally {
       setLoading(false)
@@ -33,7 +35,7 @@ export default function AssignLeadButton({ leadId }: { leadId: string }) {
       <button onClick={handleAssign} disabled={loading}
         className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50">
         {loading ? <Loader2 size={12} className="animate-spin" /> : <UserCheck size={12} />}
-        تعيين تلقائي
+        {t('تعيين تلقائي', 'Auto Assign')}
       </button>
       {result && <span className="text-xs text-teal-700 font-bold">{result}</span>}
     </div>

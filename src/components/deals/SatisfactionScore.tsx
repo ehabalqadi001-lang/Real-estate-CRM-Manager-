@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Star, Send, ExternalLink } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Score {
   score: number
@@ -10,6 +11,7 @@ interface Score {
 }
 
 export default function SatisfactionScore({ dealId, initial }: { dealId: string; initial: Score | null }) {
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
 
   const surveyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/survey/${dealId}`
@@ -31,18 +33,18 @@ export default function SatisfactionScore({ dealId, initial }: { dealId: string;
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <h3 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
-        <Star size={15} className="text-yellow-500" /> تقييم رضا العميل
+        <Star size={15} className="text-yellow-500" /> {t('تقييم رضا العميل', 'Client Satisfaction')}
       </h3>
 
       {initial ? (
         <div className="space-y-3">
           <div>
-            <p className="text-xs text-slate-500 mb-1">التقييم العام</p>
+            <p className="text-xs text-slate-500 mb-1">{t('التقييم العام', 'Overall Rating')}</p>
             {renderStars(initial.score)}
           </div>
           {initial.agent_rating && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">تقييم مسؤول المبيعات</p>
+              <p className="text-xs text-slate-500 mb-1">{t('تقييم مسؤول المبيعات', 'Sales Agent Rating')}</p>
               {renderStars(initial.agent_rating)}
             </div>
           )}
@@ -54,15 +56,15 @@ export default function SatisfactionScore({ dealId, initial }: { dealId: string;
         </div>
       ) : (
         <div className="text-center py-4">
-          <p className="text-xs text-slate-400 mb-3">لم يقدم العميل تقييمه بعد</p>
+          <p className="text-xs text-slate-400 mb-3">{t('لم يقدم العميل تقييمه بعد', 'Client has not submitted a rating yet')}</p>
           <div className="flex gap-2 justify-center">
             <button onClick={copyLink}
               className="flex items-center gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
-              <Send size={12} /> {copied ? 'تم النسخ!' : 'نسخ رابط الاستطلاع'}
+              <Send size={12} /> {copied ? t('تم النسخ!', 'Copied!') : t('نسخ رابط الاستطلاع', 'Copy Survey Link')}
             </button>
             <a href={surveyUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors">
-              <ExternalLink size={12} /> معاينة
+              <ExternalLink size={12} /> {t('معاينة', 'Preview')}
             </a>
           </div>
         </div>

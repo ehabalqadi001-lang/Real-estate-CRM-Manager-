@@ -5,14 +5,7 @@ import Link from 'next/link'
 import { updateLeadStatus, addLeadReport } from '@/app/dashboard/leads/actions'
 import { getTeamMembers, assignLeadToMember } from '@/app/dashboard/team/actions'
 import { Building2, DollarSign, MessageSquarePlus, Loader2, UserCheck } from 'lucide-react'
-
-const COLUMNS = [
-  { id: 'Fresh Leads', title: 'عملاء جدد', color: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-700' },
-  { id: 'Follow Up', title: 'متابعة', color: 'bg-amber-50', borderColor: 'border-amber-200', textColor: 'text-amber-700' },
-  { id: 'Meeting', title: 'اجتماعات', color: 'bg-purple-50', borderColor: 'border-purple-200', textColor: 'text-purple-700' },
-  { id: 'Won', title: 'تم البيع (Won)', color: 'bg-emerald-50', borderColor: 'border-emerald-200', textColor: 'text-emerald-700' },
-  { id: 'Lost', title: 'مرفوض (Lost)', color: 'bg-red-50', borderColor: 'border-red-200', textColor: 'text-red-700' }
-]
+import { useI18n } from '@/hooks/use-i18n'
 
 interface PipelineLead {
   id: string
@@ -29,6 +22,7 @@ interface TeamMember {
 }
 
 export default function PipelineBoard({ initialLeads }: { initialLeads: PipelineLead[] }) {
+  const { t, numLocale } = useI18n()
   const [leads, setLeads] = useState(initialLeads)
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null)
@@ -37,6 +31,14 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
   const [reportFormLeadId, setReportFormLeadId] = useState<string | null>(null)
   const [reportText, setReportText] = useState('')
   const [isSubmittingReport, setIsSubmittingReport] = useState(false)
+
+  const COLUMNS = [
+    { id: 'Fresh Leads', title: t('عملاء جدد', 'Fresh Leads'),     color: 'bg-blue-50',    borderColor: 'border-blue-200',   textColor: 'text-blue-700' },
+    { id: 'Follow Up',   title: t('متابعة', 'Follow Up'),           color: 'bg-amber-50',   borderColor: 'border-amber-200',  textColor: 'text-amber-700' },
+    { id: 'Meeting',     title: t('اجتماعات', 'Meetings'),          color: 'bg-purple-50',  borderColor: 'border-purple-200', textColor: 'text-purple-700' },
+    { id: 'Won',         title: t('تم البيع', 'Won'),               color: 'bg-emerald-50', borderColor: 'border-emerald-200',textColor: 'text-emerald-700' },
+    { id: 'Lost',        title: t('مرفوض', 'Lost'),                 color: 'bg-red-50',     borderColor: 'border-red-200',    textColor: 'text-red-700' },
+  ]
 
   useEffect(() => {
     let mounted = true
@@ -102,7 +104,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
     setIsUpdating(true)
     try {
       await assignLeadToMember(leadId, memberId)
-      window.location.reload() 
+      window.location.reload()
     } catch (error) {
       console.error("Assignment failed", error)
     } finally {
@@ -114,10 +116,10 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
     <div className="flex gap-6 overflow-x-auto pb-8 snap-x" dir="rtl">
       {COLUMNS.map(column => {
         const columnLeads = leads.filter(l => l.status === column.id || (!l.status && column.id === 'Fresh Leads'))
-        
+
         return (
-          <div 
-            key={column.id} 
+          <div
+            key={column.id}
             className="flex-shrink-0 w-[350px] bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col snap-center h-[calc(100vh-200px)]"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
@@ -132,28 +134,27 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
             <div className="p-4 flex-1 overflow-y-auto space-y-4 bg-slate-50/50">
               {columnLeads.length === 0 ? (
                 <div className="h-full flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl">
-                  <p className="text-slate-400 font-bold text-sm">اسحب البطاقات إلى هنا</p>
+                  <p className="text-slate-400 font-bold text-sm">{t('اسحب البطاقات إلى هنا', 'Drag cards here')}</p>
                 </div>
               ) : (
                 columnLeads.map(lead => (
-                  <div 
+                  <div
                     key={lead.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, lead.id)}
                     className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:border-blue-300 hover:shadow-md transition-all group relative"
                   >
                     <div className="text-center mb-4">
-                      {/* 🔥 الرابط السحري الذي ينقلك لملف العميل */}
-                      <Link 
-                        href={`/dashboard/leads/${lead.id}`} 
+                      <Link
+                        href={`/dashboard/leads/${lead.id}`}
                         className="font-black text-slate-900 text-lg mb-1 block hover:text-blue-600 hover:underline underline-offset-4 transition-colors"
                       >
                         {lead.client_name}
                       </Link>
-                      
+
                       <div className="flex justify-center items-center gap-4 text-xs font-bold text-slate-500 mt-2">
-                        <span className="flex items-center gap-1"><Building2 size={12}/> {lead.property_type || 'غير محدد'}</span>
-                        <span className="flex items-center gap-1 text-emerald-600"><DollarSign size={12}/> {lead.expected_value?.toLocaleString() || 0} ج.م</span>
+                        <span className="flex items-center gap-1"><Building2 size={12}/> {lead.property_type || t('غير محدد', 'Unspecified')}</span>
+                        <span className="flex items-center gap-1 text-emerald-600"><DollarSign size={12}/> {lead.expected_value?.toLocaleString(numLocale) || 0} {t('ج.م', 'EGP')}</span>
                       </div>
                     </div>
 
@@ -167,7 +168,7 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
                             disabled={isUpdating}
                             className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 pr-8 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
                           >
-                            <option value="" disabled>تفويض العميل لـ...</option>
+                            <option value="" disabled>{t('تفويض العميل لـ...', 'Assign lead to...')}</option>
                             {teamMembers.map(member => (
                               <option key={member.id} value={member.id}>
                                 {member.full_name}
@@ -178,34 +179,34 @@ export default function PipelineBoard({ initialLeads }: { initialLeads: Pipeline
                       )}
 
                       {reportFormLeadId !== lead.id ? (
-                        <button 
+                        <button
                           onClick={() => setReportFormLeadId(lead.id)}
                           className="w-full flex justify-center items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors"
                         >
-                          <MessageSquarePlus size={14} /> إضافة تقرير متابعة سريع
+                          <MessageSquarePlus size={14} /> {t('إضافة تقرير متابعة سريع', 'Add Quick Follow-up Report')}
                         </button>
                       ) : (
                         <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                          <textarea 
+                          <textarea
                             autoFocus
                             value={reportText}
                             onChange={(e) => setReportText(e.target.value)}
-                            placeholder="اكتب تفاصيل المكالمة أو المتابعة..."
+                            placeholder={t('اكتب تفاصيل المكالمة أو المتابعة...', 'Write call or follow-up details...')}
                             className="w-full text-xs p-2 rounded-md border border-slate-200 outline-none focus:border-blue-400 resize-none h-16 bg-white"
                           />
                           <div className="flex gap-2">
-                            <button 
+                            <button
                               onClick={() => handleAddReport(lead.id)}
                               disabled={isSubmittingReport}
                               className="flex-1 bg-blue-600 text-white text-[10px] font-bold py-1.5 rounded-md hover:bg-blue-700 disabled:opacity-50"
                             >
-                              {isSubmittingReport ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'حفظ'}
+                              {isSubmittingReport ? <Loader2 size={12} className="animate-spin mx-auto" /> : t('حفظ', 'Save')}
                             </button>
-                            <button 
+                            <button
                               onClick={() => { setReportFormLeadId(null); setReportText(''); }}
                               className="px-3 bg-slate-200 text-slate-600 text-[10px] font-bold py-1.5 rounded-md hover:bg-slate-300"
                             >
-                              إلغاء
+                              {t('إلغاء', 'Cancel')}
                             </button>
                           </div>
                         </div>

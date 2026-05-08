@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { updateMemberRole, suspendMember, inviteAgentByEmail } from '@/app/dashboard/team/actions'
 import { canAssignRole, normalizeRole, type Role } from '@/lib/permissions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export type TeamMemberRow = {
   id: string
@@ -28,6 +29,7 @@ export function TeamManagementClient({
   members: TeamMemberRow[]
   currentRole: Role
 }) {
+  const { t, numLocale } = useI18n()
   const [view, setView] = useState<'table' | 'leaderboard'>('table')
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteName, setInviteName] = useState('')
@@ -40,39 +42,56 @@ export function TeamManagementClient({
     [currentRole],
   )
 
+  function roleLabel(role: string) {
+    const labels: Record<string, string> = {
+      branch_manager: t('مدير فرع', 'Branch Manager'),
+      senior_agent: t('وسيط أول', 'Senior Agent'),
+      agent: t('وسيط', 'Agent'),
+      individual: t('فردي', 'Individual'),
+      viewer: t('مشاهد', 'Viewer'),
+    }
+    return labels[role] ?? role
+  }
+
+  const currency = t('ج.م', 'EGP')
+
+  function formatMoney(value: number) {
+    return `${new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(value)} ${currency}`
+  }
+
   return (
     <section className="space-y-4" dir="rtl">
       <div className="rounded-xl border border-[var(--fi-line)] bg-white p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-[var(--fi-ink)]">إدارة الفريق</h1>
-            <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">أداء الوسطاء، الأدوار، الصفقات النشطة، والعمولات.</p>
+            <h1 className="text-2xl font-black text-[var(--fi-ink)]">{t('إدارة الفريق', 'Team Management')}</h1>
+            <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">{t('أداء الوسطاء، الأدوار، الصفقات النشطة، والعمولات.', 'Agent performance, roles, active deals, and commissions.')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant={view === 'table' ? 'default' : 'outline'} onClick={() => setView('table')}>جدول</Button>
-            <Button variant={view === 'leaderboard' ? 'default' : 'outline'} onClick={() => setView('leaderboard')}>ترتيب الأداء</Button>
+            <Button variant={view === 'table' ? 'default' : 'outline'} onClick={() => setView('table')}>{t('جدول', 'Table')}</Button>
+            <Button variant={view === 'leaderboard' ? 'default' : 'outline'} onClick={() => setView('leaderboard')}>{t('ترتيب الأداء', 'Leaderboard')}</Button>
           </div>
         </div>
 
         <div className="mt-4 grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-          <Input placeholder="اسم الوسيط" value={inviteName} onChange={(event) => setInviteName(event.target.value)} />
-          <Input placeholder="البريد الإلكتروني" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} />
+          <Input placeholder={t('اسم الوسيط', 'Agent name')} value={inviteName} onChange={(event) => setInviteName(event.target.value)} />
+          <Input placeholder={t('البريد الإلكتروني', 'Email address')} value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} />
           <Button
             disabled={isPending || !inviteEmail}
             className="gap-2 bg-[var(--fi-emerald)] text-white hover:bg-[var(--fi-emerald)]/90"
             onClick={() => startTransition(async () => {
               const result = await inviteAgentByEmail(inviteEmail, inviteName)
               if (result.success) {
-                toast.success('تم إرسال الدعوة')
+                toast.success(t('تم إرسال الدعوة', 'Invitation sent'))
                 setInviteEmail('')
                 setInviteName('')
               } else {
-                toast.error(result.error ?? 'تعذر إرسال الدعوة')
+                toast.error(result.error ?? t('تعذر إرسال الدعوة', 'Could not send invitation'))
               }
             })}
           >
             <Mail className="size-4" />
-            إضافة وسيط
+            {t('إضافة وسيط', 'Add Agent')}
           </Button>
         </div>
       </div>
@@ -82,26 +101,26 @@ export function TeamManagementClient({
           <table className="w-full min-w-[980px] text-right text-sm">
             <thead className="bg-[var(--fi-soft)]">
               <tr>
-                <th className="p-3">الاسم</th>
-                <th className="p-3">الدور</th>
-                <th className="p-3">الصفقات النشطة</th>
-                <th className="p-3">المبيعات هذا الشهر</th>
-                <th className="p-3">العمولات</th>
-                <th className="p-3">الأداء</th>
-                <th className="p-3">الحالة</th>
-                <th className="p-3">إجراءات</th>
+                <th className="p-3">{t('الاسم', 'Name')}</th>
+                <th className="p-3">{t('الدور', 'Role')}</th>
+                <th className="p-3">{t('الصفقات النشطة', 'Active Deals')}</th>
+                <th className="p-3">{t('المبيعات هذا الشهر', 'This Month Sales')}</th>
+                <th className="p-3">{t('العمولات', 'Commissions')}</th>
+                <th className="p-3">{t('الأداء', 'Performance')}</th>
+                <th className="p-3">{t('الحالة', 'Status')}</th>
+                <th className="p-3">{t('إجراءات', 'Actions')}</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td className="p-6 text-center font-bold text-[var(--fi-muted)]" colSpan={8}>لا يوجد أعضاء فريق حتى الآن</td>
+                  <td className="p-6 text-center font-bold text-[var(--fi-muted)]" colSpan={8}>{t('لا يوجد أعضاء فريق حتى الآن', 'No team members yet')}</td>
                 </tr>
               ) : rows.map((member, index) => (
                 <tr key={member.id} className="border-t border-[var(--fi-line)]">
                   <td className="p-3">
                     <p className="font-black text-[var(--fi-ink)]">{view === 'leaderboard' ? `${index + 1}. ` : ''}{member.name}</p>
-                    <p className="text-xs font-semibold text-[var(--fi-muted)]">{member.email ?? 'بدون بريد مسجل'}</p>
+                    <p className="text-xs font-semibold text-[var(--fi-muted)]">{member.email ?? t('بدون بريد مسجل', 'No email')}</p>
                   </td>
                   <td className="p-3">
                     <select
@@ -111,16 +130,16 @@ export function TeamManagementClient({
                       onChange={(event) => startTransition(async () => {
                         try {
                           await updateMemberRole(member.id, event.target.value)
-                          toast.success('تم تحديث الدور')
+                          toast.success(t('تم تحديث الدور', 'Role updated'))
                         } catch (error) {
-                          toast.error(error instanceof Error ? error.message : 'تعذر تحديث الدور')
+                          toast.error(error instanceof Error ? error.message : t('تعذر تحديث الدور', 'Could not update role'))
                         }
                       })}
                     >
                       {roleOptions.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
                     </select>
                   </td>
-                  <td className="p-3 font-black">{member.activeDeals.toLocaleString('ar-EG')}</td>
+                  <td className="p-3 font-black">{member.activeDeals.toLocaleString(numLocale)}</td>
                   <td className="p-3 font-black text-[var(--fi-emerald)]">{formatMoney(member.monthSales)}</td>
                   <td className="p-3 font-black">{formatMoney(member.commissions)}</td>
                   <td className="p-3">
@@ -134,24 +153,24 @@ export function TeamManagementClient({
                   </td>
                   <td className="p-3">
                     <span className={member.status === 'suspended' ? 'rounded-full bg-red-50 px-2 py-1 text-xs font-black text-red-700' : 'rounded-full bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-700'}>
-                      {member.status === 'suspended' ? 'معلق' : 'نشط'}
+                      {member.status === 'suspended' ? t('معلق', 'Suspended') : t('نشط', 'Active')}
                     </span>
                   </td>
                   <td className="p-3">
                     <div className="flex gap-1">
-                      <Button size="icon-sm" variant="outline" title="عرض التفاصيل"><Eye className="size-4" /></Button>
-                      <Button size="icon-sm" variant="outline" title="تعديل الدور"><Shield className="size-4" /></Button>
+                      <Button size="icon-sm" variant="outline" title={t('عرض التفاصيل', 'View details')}><Eye className="size-4" /></Button>
+                      <Button size="icon-sm" variant="outline" title={t('تعديل الدور', 'Edit role')}><Shield className="size-4" /></Button>
                       <Button
                         size="icon-sm"
                         variant="destructive"
-                        title="تعليق الحساب"
+                        title={t('تعليق الحساب', 'Suspend account')}
                         disabled={isPending}
                         onClick={() => startTransition(async () => {
                           try {
                             await suspendMember(member.id)
-                            toast.success('تم تعليق الحساب')
+                            toast.success(t('تم تعليق الحساب', 'Account suspended'))
                           } catch (error) {
-                            toast.error(error instanceof Error ? error.message : 'تعذر تعليق الحساب')
+                            toast.error(error instanceof Error ? error.message : t('تعذر تعليق الحساب', 'Could not suspend account'))
                           }
                         })}
                       >
@@ -167,19 +186,4 @@ export function TeamManagementClient({
       </div>
     </section>
   )
-}
-
-function roleLabel(role: string) {
-  const labels: Record<string, string> = {
-    branch_manager: 'مدير فرع',
-    senior_agent: 'وسيط أول',
-    agent: 'وسيط',
-    individual: 'فردي',
-    viewer: 'مشاهد',
-  }
-  return labels[role] ?? role
-}
-
-function formatMoney(value: number) {
-  return `${new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(value)} ج.م`
 }

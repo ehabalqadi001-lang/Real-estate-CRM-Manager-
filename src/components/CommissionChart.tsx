@@ -1,16 +1,18 @@
 "use client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function CommissionChart({ data: _data }: { data: Record<string, unknown>[] }) {
-  // معالجة البيانات لتجميعها حسب الأشهر (توضيحي)
+  const { t } = useI18n()
+
   const chartData = [
-    { name: 'يناير', earned: 40000, collected: 24000 },
-    { name: 'فبراير', earned: 30000, collected: 13980 },
-    { name: 'مارس', earned: 20000, collected: 9800 },
-    { name: 'أبريل', earned: 27800, collected: 3908 },
-    { name: 'مايو', earned: 18900, collected: 4800 },
-    { name: 'يونيو', earned: 23900, collected: 3800 },
-  ]; // في النظام الحقيقي سيتم بناء هذا المصفوفة من الـ data المُمررة
+    { name: t('يناير', 'Jan'),   earned: 40000, collected: 24000 },
+    { name: t('فبراير', 'Feb'),  earned: 30000, collected: 13980 },
+    { name: t('مارس', 'Mar'),    earned: 20000, collected: 9800 },
+    { name: t('أبريل', 'Apr'),   earned: 27800, collected: 3908 },
+    { name: t('مايو', 'May'),    earned: 18900, collected: 4800 },
+    { name: t('يونيو', 'Jun'),   earned: 23900, collected: 3800 },
+  ];
 
   return (
     <div className="h-[300px] w-full mt-4">
@@ -21,8 +23,8 @@ export default function CommissionChart({ data: _data }: { data: Record<string, 
           <YAxis axisLine={false} tickLine={false} />
           <Tooltip cursor={{fill: 'transparent'}} />
           <Legend />
-          <Bar dataKey="earned" name="إجمالي مستحق" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="collected" name="تم تحصيله" fill="#10b981" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="earned" name={t('إجمالي مستحق', 'Total Due')} fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="collected" name={t('تم تحصيله', 'Collected')} fill="#10b981" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

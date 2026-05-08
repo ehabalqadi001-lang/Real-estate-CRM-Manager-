@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2 } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -9,6 +10,7 @@ interface Message {
 }
 
 export default function AIAssistantChat() {
+  const { t } = useI18n()
   const [phone, setPhone]           = useState('')
   const [input, setInput]           = useState('')
   const [messages, setMessages]     = useState<Message[]>([])
@@ -25,7 +27,10 @@ export default function AIAssistantChat() {
     setStarted(true)
     setMessages([{
       role: 'assistant',
-      content: `أهلاً بك في FAST INVESTMENT! 👋\nيسعدنا مساعدتك في العثور على العقار المناسب.\nكيف يمكنني مساعدتك اليوم؟`
+      content: t(
+        `أهلاً بك في FAST INVESTMENT! 👋\nيسعدنا مساعدتك في العثور على العقار المناسب.\nكيف يمكنني مساعدتك اليوم؟`,
+        `Welcome to FAST INVESTMENT! 👋\nWe're happy to help you find the right property.\nHow can I help you today?`
+      ),
     }])
   }
 
@@ -52,7 +57,7 @@ export default function AIAssistantChat() {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply! }])
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'عذراً، حدث خطأ في الاتصال. حاول مجدداً.' }])
+      setMessages(prev => [...prev, { role: 'assistant', content: t('عذراً، حدث خطأ في الاتصال. حاول مجدداً.', 'Sorry, a connection error occurred. Please try again.') }])
     } finally {
       setLoading(false)
     }
@@ -66,11 +71,11 @@ export default function AIAssistantChat() {
             <Bot className="text-emerald-600" size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">المساعد الذكي</h3>
-            <p className="text-xs text-slate-500">مدعوم بـ Claude AI</p>
+            <h3 className="font-bold text-slate-800">{t('المساعد الذكي', 'AI Assistant')}</h3>
+            <p className="text-xs text-slate-500">{t('مدعوم بـ Claude AI', 'Powered by Claude AI')}</p>
           </div>
         </div>
-        <p className="text-sm text-slate-600 mb-4">أدخل رقم هاتف العميل لبدء محادثة تجريبية</p>
+        <p className="text-sm text-slate-600 mb-4">{t('أدخل رقم هاتف العميل لبدء محادثة تجريبية', 'Enter the client phone number to start a test conversation')}</p>
         <div className="flex gap-2">
           <input
             type="tel"
@@ -86,7 +91,7 @@ export default function AIAssistantChat() {
             disabled={!phone.trim()}
             className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
           >
-            ابدأ
+            {t('ابدأ', 'Start')}
           </button>
         </div>
       </div>
@@ -101,7 +106,7 @@ export default function AIAssistantChat() {
           <Bot size={16} />
         </div>
         <div>
-          <div className="font-bold text-sm">المساعد الذكي — FAST INVESTMENT</div>
+          <div className="font-bold text-sm">{t('المساعد الذكي — FAST INVESTMENT', 'AI Assistant — FAST INVESTMENT')}</div>
           <div className="text-xs opacity-70" dir="ltr">{phone}</div>
         </div>
       </div>
@@ -141,7 +146,7 @@ export default function AIAssistantChat() {
       <div className="p-3 border-t border-slate-200 flex gap-2 bg-white">
         <input
           type="text"
-          placeholder="اكتب رسالتك..."
+          placeholder={t('اكتب رسالتك...', 'Type your message...')}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && send()}

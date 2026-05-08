@@ -17,6 +17,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Building, ChevronLeft, ChevronRight, DollarSign, GripVertical, User } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Deal {
   id: string
@@ -27,30 +28,32 @@ interface Deal {
   compound?: string
 }
 
-const STAGES = [
-  { key: 'New', label: 'جديد', tone: 'slate' },
-  { key: 'Negotiation', label: 'تفاوض', tone: 'blue' },
-  { key: 'Contracted', label: 'عقد', tone: 'violet' },
-  { key: 'Registration', label: 'توثيق', tone: 'amber' },
-  { key: 'Handover', label: 'تسليم', tone: 'emerald' },
-  { key: 'Lost', label: 'خسارة', tone: 'red' },
-] as const
+type StageKey = 'New' | 'Negotiation' | 'Contracted' | 'Registration' | 'Handover' | 'Lost'
+
+const STAGE_KEYS: StageKey[] = ['New', 'Negotiation', 'Contracted', 'Registration', 'Handover', 'Lost']
+const STAGE_TONES: Record<StageKey, string> = {
+  New: 'slate', Negotiation: 'blue', Contracted: 'violet', Registration: 'amber', Handover: 'emerald', Lost: 'red',
+}
 
 function DealCard({
   deal,
   stageIndex,
   onMove,
   isDragging = false,
+  t,
+  numLocale,
 }: {
   deal: Deal
   stageIndex: number
   onMove: (dealId: string, targetStage: string) => void
   isDragging?: boolean
+  t: (ar: string, en: string) => string
+  numLocale: string
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: deal.id })
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.45 : 1 }
-  const previousStage = STAGES[stageIndex - 1]
-  const nextStage = STAGES[stageIndex + 1]
+  const previousStage = STAGE_KEYS[stageIndex - 1]
+  const nextStage = STAGE_KEYS[stageIndex + 1]
 
   return (
     <motion.div
@@ -64,16 +67,16 @@ function DealCard({
           {...attributes}
           {...listeners}
           className="mt-0.5 flex size-8 shrink-0 touch-none items-center justify-center rounded-lg text-slate-300 transition hover:bg-[var(--fi-soft)] hover:text-[var(--fi-emerald)] active:cursor-grabbing md:cursor-grab"
-          aria-label="سحب الصفقة"
+          aria-label={t('سحب الصفقة', 'Drag deal')}
         >
           <GripVertical size={15} />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-[var(--fi-ink)]">{deal.title ?? deal.compound ?? 'صفقة'}</p>
+          <p className="truncate text-sm font-black text-[var(--fi-ink)]">{deal.title ?? deal.compound ?? t('صفقة', 'Deal')}</p>
           {deal.unit_value ? (
             <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[var(--fi-emerald)]">
               <DollarSign size={12} />
-              {new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(deal.unit_value)} ج.م
+              {new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(deal.unit_value)} {t('ج.م', 'EGP')}
             </p>
           ) : null}
           {deal.buyer_name && (
@@ -93,19 +96,19 @@ function DealCard({
         <button
           type="button"
           disabled={!previousStage}
-          onClick={() => previousStage && onMove(deal.id, previousStage.key)}
+          onClick={() => previousStage && onMove(deal.id, previousStage)}
           className="flex min-h-10 items-center justify-center gap-1 rounded-lg border border-[var(--fi-line)] text-xs font-black text-[var(--fi-muted)] disabled:opacity-40"
         >
           <ChevronRight size={14} />
-          السابق
+          {t('السابق', 'Prev')}
         </button>
         <button
           type="button"
           disabled={!nextStage}
-          onClick={() => nextStage && onMove(deal.id, nextStage.key)}
+          onClick={() => nextStage && onMove(deal.id, nextStage)}
           className="flex min-h-10 items-center justify-center gap-1 rounded-lg bg-[var(--fi-emerald)] text-xs font-black text-white disabled:opacity-40"
         >
-          التالي
+          {t('التالي', 'Next')}
           <ChevronLeft size={14} />
         </button>
       </div>
@@ -113,13 +116,13 @@ function DealCard({
   )
 }
 
-function DragCard({ deal }: { deal: Deal }) {
+function DragCard({ deal, t, numLocale }: { deal: Deal; t: (ar: string, en: string) => string; numLocale: string }) {
   return (
     <div className="w-56 rotate-1 rounded-lg border-2 border-[var(--fi-emerald)] bg-white p-3 shadow-2xl">
-      <p className="truncate text-sm font-black text-[var(--fi-ink)]">{deal.title ?? deal.compound ?? 'صفقة'}</p>
+      <p className="truncate text-sm font-black text-[var(--fi-ink)]">{deal.title ?? deal.compound ?? t('صفقة', 'Deal')}</p>
       {deal.unit_value ? (
         <p className="mt-1 text-xs font-bold text-[var(--fi-emerald)]">
-          {new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(deal.unit_value)} ج.م
+          {new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(deal.unit_value)} {t('ج.م', 'EGP')}
         </p>
       ) : null}
     </div>
@@ -127,19 +130,25 @@ function DragCard({ deal }: { deal: Deal }) {
 }
 
 function Column({
-  stage,
+  stageKey,
+  label,
   stageIndex,
   deals,
   focused,
   onMove,
+  t,
+  numLocale,
 }: {
-  stage: (typeof STAGES)[number]
+  stageKey: StageKey
+  label: string
   stageIndex: number
   deals: Deal[]
   focused: boolean
   onMove: (dealId: string, targetStage: string) => void
+  t: (ar: string, en: string) => string
+  numLocale: string
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage.key })
+  const { setNodeRef, isOver } = useDroppable({ id: stageKey })
   const total = deals.reduce((sum, deal) => sum + Number(deal.unit_value ?? 0), 0)
 
   return (
@@ -149,14 +158,14 @@ function Column({
       <div className="border-b border-[var(--fi-line)] p-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className={`size-2.5 rounded-full ${stageDot(stage.tone)}`} />
-            <h2 className="text-sm font-black text-[var(--fi-ink)]">{stage.label}</h2>
+            <span className={`size-2.5 rounded-full ${stageDot(STAGE_TONES[stageKey])}`} />
+            <h2 className="text-sm font-black text-[var(--fi-ink)]">{label}</h2>
           </div>
           <span className="rounded-full bg-[var(--fi-soft)] px-2.5 py-1 text-xs font-black text-[var(--fi-emerald)]">{deals.length}</span>
         </div>
         {total > 0 && (
           <p className="mt-2 text-xs font-bold text-[var(--fi-muted)]">
-            {new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(total)} ج.م
+            {new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(total)} {t('ج.م', 'EGP')}
           </p>
         )}
       </div>
@@ -166,11 +175,11 @@ function Column({
           <AnimatePresence initial={false}>
             {deals.length ? (
               deals.map((deal) => (
-                <DealCard key={deal.id} deal={deal} stageIndex={stageIndex} onMove={onMove} />
+                <DealCard key={deal.id} deal={deal} stageIndex={stageIndex} onMove={onMove} t={t} numLocale={numLocale} />
               ))
             ) : (
               <div className="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 text-center text-xs font-bold text-[var(--fi-muted)]">
-                لا توجد صفقات في هذه المرحلة
+                {t('لا توجد صفقات في هذه المرحلة', 'No deals in this stage')}
               </div>
             )}
           </AnimatePresence>
@@ -187,9 +196,20 @@ export default function KanbanBoard({
   initialDeals: Deal[]
   onStageChange: (dealId: string, newStage: string) => Promise<void>
 }) {
+  const { t, numLocale } = useI18n()
+
+  const STAGES: Array<{ key: StageKey; label: string }> = [
+    { key: 'New',          label: t('جديد', 'New') },
+    { key: 'Negotiation',  label: t('تفاوض', 'Negotiation') },
+    { key: 'Contracted',   label: t('عقد', 'Contracted') },
+    { key: 'Registration', label: t('توثيق', 'Registration') },
+    { key: 'Handover',     label: t('تسليم', 'Handover') },
+    { key: 'Lost',         label: t('خسارة', 'Lost') },
+  ]
+
   const [deals, setDeals] = useState<Deal[]>(initialDeals)
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [focusedStage, setFocusedStage] = useState<(typeof STAGES)[number]['key']>('New')
+  const [focusedStage, setFocusedStage] = useState<StageKey>('New')
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -202,7 +222,7 @@ export default function KanbanBoard({
       ...stage,
       deals: deals.filter((deal) => (deal.stage ?? 'New') === stage.key),
     }))
-  }, [deals])
+  }, [deals, STAGES])
 
   const getStageForDeal = useCallback((id: string) => deals.find((deal) => deal.id === id)?.stage ?? 'New', [deals])
 
@@ -213,7 +233,7 @@ export default function KanbanBoard({
     setDeals((current) => current.map((deal) => (deal.id === dealId ? { ...deal, stage: targetStage } : deal)))
     try {
       await onStageChange(dealId, targetStage)
-      setFocusedStage(targetStage as (typeof STAGES)[number]['key'])
+      setFocusedStage(targetStage as StageKey)
     } catch {
       setDeals((current) => current.map((deal) => (deal.id === dealId ? { ...deal, stage: currentStage } : deal)))
     }
@@ -257,22 +277,25 @@ export default function KanbanBoard({
           {grouped.map((stage, index) => (
             <Column
               key={stage.key}
-              stage={stage}
+              stageKey={stage.key}
+              label={stage.label}
               stageIndex={index}
               deals={stage.deals}
               focused={focusedStage === stage.key}
               onMove={(dealId, targetStage) => void moveDeal(dealId, targetStage)}
+              t={t}
+              numLocale={numLocale}
             />
           ))}
         </div>
-        <DragOverlay>{activeDeal ? <DragCard deal={activeDeal} /> : null}</DragOverlay>
+        <DragOverlay>{activeDeal ? <DragCard deal={activeDeal} t={t} numLocale={numLocale} /> : null}</DragOverlay>
       </DndContext>
     </div>
   )
 }
 
-function stageDot(tone: (typeof STAGES)[number]['tone']) {
-  const tones = {
+function stageDot(tone: string) {
+  const tones: Record<string, string> = {
     slate: 'bg-slate-400',
     blue: 'bg-[var(--fi-info)]',
     violet: 'bg-violet-500',
@@ -280,6 +303,5 @@ function stageDot(tone: (typeof STAGES)[number]['tone']) {
     emerald: 'bg-[var(--fi-emerald)]',
     red: 'bg-[var(--fi-danger)]',
   }
-
-  return tones[tone]
+  return tones[tone] ?? 'bg-slate-400'
 }

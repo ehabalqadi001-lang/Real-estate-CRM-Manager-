@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Upload, X, FileText, CheckCircle, AlertCircle, Download } from 'lucide-react'
 import { bulkImportLeads } from '@/app/dashboard/leads/import-actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface ParsedRow {
   name: string
@@ -17,7 +18,6 @@ interface ParsedRow {
 const REQUIRED_COLS = ['name', 'phone']
 const ALL_COLS = ['name', 'phone', 'email', 'source', 'expected_value', 'notes', 'status']
 
-// Map Arabic header names to internal keys
 const HEADER_MAP: Record<string, string> = {
   'الاسم': 'name', 'name': 'name',
   'الهاتف': 'phone', 'phone': 'phone', 'mobile': 'phone', 'رقم الهاتف': 'phone',
@@ -60,6 +60,7 @@ function mapRow(row: Record<string, string>): ParsedRow | null {
 }
 
 export default function BulkImportButton() {
+  const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [parsed, setParsed] = useState<ParsedRow[]>([])
   const [invalidCount, setInvalidCount] = useState(0)
@@ -99,7 +100,7 @@ export default function BulkImportButton() {
       setParsed([])
       setFileName('')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ غير معروف')
+      setError(err instanceof Error ? err.message : t('خطأ غير معروف', 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -108,7 +109,7 @@ export default function BulkImportButton() {
   const downloadTemplate = () => {
     const header = 'name,phone,email,source,expected_value,notes,status'
     const sample = 'أحمد محمد,01012345678,ahmed@example.com,Facebook,500000,,Fresh Leads'
-    const blob = new Blob([`\uFEFF${header}\n${sample}`], { type: 'text/csv;charset=utf-8' })
+    const blob = new Blob([`﻿${header}\n${sample}`], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url; a.download = 'leads-template.csv'; a.click()
@@ -124,7 +125,7 @@ export default function BulkImportButton() {
     <>
       <button onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg transition-all text-sm font-bold">
-        <Upload size={15} /> استيراد CSV
+        <Upload size={15} /> {t('استيراد CSV', 'Import CSV')}
       </button>
 
       {isOpen && (
@@ -133,7 +134,7 @@ export default function BulkImportButton() {
             {/* Header */}
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                <Upload size={16} className="text-blue-600" /> استيراد عملاء بالجملة (CSV)
+                <Upload size={16} className="text-blue-600" /> {t('استيراد عملاء بالجملة (CSV)', 'Bulk Import Leads (CSV)')}
               </h3>
               <button onClick={() => { setIsOpen(false); reset() }} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
             </div>
@@ -142,12 +143,12 @@ export default function BulkImportButton() {
               {/* Download template */}
               <button onClick={downloadTemplate}
                 className="w-full border-2 border-dashed border-blue-200 bg-blue-50 text-blue-700 rounded-xl py-3 flex items-center justify-center gap-2 text-sm font-bold hover:bg-blue-100 transition-colors">
-                <Download size={15} /> تحميل قالب CSV النموذجي
+                <Download size={15} /> {t('تحميل قالب CSV النموذجي', 'Download CSV Template')}
               </button>
 
               {/* Column reference */}
               <div className="bg-slate-50 rounded-xl p-3">
-                <p className="text-xs font-bold text-slate-600 mb-2">الأعمدة المدعومة:</p>
+                <p className="text-xs font-bold text-slate-600 mb-2">{t('الأعمدة المدعومة:', 'Supported columns:')}</p>
                 <div className="flex flex-wrap gap-1">
                   {ALL_COLS.map(c => (
                     <span key={c}
@@ -156,7 +157,7 @@ export default function BulkImportButton() {
                     </span>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1.5">* الأعمدة المطلوبة — الباقي اختياري</p>
+                <p className="text-[10px] text-slate-400 mt-1.5">{t('* الأعمدة المطلوبة — الباقي اختياري', '* Required columns — others are optional')}</p>
               </div>
 
               {/* File drop zone */}
@@ -166,8 +167,8 @@ export default function BulkImportButton() {
                     onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
                   <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/40 transition-colors">
                     <FileText size={32} className="mx-auto text-slate-300 mb-2" />
-                    <p className="font-bold text-slate-600 text-sm">اسحب الملف هنا أو انقر للاختيار</p>
-                    <p className="text-xs text-slate-400 mt-1">CSV فقط — حد أقصى 500 سجل</p>
+                    <p className="font-bold text-slate-600 text-sm">{t('اسحب الملف هنا أو انقر للاختيار', 'Drag file here or click to choose')}</p>
+                    <p className="text-xs text-slate-400 mt-1">{t('CSV فقط — حد أقصى 500 سجل', 'CSV only — max 500 records')}</p>
                   </div>
                 </label>
               ) : (
@@ -180,11 +181,11 @@ export default function BulkImportButton() {
                   </div>
                   <div className="flex gap-3 text-xs font-bold">
                     <span className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg">
-                      {parsed.length} سجل صالح
+                      {parsed.length} {t('سجل صالح', 'valid records')}
                     </span>
                     {invalidCount > 0 && (
                       <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg">
-                        {invalidCount} سجل محذوف (ناقص اسم/هاتف)
+                        {invalidCount} {t('سجل محذوف (ناقص اسم/هاتف)', 'skipped (missing name/phone)')}
                       </span>
                     )}
                   </div>
@@ -195,9 +196,9 @@ export default function BulkImportButton() {
                       <table className="w-full text-xs">
                         <thead className="bg-slate-50 sticky top-0">
                           <tr>
-                            <th className="p-2 text-right font-bold text-slate-500">الاسم</th>
-                            <th className="p-2 text-right font-bold text-slate-500">الهاتف</th>
-                            <th className="p-2 text-right font-bold text-slate-500">المصدر</th>
+                            <th className="p-2 text-right font-bold text-slate-500">{t('الاسم', 'Name')}</th>
+                            <th className="p-2 text-right font-bold text-slate-500">{t('الهاتف', 'Phone')}</th>
+                            <th className="p-2 text-right font-bold text-slate-500">{t('المصدر', 'Source')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -212,7 +213,7 @@ export default function BulkImportButton() {
                       </table>
                       {parsed.length > 10 && (
                         <p className="text-center text-xs text-slate-400 py-2">
-                          +{parsed.length - 10} سجل آخر...
+                          +{parsed.length - 10} {t('سجل آخر...', 'more records...')}
                         </p>
                       )}
                     </div>
@@ -225,8 +226,8 @@ export default function BulkImportButton() {
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
                   <CheckCircle size={20} className="text-emerald-600 flex-shrink-0" />
                   <div>
-                    <p className="font-bold text-emerald-800">تم الاستيراد بنجاح!</p>
-                    <p className="text-sm text-emerald-600">تم إضافة {result.imported} عميل محتمل</p>
+                    <p className="font-bold text-emerald-800">{t('تم الاستيراد بنجاح!', 'Import successful!')}</p>
+                    <p className="text-sm text-emerald-600">{t('تم إضافة', 'Added')} {result.imported} {t('عميل محتمل', 'leads')}</p>
                   </div>
                 </div>
               )}
@@ -241,12 +242,14 @@ export default function BulkImportButton() {
               <div className="flex gap-3">
                 <button onClick={() => { setIsOpen(false); reset() }}
                   className="flex-1 border border-slate-200 text-slate-600 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
-                  إغلاق
+                  {t('إغلاق', 'Close')}
                 </button>
                 {parsed.length > 0 && !result && (
                   <button onClick={handleImport} disabled={loading}
                     className="flex-1 bg-[#00C27C] hover:bg-[#009F64] text-white py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                    {loading ? 'جاري الاستيراد...' : <><Upload size={15} /> استيراد {parsed.length} سجل</>}
+                    {loading
+                      ? t('جاري الاستيراد...', 'Importing...')
+                      : <><Upload size={15} /> {t('استيراد', 'Import')} {parsed.length} {t('سجل', 'records')}</>}
                   </button>
                 )}
               </div>
