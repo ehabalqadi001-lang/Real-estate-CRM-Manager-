@@ -1,7 +1,6 @@
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { createServerClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import { Building2, FolderOpen, Layers, FileSpreadsheet, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Building2, FolderOpen, Layers, FileSpreadsheet, CheckCircle2, AlertCircle } from 'lucide-react'
 import { ImportPanel } from './ImportPanel'
 import { importDevelopersAction, importProjectsAction, importUnitsAction } from './actions'
 
@@ -74,16 +73,32 @@ export default async function DataEntryHubPage() {
 
       {/* Bulk Operations */}
       <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
-        <p className="mb-4 font-black text-[var(--fi-ink)]">عمليات جماعية</p>
+        <p className="mb-4 font-black text-[var(--fi-ink)]">تصدير البيانات</p>
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" className="font-semibold">
-            <FileSpreadsheet className="size-4" />
-            تصدير كامل الإنفنتوري
-          </Button>
-          <Button variant="outline" className="font-semibold">
-            <RefreshCw className="size-4" />
-            مزامنة الأسعار
-          </Button>
+          <a
+            href="/admin/data-entry/export?type=units"
+            download="inventory.csv"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-4 py-2 text-sm font-semibold text-[var(--fi-ink)] hover:bg-[var(--fi-soft)] transition"
+          >
+            <FileSpreadsheet className="size-4 text-[var(--fi-emerald)]" />
+            تصدير الوحدات CSV
+          </a>
+          <a
+            href="/admin/data-entry/export?type=projects"
+            download="projects.csv"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-4 py-2 text-sm font-semibold text-[var(--fi-ink)] hover:bg-[var(--fi-soft)] transition"
+          >
+            <FileSpreadsheet className="size-4" style={{ color: '#C9964A' }} />
+            تصدير المشاريع CSV
+          </a>
+          <a
+            href="/admin/data-entry/export?type=developers"
+            download="developers.csv"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-4 py-2 text-sm font-semibold text-[var(--fi-ink)] hover:bg-[var(--fi-soft)] transition"
+          >
+            <FileSpreadsheet className="size-4 text-[var(--fi-muted)]" />
+            تصدير المطورين CSV
+          </a>
         </div>
       </div>
     </div>

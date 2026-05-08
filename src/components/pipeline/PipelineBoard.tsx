@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import type { ReactNode } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   DndContext,
   DragOverlay,
@@ -552,21 +552,37 @@ function PipelineColumn({
         strategy={verticalListSortingStrategy}
       >
         <div ref={setNodeRef} className="min-h-32 flex-1 space-y-2 overflow-y-auto p-2">
-          {stage.deals.length === 0 ? (
-            <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)]/50 px-4 text-center text-xs font-bold text-[var(--fi-muted)]">
-              Drop deals here
-            </div>
-          ) : (
-            stage.deals.map((deal) => (
-              <SortableDealCard
-                key={deal.id}
-                deal={deal}
-                disabled={disabled}
-                onClick={() => onDealClick(deal)}
-                onMove={onMove}
-              />
-            ))
-          )}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {stage.deals.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)]/50 px-4 text-center text-xs font-bold text-[var(--fi-muted)]"
+              >
+                Drop deals here
+              </motion.div>
+            ) : (
+              stage.deals.map((deal) => (
+                <motion.div
+                  key={deal.id}
+                  layout="position"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.16, ease: 'easeOut' }}
+                >
+                  <SortableDealCard
+                    deal={deal}
+                    disabled={disabled}
+                    onClick={() => onDealClick(deal)}
+                    onMove={onMove}
+                  />
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
         </div>
       </SortableContext>
     </section>
