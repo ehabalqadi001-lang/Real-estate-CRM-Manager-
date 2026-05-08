@@ -196,10 +196,10 @@ export const dashboardNavigation: NavigationGroup[] = [
       { title: 'مركز التسويق', titleKey: 'marketingHub', href: '/dashboard/marketing', permission: 'messages.read', icon: Megaphone },
       { title: 'مكتبة المهارات', titleKey: 'marketingSkills', href: '/dashboard/marketing/skills', permission: 'messages.read', icon: BookOpen },
       { title: 'مكتبة الأصول', titleKey: 'marketingAssets', href: '/dashboard/marketing/assets', permission: 'messages.read', icon: Wand2 },
-      { title: 'فريق التسويق', titleKey: 'marketingTeam', href: '/dashboard/marketing/team', permission: 'erp.hr.view', icon: Users },
+      { title: 'فريق التسويق', titleKey: 'marketingTeam', href: '/dashboard/marketing/team', permission: 'messages.read', icon: Users },
       { title: 'الحملات التسويقية', titleKey: 'marketingCampaigns', href: '/dashboard/marketing/campaigns', permission: 'messages.create', icon: Megaphone },
-      { title: 'مولّد SEO', titleKey: 'seoBlog', href: '/admin/seo-blog', permission: 'platform.manage', icon: PenLine },
-      { title: 'Ads API Connector', titleKey: 'adsApi', href: '/admin/ads-api', permission: 'platform.manage', icon: Megaphone },
+      { title: 'مولّد SEO', titleKey: 'seoBlog', href: '/dashboard/marketing/seo-blog', permission: 'marketing.manage', icon: PenLine },
+      { title: 'Ads API Connector', titleKey: 'adsApi', href: '/dashboard/marketing/ads-api', permission: 'marketing.manage', icon: Megaphone },
     ],
   },
   {

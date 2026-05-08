@@ -65,7 +65,8 @@
       "realEstateMarket": "السوق العقاري",
       "marketplaceAdmin": "Marketplace Hub (Admin)",
       "platform": "المنصة",
-      "nexus": "NEXUS AI OS"
+      "nexus": "NEXUS AI OS",
+      "marketing": "التسويق الذكي"
     },
     "items": {
       "home": "الرئيسية",
@@ -144,7 +145,12 @@
       "creativeStudio": "AI Creative Studio",
       "featureFlags": "Feature Flags",
       "apiVault": "API Vault",
-      "aiLeadScoring": "تقييم العملاء بالـ AI"
+      "aiLeadScoring": "تقييم العملاء بالـ AI",
+      "marketingHub": "مركز التسويق",
+      "marketingSkills": "مكتبة المهارات",
+      "marketingAssets": "مكتبة الأصول",
+      "marketingTeam": "فريق التسويق",
+      "marketingCampaigns": "الحملات التسويقية"
     }
   },
   "sidebar": {

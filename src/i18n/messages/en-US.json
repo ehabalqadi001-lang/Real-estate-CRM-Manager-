@@ -65,7 +65,8 @@
       "realEstateMarket": "Real Estate Market",
       "marketplaceAdmin": "Marketplace Hub (Admin)",
       "platform": "Platform",
-      "nexus": "NEXUS AI OS"
+      "nexus": "NEXUS AI OS",
+      "marketing": "Smart Marketing"
     },
     "items": {
       "home": "Home",
@@ -144,7 +145,12 @@
       "creativeStudio": "AI Creative Studio",
       "featureFlags": "Feature Flags",
       "apiVault": "API Vault",
-      "aiLeadScoring": "AI Lead Scoring"
+      "aiLeadScoring": "AI Lead Scoring",
+      "marketingHub": "Marketing Hub",
+      "marketingSkills": "Skills Library",
+      "marketingAssets": "Assets Library",
+      "marketingTeam": "Marketing Team",
+      "marketingCampaigns": "Campaigns"
     }
   },
   "sidebar": {

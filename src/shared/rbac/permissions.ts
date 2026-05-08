@@ -151,6 +151,10 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
   'inventory.update',
   'inventory.delete',
   'inventory.import',
+  'messages.read',
+  'messages.create',
+  'messages.broadcast',
+  'messages.whatsapp',
   'marketing.view',
   'marketing.manage',
 ]
