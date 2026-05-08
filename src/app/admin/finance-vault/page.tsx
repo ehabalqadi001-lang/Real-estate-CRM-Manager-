@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ShieldAlert, TrendingUp, Wallet, ReceiptText, Download, Clock, CheckCircle2, XCircle, Users } from 'lucide-react'
 import { PayoutConfirmDialog } from './PayoutConfirmDialog'
+import { SetApprovalPinForm } from './SetApprovalPinForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -168,6 +169,10 @@ export default async function FinanceVaultPage() {
             ))}
           </div>
         )}
+      </div>
+      {/* Approval PIN Setup */}
+      <div className="max-w-sm">
+        <SetApprovalPinForm />
       </div>
     </div>
   )
