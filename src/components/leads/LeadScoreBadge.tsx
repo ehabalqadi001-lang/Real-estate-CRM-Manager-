@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Flame, Snowflake, Sun } from 'lucide-react'
 import { useI18n } from '@/hooks/use-i18n'
@@ -52,7 +52,6 @@ export default function LeadScoreBadge({ score }: { score: number }) {
       <div className="hidden md:block w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-1000 ${score >= 75 ? 'bg-red-500' : score >= 40 ? 'bg-amber-400' : 'bg-blue-400'}`}
-          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ width: `${score}%` }}
         ></div>
       </div>

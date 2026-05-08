@@ -1,4 +1,4 @@
-import { getI18n } from '@/lib/i18n'
+﻿import { getI18n } from '@/lib/i18n'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Users, TrendingUp, DollarSign, Target } from 'lucide-react'
@@ -161,7 +161,6 @@ export default async function PerformancePage() {
                       <div className="bg-slate-100 rounded-full h-2">
                         <div
                           className="bg-blue-500 h-2 rounded-full transition-all"
-                          // eslint-disable-next-line no-inline-styles/no-inline-styles
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>

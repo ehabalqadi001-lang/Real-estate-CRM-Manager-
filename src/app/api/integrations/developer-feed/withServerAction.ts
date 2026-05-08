@@ -20,7 +20,7 @@ export type ActionState<T> = {
 export function withServerAction<TInput, TOutput>(
   allowedRoles: string[],
   schema: z.ZodType<TInput>,
-  handler: (data: TInput, userMeta: Record<string, any>) => Promise<TOutput>
+  handler: (data: TInput, userMeta: Record<string, unknown>) => Promise<TOutput>
 ) {
   return async (formDataOrObject: FormData | TInput): Promise<ActionState<TOutput>> => {
     try {
@@ -42,7 +42,7 @@ export function withServerAction<TInput, TOutput>(
       }
 
       // 2. Input Validation
-      let inputData: any = formDataOrObject
+      let inputData: FormData | TInput | Record<string, FormDataEntryValue> = formDataOrObject
       if (formDataOrObject instanceof FormData) {
         inputData = Object.fromEntries(formDataOrObject.entries())
       }
@@ -55,9 +55,9 @@ export function withServerAction<TInput, TOutput>(
       // 3. Execute Handler
       const result = await handler(parsed.data, userMeta)
       return { success: true, data: result }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[SERVER_ACTION_ERROR]', error)
-      return { success: false, error: error.message || 'Internal Server Error' }
+      return { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' }
     }
   }
 }

@@ -92,7 +92,7 @@ export default async function AttendancePage() {
   if (companyId) logsQuery = logsQuery.eq('company_id', companyId)
 
   // Today's attendance from attendance table
-  let todayQuery = supabase
+  const todayQuery = supabase
     .from('attendance')
     .select(`
       employee_id, check_in, check_out, status,

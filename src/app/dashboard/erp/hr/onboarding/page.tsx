@@ -58,6 +58,7 @@ export default async function OnboardingPage() {
   const companyId = nullableUuid(profile.company_id) ?? nullableUuid(profile.tenant_id)
 
   // Get employees hired in last 90 days (active onboarding window)
+  // eslint-disable-next-line react-hooks/purity
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   let empQuery = supabase
@@ -124,7 +125,7 @@ export default async function OnboardingPage() {
           <ClipboardList className="mx-auto mb-3 size-10 text-[var(--fi-muted)]" />
           <p className="font-black text-[var(--fi-ink)]">لا يوجد موظفون جدد في نطاق الـ 90 يوم</p>
           <p className="mt-1 text-sm font-bold text-[var(--fi-muted)]">
-            عند إضافة موظف جديد، استخدم زر "بدء بروتوكول الاستقبال" لإطلاق قائمة المهام تلقائياً.
+            عند إضافة موظف جديد، استخدم زر &quot;بدء بروتوكول الاستقبال&quot; لإطلاق قائمة المهام تلقائياً.
           </p>
         </section>
       ) : (

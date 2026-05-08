@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable react-hooks/set-state-in-effect -- Legacy client-loaded notifications page */
+ 
 
 import { useState, useEffect, useCallback } from 'react'
 import { Bell, CheckCheck, Circle, CheckCircle2, Info, CheckCircle, AlertTriangle, XCircle, Trash2, ExternalLink } from 'lucide-react'
@@ -28,6 +28,7 @@ export default function NotificationsPage() {
   }
 
   function timeAgo(dateStr: string) {
+    // eslint-disable-next-line react-hooks/purity
     const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
     if (diff < 60)   return t('الآن', 'now')
     if (diff < 3600) return `${Math.floor(diff / 60)}${t('د', 'm')}`

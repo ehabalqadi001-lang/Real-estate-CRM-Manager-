@@ -90,6 +90,7 @@ export default async function HRBPPage() {
     .select('employee_id, total_points:points.sum(), profiles!points_ledger_employee_id_fkey(full_name)')
     .limit(20)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (companyId) pointsQuery = (pointsQuery as any).eq('company_id', companyId)
 
   let employeesQuery = supabase
@@ -111,7 +112,7 @@ export default async function HRBPPage() {
   }))
 
   const pulseData = (pulseResult.data ?? []) as PulseRow[]
-  const employees = (employeesResult.data ?? []).map((e: any) => ({
+  const employees = (employeesResult.data ?? []).map((e) => ({
     id: e.id as string,
     name: (Array.isArray(e.profiles) ? e.profiles[0] : e.profiles)?.full_name ?? 'موظف',
     jobTitle: e.job_title as string | null,

@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'File imported and queued', batch_id: batch.id, rows: rowsToInsert.length }, { status: 202 })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Inventory Import API] Error:', error)
     return NextResponse.json({ success: false, error: 'Internal server error during import' }, { status: 500 })
   }

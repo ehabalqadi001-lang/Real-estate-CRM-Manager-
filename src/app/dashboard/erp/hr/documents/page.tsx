@@ -100,6 +100,7 @@ export default async function DocumentsPage() {
 
   const canWrite    = HR_WRITE_ROLES.includes(profile.role)
   const today       = new Date().toISOString().slice(0, 10)
+  // eslint-disable-next-line react-hooks/purity
   const in30Days    = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   const verifiedCount  = docs.filter((d) => d.verified).length
   const pendingVerify  = docs.filter((d) => !d.verified).length

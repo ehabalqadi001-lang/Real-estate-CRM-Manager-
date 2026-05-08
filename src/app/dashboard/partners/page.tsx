@@ -151,6 +151,7 @@ export default async function PartnersManagementPage({ searchParams }: PageProps
   const appPage = parseInt(currentParams.appPage, 10)
   const salePage = parseInt(currentParams.salePage, 10)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyFilters = (query: any) => {
     let q = query
     if (currentParams.status) q = q.eq('status', currentParams.status)

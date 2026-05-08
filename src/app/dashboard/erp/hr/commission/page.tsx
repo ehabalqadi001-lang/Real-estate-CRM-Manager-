@@ -88,7 +88,7 @@ export default async function CommissionPage() {
     profiles: Array.isArray(d.profiles) ? d.profiles[0] : d.profiles,
   }))
 
-  const employees = (employeesResult.data ?? []).map((e: any) => ({
+  const employees = (employeesResult.data ?? []).map((e) => ({
     id: e.id as string,
     name: (Array.isArray(e.profiles) ? e.profiles[0] : e.profiles)?.full_name ?? t('موظف', 'Employee'),
     jobTitle: e.job_title as string | null,

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import type { ReactNode } from 'react'
@@ -524,18 +524,15 @@ function PipelineColumn({
       }`}
     >
       {/* Column header */}
-      {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
       <div className="border-b border-[var(--fi-line)] p-4" style={{ background: stage.bg }}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
             <span
               className={`size-2.5 rounded-full ${stage.tone} shadow-sm`}
               style={{ boxShadow: `0 0 0 3px ${stage.color}22` }}
             />
             <h2 className="font-black text-[var(--fi-ink)]">{stage.label}</h2>
           </div>
-          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           <Badge
             className="sales-pill font-black tabular-nums"
             variant="secondary"
@@ -600,7 +597,6 @@ function SortableDealCard({
   }
 
   return (
-    // eslint-disable-next-line no-inline-styles/no-inline-styles
     <div ref={setNodeRef} style={style}>
       <CompactDealCard
         deal={deal}
@@ -667,7 +663,6 @@ function CompactDealCard({
             {deal.unitName || deal.projectName || deal.title}
           </p>
           <div className="mt-3 flex items-center justify-between gap-2">
-            {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-black"
               style={{

@@ -40,9 +40,9 @@ export class BatchProcessorService {
         await this.processRow(supabaseAdmin, batch.developer_id, batch.company_id, row)
         processed++
         await supabaseAdmin.from('inventory_ingestion_rows').update({ status: 'processed' }).eq('id', row.id)
-      } catch (err: any) {
+      } catch (err: unknown) {
         failed++
-        await supabaseAdmin.from('inventory_ingestion_rows').update({ status: 'failed', error_message: err.message }).eq('id', row.id)
+        await supabaseAdmin.from('inventory_ingestion_rows').update({ status: 'failed', error_message: err instanceof Error ? err.message : String(err) }).eq('id', row.id)
       }
     }
 
@@ -53,12 +53,12 @@ export class BatchProcessorService {
     return { success: true, processed, failed, status: finalStatus }
   }
 
-  private static async processRow(supabase: SupabaseClient, developerId: string | null, companyId: string | null, row: any) {
-    const payload = row.raw_payload 
-    
+  private static async processRow(supabase: SupabaseClient, developerId: string | null, companyId: string | null, row: Record<string, unknown>) {
+    const payload = row.raw_payload as Record<string, unknown>
+
     const projectName = payload.project_name || 'Default Project'
     const unitNumber = payload.unit_number || payload.unit
-    const price = payload.price ? parseFloat(payload.price) : null
+    const price = payload.price ? parseFloat(String(payload.price)) : null
     const status = payload.status || 'available'
 
     if (!unitNumber) throw new Error('Missing required field: unit_number')

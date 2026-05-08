@@ -103,7 +103,7 @@ export function CommissionsDashboard({
   ], [numLocale, t])
 
   // TanStack Table intentionally returns stable methods that React Compiler cannot memoize safely.
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const table = useReactTable({
     data: filtered,
     columns,

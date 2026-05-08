@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { useI18n } from '@/hooks/use-i18n'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GmpxApiLoader = 'gmpx-api-loader' as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GmpMap = 'gmp-map' as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GmpxPlacePicker = 'gmpx-place-picker' as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GmpAdvancedMarker = 'gmp-advanced-marker' as any
 
 const defaultCenter = {
@@ -23,8 +27,11 @@ interface GoogleLocationPickerProps {
 
 export default function GoogleLocationPicker({ value, onChange }: GoogleLocationPickerProps) {
   const { t } = useI18n()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markerRef = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const placePickerRef = useRef<any>(null)
   const onChangeRef = useRef(onChange)
 
@@ -36,13 +43,14 @@ export default function GoogleLocationPicker({ value, onChange }: GoogleLocation
   }, [onChange])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (value) setMarkerPos(value)
   }, [value])
 
   useEffect(() => {
     if (!isLoaded) return;
 
-    let clickListener: any;
+    let clickListener: { remove?: () => void } | undefined;
     const mapEl = mapRef.current;
     const placePickerEl = placePickerRef.current;
 
@@ -72,7 +80,7 @@ export default function GoogleLocationPicker({ value, onChange }: GoogleLocation
 
       if (mapEl.innerMap) {
         mapEl.innerMap.setOptions({ mapTypeControl: false });
-        clickListener = mapEl.innerMap.addListener('click', (e: any) => {
+        clickListener = mapEl.innerMap.addListener('click', (e: { latLng?: { lat: (() => number) | number; lng: (() => number) | number } }) => {
           if (e.latLng) {
             const lat = typeof e.latLng.lat === 'function' ? e.latLng.lat() : e.latLng.lat;
             const lng = typeof e.latLng.lng === 'function' ? e.latLng.lng() : e.latLng.lng;
@@ -89,7 +97,7 @@ export default function GoogleLocationPicker({ value, onChange }: GoogleLocation
 
     return () => {
       placePickerEl.removeEventListener('gmpx-placechange', handlePlaceChange);
-      const google = (window as any).google;
+      const google = (window as Window & { google?: { maps?: { event?: { removeListener: (l: unknown) => void } } } }).google;
       if (clickListener && google?.maps?.event) {
         google.maps.event.removeListener(clickListener);
       }

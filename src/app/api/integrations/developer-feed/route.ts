@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       rows_queued: items.length
     }, { status: 202 })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API Gateway] Ingestion Error:', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error during inventory ingestion' },

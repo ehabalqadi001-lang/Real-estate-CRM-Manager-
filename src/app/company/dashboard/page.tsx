@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+﻿import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import {
   AlertTriangle, Users, TrendingUp, UserPlus, Phone, ShieldCheck,
@@ -363,7 +363,6 @@ export default async function CompanyDashboardPage() {
                       <span className="text-xs font-black text-slate-700">{count} <span className="text-slate-400 font-normal">({totalPct}%)</span></span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                       <div className="h-full bg-gradient-to-l from-[#00C27C] to-[#009F64] rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </div>

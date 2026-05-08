@@ -58,7 +58,7 @@ export default async function ReservationsPage() {
 
   // batch-fetch unit names
   const unitIds = [...new Set(reservations.map(r => r.unit_id).filter(Boolean))]
-  let unitMap: Record<string, string> = {}
+  const unitMap: Record<string, string> = {}
   if (unitIds.length > 0) {
     const { data: units } = await supabase
       .from('inventory')
@@ -74,6 +74,7 @@ export default async function ReservationsPage() {
   }))
 
   // KPIs
+  // eslint-disable-next-line react-hooks/purity
   const now            = Date.now()
   const active         = reservations.filter(r => r.status === 'active')
   const expiringSoon   = active.filter(r => r.expires_at && new Date(r.expires_at).getTime() - now < 24 * 3_600_000)

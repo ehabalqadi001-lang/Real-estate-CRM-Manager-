@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -36,7 +36,6 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
             whileHover={{ scale: 1.08, rotate: -3 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             className="flex size-10 shrink-0 items-center justify-center rounded-2xl shadow-md"
-            // eslint-disable-next-line no-inline-styles/no-inline-styles
             style={{ background: 'linear-gradient(135deg, #07172f 0%, #1a3a7a 100%)' }}
           >
             <Building2 className="size-5 text-white" />
@@ -78,7 +77,6 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 onClick={() => router.push('/marketplace/add-property')}
                 {...buttonMotion}
                 className="hidden h-10 items-center gap-2 rounded-2xl px-4 text-sm font-black text-white sm:inline-flex"
-                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ background: 'linear-gradient(135deg, #07172f, #1a3a7a)' }}
               >
                 <Plus className="size-4" />
@@ -120,7 +118,6 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 onClick={() => router.push('/register?role=client')}
                 {...buttonMotion}
                 className="hidden h-10 items-center gap-2 rounded-2xl px-4 text-sm font-black text-white sm:inline-flex"
-                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ background: 'linear-gradient(135deg, #07172f, #1a3a7a)' }}
               >
                 <UserRound className="size-4" />
@@ -131,7 +128,6 @@ export default function MarketplaceHeader({ user }: { user: MarketplaceUser | nu
                 onClick={() => router.push('/register?role=partner')}
                 {...buttonMotion}
                 className="hidden h-10 items-center gap-2 rounded-2xl px-4 text-sm font-black text-white sm:inline-flex"
-                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)' }}
               >
                 <Handshake className="size-4" />

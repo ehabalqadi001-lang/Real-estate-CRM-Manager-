@@ -81,3 +81,11 @@ supabase/.temp/
 
 .vercel
 .env*.local
+
+# local build/lint artifacts
+build.txt
+build_output.txt
+lint_output.txt
+tsc_output.txt
+.eslintrc.test.json
+.claude/settings.local.json

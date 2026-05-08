@@ -63,7 +63,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'points_ledger' },
-        (payload: any) => {
+        (payload: { new: unknown }) => {
           const newRecord = payload.new as PointTransaction
           setLedgerData((prev) => [newRecord, ...prev])
           

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Plus, X, TrendingUp, Target, Users } from 'lucide-react'
@@ -19,7 +19,6 @@ function ProgressBar({ actual, target, color }: { actual: number; target: number
         <span className="text-slate-400">{actual.toLocaleString(numLocale)} / {target.toLocaleString(numLocale)}</span>
       </div>
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-        {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
         <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>

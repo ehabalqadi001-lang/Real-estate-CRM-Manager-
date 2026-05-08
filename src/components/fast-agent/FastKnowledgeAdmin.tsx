@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Bot, BrainCircuit, CheckCircle2, Database, History, Loader2, MessageSquareText, RefreshCw, Search, Send } from 'lucide-react'
@@ -175,7 +175,6 @@ export function FastKnowledgeAdmin({ initialStatus }: { initialStatus: FastKnowl
                 <span className="text-[var(--fi-emerald)]">{embeddingCoverage}%</span>
               </div>
               <div className="mt-2 h-2 rounded-full bg-white">
-                {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
                 <div className="h-full rounded-full bg-[var(--fi-emerald)] transition-all" style={{ width: `${embeddingCoverage}%` }} />
               </div>
             </div>

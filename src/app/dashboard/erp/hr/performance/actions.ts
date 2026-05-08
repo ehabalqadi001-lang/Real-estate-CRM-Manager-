@@ -115,7 +115,8 @@ export async function submitSelfAssessmentAction(
       .maybeSingle()
 
     if (review?.reviewer_id) {
-      const empData = review.employees as any
+      type EmpShape = { profiles?: { full_name?: string | null } | null }
+      const empData = review.employees as EmpShape | EmpShape[]
       const empName = (Array.isArray(empData) ? empData[0] : empData)?.profiles?.full_name ?? 'موظف'
       await sendHRNotification(service, {
         companyId: review.company_id,

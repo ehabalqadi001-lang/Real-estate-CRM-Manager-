@@ -1,11 +1,12 @@
+import { SupabaseClient } from '@supabase/supabase-js'
 import { IngestionService } from '@/domains/inventory/services/IngestionService'
 
 export class ExcelParserService {
   /**
    * Auto-maps Arabic/English common Excel columns to our standard JSON schema
    */
-  static normalizeRow(row: Record<string, any>) {
-    const normalized: Record<string, any> = {}
+  static normalizeRow(row: Record<string, unknown>) {
+    const normalized: Record<string, unknown> = {}
 
     for (const [key, value] of Object.entries(row)) {
       const lowerKey = key.toLowerCase().trim()
@@ -44,7 +45,7 @@ export class ExcelParserService {
   /**
    * Processes raw Excel JSON array, normalizes it, and injects it into our standard mesh queue.
    */
-  static async processExcelUpload(supabase: any, data: { developerId: string; companyId?: string; fileName: string; rows: Record<string, any>[] }) {
+  static async processExcelUpload(supabase: SupabaseClient, data: { developerId: string; companyId?: string; fileName: string; rows: Record<string, unknown>[] }) {
     // 1. Normalize mapping
     const mappedRows = data.rows.map(row => this.normalizeRow(row))
 

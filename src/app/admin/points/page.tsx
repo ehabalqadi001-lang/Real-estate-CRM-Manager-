@@ -46,7 +46,7 @@ export default async function PointsAdminPage() {
       .limit(50),
   ])
 
-  const legacyById = new Map<string, any>((legacyUsers ?? []).map((user) => [user.id, user]))
+  const legacyById = new Map((legacyUsers ?? []).map((user) => [user.id, user]))
   const users = userProfiles && userProfiles.length > 0
     ? userProfiles.map((user) => {
       const legacy = legacyById.get(user.id)

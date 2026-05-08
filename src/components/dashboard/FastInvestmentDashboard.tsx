@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -256,7 +256,6 @@ export function FastInvestmentDashboard({
             <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--fi-line)]">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[var(--fi-emerald)] to-[var(--fi-emerald-2)] transition-all duration-700"
-                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ width: `${Math.min(conversion, 100)}%` }}
                 role="progressbar"
                 aria-valuenow={conversion}

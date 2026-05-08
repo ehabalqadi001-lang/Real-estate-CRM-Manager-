@@ -114,7 +114,7 @@ export default async function EmployeePortalPage() {
     ? (Array.isArray(employee.profiles) ? employee.profiles[0] : employee.profiles)
     : null
 
-  const companyId = (employeeData as any)?.company_id ?? null
+  const companyId = (employeeData as Record<string, unknown>)?.company_id ?? null
 
   const leaveTypesQuery = supabase
     .from('leave_types')

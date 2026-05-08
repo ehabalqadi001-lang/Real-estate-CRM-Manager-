@@ -5,7 +5,7 @@ import PropertyGrid from '@/components/marketplace/PropertyGrid'
 import { Button } from '@/components/ui/button'
 import { createServerClient } from '@/lib/supabase/server'
 import { marketplaceSampleProperties } from '@/domains/marketplace/sample-data'
-import type { MarketplaceUser } from '@/domains/marketplace/types'
+import type { MarketplaceUser, MarketplaceProperty } from '@/domains/marketplace/types'
 import { MessageCircle, ShieldCheck, Map, Video } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,7 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
     ? { id: user.id, email: user.email ?? null, name: user.email ?? 'مستخدم', role: null }
     : null
 
-  let property: any = marketplaceSampleProperties.find((item) => item.id === id)
+  let property: (Partial<MarketplaceProperty> & { virtualTourUrl?: string; videoUrl?: string }) | undefined = marketplaceSampleProperties.find((item) => item.id === id)
   
   // If not found in samples, try DB
   if (!property) {
@@ -50,8 +50,8 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
             <Image
-              src={property.imageUrl}
-              alt={property.title}
+              src={property.imageUrl ?? ''}
+              alt={property.title ?? ''}
               width={1100}
               height={550}
               priority

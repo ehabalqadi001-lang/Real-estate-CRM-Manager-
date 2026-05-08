@@ -201,7 +201,7 @@ export default async function PerformancePage() {
                       {r.employees?.job_title ?? '—'} — {cycleLabel[r.review_cycle] ?? r.review_cycle} — {r.period_label}
                     </p>
                     {r.self_notes && (
-                      <p className="mt-2 text-xs text-[var(--fi-muted)] italic">"{r.self_notes}"</p>
+                      <p className="mt-2 text-xs text-[var(--fi-muted)] italic">&quot;{r.self_notes}&quot;</p>
                     )}
                     <div className="mt-2 flex flex-wrap gap-3">
                       {[
@@ -290,7 +290,7 @@ export default async function PerformancePage() {
               {!reviews.length && (
                 <tr>
                   <td colSpan={canWrite ? 8 : 7} className="px-4 py-12 text-center text-sm font-bold text-[var(--fi-muted)]">
-                    لا توجد دورات تقييم بعد. استخدم "إنشاء دورة تقييم جديدة" للبدء.
+                    لا توجد دورات تقييم بعد. استخدم &quot;إنشاء دورة تقييم جديدة&quot; للبدء.
                   </td>
                 </tr>
               )}

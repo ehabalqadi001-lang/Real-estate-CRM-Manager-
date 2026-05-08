@@ -25,6 +25,71 @@ import {
 import { GamificationDashboard } from './GamificationDashboard'
 import { SubmitButton } from './SubmitButton'
 
+interface PointPackage {
+  id?: string
+  name?: string
+  description?: string
+  package_kind?: string
+  amount_egp?: number
+  currency?: string
+  points_amount?: number
+  billing_interval?: string | null
+  is_active?: boolean
+  sort_order?: number
+  updated_at?: string
+}
+
+interface AdCostConfig {
+  regular_points_cost?: number
+  premium_points_cost?: number
+  regular_duration_days?: number
+  premium_duration_days?: number
+  points_per_egp?: number
+}
+
+interface PaymobSettings {
+  card_integration_id?: string
+  wallet_integration_id?: string
+  card_iframe_id?: string
+  updated_at?: string
+}
+
+interface WalletRow {
+  id: string
+  user_id: string
+  points_balance: number | null
+  lifetime_points_earned: number | null
+  lifetime_points_spent: number | null
+  updated_at?: string
+}
+
+interface UserProfile {
+  id: string
+  full_name?: string | null
+  email?: string | null
+  company_name?: string | null
+}
+
+interface TransactionRow {
+  id: string
+  user_id?: string | null
+  type?: string | null
+  points_delta?: number | null
+  balance_after?: number | null
+  money_amount?: number | null
+  currency?: string | null
+  reason?: string | null
+  created_at?: string | null
+  paymob_transaction_id?: string | null
+}
+
+interface GamificationUserRow {
+  id: string
+  full_name: string | null
+  email: string | null
+  company_name?: string | null
+}
+
 const TX_TYPE_CLASSES: Record<string, string> = {
   paymob_topup: 'bg-[#EEF6F5] text-[#27AE60]',
   manual_grant: 'bg-blue-50 text-blue-600',
@@ -58,7 +123,7 @@ function Metric({ label, value, suffix = 'pts' }: { label: string; value: number
 function PackageEditor({
   pointPackage,
 }: {
-  pointPackage?: any
+  pointPackage?: PointPackage
 }) {
   const isNew = !pointPackage?.id
   const packageKind = pointPackage?.package_kind ?? 'one_time'
@@ -166,13 +231,13 @@ function PackageEditor({
 }
 
 interface PointsDashboardClientProps {
-  costs: any
-  paymobSettings: any
-  pointPackages: any[]
-  wallets: any[]
-  users: any[]
-  transactions: any[]
-  gamificationUsers: any[]
+  costs: AdCostConfig | null
+  paymobSettings: PaymobSettings | null
+  pointPackages: PointPackage[]
+  wallets: WalletRow[]
+  users: UserProfile[]
+  transactions: TransactionRow[]
+  gamificationUsers: GamificationUserRow[]
   totalCirculatingPoints: number
   totalLifetimeEarned: number
   recentTopupsEGP: number
@@ -190,7 +255,7 @@ export function PointsDashboardClient({
   totalLifetimeEarned,
   recentTopupsEGP,
 }: PointsDashboardClientProps) {
-  const userById = new Map<string, any>((users ?? []).map((user) => [user.id, user]))
+  const userById = new Map<string, UserProfile>((users ?? []).map((user) => [user.id, user]))
   const activePackagesCount = (pointPackages ?? []).filter((item) => item.is_active).length
 
   return (
@@ -399,12 +464,12 @@ export function PointsDashboardClient({
             </thead>
             <tbody className="divide-y divide-[#DDE6E4]">
               {(transactions ?? []).map((tx) => {
-                const owner = userById.get(tx.user_id)
+                const owner = tx.user_id ? userById.get(tx.user_id) : undefined
                 return (
                   <tr key={tx.id} className="transition hover:bg-[#F6FAF7]">
                     <td className="px-4 py-3 font-semibold">{owner?.full_name ?? owner?.email ?? String(tx.user_id ?? '').slice(0, 8)}</td>
                     <td className="px-4 py-3">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${TX_TYPE_CLASSES[tx.type] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tx.type ? (TX_TYPE_CLASSES[tx.type] ?? 'bg-gray-100 text-gray-600') : 'bg-gray-100 text-gray-600'}`}>
                         {tx.type}
                       </span>
                     </td>
@@ -421,7 +486,7 @@ export function PointsDashboardClient({
                       {tx.paymob_transaction_id ? `${tx.paymob_transaction_id.slice(0, 12)}...` : '-'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-semibold text-[#64748B]">
-                      {new Date(tx.created_at).toLocaleDateString('en-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-EG', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                     </td>
                   </tr>
                 )

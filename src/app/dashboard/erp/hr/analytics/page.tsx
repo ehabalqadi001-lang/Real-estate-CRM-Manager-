@@ -62,7 +62,7 @@ export default async function HRAnalyticsPage() {
     .eq('status', 'approved')
   if (companyId) leaveQuery = leaveQuery.eq('company_id', companyId)
 
-  let deptQuery = supabase
+  const deptQuery = supabase
     .from('departments')
     .select('id, name_ar, name')
 

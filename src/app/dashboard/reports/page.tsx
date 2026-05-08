@@ -1,4 +1,4 @@
-import { getI18n } from '@/lib/i18n'
+﻿import { getI18n } from '@/lib/i18n'
 import { DollarSign, FileBarChart2, Target, TrendingUp, Users } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/require-role'
@@ -165,7 +165,6 @@ export default async function ReportsPage() {
                     <div className="h-2.5 overflow-hidden rounded-full bg-[var(--fi-soft)]">
                       <div
                         className="h-full rounded-full transition-all duration-700"
-                        // eslint-disable-next-line no-inline-styles/no-inline-styles
                         style={{ width: `${percentage}%`, background: developerName === 'غير محدد' ? '#EF4444' : 'var(--fi-gradient-primary)' }}
                       />
                     </div>

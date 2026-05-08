@@ -11,7 +11,7 @@ jest.mock('./useNotifications', () => ({
 
 // 2. محاكاة مكون NotificationCenter
 jest.mock('./NotificationCenter', () => ({
-  NotificationCenter: ({ open, onOpenChange }: any) => (
+  NotificationCenter: ({ open, onOpenChange }: { open: boolean, onOpenChange: (val: boolean) => void }) => (
     <div data-testid="mock-notification-center" data-open={open}>
       <button onClick={() => onOpenChange(false)}>Close</button>
     </div>
@@ -20,12 +20,13 @@ jest.mock('./NotificationCenter', () => ({
 
 // 3. محاكاة Framer Motion لتجنب أخطاء الأنيميشن أثناء الاختبار
 jest.mock('framer-motion', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react')
   return {
     motion: {
-      span: ({ children, className }: any) => <span className={className}>{children}</span>,
+      span: ({ children, className }: { children: React.ReactNode, className?: string }) => <span className={className}>{children}</span>,
     },
-    AnimatePresence: ({ children }: any) => <>{children}</>,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   }
 })
 
@@ -55,7 +56,7 @@ describe('NotificationBell Component', () => {
   it('يجب أن يعرض زر مفعل عندما يتم تمرير userId', () => {
     render(<NotificationBell userId="user-123" />)
     
-    const button = screen.getByRole('button', { name: 'فتح الإشعارات' })
+    const button = screen.getByRole('button', { name: 'Open notifications' })
     expect(button).toBeInTheDocument()
     expect(button).not.toBeDisabled()
   })
@@ -63,7 +64,7 @@ describe('NotificationBell Component', () => {
   it('يجب أن يفتح NotificationCenter عند النقر على الزر', () => {
     render(<NotificationBell userId="user-123" />)
     
-    const button = screen.getByRole('button', { name: 'فتح الإشعارات' })
+    const button = screen.getByRole('button', { name: 'Open notifications' })
     fireEvent.click(button)
     
     const center = screen.getByTestId('mock-notification-center')
@@ -78,25 +79,24 @@ describe('NotificationBell Component', () => {
     expect(badge).not.toBeInTheDocument()
   })
 
-  it('يجب أن يعرض الرقم بالأرقام العربية (مثال: ٥) عندما يكون unreadCount أكبر من صفر', () => {
+  it('يجب أن يعرض الرقم (مثال: 5) عندما يكون unreadCount أكبر من صفر', () => {
     mockUseNotifications.mockReturnValue({
       unreadCount: 5,
     })
     render(<NotificationBell userId="user-123" />)
     
-    // الرقم 5 بتنسيق ar-EG هو '٥'
-    const badge = screen.getByText('٥')
+    const badge = screen.getByText('5')
     expect(badge).toBeInTheDocument()
     expect(badge).toHaveClass('bg-red-600') // للتأكد من ألوان التنبيه
   })
 
-  it('يجب أن يعرض "٩٩+" عندما يكون عدد الإشعارات غير المقروءة أكبر من 99', () => {
+  it('يجب أن يعرض "99+" عندما يكون عدد الإشعارات غير المقروءة أكبر من 99', () => {
     mockUseNotifications.mockReturnValue({
       unreadCount: 150,
     })
     render(<NotificationBell userId="user-123" />)
     
-    const badge = screen.getByText('٩٩+')
+    const badge = screen.getByText('99+')
     expect(badge).toBeInTheDocument()
   })
 })

@@ -1,3 +1,5 @@
+import { SupabaseClient } from '@supabase/supabase-js'
+
 /**
  * Domain Service for handling Inventory Ingestion (Developer API, Excel, CSV)
  */
@@ -7,7 +9,7 @@ export class IngestionService {
    * Creates a new processing batch in the database.
    */
   static async createBatch(
-    supabase: any, 
+    supabase: SupabaseClient,
     data: {
       developerId: string;
       companyId?: string;
@@ -36,7 +38,7 @@ export class IngestionService {
   /**
    * Queues rows into the batch for asynchronous processing.
    */
-  static async queueRows(supabase: any, batchId: string, rows: any[]) {
+  static async queueRows(supabase: SupabaseClient, batchId: string, rows: Record<string, unknown>[]) {
     const formattedRows = rows.map((row, index) => ({
       batch_id: batchId,
       row_number: index + 1,

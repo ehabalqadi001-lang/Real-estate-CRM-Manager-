@@ -88,13 +88,13 @@ export default async function AcademyPage() {
 
   if (companyId) coursesQuery = coursesQuery.eq('company_id', companyId)
 
-  let enrollmentsQuery = supabase
+  const enrollmentsQuery = supabase
     .from('course_enrollments')
     .select('id, course_id, employee_id, status, score, enrolled_at, completed_at, profiles!course_enrollments_employee_id_fkey(full_name)')
     .order('enrolled_at', { ascending: false })
     .limit(200)
 
-  let skillsQuery = supabase
+  const skillsQuery = supabase
     .from('skill_assessments')
     .select('id, employee_id, skill_name, current_level, target_level, gap, category, profiles!skill_assessments_employee_id_fkey(full_name)')
     .order('gap', { ascending: false })

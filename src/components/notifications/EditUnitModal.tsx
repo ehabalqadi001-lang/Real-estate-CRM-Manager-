@@ -27,8 +27,8 @@ export function EditUnitModal({ unit, projectId }: EditUnitModalProps) {
       try {
         await updateUnitDetails(formData)
         setIsOpen(false)
-      } catch (err: any) {
-        setError(err.message || t('حدث خطأ أثناء التحديث', 'An error occurred while updating'))
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : t('حدث خطأ أثناء التحديث', 'An error occurred while updating'))
       }
     })
   }

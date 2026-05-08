@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -129,7 +129,6 @@ export default function MFAPage() {
             onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))} // قبول الأرقام فقط
             required
           />
-          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           {error && <div style={{color: '#ef4444', fontSize: '13px', marginTop: '10px', fontWeight: 700}}>{error}</div>}
           
           <button type="submit" className="btn-submit" disabled={loading || verifyCode.length !== 6}>

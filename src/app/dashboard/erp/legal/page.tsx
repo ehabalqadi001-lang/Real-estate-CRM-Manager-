@@ -91,7 +91,7 @@ export default async function ERPLegalPage() {
       .limit(30),
   ])
 
-  const employees = (employeesRaw ?? []).map((e: any) => ({
+  const employees = (employeesRaw ?? []).map((e) => ({
     id: e.id as string,
     name: (Array.isArray(e.profiles) ? e.profiles[0] : e.profiles)?.full_name ?? t('موظف', 'Employee'),
   }))

@@ -28,8 +28,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ message: 'Property saved successfully' }, { status: 200 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
 
@@ -57,7 +57,7 @@ export async function DELETE(request: Request) {
     if (error) throw error
 
     return NextResponse.json({ message: 'Property removed from saved' }, { status: 200 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

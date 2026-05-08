@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 
-export type WebhookHandler = (req: Request, context: any) => Promise<NextResponse>
+export type WebhookHandler = (req: Request, context: unknown) => Promise<NextResponse>
 
 /**
  * Wrapper function for all incoming integrations (Developer feeds, VoIP, etc.)
  * Enforces security contracts: Timestamp validation, API keys, and Signatures.
  */
 export function webhookApi(handler: WebhookHandler) {
-  return async (req: Request, context: any) => {
+  return async (req: Request, context: unknown) => {
     try {
       // 1. Extract security headers
       const clientKey = req.headers.get('X-FI-Client-Key')

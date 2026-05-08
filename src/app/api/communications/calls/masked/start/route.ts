@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     // TODO: استدعاء Twilio API لإنشاء الاتصال الفعلي (سيتم تنفيذه بعد إضافة مفاتيح Twilio)
 
     return NextResponse.json({ success: true, sessionId: session.id, message: 'Masked call initiated and logged successfully.' })
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

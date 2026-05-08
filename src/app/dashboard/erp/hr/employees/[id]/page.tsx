@@ -89,7 +89,9 @@ export default async function EmployeeProfilePage({
     .maybeSingle()
 
   if (!empRaw) notFound()
-  const emp = empRaw as any
+  type EmpProfile = { full_name?: string | null; email?: string | null; phone?: string | null; role?: string | null }
+  type EmpType = typeof empRaw & { profiles?: EmpProfile | EmpProfile[] | null; bank_account_number?: string | null; basic_salary?: number | null; company_id?: string | null; allowed_wifi_ssid?: string | null }
+  const emp = empRaw as EmpType
   const empProfile = Array.isArray(emp.profiles) ? emp.profiles[0] : emp.profiles
 
   // Guard: non-super-admin can only see employees of their own company
@@ -197,7 +199,8 @@ export default async function EmployeeProfilePage({
     sale_value: number; commission_amount: number; triggered_commission: number
     deal_stage: string; status: string; created_at: string
   }>
-  const enrollments = ((enrollmentsResult.data ?? []) as any[]).map((e) => ({
+  type EnrollmentRow = { status: string; score?: number | null; enrolled_at: string; completed_at?: string | null; learning_courses: { title?: string; category?: string; duration_hours?: number } | { title?: string; category?: string; duration_hours?: number }[] | null }
+  const enrollments = ((enrollmentsResult.data ?? []) as EnrollmentRow[]).map((e) => ({
     ...e,
     learning_courses: Array.isArray(e.learning_courses) ? e.learning_courses[0] : e.learning_courses,
   }))
@@ -208,9 +211,10 @@ export default async function EmployeeProfilePage({
   const skills = (skillsResult.data ?? []) as Array<{
     skill_name: string; current_level: number; target_level: number; gap: number; category: string
   }>
-  const department = (departmentResult as any).data as { name_ar: string | null; name: string } | null
+  const department = (departmentResult as { data: { name_ar: string | null; name: string } | null }).data
 
-  const leaveRequests = ((leavesResult.data ?? []) as any[]).map((l) => ({
+  type LeaveRow = { id: string; leave_types: { name_ar?: string | null } | { name_ar?: string | null }[] | null; start_date: string; end_date: string; days_count: number; status: string; reason?: string | null; created_at: string }
+  const leaveRequests = ((leavesResult.data ?? []) as LeaveRow[]).map((l) => ({
     id: l.id as string,
     leaveType: (Array.isArray(l.leave_types) ? l.leave_types[0] : l.leave_types)?.name_ar ?? 'إجازة',
     startDate: l.start_date as string,
@@ -254,6 +258,7 @@ export default async function EmployeeProfilePage({
     ? burnoutHistory.reduce((s, b) => s + b.burnout_score, 0) / burnoutHistory.length
     : null
 
+  // eslint-disable-next-line react-hooks/purity
   const tenureMs = emp.hire_date ? Date.now() - new Date(emp.hire_date).getTime() : 0
   const tenureMonths = Math.floor(tenureMs / (1000 * 60 * 60 * 24 * 30.5))
   const tenureLabel = tenureMonths >= 12

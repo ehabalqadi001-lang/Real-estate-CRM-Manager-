@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Building2, Clock, DollarSign, MoreHorizontal, Phone, User } from 'lucide-react'
 import { fadeUp, staggerContainer } from '@/lib/motion'
@@ -54,7 +54,7 @@ export function PipelineBoard() {
         <motion.div variants={fadeUp} initial="hidden" animate="show" className="relative z-10">
           <h1 className="text-3xl font-black mb-2">Sales Command Pipeline</h1>
           <p className="text-white/70 font-semibold max-w-xl">
-            Manage your active deals, move clients through stages, and track your cell's overall GMV in real-time.
+            Manage your active deals, move clients through stages, and track your cell&apos;s overall GMV in real-time.
           </p>
         </motion.div>
       </div>
@@ -89,7 +89,7 @@ export function PipelineBoard() {
                     key={deal.id}
                     variants={fadeUp}
                     draggable
-                    onDragStart={(e: any) => handleDragStart(e, deal.id)}
+                    onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, deal.id)}
                     onDragEnd={() => setDraggedDeal(null)}
                     className={`sales-deal-card cursor-grab bg-white p-4 rounded-xl border ${draggedDeal === deal.id ? 'opacity-50' : 'opacity-100'}`}
                   >

@@ -81,7 +81,7 @@ export default async function SaleClaimsPage() {
 
   // build unit map for display
   const unitIds = [...new Set(claims.map(c => c.unit_id).filter(Boolean))]
-  let unitMap: Record<string, string> = {}
+  const unitMap: Record<string, string> = {}
   if (unitIds.length > 0) {
     const { data: ud } = await supabase.from('inventory').select('id, unit_number').in('id', unitIds)
     for (const u of ud ?? []) unitMap[u.id] = u.unit_number

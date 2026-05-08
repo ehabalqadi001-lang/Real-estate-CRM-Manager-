@@ -1,4 +1,4 @@
-import {
+﻿import {
   Shield, CheckCircle, XCircle, Clock,
   Phone, Mail, MessageSquare, FileText,
   Headphones,
@@ -102,7 +102,6 @@ export default async function BrokerProfilePage() {
           <span className="text-2xl font-black text-emerald-600">{completionPct}%</span>
         </div>
         <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
-          {/* eslint-disable-next-line no-inline-styles/no-inline-styles */}
           <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${completionPct}%` }} />
         </div>
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-2 gap-x-4">

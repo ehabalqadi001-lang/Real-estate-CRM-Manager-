@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+﻿import { createServerClient } from '@/lib/supabase/server'
 import { requireSession } from '@/shared/auth/session'
 import {
   Handshake, TrendingUp, Star, Clock, CheckCircle,
@@ -231,7 +231,6 @@ export default async function BrokerPortalPage() {
             <div className="h-2 bg-white/20 rounded-full overflow-hidden">
               <div
                 className="h-full bg-yellow-400 rounded-full transition-all"
-                // eslint-disable-next-line no-inline-styles/no-inline-styles
                 style={{ width: `${Math.min((data.paidAmount / 100000) * 100, 100)}%` }}
               />
             </div>

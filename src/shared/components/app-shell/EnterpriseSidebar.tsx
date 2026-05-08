@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -53,6 +53,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [pathname])
 
@@ -254,10 +255,10 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
         className="hidden h-screen shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out lg:block bg-white dark:bg-slate-950"
-        // eslint-disable-next-line no-inline-styles/no-inline-styles
         style={{ width: collapsed ? 72 : 280 }}
       >
         <div className="h-full overflow-hidden">
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <SidebarInner
             isCollapsed={collapsed}
             onToggleCollapse={() => setCollapsed((c) => !c)}
@@ -287,6 +288,7 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="absolute inset-y-0 start-0 flex w-[280px] flex-col shadow-2xl bg-white dark:bg-slate-950"
             >
+              {/* eslint-disable-next-line react-hooks/static-components */}
               <SidebarInner onNavigate={() => setMobileOpen(false)} />
             </motion.aside>
             <motion.button
@@ -309,7 +311,6 @@ export function EnterpriseSidebar({ profile }: EnterpriseSidebarProps) {
       {mobileItems.length > 0 && (
         <nav
           className="fi-bottom-nav fixed inset-x-3 bottom-3 z-50 grid gap-1 rounded-xl p-1 lg:hidden border border-[var(--fi-line)] bg-white/90 backdrop-blur-md shadow-lg dark:bg-slate-950/90"
-          // eslint-disable-next-line no-inline-styles/no-inline-styles
           style={{ gridTemplateColumns: `repeat(${mobileItems.length}, 1fr)` }}
           aria-label="Quick navigation"
         >

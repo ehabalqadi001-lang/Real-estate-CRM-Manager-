@@ -62,7 +62,7 @@ export default async function EOIPage() {
 
   // batch unit names for display
   const unitIds = [...new Set(eois.map(e => e.unit_id).filter(Boolean))]
-  let unitMap: Record<string, string> = {}
+  const unitMap: Record<string, string> = {}
   if (unitIds.length > 0) {
     const { data: uDetails } = await supabase
       .from('inventory')
