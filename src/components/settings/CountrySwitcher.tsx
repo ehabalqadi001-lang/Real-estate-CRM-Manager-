@@ -4,12 +4,14 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { Globe2, Loader2 } from 'lucide-react'
 import { COUNTRIES, type CountryCode } from '@/config/countries'
+import { useI18n } from '@/hooks/use-i18n'
 
 type CountrySwitcherProps = {
   initialCountry: CountryCode
 }
 
 export function CountrySwitcher({ initialCountry }: CountrySwitcherProps) {
+  const { t } = useI18n()
   const router = useRouter()
   const [country, setCountry] = useState<CountryCode>(initialCountry)
   const [isPending, startTransition] = useTransition()
@@ -32,8 +34,8 @@ export function CountrySwitcher({ initialCountry }: CountrySwitcherProps) {
         <div className="flex items-center gap-2">
           <Globe2 className="size-5 text-[var(--fi-emerald)]" />
           <div>
-            <h2 className="font-black text-[var(--fi-ink)]">الدولة والعملة</h2>
-            <p className="text-xs font-semibold text-[var(--fi-muted)]">تحدد العملة، الضريبة، أرقام الهاتف، واللغة المحلية.</p>
+            <h2 className="font-black text-[var(--fi-ink)]">{t('الدولة والعملة', 'Country & Currency')}</h2>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">{t('تحدد العملة، الضريبة، أرقام الهاتف، واللغة المحلية.', 'Sets the currency, tax, phone numbers, and local language.')}</p>
           </div>
         </div>
         {isPending ? <Loader2 className="size-4 animate-spin text-[var(--fi-emerald)]" /> : null}

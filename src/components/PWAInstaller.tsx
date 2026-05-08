@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Download, X } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function PWAInstaller() {
+  const { t } = useI18n()
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
 
@@ -48,13 +50,13 @@ export default function PWAInstaller() {
       <div className="flex items-start gap-3 rounded-2xl bg-slate-900 p-4 text-white shadow-2xl">
         <Download size={18} className="mt-0.5 flex-shrink-0 text-emerald-400" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold">تثبيت التطبيق</p>
-          <p className="mt-0.5 text-xs text-slate-400">أضف CRM إلى شاشتك الرئيسية للوصول السريع</p>
+          <p className="text-sm font-bold">{t('تثبيت التطبيق', 'Install App')}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t('أضف CRM إلى شاشتك الرئيسية للوصول السريع', 'Add CRM to your home screen for quick access')}</p>
           <button
             onClick={handleInstall}
             className="mt-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
           >
-            تثبيت التطبيق
+            {t('تثبيت التطبيق', 'Install App')}
           </button>
         </div>
         <button onClick={handleDismiss} className="flex-shrink-0 text-slate-500 hover:text-slate-300">
