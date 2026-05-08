@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { Bot, Loader2, Maximize2, MessageSquareText, Minimize2, Send, ShieldCheck, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { useI18n } from '@/hooks/use-i18n'
 
 type FastMessage = {
   role: 'user' | 'assistant'
@@ -18,12 +19,17 @@ type FastResponse = {
   conversationId: string | null
 }
 
-const welcomeMessage: FastMessage = {
-  role: 'assistant',
-  content: 'أنا FAST، مستشارك الذكي داخل النظام. اسألني عن العقارات، العملاء، الصفقات، الشركاء، التقارير، أو خطوات استخدام المنصة.',
-}
-
 export default function FastAgentWidget() {
+  const { t } = useI18n()
+
+  const welcomeMessage: FastMessage = {
+    role: 'assistant',
+    content: t(
+      'أنا FAST، مستشارك الذكي داخل النظام. اسألني عن العقارات، العملاء، الصفقات، الشركاء، التقارير، أو خطوات استخدام المنصة.',
+      "I'm FAST, your AI advisor. Ask me about properties, clients, deals, partners, reports, or how to use the platform."
+    ),
+  }
+
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [input, setInput] = useState('')
@@ -59,7 +65,7 @@ export default function FastAgentWidget() {
       console.error('FAST widget failed', error)
       setMessages((current) => [...current, {
         role: 'assistant',
-        content: 'تعذر الاتصال بوكيل FAST الآن. حاول مرة أخرى بعد لحظات.',
+        content: t('تعذر الاتصال بوكيل FAST الآن. حاول مرة أخرى بعد لحظات.', 'Could not connect to FAST agent. Please try again in a moment.'),
       }])
     } finally {
       setLoading(false)
@@ -82,7 +88,7 @@ export default function FastAgentWidget() {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-black">FAST AI Agent</p>
-                <p className="truncate text-xs font-semibold text-white/62">مستشار سياقي مرتبط بالصلاحيات</p>
+                <p className="truncate text-xs font-semibold text-white/62">{t('مستشار سياقي مرتبط بالصلاحيات', 'Context-aware role-based advisor')}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -92,7 +98,7 @@ export default function FastAgentWidget() {
                 size="icon"
                 className="size-8 rounded-xl text-white hover:bg-white/10 hover:text-white"
                 onClick={() => setExpanded((current) => !current)}
-                aria-label={expanded ? 'تصغير FAST' : 'تكبير FAST'}
+                aria-label={expanded ? t('تصغير FAST', 'Collapse FAST') : t('تكبير FAST', 'Expand FAST')}
               >
                 {expanded ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
               </Button>
@@ -102,7 +108,7 @@ export default function FastAgentWidget() {
                 size="icon"
                 className="size-8 rounded-xl text-white hover:bg-white/10 hover:text-white"
                 onClick={() => setOpen(false)}
-                aria-label="إغلاق FAST"
+                aria-label={t('إغلاق FAST', 'Close FAST')}
               >
                 <X className="size-4" />
               </Button>
@@ -126,7 +132,7 @@ export default function FastAgentWidget() {
               {loading && (
                 <div className="ml-auto inline-flex items-center gap-2 rounded-2xl border border-market-line bg-white px-4 py-3 text-sm font-bold text-market-slate">
                   <Loader2 className="size-4 animate-spin text-market-teal" />
-                  FAST يفكر...
+                  {t('FAST يفكر...', 'FAST is thinking...')}
                 </div>
               )}
             </div>
@@ -157,12 +163,12 @@ export default function FastAgentWidget() {
                       formRef.current?.requestSubmit()
                     }
                   }}
-                  placeholder="اكتب سؤالك لـ FAST..."
+                  placeholder={t('اكتب سؤالك لـ FAST...', 'Ask FAST a question...')}
                   className="max-h-32 min-h-20 resize-none rounded-2xl border-market-line bg-market-paper text-sm font-semibold"
                 />
                 <Button type="submit" disabled={loading || !input.trim()} className="rounded-2xl bg-market-teal text-white hover:bg-[#0B6F66]">
                   {loading ? <Loader2 className="ms-2 size-4 animate-spin" /> : <Send className="ms-2 size-4" />}
-                  إرسال
+                  {t('إرسال', 'Send')}
                 </Button>
               </form>
             </div>

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { MarketplaceProperty, MarketplaceUser } from '@/domains/marketplace/types'
 import { Bath, BedDouble, Eye, Heart, LockKeyhole, MapPin, MessageCircle, ShieldCheck, Sparkles, Square } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function PropertyGrid({
   properties,
@@ -18,6 +19,7 @@ export default function PropertyGrid({
   properties: MarketplaceProperty[]
   user: MarketplaceUser | null
 }) {
+  const { t } = useI18n()
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
   const sortedProperties = useMemo(
@@ -37,9 +39,9 @@ export default function PropertyGrid({
   if (!sortedProperties.length) {
     return (
       <div className="rounded-3xl border border-dashed border-market-line bg-white p-10 text-center">
-        <p className="text-xl font-black text-market-ink">لا توجد عقارات مطابقة الآن</p>
+        <p className="text-xl font-black text-market-ink">{t('لا توجد عقارات مطابقة الآن', 'No matching properties found')}</p>
         <p className="mt-2 text-sm font-semibold text-market-slate">
-          جرب تغيير الفلاتر أو أضف عقارك ليظهر بعد موافقة الفريق.
+          {t('جرب تغيير الفلاتر أو أضف عقارك ليظهر بعد موافقة الفريق.', 'Try changing filters or add your property to appear after team approval.')}
         </p>
       </div>
     )
@@ -71,7 +73,16 @@ function PropertyCard({
   favorite: boolean
   onToggleFavorite: () => void
 }) {
+  const { t, numLocale } = useI18n()
   const router = useRouter()
+
+  function formatPrice(price: number) {
+    const currency = t('ج.م', 'EGP')
+    if (price >= 1_000_000) {
+      return `${(price / 1_000_000).toLocaleString(numLocale, { maximumFractionDigits: 1 })} ${t('مليون', 'M')} ${currency}`
+    }
+    return `${price.toLocaleString(numLocale)} ${currency}`
+  }
 
   return (
     <Card className={`overflow-hidden rounded-3xl border bg-white py-0 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${property.featured ? 'border-market-gold/70' : 'border-market-line'}`}>
@@ -87,7 +98,7 @@ function PropertyCard({
           {property.featured && (
             <Badge className="bg-market-gold text-white">
               <Sparkles className="ms-1 size-3" />
-              مميز
+              {t('مميز', 'Featured')}
             </Badge>
           )}
           <Badge className="bg-white/92 text-market-navy">{property.listingKind === 'primary' ? 'Primary' : 'Resale'}</Badge>
@@ -95,7 +106,7 @@ function PropertyCard({
         <Button
           variant="ghost"
           size="icon"
-          aria-label="حفظ العقار"
+          aria-label={t('حفظ العقار', 'Save property')}
           onClick={onToggleFavorite}
           className="absolute left-3 top-3 rounded-2xl bg-white/88 text-market-navy hover:bg-white"
         >
@@ -109,7 +120,7 @@ function PropertyCard({
             <p className="text-2xl font-black tabular-nums text-market-navy">{formatPrice(property.price)}</p>
             <h3 className="mt-2 line-clamp-2 text-lg font-black leading-7 text-market-ink">{property.title}</h3>
           </div>
-          {property.urgent && <Badge className="bg-market-rose/10 text-market-rose">سريع</Badge>}
+          {property.urgent && <Badge className="bg-market-rose/10 text-market-rose">{t('سريع', 'Urgent')}</Badge>}
         </div>
 
         <p className="line-clamp-2 text-sm font-semibold leading-6 text-market-slate">{property.description}</p>
@@ -120,9 +131,9 @@ function PropertyCard({
         </div>
 
         <div className="grid grid-cols-3 rounded-2xl border border-market-line bg-market-paper text-center text-sm font-black text-market-ink">
-          <Fact icon={<BedDouble className="size-4" />} value={property.bedrooms ? `${property.bedrooms}` : '-'} label="غرف" />
-          <Fact icon={<Bath className="size-4" />} value={property.bathrooms ? `${property.bathrooms}` : '-'} label="حمام" />
-          <Fact icon={<Square className="size-4" />} value={`${property.areaSqm}`} label="م²" />
+          <Fact icon={<BedDouble className="size-4" />} value={property.bedrooms ? `${property.bedrooms}` : '-'} label={t('غرف', 'Beds')} />
+          <Fact icon={<Bath className="size-4" />} value={property.bathrooms ? `${property.bathrooms}` : '-'} label={t('حمام', 'Bath')} />
+          <Fact icon={<Square className="size-4" />} value={`${property.areaSqm}`} label="m²" />
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-market-line pt-4">
@@ -136,29 +147,29 @@ function PropertyCard({
               <p className="truncate text-sm font-black text-market-ink">{property.seller.name}</p>
               <p className="flex items-center gap-1 text-xs font-bold text-market-slate">
                 {property.seller.verified && <ShieldCheck className="size-3 text-market-teal" />}
-                {property.seller.verified ? 'موثق' : 'معلن'}
+                {property.seller.verified ? t('موثق', 'Verified') : t('معلن', 'Advertiser')}
                 <span>·</span>
-                {property.seller.rating.toLocaleString('ar-EG')}
+                {property.seller.rating.toLocaleString(numLocale)}
               </p>
             </div>
           </div>
           <p className="flex items-center gap-1 text-xs font-bold text-market-slate">
             <Eye className="size-3" />
-            {property.viewsCount.toLocaleString('ar-EG')}
+            {property.viewsCount.toLocaleString(numLocale)}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" className="rounded-2xl border-market-line" onClick={() => router.push(`/marketplace/${property.id}`)}>
             <Eye className="ms-1 size-4" />
-            التفاصيل
+            {t('التفاصيل', 'Details')}
           </Button>
           <Button
             className="rounded-2xl bg-market-teal text-white hover:bg-[#0B6F66]"
             onClick={() => router.push(user ? `/marketplace/chat?ad=${property.id}` : '/login')}
           >
             {user ? <MessageCircle className="ms-1 size-4" /> : <LockKeyhole className="ms-1 size-4" />}
-            {user ? 'محادثة' : 'دخول للتواصل'}
+            {user ? t('محادثة', 'Chat') : t('دخول للتواصل', 'Login to Contact')}
           </Button>
         </div>
       </CardContent>
@@ -174,11 +185,4 @@ function Fact({ icon, value, label }: { icon: ReactNode; value: string; label: s
       <span className="text-xs text-market-slate">{label}</span>
     </div>
   )
-}
-
-function formatPrice(price: number) {
-  if (price >= 1_000_000) {
-    return `${(price / 1_000_000).toLocaleString('ar-EG', { maximumFractionDigits: 1 })} مليون ج.م`
-  }
-  return `${price.toLocaleString('ar-EG')} ج.م`
 }

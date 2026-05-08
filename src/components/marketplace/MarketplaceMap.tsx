@@ -5,6 +5,7 @@ import L from 'leaflet'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface MarketplacePropertyMapItem {
   id: string
@@ -30,31 +31,33 @@ const icon = L.icon({
   iconAnchor: [12, 41],
 })
 
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function labelType(type: string) {
-  const labels: Record<string, string> = {
-    residential: 'سكني',
-    commercial: 'تجاري',
-    administrative: 'إداري',
-    medical: 'طبي',
-    mixed: 'متعدد الاستخدام',
-    land: 'أرض',
-  }
-  return labels[type] ?? type
-}
-
 export default function MarketplaceMap({ properties, height = '400px' }: MarketplaceMapProps) {
+  const { t, numLocale } = useI18n()
+
+  function formatEgp(value: number) {
+    return new Intl.NumberFormat(numLocale, {
+      style: 'currency',
+      currency: 'EGP',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+
+  function labelType(type: string) {
+    const labels: Record<string, string> = {
+      residential: t('سكني', 'Residential'),
+      commercial:  t('تجاري', 'Commercial'),
+      administrative: t('إداري', 'Administrative'),
+      medical:     t('طبي', 'Medical'),
+      mixed:       t('متعدد الاستخدام', 'Mixed Use'),
+      land:        t('أرض', 'Land'),
+    }
+    return labels[type] ?? type
+  }
+
   const mappedProperties = properties.filter((p) => p.lat && p.lng)
   const center: [number, number] = mappedProperties.length
     ? [mappedProperties[0].lat as number, mappedProperties[0].lng as number]
-    : [30.0444, 31.2357] // Default Cairo
+    : [30.0444, 31.2357]
 
   return (
     <div style={{ height }} className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-white shadow-sm" dir="ltr">
@@ -74,7 +77,7 @@ export default function MarketplaceMap({ properties, height = '400px' }: Marketp
                 <p className="text-xs font-semibold text-slate-500">{property.city}{property.district ? `، ${property.district}` : ''}</p>
                 <p className="font-black text-slate-900">{formatEgp(property.list_price)}</p>
                 <Link href={`/marketplace/${property.id}`} className="mt-2 block">
-                  <Button size="sm" className="w-full">عرض التفاصيل</Button>
+                  <Button size="sm" className="w-full">{t('عرض التفاصيل', 'View Details')}</Button>
                 </Link>
               </div>
             </Popup>

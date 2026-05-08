@@ -6,6 +6,7 @@ import L from 'leaflet'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { Button } from '@/components/ui/button'
 import type { InventoryUnit } from './inventory-types'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface InventoryMapProps {
   units: InventoryUnit[]
@@ -20,15 +21,17 @@ const icon = L.icon({
   iconAnchor: [12, 41],
 })
 
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 export function InventoryMap({ units, onDetails }: InventoryMapProps) {
+  const { t, numLocale } = useI18n()
+
+  function formatEgp(value: number) {
+    return new Intl.NumberFormat(numLocale, {
+      style: 'currency',
+      currency: 'EGP',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+
   const mappedUnits = units.filter((unit) => unit.latitude && unit.longitude)
   const center: [number, number] = mappedUnits.length
     ? [mappedUnits[0].latitude as number, mappedUnits[0].longitude as number]
@@ -48,7 +51,7 @@ export function InventoryMap({ units, onDetails }: InventoryMapProps) {
                 <p className="font-bold">{unit.projectNameAr}</p>
                 <p className="text-xs text-slate-500">{unit.unitNumber} - {unit.city}</p>
                 <p className="font-black">{formatEgp(unit.price)}</p>
-                <Button size="sm" onClick={() => onDetails(unit)}>عرض التفاصيل</Button>
+                <Button size="sm" onClick={() => onDetails(unit)}>{t('عرض التفاصيل', 'View Details')}</Button>
               </div>
             </Popup>
           </Marker>

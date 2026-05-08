@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select'
 import type { MarketplaceFilterState } from '@/domains/marketplace/types'
 import { Building, Filter, Home, Search, X } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 const initialFilters: MarketplaceFilterState = {
   query: '',
@@ -27,6 +28,7 @@ const initialFilters: MarketplaceFilterState = {
 }
 
 export default function MarketplaceFilters() {
+  const { t } = useI18n()
   const [filters, setFilters] = useState<MarketplaceFilterState>(initialFilters)
 
   const activeCount = Object.entries(filters).filter(([key, value]) => {
@@ -44,82 +46,82 @@ export default function MarketplaceFilters() {
         <div>
           <div className="flex items-center gap-2">
             <Filter className="size-5 text-market-navy" />
-            <h2 className="text-xl font-black text-market-ink">فلترة العقارات</h2>
-            {activeCount > 0 && <Badge className="bg-market-mist text-market-teal">{activeCount} نشط</Badge>}
+            <h2 className="text-xl font-black text-market-ink">{t('فلترة العقارات', 'Filter Properties')}</h2>
+            {activeCount > 0 && <Badge className="bg-market-mist text-market-teal">{activeCount} {t('نشط', 'active')}</Badge>}
           </div>
           <p className="mt-1 text-sm font-semibold text-market-slate">
-            استخدم الفلاتر للوصول السريع إلى أفضل الوحدات المناسبة لك.
+            {t('استخدم الفلاتر للوصول السريع إلى أفضل الوحدات المناسبة لك.', 'Use filters to quickly find the best matching properties.')}
           </p>
         </div>
         {activeCount > 0 && (
           <Button variant="outline" onClick={() => setFilters(initialFilters)} className="rounded-2xl border-market-line">
             <X className="ms-1 size-4" />
-            مسح الفلاتر
+            {t('مسح الفلاتر', 'Clear Filters')}
           </Button>
         )}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
         <div className="space-y-2">
-          <Label htmlFor="market-search">بحث</Label>
+          <Label htmlFor="market-search">{t('بحث', 'Search')}</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-market-slate" />
             <Input
               id="market-search"
               value={filters.query}
               onChange={(event) => updateFilter('query', event.target.value)}
-              placeholder="اسم الكمبوند، المنطقة، نوع الوحدة"
+              placeholder={t('اسم الكمبوند، المنطقة، نوع الوحدة', 'Compound name, area, unit type')}
               className="h-11 rounded-2xl border-market-line bg-market-paper pr-10 font-semibold"
             />
           </div>
         </div>
 
         <FilterSelect
-          label="نوع الإعلان"
+          label={t('نوع الإعلان', 'Listing Type')}
           value={filters.listingKind}
           onValueChange={(value) => updateFilter('listingKind', value)}
           icon={<Home className="size-4" />}
           options={[
-            ['all', 'الكل'],
+            ['all', t('الكل', 'All')],
             ['primary', 'Primary'],
             ['resale', 'Resale'],
           ]}
         />
 
         <FilterSelect
-          label="نوع العقار"
+          label={t('نوع العقار', 'Property Type')}
           value={filters.propertyType}
           onValueChange={(value) => updateFilter('propertyType', value)}
           icon={<Building className="size-4" />}
           options={[
-            ['all', 'كل الأنواع'],
-            ['apartment', 'شقة'],
-            ['villa', 'فيلا'],
-            ['townhouse', 'تاون هاوس'],
-            ['office', 'إداري'],
-            ['shop', 'تجاري'],
+            ['all', t('كل الأنواع', 'All Types')],
+            ['apartment', t('شقة', 'Apartment')],
+            ['villa', t('فيلا', 'Villa')],
+            ['townhouse', t('تاون هاوس', 'Townhouse')],
+            ['office', t('إداري', 'Office')],
+            ['shop', t('تجاري', 'Commercial')],
           ]}
         />
 
         <FilterSelect
-          label="المدينة"
+          label={t('المدينة', 'City')}
           value={filters.city}
           onValueChange={(value) => updateFilter('city', value)}
           options={[
-            ['all', 'كل المدن'],
-            ['new-cairo', 'القاهرة الجديدة'],
-            ['sheikh-zayed', 'الشيخ زايد'],
-            ['shorouk', 'الشروق'],
-            ['north-coast', 'الساحل الشمالي'],
+            ['all', t('كل المدن', 'All Cities')],
+            ['new-cairo', t('القاهرة الجديدة', 'New Cairo')],
+            ['sheikh-zayed', t('الشيخ زايد', 'Sheikh Zayed')],
+            ['shorouk', t('الشروق', 'Al Shorouk')],
+            ['north-coast', t('الساحل الشمالي', 'North Coast')],
           ]}
         />
 
         <FilterSelect
-          label="الغرف"
+          label={t('الغرف', 'Bedrooms')}
           value={filters.bedrooms}
           onValueChange={(value) => updateFilter('bedrooms', value)}
           options={[
-            ['all', 'أي عدد'],
+            ['all', t('أي عدد', 'Any')],
             ['1', '1'],
             ['2', '2'],
             ['3', '3'],
@@ -130,24 +132,24 @@ export default function MarketplaceFilters() {
 
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="min-price">أقل سعر</Label>
+          <Label htmlFor="min-price">{t('أقل سعر', 'Min Price')}</Label>
           <Input
             id="min-price"
             inputMode="numeric"
             value={filters.minPrice}
             onChange={(event) => updateFilter('minPrice', event.target.value)}
-            placeholder="مثال: 1500000"
+            placeholder={t('مثال: 1500000', 'e.g. 1500000')}
             className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="max-price">أعلى سعر</Label>
+          <Label htmlFor="max-price">{t('أعلى سعر', 'Max Price')}</Label>
           <Input
             id="max-price"
             inputMode="numeric"
             value={filters.maxPrice}
             onChange={(event) => updateFilter('maxPrice', event.target.value)}
-            placeholder="مثال: 8000000"
+            placeholder={t('مثال: 8000000', 'e.g. 8000000')}
             className="h-11 rounded-2xl border-market-line bg-market-paper font-semibold"
           />
         </div>
