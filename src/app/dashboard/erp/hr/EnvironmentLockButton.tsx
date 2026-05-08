@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { MapPin, Wifi, LockKeyhole, Loader2 } from 'lucide-react'
 import { bindEmployeeEnvironmentAction } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export function EnvironmentLockButton({
   employeeId,
@@ -11,12 +12,13 @@ export function EnvironmentLockButton({
   employeeId: string
   locked: boolean
 }) {
+  const { t } = useI18n()
   const [wifiSsid, setWifiSsid] = useState('')
   const [message, setMessage] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function lockEnvironment() {
-    setMessage('جاري قراءة الموقع وربط البيئة...')
+    setMessage(t('جاري قراءة الموقع وربط البيئة...', 'Reading location and binding environment...'))
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -56,7 +58,7 @@ export function EnvironmentLockButton({
             value={wifiSsid}
             onChange={(event) => setWifiSsid(event.target.value)}
             className="h-9 w-full rounded-lg border border-[var(--fi-line)] bg-white pr-9 pl-3 text-xs font-bold outline-none focus:border-[var(--fi-emerald)] dark:bg-white/5"
-            placeholder="اسم شبكة Wi-Fi اختياري"
+            placeholder={t('اسم شبكة Wi-Fi اختياري', 'Wi-Fi name optional')}
           />
         </div>
         <button
@@ -66,7 +68,7 @@ export function EnvironmentLockButton({
           className="flex h-9 items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 text-xs font-black text-[var(--fi-emerald)] transition hover:border-[var(--fi-emerald)] disabled:opacity-60"
         >
           {isPending ? <Loader2 className="size-3.5 animate-spin" /> : locked ? <LockKeyhole className="size-3.5" /> : <MapPin className="size-3.5" />}
-          {locked ? 'تحديث القفل' : 'ربط البيئة'}
+          {locked ? t('تحديث القفل', 'Update Lock') : t('ربط البيئة', 'Bind Environment')}
         </button>
       </div>
       {message ? <p className="text-xs font-bold text-[var(--fi-muted)]">{message}</p> : null}

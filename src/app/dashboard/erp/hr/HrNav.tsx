@@ -3,24 +3,26 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode } from 'react'
-
-const modules = [
-  { href: '/dashboard/erp/hr', label: 'لوحة التحكم', exact: true },
-  { href: '/dashboard/erp/hr/attendance', label: 'الحضور' },
-  { href: '/dashboard/erp/hr/leaves', label: 'الإجازات' },
-  { href: '/dashboard/erp/hr/commission', label: 'العمولات' },
-  { href: '/dashboard/erp/hr/payroll', label: 'الرواتب' },
-  { href: '/dashboard/erp/hr/talent', label: 'استقطاب المواهب' },
-  { href: '/dashboard/erp/hr/onboarding', label: 'الاستقبال' },
-  { href: '/dashboard/erp/hr/performance', label: 'تقييمات الأداء' },
-  { href: '/dashboard/erp/hr/documents', label: 'الوثائق' },
-  { href: '/dashboard/erp/hr/academy', label: 'الأكاديمية' },
-  { href: '/dashboard/erp/hr/hrbp', label: 'الذكاء البشري' },
-  { href: '/dashboard/erp/hr/analytics', label: 'التحليلات' },
-]
+import { useI18n } from '@/hooks/use-i18n'
 
 export function HrNav({ icons }: { icons: Record<string, ReactNode> }) {
+  const { t } = useI18n()
   const pathname = usePathname()
+
+  const modules = [
+    { href: '/dashboard/erp/hr', label: t('لوحة التحكم', 'Dashboard'), exact: true },
+    { href: '/dashboard/erp/hr/attendance', label: t('الحضور', 'Attendance') },
+    { href: '/dashboard/erp/hr/leaves', label: t('الإجازات', 'Leaves') },
+    { href: '/dashboard/erp/hr/commission', label: t('العمولات', 'Commissions') },
+    { href: '/dashboard/erp/hr/payroll', label: t('الرواتب', 'Payroll') },
+    { href: '/dashboard/erp/hr/talent', label: t('استقطاب المواهب', 'Talent Acquisition') },
+    { href: '/dashboard/erp/hr/onboarding', label: t('الاستقبال', 'Onboarding') },
+    { href: '/dashboard/erp/hr/performance', label: t('تقييمات الأداء', 'Performance Reviews') },
+    { href: '/dashboard/erp/hr/documents', label: t('الوثائق', 'Documents') },
+    { href: '/dashboard/erp/hr/academy', label: t('الأكاديمية', 'Academy') },
+    { href: '/dashboard/erp/hr/hrbp', label: t('الذكاء البشري', 'People Intelligence') },
+    { href: '/dashboard/erp/hr/analytics', label: t('التحليلات', 'Analytics') },
+  ]
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
