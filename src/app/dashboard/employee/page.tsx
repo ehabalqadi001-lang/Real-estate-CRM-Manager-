@@ -269,10 +269,12 @@ export default async function EmployeePortalPage() {
               {employee?.job_title ?? 'بوابة الموظف'} — حضورك، راتبك، عمولاتك، ومساراتك التعليمية.
             </p>
           </div>
-          <span className={`inline-flex w-fit items-center gap-2 rounded-lg px-3 py-2 text-xs font-black ${employee?.is_env_locked ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-            <ShieldCheck className="size-4" />
-            {employee?.is_env_locked ? 'بيئة العمل مربوطة' : 'في انتظار ربط البيئة'}
-          </span>
+          {employee && (
+            <span className={`inline-flex w-fit items-center gap-2 rounded-lg px-3 py-2 text-xs font-black ${employee.is_env_locked ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+              <ShieldCheck className="size-4" />
+              {employee.is_env_locked ? 'بيئة العمل مربوطة' : 'في انتظار ربط البيئة'}
+            </span>
+          )}
         </div>
       </section>
 
