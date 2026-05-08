@@ -4,6 +4,7 @@ import { MessageSquareText, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/hooks/use-i18n'
 
 type AiFollowUpMessageButtonProps = {
   clientName: string
@@ -14,6 +15,7 @@ type AiFollowUpMessageButtonProps = {
 }
 
 export function AiFollowUpMessageButton(props: AiFollowUpMessageButtonProps) {
+  const { t } = useI18n()
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -30,7 +32,7 @@ export function AiFollowUpMessageButton(props: AiFollowUpMessageButtonProps) {
 
       if (!response.ok || !response.body) {
         const payload = await response.json().catch(() => null)
-        throw new Error(payload?.error ?? 'تعذر توليد الرسالة')
+        throw new Error(payload?.error ?? t('تعذر توليد الرسالة', 'Failed to generate message'))
       }
 
       const reader = response.body.getReader()
@@ -44,7 +46,7 @@ export function AiFollowUpMessageButton(props: AiFollowUpMessageButtonProps) {
         setMessage(fullText)
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'تعذر توليد الرسالة')
+      toast.error(error instanceof Error ? error.message : t('تعذر توليد الرسالة', 'Failed to generate message'))
     } finally {
       setIsLoading(false)
     }
@@ -52,16 +54,16 @@ export function AiFollowUpMessageButton(props: AiFollowUpMessageButtonProps) {
 
   async function copy() {
     await navigator.clipboard.writeText(message)
-    toast.success('تم نسخ رسالة المتابعة')
+    toast.success(t('تم نسخ رسالة المتابعة', 'Follow-up message copied'))
   }
 
   return (
     <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-black text-[var(--fi-ink)]">رسالة متابعة ذكية</p>
+        <p className="text-sm font-black text-[var(--fi-ink)]">{t('رسالة متابعة ذكية', 'Smart Follow-up Message')}</p>
         <Button type="button" variant="outline" size="sm" onClick={generate} disabled={isLoading}>
           <Sparkles className="size-4" />
-          {isLoading ? 'جاري الاقتراح...' : 'اقتراح رسالة متابعة'}
+          {isLoading ? t('جاري الاقتراح...', 'Generating...') : t('اقتراح رسالة متابعة', 'Suggest Follow-up')}
         </Button>
       </div>
       {message ? (
@@ -71,7 +73,7 @@ export function AiFollowUpMessageButton(props: AiFollowUpMessageButtonProps) {
           </p>
           <Button type="button" variant="outline" size="sm" onClick={copy}>
             <MessageSquareText className="size-4" />
-            نسخ للواتساب
+            {t('نسخ للواتساب', 'Copy for WhatsApp')}
           </Button>
         </div>
       ) : null}

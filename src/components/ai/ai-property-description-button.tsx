@@ -3,6 +3,7 @@
 import { Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { useI18n } from '@/hooks/use-i18n'
 
 type AiPropertyDescriptionButtonProps = {
   input: {
@@ -18,6 +19,7 @@ type AiPropertyDescriptionButtonProps = {
 }
 
 export function AiPropertyDescriptionButton({ input, onGenerated }: AiPropertyDescriptionButtonProps) {
+  const { t } = useI18n()
   const [isLoading, setIsLoading] = useState(false)
 
   async function generate() {
@@ -33,7 +35,7 @@ export function AiPropertyDescriptionButton({ input, onGenerated }: AiPropertyDe
 
       if (!response.ok || !response.body) {
         const payload = await response.json().catch(() => null)
-        throw new Error(payload?.error ?? 'تعذر توليد الوصف')
+        throw new Error(payload?.error ?? t('تعذر توليد الوصف', 'Failed to generate description'))
       }
 
       const reader = response.body.getReader()
@@ -47,9 +49,9 @@ export function AiPropertyDescriptionButton({ input, onGenerated }: AiPropertyDe
         onGenerated(fullText)
       }
 
-      toast.success('تم توليد وصف الوحدة')
+      toast.success(t('تم توليد وصف الوحدة', 'Unit description generated'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'تعذر توليد الوصف')
+      toast.error(error instanceof Error ? error.message : t('تعذر توليد الوصف', 'Failed to generate description'))
     } finally {
       setIsLoading(false)
     }
@@ -63,7 +65,7 @@ export function AiPropertyDescriptionButton({ input, onGenerated }: AiPropertyDe
       className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Sparkles className="size-4 text-blue-600" />
-      {isLoading ? 'جاري التوليد...' : 'توليد وصف بالذكاء الاصطناعي'}
+      {isLoading ? t('جاري التوليد...', 'Generating...') : t('توليد وصف بالذكاء الاصطناعي', 'Generate AI Description')}
     </button>
   )
 }
