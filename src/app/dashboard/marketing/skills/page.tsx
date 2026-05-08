@@ -60,20 +60,24 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
   const filtered = activeDept ? skills.filter((s) => s.department === activeDept) : skills
 
   return (
-    <div className="space-y-6 p-4 sm:p-6" dir="rtl">
+    <div className="space-y-5 p-4 sm:p-6" dir="rtl">
       {/* Header */}
-      <div>
-        <p className="text-xs font-black text-[#0F8F83]">مركز التسويق</p>
-        <h1 className="mt-1 text-xl font-black text-[#102033] sm:text-2xl dark:text-white">مكتبة المهارات التسويقية</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
-          {skills.length} مهارة في {departments.length} قسم — اختر مهارة لتوليد محتوى بالذكاء الاصطناعي
-        </p>
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--fi-emerald)] shadow-lg shadow-[var(--fi-emerald)]/20">
+          <Sparkles size={18} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-lg font-black text-[var(--fi-ink)]">مكتبة المهارات التسويقية</h1>
+          <p className="text-xs text-[var(--fi-muted)]">
+            {skills.length} مهارة في {departments.length} قسم — اختر مهارة لتوليد محتوى بالذكاء الاصطناعي
+          </p>
+        </div>
       </div>
 
-      {/* Department Tabs */}
+      {/* Department tabs */}
       <div className="flex flex-wrap gap-2">
         {departments.map((d) => {
-          const color = DEPT_COLORS[d] ?? '#0F8F83'
+          const color = DEPT_COLORS[d] ?? 'var(--fi-emerald)'
           const isActive = activeDept === d
           return (
             <Link
@@ -82,7 +86,7 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
               className="rounded-xl border px-3 py-1.5 text-xs font-bold transition"
               style={isActive
                 ? { backgroundColor: `${color}15`, borderColor: color, color }
-                : { borderColor: '#DDE6E4', color: '#64748b' }
+                : { borderColor: 'var(--fi-line)', color: 'var(--fi-muted)' }
               }
             >
               {DEPT_LABELS[d] ?? d}
@@ -91,7 +95,7 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
         })}
       </div>
 
-      {/* Skills Grid */}
+      {/* Skills grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((skill) => {
           const color = DEPT_COLORS[skill.department] ?? '#0F8F83'
@@ -99,10 +103,10 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
             <Link
               key={skill.skill_key}
               href={`/dashboard/marketing/skills/${skill.skill_key}`}
-              className="group flex flex-col gap-3 rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm transition hover:shadow-md dark:bg-slate-900"
+              className="group flex flex-col gap-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm transition hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-2">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl transition group-hover:scale-110" style={{ backgroundColor: `${color}15`, color }}>
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg transition group-hover:scale-105" style={{ backgroundColor: `${color}15`, color }}>
                   <Sparkles className="size-5" />
                 </div>
                 <span className="rounded-lg px-2 py-0.5 text-xs font-bold" style={{ backgroundColor: `${color}10`, color }}>
@@ -110,9 +114,9 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
                 </span>
               </div>
               <div>
-                <p className="font-black text-[#102033] leading-snug dark:text-white">{skill.title_ar ?? skill.title_en}</p>
+                <p className="font-black text-[var(--fi-ink)] leading-snug">{skill.title_ar ?? skill.title_en}</p>
                 {skill.description_en && (
-                  <p className="mt-1 text-xs font-semibold text-slate-400 leading-relaxed line-clamp-2" dir="ltr">
+                  <p className="mt-1 text-xs text-[var(--fi-muted)] leading-relaxed line-clamp-2" dir="ltr">
                     {skill.description_en}
                   </p>
                 )}
@@ -124,9 +128,9 @@ export default async function MarketingSkillsPage({ searchParams }: { searchPara
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-2xl border border-[#DDE6E4] bg-white p-10 text-center dark:bg-slate-900">
-          <Sparkles className="mx-auto mb-3 size-10 text-slate-200" />
-          <p className="font-semibold text-slate-500">لا توجد مهارات في هذا القسم</p>
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-10 text-center shadow-sm">
+          <Sparkles className="mx-auto mb-3 size-10 text-[var(--fi-muted)]" />
+          <p className="font-semibold text-[var(--fi-muted)]">لا توجد مهارات في هذا القسم</p>
         </div>
       )}
     </div>

@@ -47,26 +47,27 @@ export default async function MarketingTeamPage() {
     .order('full_name')
 
   const members = (data ?? []) as TeamMember[]
-
   const byRole = MARKETING_ROLES.reduce<Record<string, TeamMember[]>>((acc, role) => {
     acc[role] = members.filter((m) => m.role === role)
     return acc
   }, {})
 
   return (
-    <div className="space-y-8 p-4 sm:p-6" dir="rtl">
+    <div className="space-y-6 p-4 sm:p-6" dir="rtl">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs font-black text-[#0F8F83]">مركز التسويق</p>
-          <h1 className="mt-1 text-xl font-black text-[#102033] sm:text-2xl dark:text-white">فريق التسويق</h1>
-          <p className="mt-1 text-sm font-semibold text-slate-500">
-            {members.length} عضو · مرتبط بنظام HR
-          </p>
+      <div className="flex flex-col gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--fi-emerald)] shadow-lg shadow-[var(--fi-emerald)]/20">
+            <Users size={18} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-[var(--fi-ink)]">فريق التسويق</h1>
+            <p className="text-xs text-[var(--fi-muted)]">{members.length} عضو · مرتبط بنظام HR</p>
+          </div>
         </div>
         <Link
           href="/dashboard/erp/hr/employees"
-          className="flex items-center gap-2 rounded-xl border border-[#DDE6E4] px-4 py-2 text-sm font-black text-[#0F8F83] transition hover:bg-[#EEF6F5]"
+          className="flex items-center gap-2 rounded-xl border border-[var(--fi-line)] px-3 py-2 text-sm font-bold text-[var(--fi-ink)] transition hover:bg-[var(--fi-soft)]"
         >
           <ExternalLink className="size-4" />
           إدارة الموظفين في HR
@@ -74,21 +75,19 @@ export default async function MarketingTeamPage() {
       </div>
 
       {members.length === 0 ? (
-        <div className="rounded-2xl border border-[#DDE6E4] bg-white p-10 text-center dark:bg-slate-900">
-          <Users className="mx-auto mb-3 size-12 text-slate-200" />
-          <p className="font-black text-slate-500">لا يوجد موظفون بأدوار تسويقية</p>
-          <p className="mt-2 text-sm font-semibold text-slate-400">
-            قم بتعيين أدوار تسويقية للموظفين من خلال إدارة HR
-          </p>
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-10 text-center shadow-sm">
+          <Users className="mx-auto mb-3 size-12 text-[var(--fi-muted)]" />
+          <p className="font-black text-[var(--fi-muted)]">لا يوجد موظفون بأدوار تسويقية</p>
+          <p className="mt-2 text-sm text-[var(--fi-muted)]">قم بتعيين أدوار تسويقية للموظفين من خلال إدارة HR</p>
           <Link
             href="/dashboard/erp/hr/employees"
-            className="mt-4 inline-block rounded-xl bg-[#0F8F83] px-5 py-2 text-sm font-black text-white hover:bg-[#0B6F66]"
+            className="fi-primary-button mt-4 inline-block rounded-xl px-5 py-2 text-sm font-black text-white"
           >
             إدارة HR ←
           </Link>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-7">
           {MARKETING_ROLES.map((role) => {
             const roleMembers = byRole[role] ?? []
             if (roleMembers.length === 0) return null
@@ -98,39 +97,28 @@ export default async function MarketingTeamPage() {
               <div key={role}>
                 <div className="mb-3 flex items-center gap-3">
                   <div className="h-0.5 w-4 rounded-full" style={{ backgroundColor: color }} />
-                  <h2 className="font-black text-[#102033] dark:text-white">{label}</h2>
+                  <h2 className="font-black text-[var(--fi-ink)]">{label}</h2>
                   <span className="rounded-lg px-2 py-0.5 text-xs font-bold" style={{ backgroundColor: `${color}15`, color }}>
                     {roleMembers.length}
                   </span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {roleMembers.map((member) => (
-                    <div key={member.id} className="flex items-start gap-3 rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
-                      {/* Avatar */}
-                      <div
-                        className="flex size-11 shrink-0 items-center justify-center rounded-full text-white font-black text-lg"
-                        style={{ backgroundColor: color }}
-                      >
+                    <div key={member.id} className="flex items-start gap-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-full text-lg font-black text-white" style={{ backgroundColor: color }}>
                         {(member.full_name ?? '?').charAt(0).toUpperCase()}
                       </div>
-                      {/* Info */}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-black text-[#102033] dark:text-white">
-                          {member.full_name ?? 'موظف'}
-                        </p>
+                        <p className="truncate font-black text-[var(--fi-ink)]">{member.full_name ?? 'موظف'}</p>
                         <p className="text-xs font-bold" style={{ color }}>{label}</p>
                         {member.phone && (
-                          <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-slate-400">
+                          <p className="mt-1 flex items-center gap-1 text-xs text-[var(--fi-muted)]">
                             <Phone className="size-3" />
                             <span dir="ltr">{member.phone}</span>
                           </p>
                         )}
-                        <Link
-                          href={`/dashboard/erp/hr/employees/${member.id}`}
-                          className="mt-2 flex items-center gap-1 text-xs font-bold text-[#0F8F83] hover:underline"
-                        >
-                          <ExternalLink className="size-3" />
-                          ملف HR
+                        <Link href={`/dashboard/erp/hr/employees/${member.id}`} className="mt-1 flex items-center gap-1 text-xs font-bold text-[var(--fi-emerald)] hover:underline">
+                          <ExternalLink className="size-3" />ملف HR
                         </Link>
                       </div>
                     </div>
@@ -142,12 +130,12 @@ export default async function MarketingTeamPage() {
         </div>
       )}
 
-      {/* Info note */}
-      <div className="rounded-xl border border-[#C9964A]/30 bg-[#C9964A]/5 p-4">
-        <p className="flex items-start gap-2 text-sm font-semibold text-[#C9964A]">
-          <Mail className="mt-0.5 size-4 shrink-0" />
-          لتعيين موظف لقسم التسويق، قم بتغيير دوره إلى &quot;مدير التسويق&quot; أو &quot;أخصائي حملات&quot; من صفحة{' '}
-          <Link href="/dashboard/erp/hr/employees" className="underline hover:no-underline">إدارة الموظفين</Link>
+      {/* Info */}
+      <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
+        <p className="flex items-start gap-2 text-sm font-semibold text-[var(--fi-muted)]">
+          <Mail className="mt-0.5 size-4 shrink-0 text-[var(--fi-emerald)]" />
+          لتعيين موظف لقسم التسويق، قم بتغيير دوره إلى &quot;مدير التسويق&quot; أو &quot;أخصائي حملات&quot; من{' '}
+          <Link href="/dashboard/erp/hr/employees" className="text-[var(--fi-emerald)] underline hover:no-underline">إدارة الموظفين</Link>
         </p>
       </div>
     </div>
