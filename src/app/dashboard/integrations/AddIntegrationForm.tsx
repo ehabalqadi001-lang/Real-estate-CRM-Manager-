@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { PlugZap } from 'lucide-react'
 import { createIntegrationAction, type IntegrationActionState } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 type DeveloperOption = { id: string; name_ar: string | null; name: string | null }
 
@@ -11,6 +12,7 @@ const inputClass =
   'h-11 w-full rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold text-[var(--fi-ink)] outline-none focus:border-[var(--fi-emerald)] dark:bg-white/5'
 
 export function AddIntegrationForm({ developers }: { developers: DeveloperOption[] }) {
+  const { t } = useI18n()
   const [state, action, pending] = useActionState(createIntegrationAction, initialState)
 
   return (
@@ -20,9 +22,9 @@ export function AddIntegrationForm({ developers }: { developers: DeveloperOption
           <PlugZap className="size-5" />
         </span>
         <div>
-          <h2 className="text-xl font-black text-[var(--fi-ink)]">إضافة API Gateway</h2>
+          <h2 className="text-xl font-black text-[var(--fi-ink)]">{t('إضافة API Gateway', 'Add API Gateway')}</h2>
           <p className="text-sm font-semibold text-[var(--fi-muted)]">
-            استقبال بيانات المخزون والأسعار وخطط السداد من المطورين.
+            {t('استقبال بيانات المخزون والأسعار وخطط السداد من المطورين.', 'Receive inventory, pricing, and payment plan data from developers.')}
           </p>
         </div>
       </div>
@@ -38,10 +40,10 @@ export function AddIntegrationForm({ developers }: { developers: DeveloperOption
       ) : null}
 
       <form action={action} className="grid gap-4 sm:grid-cols-2">
-        <input name="name" className={inputClass} placeholder="اسم التكامل" required />
-        <input name="provider" className={inputClass} placeholder="اسم المزود / المطور" required />
+        <input name="name" className={inputClass} placeholder={t('اسم التكامل', 'Integration Name')} required />
+        <input name="provider" className={inputClass} placeholder={t('اسم المزود / المطور', 'Provider / Developer Name')} required />
         <select name="developerId" className={inputClass} defaultValue="">
-          <option value="">بدون مطور محدد</option>
+          <option value="">{t('بدون مطور محدد', 'No specific developer')}</option>
           {developers.map((developer) => (
             <option key={developer.id} value={developer.id}>
               {developer.name_ar || developer.name}
@@ -49,16 +51,16 @@ export function AddIntegrationForm({ developers }: { developers: DeveloperOption
           ))}
         </select>
         <select name="integrationType" className={inputClass} defaultValue="inventory">
-          <option value="inventory">المخزون</option>
-          <option value="prices">الأسعار</option>
-          <option value="payment_plans">خطط السداد</option>
-          <option value="availability">التوافر</option>
+          <option value="inventory">{t('المخزون', 'Inventory')}</option>
+          <option value="prices">{t('الأسعار', 'Prices')}</option>
+          <option value="payment_plans">{t('خطط السداد', 'Payment Plans')}</option>
+          <option value="availability">{t('التوافر', 'Availability')}</option>
           <option value="webhook">Webhook</option>
         </select>
         <input name="baseUrl" className={`${inputClass} sm:col-span-2`} placeholder="https://developer.example.com/api/feed" />
-        <input name="syncFrequencyMinutes" type="number" min={5} className={inputClass} placeholder="كل 60 دقيقة" />
+        <input name="syncFrequencyMinutes" type="number" min={5} className={inputClass} placeholder={t('كل 60 دقيقة', 'Every 60 minutes')} />
         <button type="submit" disabled={pending} className="fi-primary-button min-h-11 rounded-lg px-4 text-sm font-black disabled:opacity-60">
-          {pending ? 'جاري الحفظ...' : 'حفظ التكامل'}
+          {pending ? t('جاري الحفظ...', 'Saving...') : t('حفظ التكامل', 'Save Integration')}
         </button>
       </form>
     </section>
