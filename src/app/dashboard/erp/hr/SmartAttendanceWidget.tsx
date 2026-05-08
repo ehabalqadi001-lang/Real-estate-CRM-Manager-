@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { CheckCircle2, Clock3, Loader2, MapPin, ShieldAlert, ShieldCheck, Wifi } from 'lucide-react'
 import { attendancePunchAction } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 export type SmartAttendanceEmployee = {
   id: string
@@ -14,6 +15,7 @@ export type SmartAttendanceEmployee = {
 }
 
 export function SmartAttendanceWidget({ employee }: { employee: SmartAttendanceEmployee | null }) {
+  const { t, numLocale } = useI18n()
   const [wifiSsid, setWifiSsid] = useState('')
   const [message, setMessage] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -22,8 +24,16 @@ export function SmartAttendanceWidget({ employee }: { employee: SmartAttendanceE
   const checkedOut = Boolean(employee?.todayCheckOut)
   const disabled = !employee || !employee.isEnvLocked || checkedOut || isPending
 
+  function formatTime(value: string | null) {
+    if (!value) return t('لم يسجل', 'Not recorded')
+    return new Intl.DateTimeFormat(numLocale, {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(value))
+  }
+
   function punch() {
-    setMessage('جاري التحقق من البيئة...')
+    setMessage(t('جاري التحقق من البيئة...', 'Verifying environment...'))
 
     navigator.geolocation.getCurrentPosition(
       (position) => submit(position.coords.latitude, position.coords.longitude),
@@ -44,9 +54,9 @@ export function SmartAttendanceWidget({ employee }: { employee: SmartAttendanceE
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">SMART ATTENDANCE</p>
-          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">تسجيل الحضور الذكي</h2>
+          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">{t('تسجيل الحضور الذكي', 'Smart Attendance')}</h2>
           <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-            الزر يعمل فقط عند تطابق IP أو Wi-Fi أو نطاق GPS المسموح.
+            {t('الزر يعمل فقط عند تطابق IP أو Wi-Fi أو نطاق GPS المسموح.', 'Button works only when IP, Wi-Fi, or GPS range matches the allowed environment.')}
           </p>
         </div>
         <span className={`flex size-12 shrink-0 items-center justify-center rounded-lg ${
@@ -58,35 +68,35 @@ export function SmartAttendanceWidget({ employee }: { employee: SmartAttendanceE
 
       {!employee ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-          لا يوجد ملف موظف مرتبط بحسابك.
+          {t('لا يوجد ملف موظف مرتبط بحسابك.', 'No employee profile linked to your account.')}
         </div>
       ) : (
         <div className="space-y-4">
           <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
             <p className="text-sm font-black text-[var(--fi-ink)]">{employee.fullName}</p>
-            <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.jobTitle ?? 'موظف'}</p>
+            <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{employee.jobTitle ?? t('موظف', 'Employee')}</p>
           </div>
 
           {!employee.isEnvLocked ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-              بيئة العمل غير مربوطة. يجب على مدير الموارد البشرية أو مدير النظام ربط البيئة أولاً.
+              {t('بيئة العمل غير مربوطة. يجب على مدير الموارد البشرية أو مدير النظام ربط البيئة أولاً.', 'Work environment not configured. HR or system admin must set up the environment first.')}
             </div>
           ) : null}
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <StatusCard label="الحضور" value={formatTime(employee.todayCheckIn)} done={checkedIn} />
-            <StatusCard label="الانصراف" value={formatTime(employee.todayCheckOut)} done={checkedOut} />
+            <StatusCard label={t('الحضور', 'Check-in')} value={formatTime(employee.todayCheckIn)} done={checkedIn} />
+            <StatusCard label={t('الانصراف', 'Check-out')} value={formatTime(employee.todayCheckOut)} done={checkedOut} />
           </div>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">اسم شبكة Wi-Fi الحالية</span>
+            <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('اسم شبكة Wi-Fi الحالية', 'Current Wi-Fi Network Name')}</span>
             <span className="relative block">
               <Wifi className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" />
               <input
                 value={wifiSsid}
                 onChange={(event) => setWifiSsid(event.target.value)}
                 className="h-11 w-full rounded-lg border border-[var(--fi-line)] bg-white pr-9 pl-3 text-sm font-bold outline-none focus:border-[var(--fi-emerald)] dark:bg-white/5"
-                placeholder="اكتب اسم الشبكة إن كان مطلوباً"
+                placeholder={t('اكتب اسم الشبكة إن كان مطلوباً', 'Enter network name if required')}
               />
             </span>
           </label>
@@ -98,7 +108,11 @@ export function SmartAttendanceWidget({ employee }: { employee: SmartAttendanceE
             className="fi-primary-button flex min-h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? <Loader2 className="size-4 animate-spin" /> : <MapPin className="size-4" />}
-            {checkedOut ? 'تم تسجيل اليوم بالكامل' : checkedIn ? 'تسجيل الانصراف' : 'تسجيل الحضور الآن'}
+            {checkedOut
+              ? t('تم تسجيل اليوم بالكامل', 'Full day recorded')
+              : checkedIn
+              ? t('تسجيل الانصراف', 'Record Check-out')
+              : t('تسجيل الحضور الآن', 'Record Check-in Now')}
           </button>
 
           {message ? (
@@ -126,12 +140,4 @@ function StatusCard({ label, value, done }: { label: string; value: string; done
       <p className="mt-2 text-lg font-black text-[var(--fi-ink)]">{value}</p>
     </div>
   )
-}
-
-function formatTime(value: string | null) {
-  if (!value) return 'لم يسجل'
-  return new Intl.DateTimeFormat('ar-EG', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
 }

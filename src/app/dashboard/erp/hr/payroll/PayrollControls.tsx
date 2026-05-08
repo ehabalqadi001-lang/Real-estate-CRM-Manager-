@@ -3,10 +3,12 @@
 import { useActionState, useTransition } from 'react'
 import { Play, CheckCircle2, ChevronsUp, Banknote } from 'lucide-react'
 import { runPayrollAction, approvePayrollAction, approveAllPayrollAction, markAsPaidAction, type PayrollActionState } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 const initial: PayrollActionState = { ok: false, message: '' }
 
 export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: number; defaultYear: number }) {
+  const { t, numLocale } = useI18n()
   const [state, action, pending] = useActionState(runPayrollAction, initial)
 
   return (
@@ -14,9 +16,9 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">PAYROLL ENGINE</p>
-          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">إصدار مسيرة رواتب</h2>
+          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">{t('إصدار مسيرة رواتب', 'Run Payroll')}</h2>
           <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-            يحتسب تلقائياً: الراتب الأساسي + البدلات + الحوافز + العمولات — خصم الغياب والتأخير والإجازات غير المدفوعة والتأمينات والضريبة.
+            {t('يحتسب تلقائياً: الراتب الأساسي + البدلات + الحوافز + العمولات — خصم الغياب والتأخير والإجازات غير المدفوعة والتأمينات والضريبة.', 'Auto-calculates: basic salary + allowances + bonuses + commissions — minus absences, delays, unpaid leaves, insurance, and tax.')}
           </p>
         </div>
         <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -32,33 +34,33 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
 
       <form action={action} className="grid gap-4 sm:grid-cols-3" noValidate>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">الشهر</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('الشهر', 'Month')}</span>
           <select name="month" defaultValue={defaultMonth} className={inputClass}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
-                {new Date(2000, m - 1).toLocaleDateString('ar-EG', { month: 'long' })}
+                {new Date(2000, m - 1).toLocaleDateString(numLocale, { month: 'long' })}
               </option>
             ))}
           </select>
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">السنة</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('السنة', 'Year')}</span>
           <input name="year" type="number" defaultValue={defaultYear} className={inputClass} />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">أيام العمل</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('أيام العمل', 'Working Days')}</span>
           <input name="workingDays" type="number" defaultValue={22} min={1} max={31} className={inputClass} />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">البدلات (ج.م)</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('البدلات (ج.م)', 'Allowances (EGP)')}</span>
           <input name="allowances" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">الحوافز / المكافآت (ج.م)</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('الحوافز / المكافآت (ج.م)', 'Incentives / Bonuses (EGP)')}</span>
           <input name="bonus" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">أوفر تايم (ج.م)</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('أوفر تايم (ج.م)', 'Overtime (EGP)')}</span>
           <input name="overtime" type="number" defaultValue={0} min={0} className={inputClass} placeholder="0" />
         </label>
         <div className="sm:col-span-3">
@@ -68,7 +70,7 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
             className="fi-primary-button flex min-h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60"
           >
             <Play className="size-4" />
-            {pending ? 'جاري الاحتساب...' : 'إصدار المسيرة'}
+            {pending ? t('جاري الاحتساب...', 'Calculating...') : t('إصدار المسيرة', 'Run Payroll')}
           </button>
         </div>
       </form>
@@ -77,6 +79,7 @@ export function RunPayrollForm({ defaultMonth, defaultYear }: { defaultMonth: nu
 }
 
 export function ApprovePayrollButton({ employeeId, month, year }: { employeeId: string; month: number; year: number }) {
+  const { t } = useI18n()
   const [pending, startTransition] = useTransition()
   return (
     <button
@@ -85,12 +88,13 @@ export function ApprovePayrollButton({ employeeId, month, year }: { employeeId: 
       className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
     >
       <CheckCircle2 className="size-3.5" />
-      {pending ? '...' : 'إقرار'}
+      {pending ? '...' : t('إقرار', 'Approve')}
     </button>
   )
 }
 
 export function ApproveAllButton({ month, year, companyId }: { month: number; year: number; companyId: string }) {
+  const { t } = useI18n()
   const [pending, startTransition] = useTransition()
   return (
     <button
@@ -99,12 +103,13 @@ export function ApproveAllButton({ month, year, companyId }: { month: number; ye
       className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
     >
       <ChevronsUp className="size-4" />
-      {pending ? 'جاري الإقرار...' : 'إقرار الكل'}
+      {pending ? t('جاري الإقرار...', 'Approving...') : t('إقرار الكل', 'Approve All')}
     </button>
   )
 }
 
 export function MarkAsPaidButton({ month, year, companyId }: { month: number; year: number; companyId: string }) {
+  const { t } = useI18n()
   const [pending, startTransition] = useTransition()
   return (
     <button
@@ -113,7 +118,7 @@ export function MarkAsPaidButton({ month, year, companyId }: { month: number; ye
       className="flex min-h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-60"
     >
       <Banknote className="size-4" />
-      {pending ? 'جاري التسجيل...' : 'تسجيل الصرف'}
+      {pending ? t('جاري التسجيل...', 'Recording...') : t('تسجيل الصرف', 'Mark as Paid')}
     </button>
   )
 }

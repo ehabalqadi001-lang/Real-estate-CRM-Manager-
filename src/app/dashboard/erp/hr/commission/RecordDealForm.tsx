@@ -3,19 +3,22 @@
 import { useActionState } from 'react'
 import { BadgeDollarSign } from 'lucide-react'
 import { recordDealCommissionAction, type CommissionActionState } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 type EmployeeOption = { id: string; name: string; jobTitle: string | null; commissionRate: number | null }
 
 const initial: CommissionActionState = { ok: false, message: '' }
 
-const stageOptions = [
-  { value: 'reservation', label: 'حجز' },
-  { value: 'contract', label: 'توقيع عقد' },
-  { value: 'handover', label: 'تسليم وحدة' },
-  { value: 'collection', label: 'تحصيل دفعة' },
-]
-
 export function RecordDealForm({ employees }: { employees: EmployeeOption[] }) {
+  const { t } = useI18n()
+
+  const stageOptions = [
+    { value: 'reservation', label: t('حجز', 'Reservation') },
+    { value: 'contract',    label: t('توقيع عقد', 'Contract Signing') },
+    { value: 'handover',    label: t('تسليم وحدة', 'Unit Handover') },
+    { value: 'collection',  label: t('تحصيل دفعة', 'Payment Collection') },
+  ]
+
   const [state, action, pending] = useActionState(recordDealCommissionAction, initial)
 
   return (
@@ -23,9 +26,9 @@ export function RecordDealForm({ employees }: { employees: EmployeeOption[] }) {
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">COMMISSION ENGINE</p>
-          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">تسجيل صفقة جديدة</h2>
+          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">{t('تسجيل صفقة جديدة', 'Record New Deal')}</h2>
           <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
-            العمولة محتسبة تلقائياً: 1.5% حتى 5 مليون — 2% فوقها
+            {t('العمولة محتسبة تلقائياً: 1.5% حتى 5 مليون — 2% فوقها', 'Commission auto-calculated: 1.5% up to 5M — 2% above')}
           </p>
         </div>
         <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -40,38 +43,38 @@ export function RecordDealForm({ employees }: { employees: EmployeeOption[] }) {
       ) : null}
 
       <form key={state.ok ? state.message : 'deal-form'} action={action} className="grid gap-4 md:grid-cols-2" noValidate>
-        <Field label="الموظف">
+        <Field label={t('الموظف', 'Employee')}>
           <select name="employeeId" required className={inputClass}>
-            <option value="">اختر الموظف</option>
+            <option value="">{t('اختر الموظف', 'Select employee')}</option>
             {employees.map((emp) => (
               <option key={emp.id} value={emp.id}>
-                {emp.name} — {emp.jobTitle ?? 'غير محدد'} ({emp.commissionRate ?? 'متدرج'}%)
+                {emp.name} — {emp.jobTitle ?? t('غير محدد', 'Unspecified')} ({emp.commissionRate ?? t('متدرج', 'Tiered')}%)
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="رقم الصفقة">
+        <Field label={t('رقم الصفقة', 'Deal Reference')}>
           <input name="dealRef" required className={inputClass} placeholder="FI-DEAL-2025-001" />
         </Field>
 
-        <Field label="رقم الوحدة">
+        <Field label={t('رقم الوحدة', 'Unit Reference')}>
           <input name="unitRef" className={inputClass} placeholder="B2-1204" />
         </Field>
 
-        <Field label="اسم العميل">
-          <input name="clientName" className={inputClass} placeholder="محمد أحمد" />
+        <Field label={t('اسم العميل', 'Client Name')}>
+          <input name="clientName" className={inputClass} placeholder={t('محمد أحمد', 'Mohamed Ahmed')} />
         </Field>
 
-        <Field label="قيمة البيع (ج.م)">
+        <Field label={t('قيمة البيع (ج.م)', 'Sale Value (EGP)')}>
           <input name="saleValue" type="number" required min={1} step="0.01" className={inputClass} placeholder="0" />
         </Field>
 
-        <Field label="المبلغ المحصّل (ج.م)">
+        <Field label={t('المبلغ المحصّل (ج.م)', 'Collected Amount (EGP)')}>
           <input name="collectedAmount" type="number" min={0} step="0.01" className={inputClass} placeholder="0" />
         </Field>
 
-        <Field label="مرحلة الصفقة">
+        <Field label={t('مرحلة الصفقة', 'Deal Stage')}>
           <select name="dealStage" className={inputClass} defaultValue="reservation">
             {stageOptions.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -79,8 +82,8 @@ export function RecordDealForm({ employees }: { employees: EmployeeOption[] }) {
           </select>
         </Field>
 
-        <Field label="ملاحظات">
-          <input name="notes" className={inputClass} placeholder="اختياري" />
+        <Field label={t('ملاحظات', 'Notes')}>
+          <input name="notes" className={inputClass} placeholder={t('اختياري', 'optional')} />
         </Field>
 
         <div className="md:col-span-2">
@@ -89,7 +92,7 @@ export function RecordDealForm({ employees }: { employees: EmployeeOption[] }) {
             disabled={pending}
             className="fi-primary-button flex min-h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60"
           >
-            {pending ? 'جاري الحساب...' : 'تسجيل الصفقة واحتساب العمولة'}
+            {pending ? t('جاري الحساب...', 'Calculating...') : t('تسجيل الصفقة واحتساب العمولة', 'Record Deal & Calculate Commission')}
           </button>
         </div>
       </form>

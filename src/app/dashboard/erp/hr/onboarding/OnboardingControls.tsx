@@ -9,6 +9,7 @@ import {
   addCustomOnboardingTaskAction,
   type OnboardingActionState,
 } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 const initial: OnboardingActionState = { ok: false, message: '' }
 
@@ -38,6 +39,7 @@ export function TaskToggleButton({ taskId, completed }: { taskId: string; comple
 }
 
 export function InitOnboardingButton({ employeeId }: { employeeId: string }) {
+  const { t } = useI18n()
   const [pending, startTransition] = useTransition()
   return (
     <button
@@ -46,25 +48,26 @@ export function InitOnboardingButton({ employeeId }: { employeeId: string }) {
       className="fi-primary-button flex min-h-10 items-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60"
     >
       <Play className="size-4" />
-      {pending ? 'جاري التفعيل...' : 'بدء بروتوكول الاستقبال'}
+      {pending ? t('جاري التفعيل...', 'Activating...') : t('بدء بروتوكول الاستقبال', 'Start Onboarding Protocol')}
     </button>
   )
 }
 
 export function AddCustomTaskForm({ employeeId }: { employeeId: string }) {
+  const { t } = useI18n()
   const [state, action, pending] = useActionState(addCustomOnboardingTaskAction, initial)
   return (
     <form action={action} className="mt-4 grid gap-3 sm:grid-cols-3" dir="rtl">
       <input type="hidden" name="employeeId" value={employeeId} />
-      <input name="taskTitle" placeholder="عنوان المهمة..." required className={inputClass} />
+      <input name="taskTitle" placeholder={t('عنوان المهمة...', 'Task title...')} required className={inputClass} />
       <select name="category" className={inputClass}>
-        <option value="document">وثيقة</option>
-        <option value="access">صلاحيات</option>
-        <option value="training">تدريب</option>
-        <option value="equipment">معدات</option>
-        <option value="intro">تعارف</option>
-        <option value="review">مراجعة</option>
-        <option value="general">عام</option>
+        <option value="document">{t('وثيقة', 'Document')}</option>
+        <option value="access">{t('صلاحيات', 'Access')}</option>
+        <option value="training">{t('تدريب', 'Training')}</option>
+        <option value="equipment">{t('معدات', 'Equipment')}</option>
+        <option value="intro">{t('تعارف', 'Intro')}</option>
+        <option value="review">{t('مراجعة', 'Review')}</option>
+        <option value="general">{t('عام', 'General')}</option>
       </select>
       <button
         type="submit"
@@ -72,7 +75,7 @@ export function AddCustomTaskForm({ employeeId }: { employeeId: string }) {
         className="flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
       >
         <Plus className="size-4" />
-        {pending ? 'جاري...' : 'إضافة'}
+        {pending ? '...' : t('إضافة', 'Add')}
       </button>
       {state.message && (
         <p className={`sm:col-span-3 text-xs font-bold ${state.ok ? 'text-emerald-600' : 'text-red-600'}`}>

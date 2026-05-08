@@ -8,6 +8,7 @@ import {
   addGoalAction,
   type PerfActionState,
 } from './actions'
+import { useI18n } from '@/hooks/use-i18n'
 
 const initial: PerfActionState = { ok: false, message: '' }
 
@@ -49,6 +50,7 @@ function StarRating({ name, label }: { name: string; label: string }) {
 
 // ─── Create Review Cycle Form ─────────────────────────────────────────────────
 export function CreateReviewCycleForm({ employees }: { employees: EmployeeOption[] }) {
+  const { t } = useI18n()
   const [state, action, pending] = useActionState(createReviewCycleAction, initial)
   const [expanded, setExpanded] = useState(false)
 
@@ -61,7 +63,7 @@ export function CreateReviewCycleForm({ employees }: { employees: EmployeeOption
       >
         <div className="text-right">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--fi-emerald)]">REVIEW ENGINE</p>
-          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">إنشاء دورة تقييم جديدة</h2>
+          <h2 className="mt-1 text-xl font-black text-[var(--fi-ink)]">{t('إنشاء دورة تقييم جديدة', 'Create New Review Cycle')}</h2>
         </div>
         {expanded ? <ChevronUp className="size-5 text-[var(--fi-muted)]" /> : <ChevronDown className="size-5 text-[var(--fi-muted)]" />}
       </button>
@@ -75,27 +77,27 @@ export function CreateReviewCycleForm({ employees }: { employees: EmployeeOption
           )}
           <form action={action} className="mt-5 grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">نوع الدورة</span>
+              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('نوع الدورة', 'Cycle Type')}</span>
               <select name="reviewCycle" className={inputClass}>
-                <option value="annual">سنوي</option>
-                <option value="quarterly">ربع سنوي</option>
-                <option value="probation">فترة تجريبية</option>
+                <option value="annual">{t('سنوي', 'Annual')}</option>
+                <option value="quarterly">{t('ربع سنوي', 'Quarterly')}</option>
+                <option value="probation">{t('فترة تجريبية', 'Probation')}</option>
               </select>
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">عنوان الفترة</span>
-              <input name="periodLabel" placeholder="مثال: Q2 2026 أو سنوي 2025" required className={inputClass} />
+              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('عنوان الفترة', 'Period Label')}</span>
+              <input name="periodLabel" placeholder={t('مثال: Q2 2026 أو سنوي 2025', 'e.g. Q2 2026 or Annual 2025')} required className={inputClass} />
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">بداية الفترة</span>
+              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('بداية الفترة', 'Period Start')}</span>
               <input name="periodStart" type="date" required className={inputClass} />
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">نهاية الفترة</span>
+              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('نهاية الفترة', 'Period End')}</span>
               <input name="periodEnd" type="date" required className={inputClass} />
             </label>
             <div className="block sm:col-span-2">
-              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">الموظفون</span>
+              <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('الموظفون', 'Employees')}</span>
               <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3">
                 {employees.map((e) => (
                   <label key={e.id} className="flex cursor-pointer items-center gap-2 rounded p-1.5 text-sm font-bold text-[var(--fi-ink)] hover:bg-white">
@@ -112,7 +114,7 @@ export function CreateReviewCycleForm({ employees }: { employees: EmployeeOption
                 className="fi-primary-button flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60"
               >
                 <Star className="size-4" />
-                {pending ? 'جاري الإنشاء...' : 'إنشاء دورة التقييم'}
+                {pending ? t('جاري الإنشاء...', 'Creating...') : t('إنشاء دورة التقييم', 'Create Review Cycle')}
               </button>
             </div>
           </form>
@@ -124,6 +126,7 @@ export function CreateReviewCycleForm({ employees }: { employees: EmployeeOption
 
 // ─── Manager Score Form ───────────────────────────────────────────────────────
 export function ManagerReviewForm({ reviewId, employeeName }: { reviewId: string; employeeName: string }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const [result, setResult] = useState<PerfActionState | null>(null)
@@ -155,41 +158,41 @@ export function ManagerReviewForm({ reviewId, employeeName }: { reviewId: string
         className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 transition hover:bg-emerald-100"
       >
         <CheckCircle2 className="size-3.5" />
-        تقييم المدير
+        {t('تقييم المدير', "Manager's Review")}
       </button>
     )
   }
 
   return (
     <div className="mt-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4" dir="rtl">
-      <p className="mb-3 text-sm font-black text-[var(--fi-ink)]">تقييم المدير — {employeeName}</p>
+      <p className="mb-3 text-sm font-black text-[var(--fi-ink)]">{t('تقييم المدير', "Manager's Review")} — {employeeName}</p>
       {result && (
         <p className={`mb-3 text-xs font-bold ${result.ok ? 'text-emerald-600' : 'text-red-600'}`}>{result.message}</p>
       )}
       <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StarRating name="mgr_sales"      label="المبيعات والإنجاز" />
-        <StarRating name="mgr_teamwork"   label="العمل الجماعي" />
-        <StarRating name="mgr_attendance" label="الالتزام والحضور" />
-        <StarRating name="mgr_initiative" label="المبادرة والإبداع" />
-        <StarRating name="mgr_knowledge"  label="المعرفة التقنية" />
+        <StarRating name="mgr_sales"      label={t('المبيعات والإنجاز', 'Sales & Achievement')} />
+        <StarRating name="mgr_teamwork"   label={t('العمل الجماعي', 'Teamwork')} />
+        <StarRating name="mgr_attendance" label={t('الالتزام والحضور', 'Commitment & Attendance')} />
+        <StarRating name="mgr_initiative" label={t('المبادرة والإبداع', 'Initiative & Creativity')} />
+        <StarRating name="mgr_knowledge"  label={t('المعرفة التقنية', 'Technical Knowledge')} />
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">زيادة الراتب %</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('زيادة الراتب %', 'Salary Increase %')}</span>
           <input name="salary_increase" type="number" min={0} max={100} step={0.5} placeholder="0" className={inputClass} />
         </label>
         <label className="flex items-center gap-2 text-sm font-black text-[var(--fi-ink)]">
           <input type="checkbox" name="promotion" className="accent-emerald-600 size-4" />
-          مرشح للترقية
+          {t('مرشح للترقية', 'Promotion Candidate')}
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">ملاحظات المدير</span>
+          <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">{t('ملاحظات المدير', "Manager's Notes")}</span>
           <textarea name="mgr_notes" rows={2} className="w-full resize-none rounded-lg border border-[var(--fi-line)] bg-white px-3 py-2 text-sm font-bold text-[var(--fi-ink)] outline-none focus:border-[var(--fi-emerald)] focus:ring-4 focus:ring-emerald-100" />
         </label>
         <div className="flex gap-2 sm:col-span-2 lg:col-span-3">
           <button type="submit" disabled={pending} className="fi-primary-button flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-black disabled:opacity-60">
-            {pending ? 'جاري الحفظ...' : 'إتمام التقييم'}
+            {pending ? t('جاري الحفظ...', 'Saving...') : t('إتمام التقييم', 'Complete Review')}
           </button>
           <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-lg border border-[var(--fi-line)] px-4 text-sm font-bold text-[var(--fi-muted)] hover:bg-white">
-            إلغاء
+            {t('إلغاء', 'Cancel')}
           </button>
         </div>
       </form>
@@ -199,6 +202,7 @@ export function ManagerReviewForm({ reviewId, employeeName }: { reviewId: string
 
 // ─── Add Goal Form ────────────────────────────────────────────────────────────
 export function AddGoalForm({ employeeId, reviewId }: { employeeId: string; reviewId?: string }) {
+  const { t } = useI18n()
   const [state, action, pending] = useActionState(addGoalAction, initial)
   const [open, setOpen] = useState(false)
 
@@ -207,24 +211,24 @@ export function AddGoalForm({ employeeId, reviewId }: { employeeId: string; revi
       {!open && (
         <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--fi-line)] px-3 py-1.5 text-xs font-black text-[var(--fi-muted)] transition hover:border-emerald-400 hover:text-emerald-600">
           <Target className="size-3.5" />
-          إضافة هدف
+          {t('إضافة هدف', 'Add Goal')}
         </button>
       )}
       {open && (
         <form action={action} className="mt-2 grid gap-3 sm:grid-cols-4" dir="rtl">
           <input type="hidden" name="employeeId" value={employeeId} />
           {reviewId && <input type="hidden" name="reviewId" value={reviewId} />}
-          <input name="title" placeholder="عنوان الهدف*" required className={`${inputClass} sm:col-span-2`} />
-          <input name="targetValue" type="number" placeholder="قيمة الهدف" className={inputClass} />
-          <input name="unit" placeholder="الوحدة (صفقة، ج.م...)" className={inputClass} />
+          <input name="title" placeholder={t('عنوان الهدف*', 'Goal title*')} required className={`${inputClass} sm:col-span-2`} />
+          <input name="targetValue" type="number" placeholder={t('قيمة الهدف', 'Target value')} className={inputClass} />
+          <input name="unit" placeholder={t('الوحدة (صفقة، ج.م...)', 'Unit (deal, EGP...)')} className={inputClass} />
           <input name="weightPct" type="number" defaultValue={20} min={5} max={100} className={inputClass} />
           <input name="dueDate" type="date" className={inputClass} />
           <div className="flex gap-2 sm:col-span-2">
             <button type="submit" disabled={pending} className="h-10 flex-1 rounded-lg bg-emerald-600 px-3 text-xs font-black text-white transition hover:bg-emerald-700 disabled:opacity-60">
-              {pending ? '...' : 'حفظ الهدف'}
+              {pending ? '...' : t('حفظ الهدف', 'Save Goal')}
             </button>
             <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-lg border border-[var(--fi-line)] px-3 text-xs font-bold text-[var(--fi-muted)]">
-              إلغاء
+              {t('إلغاء', 'Cancel')}
             </button>
           </div>
           {state.message && <p className={`text-xs font-bold sm:col-span-4 ${state.ok ? 'text-emerald-600' : 'text-red-600'}`}>{state.message}</p>}
