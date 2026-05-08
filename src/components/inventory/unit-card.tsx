@@ -8,18 +8,12 @@ import { Badge } from '@/components/ui/badge'
 import { holdInventoryUnit } from '@/app/dashboard/inventory/actions'
 import { HoldTimer } from './hold-timer'
 import type { InventoryUnit } from './inventory-types'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface UnitCardProps {
   unit: InventoryUnit
   onDetails: (unit: InventoryUnit) => void
   onHeld: (unitId: string, heldUntil: string) => void
-}
-
-const statusLabels: Record<InventoryUnit['status'], string> = {
-  available: 'متاح',
-  reserved: 'محجوز',
-  sold: 'مباع',
-  held: 'محتجز',
 }
 
 const statusClass: Record<InventoryUnit['status'], string> = {
@@ -29,27 +23,36 @@ const statusClass: Record<InventoryUnit['status'], string> = {
   held: 'border-[var(--fi-line)] bg-[var(--fi-soft)] text-[var(--fi-ink)]',
 }
 
-const unitTypeLabels: Record<string, string> = {
-  apartment: 'شقة',
-  villa: 'فيلا',
-  duplex: 'دوبلكس',
-  penthouse: 'بنتهاوس',
-  studio: 'استوديو',
-  office: 'مكتب',
-  shop: 'محل',
-  chalet: 'شاليه',
-  townhouse: 'تاون هاوس',
-}
-
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 export function UnitCard({ unit, onDetails, onHeld }: UnitCardProps) {
+  const { t, numLocale } = useI18n()
+
+  const statusLabels: Record<InventoryUnit['status'], string> = {
+    available: t('متاح', 'Available'),
+    reserved: t('محجوز', 'Reserved'),
+    sold: t('مباع', 'Sold'),
+    held: t('محتجز', 'On Hold'),
+  }
+
+  const unitTypeLabels: Record<string, string> = {
+    apartment: t('شقة', 'Apartment'),
+    villa: t('فيلا', 'Villa'),
+    duplex: t('دوبلكس', 'Duplex'),
+    penthouse: t('بنتهاوس', 'Penthouse'),
+    studio: t('استوديو', 'Studio'),
+    office: t('مكتب', 'Office'),
+    shop: t('محل', 'Shop'),
+    chalet: t('شاليه', 'Chalet'),
+    townhouse: t('تاون هاوس', 'Townhouse'),
+  }
+
+  function formatEgp(value: number) {
+    return new Intl.NumberFormat(numLocale, {
+      style: 'currency',
+      currency: 'EGP',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+
   async function handleHold() {
     const result = await holdInventoryUnit(unit.id)
     if (!result.ok) {
@@ -64,7 +67,7 @@ export function UnitCard({ unit, onDetails, onHeld }: UnitCardProps) {
   async function handleShare() {
     const url = `${window.location.origin}/inventory?unit=${unit.id}`
     await navigator.clipboard.writeText(url)
-    toast.success('تم نسخ رابط المشاركة')
+    toast.success(t('تم نسخ رابط المشاركة', 'Share link copied'))
   }
 
   return (
@@ -117,7 +120,7 @@ export function UnitCard({ unit, onDetails, onHeld }: UnitCardProps) {
 
         <div className="grid grid-cols-4 gap-2 text-xs text-[var(--fi-muted)]">
           <span className="flex items-center gap-1"><Building2 className="size-3.5" />{unitTypeLabels[unit.unitType] ?? unit.unitType}</span>
-          <span className="flex items-center gap-1"><Ruler className="size-3.5" />{unit.areaSqm} م²</span>
+          <span className="flex items-center gap-1"><Ruler className="size-3.5" />{unit.areaSqm} {t('م²', 'm²')}</span>
           <span className="flex items-center gap-1"><BedDouble className="size-3.5" />{unit.bedrooms ?? 0}</span>
           <span className="flex items-center gap-1"><Bath className="size-3.5" />{unit.bathrooms ?? 0}</span>
         </div>
@@ -126,22 +129,22 @@ export function UnitCard({ unit, onDetails, onHeld }: UnitCardProps) {
           <p className="text-lg font-black text-[var(--fi-ink)]">{formatEgp(unit.price)}</p>
           <p className="mt-1 flex items-center gap-1 text-xs text-[var(--fi-muted)]">
             <CalendarClock className="size-3.5" />
-            {unit.monthlyInstallment ? `${formatEgp(unit.monthlyInstallment)} شهرياً` : 'خطة السداد غير محددة'}
+            {unit.monthlyInstallment ? `${formatEgp(unit.monthlyInstallment)} ${t('شهرياً', 'monthly')}` : t('خطة السداد غير محددة', 'Payment plan not set')}
           </p>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           <Button type="button" size="sm" onClick={handleHold} disabled={unit.status !== 'available'}>
             <Hand className="size-3.5" />
-            احتجاز
+            {t('احتجاز', 'Hold')}
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={handleShare}>
             <Share2 className="size-3.5" />
-            مشاركة
+            {t('مشاركة', 'Share')}
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={() => onDetails(unit)}>
             <Eye className="size-3.5" />
-            تفاصيل
+            {t('تفاصيل', 'Details')}
           </Button>
         </div>
       </div>

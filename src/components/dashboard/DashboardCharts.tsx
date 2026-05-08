@@ -19,6 +19,7 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartPoint, StagePoint } from './useDashboardData'
+import { useI18n } from '@/hooks/use-i18n'
 
 type DashboardChartsProps = {
   salesByMonth: ChartPoint[]
@@ -45,6 +46,12 @@ export function DashboardCharts({
   commissionsByMonth,
   isLoading = false,
 }: DashboardChartsProps) {
+  const { t, numLocale } = useI18n()
+
+  function compactAxis(value: number) {
+    return new Intl.NumberFormat(numLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+  }
+
   if (isLoading) {
     return (
       <div className="grid gap-4 2xl:grid-cols-2">
@@ -65,31 +72,31 @@ export function DashboardCharts({
 
   return (
     <div className="grid gap-4 2xl:grid-cols-2">
-      <ChartCard title="المبيعات الشهرية" description="آخر 6 أشهر حسب الصفقات المغلقة">
+      <ChartCard title={t('المبيعات الشهرية', 'Monthly Sales')} description={t('آخر 6 أشهر حسب الصفقات المغلقة', 'Last 6 months by closed deals')}>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={salesByMonth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} tick={{ fontSize: 11 }} />
-            <Tooltip content={<ArabicTooltip valueLabel="ج.م" />} />
-            <Bar dataKey="sales" name="المبيعات" fill="var(--fi-emerald)" radius={[8, 8, 0, 0]} />
+            <Tooltip content={<ChartTooltip valueLabel={t('ج.م', 'EGP')} numLocale={numLocale} />} />
+            <Bar dataKey="sales" name={t('المبيعات', 'Sales')} fill="var(--fi-emerald)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="نمو العملاء" description="النمو التراكمي للعملاء خلال الفترة">
+      <ChartCard title={t('نمو العملاء', 'Client Growth')} description={t('النمو التراكمي للعملاء خلال الفترة', 'Cumulative client growth over the period')}>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={clientGrowth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} width={42} tick={{ fontSize: 11 }} />
-            <Tooltip content={<ArabicTooltip />} />
-            <Line type="monotone" dataKey="cumulativeClients" name="العملاء" stroke="var(--fi-blue)" strokeWidth={3} dot={{ r: 3 }} />
+            <Tooltip content={<ChartTooltip numLocale={numLocale} />} />
+            <Line type="monotone" dataKey="cumulativeClients" name={t('العملاء', 'Clients')} stroke="var(--fi-blue)" strokeWidth={3} dot={{ r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="حالة الصفقات" description="توزيع الصفقات حسب المرحلة الحالية">
+      <ChartCard title={t('حالة الصفقات', 'Deal Status')} description={t('توزيع الصفقات حسب المرحلة الحالية', 'Deal distribution by current stage')}>
         {dealsByStage.some((stage) => stage.count > 0) ? (
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
@@ -106,16 +113,16 @@ export function DashboardCharts({
                   <Cell key={entry.stage} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip content={<ArabicTooltip />} />
+              <Tooltip content={<ChartTooltip numLocale={numLocale} />} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <EmptyChart label="لا توجد صفقات في هذه الفترة" />
+          <EmptyChart label={t('لا توجد صفقات في هذه الفترة', 'No deals in this period')} />
         )}
       </ChartCard>
 
-      <ChartCard title="العمولات" description="العمولات المعتمدة أو المدفوعة شهرياً">
+      <ChartCard title={t('العمولات', 'Commissions')} description={t('العمولات المعتمدة أو المدفوعة شهرياً', 'Approved or paid commissions monthly')}>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={commissionsByMonth} margin={{ top: 8, right: 10, bottom: 0, left: 4 }}>
             <defs>
@@ -127,8 +134,8 @@ export function DashboardCharts({
             <CartesianGrid stroke="var(--fi-line)" vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" stroke="var(--fi-muted)" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--fi-muted)" tickLine={false} axisLine={false} tickFormatter={compactAxis} width={52} tick={{ fontSize: 11 }} />
-            <Tooltip content={<ArabicTooltip valueLabel="ج.م" />} />
-            <Area type="monotone" dataKey="commissions" name="العمولات" stroke="var(--fi-emerald)" strokeWidth={3} fill="url(#commissionFill)" />
+            <Tooltip content={<ChartTooltip valueLabel={t('ج.م', 'EGP')} numLocale={numLocale} />} />
+            <Area type="monotone" dataKey="commissions" name={t('العمولات', 'Commissions')} stroke="var(--fi-emerald)" strokeWidth={3} fill="url(#commissionFill)" />
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -156,11 +163,12 @@ function EmptyChart({ label }: { label: string }) {
   )
 }
 
-function ArabicTooltip({ active, payload, label, valueLabel }: {
+function ChartTooltip({ active, payload, label, valueLabel, numLocale }: {
   active?: boolean
   payload?: Array<{ name?: string; value?: number; payload?: { stage?: string } }>
   label?: string
   valueLabel?: string
+  numLocale: string
 }) {
   if (!active || !payload?.length) return null
 
@@ -169,13 +177,9 @@ function ArabicTooltip({ active, payload, label, valueLabel }: {
       {label && <p className="mb-1 font-black text-[var(--fi-ink)]">{label}</p>}
       {payload.map((item) => (
         <p key={`${item.name}-${item.value}`} className="font-bold text-[var(--fi-muted)]">
-          {item.name ?? item.payload?.stage}: {Number(item.value ?? 0).toLocaleString('ar-EG')} {valueLabel ?? ''}
+          {item.name ?? item.payload?.stage}: {Number(item.value ?? 0).toLocaleString(numLocale)} {valueLabel ?? ''}
         </p>
       ))}
     </div>
   )
-}
-
-function compactAxis(value: number) {
-  return new Intl.NumberFormat('ar-EG', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 }

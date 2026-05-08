@@ -5,6 +5,7 @@ import { PlusIcon, X, UploadCloud, FileSpreadsheet } from 'lucide-react'
 import { getDevelopersList, addSingleUnit, addBulkUnits } from '@/app/dashboard/inventory/actions'
 import { AiPropertyDescriptionButton } from '@/components/ai/ai-property-description-button'
 import readXlsxFile from 'read-excel-file/browser'
+import { useI18n } from '@/hooks/use-i18n'
 
 type CellValue = string | number | boolean | Date | null
 
@@ -61,7 +62,7 @@ async function parseSpreadsheetFile(file: File) {
   }
 
   if (!fileName.endsWith('.xlsx')) {
-    throw new Error('صيغة الملف غير مدعومة. استخدم CSV أو XLSX.')
+    throw new Error('Unsupported file format. Use CSV or XLSX.')
   }
 
   const rows = await readXlsxFile(file)
@@ -69,6 +70,7 @@ async function parseSpreadsheetFile(file: File) {
 }
 
 export default function AddUnitButton() {
+  const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single')
@@ -94,7 +96,6 @@ export default function AddUnitButton() {
     return () => { mounted = false }
   }, [isOpen])
 
-  // معالجة الإضافة اليدوية
   const handleSingleSubmit = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault()
     setLoading(true)
@@ -102,25 +103,24 @@ export default function AddUnitButton() {
       await addSingleUnit(new FormData(e.currentTarget))
       setIsOpen(false)
     } catch (error: unknown) {
-      alert('خطأ: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
+      alert(t('خطأ: ', 'Error: ') + (error instanceof Error ? error.message : t('خطأ غير معروف', 'Unknown error')))
     } finally {
       setLoading(false)
     }
   }
 
-  // معالجة رفع وتفكيك ملف الإكسيل
   const handleBulkSubmit = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault()
-    if (!excelFile || !selectedDeveloper) return alert('يرجى اختيار المطور وملف الإكسيل')
-    
+    if (!excelFile || !selectedDeveloper) return alert(t('يرجى اختيار المطور وملف الإكسيل', 'Please select a developer and Excel file'))
+
     setLoading(true)
     try {
       const jsonData = await parseSpreadsheetFile(excelFile)
       await addBulkUnits(jsonData, selectedDeveloper)
       setIsOpen(false)
-      alert(`تمت إضافة ${jsonData.length} وحدة بنجاح!`)
+      alert(`${t('تمت إضافة', 'Successfully added')} ${jsonData.length} ${t('وحدة بنجاح!', 'units!')}`)
     } catch (error: unknown) {
-      alert('حدث خطأ أثناء معالجة الملف: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'))
+      alert(t('حدث خطأ أثناء معالجة الملف: ', 'Error processing file: ') + (error instanceof Error ? error.message : t('خطأ غير معروف', 'Unknown error')))
     } finally {
       setLoading(false)
     }
@@ -130,56 +130,54 @@ export default function AddUnitButton() {
     <>
       <button onClick={() => setIsOpen(true)} className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-md transition-all">
         <PlusIcon size={18} />
-        <span className="text-sm font-medium">إضافة للمخزون</span>
+        <span className="text-sm font-medium">{t('إضافة للمخزون', 'Add to Inventory')}</span>
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" dir="rtl">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-            {/* Header & Tabs */}
             <div className="bg-slate-50 border-b border-slate-100">
               <div className="p-4 flex justify-between items-center">
-                <h3 className="font-bold text-slate-900">إضافة وحدات عقارية</h3>
+                <h3 className="font-bold text-slate-900">{t('إضافة وحدات عقارية', 'Add Real Estate Units')}</h3>
                 <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
               </div>
               <div className="flex border-t border-slate-200">
-                <button onClick={() => setActiveTab('single')} className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'single' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:bg-slate-100'}`}>إضافة يدوية</button>
-                <button onClick={() => setActiveTab('bulk')} className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2 ${activeTab === 'bulk' ? 'border-green-600 text-green-600 bg-white' : 'border-transparent text-slate-500 hover:bg-slate-100'}`}><FileSpreadsheet size={16}/> رفع Excel</button>
+                <button onClick={() => setActiveTab('single')} className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'single' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:bg-slate-100'}`}>{t('إضافة يدوية', 'Manual Entry')}</button>
+                <button onClick={() => setActiveTab('bulk')} className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2 ${activeTab === 'bulk' ? 'border-green-600 text-green-600 bg-white' : 'border-transparent text-slate-500 hover:bg-slate-100'}`}><FileSpreadsheet size={16}/> {t('رفع Excel', 'Upload Excel')}</button>
               </div>
             </div>
 
-            {/* محتوى التبويبات */}
             <div className="p-6">
               {activeTab === 'single' ? (
                 <form onSubmit={handleSingleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">اسم الوحدة / الكود</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('اسم الوحدة / الكود', 'Unit Name / Code')}</label>
                     <input name="unit_name" required value={unitName} onChange={(event) => setUnitName(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">المطور العقاري</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('المطور العقاري', 'Real Estate Developer')}</label>
                     <select name="developer_id" required value={selectedDeveloper} onChange={(event) => setSelectedDeveloper(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                      <option value="">-- اختر المطور --</option>
+                      <option value="">{t('-- اختر المطور --', '-- Select Developer --')}</option>
                       {developers.map(dev => <option key={dev.id} value={dev.id}>{dev.name}</option>)}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">نوع الوحدة</label>
-                      <input name="unit_type" placeholder="شقة، فيلا، تجاري..." required value={unitType} onChange={(event) => setUnitType(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{t('نوع الوحدة', 'Unit Type')}</label>
+                      <input name="unit_type" placeholder={t('شقة، فيلا، تجاري...', 'Apartment, Villa, Commercial...')} required value={unitType} onChange={(event) => setUnitType(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">السعر</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{t('السعر', 'Price')}</label>
                       <input name="price" type="number" required value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">المساحة بالمتر</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('المساحة بالمتر', 'Area in m²')}</label>
                     <input name="area_sqm" type="number" min="1" value={unitArea} onChange={(event) => setUnitArea(event.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <label className="block text-xs font-bold text-slate-700">وصف تسويقي</label>
+                      <label className="block text-xs font-bold text-slate-700">{t('وصف تسويقي', 'Marketing Description')}</label>
                       <AiPropertyDescriptionButton
                         input={{
                           projectName: developers.find((developer) => developer.id === selectedDeveloper)?.name ?? unitName,
@@ -197,29 +195,29 @@ export default function AddUnitButton() {
                       value={unitDescription}
                       onChange={(event) => setUnitDescription(event.target.value)}
                       className="min-h-28 w-full rounded-lg border px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                      placeholder="اكتب وصفاً مختصراً أو استخدم التوليد بالذكاء الاصطناعي"
+                      placeholder={t('اكتب وصفاً مختصراً أو استخدم التوليد بالذكاء الاصطناعي', 'Write a brief description or use AI generation')}
                     />
                   </div>
-                  <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold mt-2">{loading ? 'جاري الحفظ...' : 'حفظ الوحدة'}</button>
+                  <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold mt-2">{loading ? t('جاري الحفظ...', 'Saving...') : t('حفظ الوحدة', 'Save Unit')}</button>
                 </form>
               ) : (
                 <form onSubmit={handleBulkSubmit} className="space-y-4 text-center">
                   <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-xs font-medium mb-4 text-right">
-                    💡 <strong>صيغة الإكسيل المطلوبة:</strong> يجب أن يحتوي الملف على أعمدة بهذه الأسماء (اسم الوحدة، النوع، السعر).
+                    💡 <strong>{t('صيغة الإكسيل المطلوبة:', 'Required Excel format:')}</strong> {t('يجب أن يحتوي الملف على أعمدة بهذه الأسماء (اسم الوحدة، النوع، السعر).', 'The file must contain columns with these names (unit name, type, price).')}
                   </div>
                   <div className="text-right">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">إلى أي مطور تنتمي هذه الوحدات؟</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('إلى أي مطور تنتمي هذه الوحدات؟', 'Which developer do these units belong to?')}</label>
                     <select required value={selectedDeveloper} onChange={(e) => setSelectedDeveloper(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 text-sm bg-white">
-                      <option value="">-- اختر المطور أولاً --</option>
+                      <option value="">{t('-- اختر المطور أولاً --', '-- Select Developer First --')}</option>
                       {developers.map(dev => <option key={dev.id} value={dev.id}>{dev.name}</option>)}
                     </select>
                   </div>
                   <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 hover:bg-slate-50 transition-colors relative mt-4">
                     <input type="file" accept=".xlsx,.csv" required onChange={(e) => setExcelFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     <UploadCloud size={40} className="mx-auto text-slate-400 mb-3" />
-                    <p className="text-sm font-bold text-slate-700">{excelFile ? excelFile.name : 'اسحب ملف Excel هنا أو اضغط للاختيار'}</p>
+                    <p className="text-sm font-bold text-slate-700">{excelFile ? excelFile.name : t('اسحب ملف Excel هنا أو اضغط للاختيار', 'Drag Excel file here or click to select')}</p>
                   </div>
-                  <button type="submit" disabled={loading || !excelFile} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold disabled:bg-slate-300 transition-colors">{loading ? 'جاري رفع ومعالجة الملف...' : 'استيراد الوحدات'}</button>
+                  <button type="submit" disabled={loading || !excelFile} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold disabled:bg-slate-300 transition-colors">{loading ? t('جاري رفع ومعالجة الملف...', 'Uploading and processing file...') : t('استيراد الوحدات', 'Import Units')}</button>
                 </form>
               )}
             </div>

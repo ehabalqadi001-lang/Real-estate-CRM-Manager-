@@ -12,6 +12,7 @@ import { Slider } from '@/components/ui/slider'
 import { UnitCard } from './unit-card'
 import { UnitDetailSheet } from './unit-detail-sheet'
 import type { InventoryDeveloper, InventorySortKey, InventoryUnit, InventoryViewMode } from './inventory-types'
+import { useI18n } from '@/hooks/use-i18n'
 
 const InventoryMap = dynamic(() => import('./inventory-map').then((mod) => mod.InventoryMap), {
   ssr: false,
@@ -28,40 +29,42 @@ interface InventoryClientProps {
   initialDeveloperIds?: string[]
 }
 
-const unitTypes = [
-  ['apartment', 'شقة'],
-  ['villa', 'فيلا'],
-  ['duplex', 'دوبلكس'],
-  ['penthouse', 'بنتهاوس'],
-  ['studio', 'استوديو'],
-  ['office', 'مكتب'],
-  ['shop', 'محل'],
-  ['chalet', 'شاليه'],
-  ['townhouse', 'تاون هاوس'],
-] as const
-
-const finishingOptions = [
-  ['fully_finished', 'تشطيب كامل'],
-  ['semi_finished', 'نصف تشطيب'],
-  ['core_shell', 'بدون تشطيب'],
-  ['furnished', 'مفروش'],
-] as const
-
-const statusOptions = [
-  ['available', 'متاح'],
-  ['reserved', 'محجوز'],
-  ['held', 'محتجز'],
-] as const
-
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 export function InventoryClient({ units, developers, initialDeveloperIds = [] }: InventoryClientProps) {
+  const { t, numLocale } = useI18n()
+
+  const unitTypes = [
+    ['apartment', t('شقة', 'Apartment')],
+    ['villa', t('فيلا', 'Villa')],
+    ['duplex', t('دوبلكس', 'Duplex')],
+    ['penthouse', t('بنتهاوس', 'Penthouse')],
+    ['studio', t('استوديو', 'Studio')],
+    ['office', t('مكتب', 'Office')],
+    ['shop', t('محل', 'Shop')],
+    ['chalet', t('شاليه', 'Chalet')],
+    ['townhouse', t('تاون هاوس', 'Townhouse')],
+  ] as const
+
+  const finishingOptions = [
+    ['fully_finished', t('تشطيب كامل', 'Fully Finished')],
+    ['semi_finished', t('نصف تشطيب', 'Semi-Finished')],
+    ['core_shell', t('بدون تشطيب', 'Core & Shell')],
+    ['furnished', t('مفروش', 'Furnished')],
+  ] as const
+
+  const statusOptions = [
+    ['available', t('متاح', 'Available')],
+    ['reserved', t('محجوز', 'Reserved')],
+    ['held', t('محتجز', 'On Hold')],
+  ] as const
+
+  function formatEgp(value: number) {
+    return new Intl.NumberFormat(numLocale, {
+      style: 'currency',
+      currency: 'EGP',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+
   const [view, setView] = useState<InventoryViewMode>('grid')
   const [query, setQuery] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(true)
@@ -136,6 +139,12 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
     setSelectedUnit((current) => current?.id === unitId ? { ...current, status: 'held', heldUntil } : current)
   }
 
+  const viewOptions = [
+    ['grid', LayoutGrid, t('بطاقات', 'Cards')],
+    ['list', List, t('قائمة', 'List')],
+    ['map', Map, t('خريطة', 'Map')],
+  ] as const
+
   return (
     <div className="grid gap-5 lg:grid-cols-[320px_1fr]" dir="rtl">
       <aside className={`${filtersOpen ? 'block' : 'hidden'} lg:block`}>
@@ -144,7 +153,7 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-black text-[var(--fi-ink)]">
                 <SlidersHorizontal className="size-4" />
-                فلاتر المخزون
+                {t('فلاتر المخزون', 'Inventory Filters')}
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={() => {
                 setDeveloperIds([])
@@ -156,11 +165,11 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
                 setPriceRange([bounds.minPrice, bounds.maxPrice])
                 setAreaRange([bounds.minArea, bounds.maxArea])
               }}>
-                إعادة ضبط
+                {t('إعادة ضبط', 'Reset')}
               </Button>
             </div>
 
-            <FilterGroup title="المطور">
+            <FilterGroup title={t('المطور', 'Developer')}>
               <div className="space-y-2">
                 {developers.map((developer) => (
                   <label key={developer.id} className="flex items-center gap-2 text-sm text-[var(--fi-ink)]">
@@ -175,37 +184,37 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
               </div>
             </FilterGroup>
 
-            <FilterGroup title="نوع الوحدة">
+            <FilterGroup title={t('نوع الوحدة', 'Unit Type')}>
               <ChipGrid options={unitTypes} selected={selectedTypes} onToggle={(value) => toggleValue(value, selectedTypes, setSelectedTypes)} />
             </FilterGroup>
 
-            <FilterGroup title="المدينة / المنطقة">
-              <Input value={city} onChange={(event) => setCity(event.target.value)} placeholder="القاهرة الجديدة، العاصمة..." />
+            <FilterGroup title={t('المدينة / المنطقة', 'City / Area')}>
+              <Input value={city} onChange={(event) => setCity(event.target.value)} placeholder={t('القاهرة الجديدة، العاصمة...', 'New Cairo, Capital...')} />
             </FilterGroup>
 
-            <FilterGroup title={`السعر: ${formatEgp(priceRange[0])} - ${formatEgp(priceRange[1])}`}>
+            <FilterGroup title={`${t('السعر', 'Price')}: ${formatEgp(priceRange[0])} - ${formatEgp(priceRange[1])}`}>
               <Slider min={bounds.minPrice} max={bounds.maxPrice || 1} step={50_000} value={priceRange} onValueChange={(value) => setPriceRange(value as [number, number])} />
             </FilterGroup>
 
-            <FilterGroup title={`المساحة: ${areaRange[0]} - ${areaRange[1]} م²`}>
+            <FilterGroup title={`${t('المساحة', 'Area')}: ${areaRange[0]} - ${areaRange[1]} ${t('م²', 'm²')}`}>
               <Slider min={bounds.minArea} max={bounds.maxArea || 1} step={5} value={areaRange} onValueChange={(value) => setAreaRange(value as [number, number])} />
             </FilterGroup>
 
-            <FilterGroup title="عدد الغرف">
+            <FilterGroup title={t('عدد الغرف', 'Bedrooms')}>
               <div className="grid grid-cols-5 gap-2">
                 {['all', '1', '2', '3', '4+'].map((value) => (
                   <Button key={value} type="button" variant={bedrooms === value ? 'default' : 'outline'} size="sm" onClick={() => setBedrooms(value)}>
-                    {value === 'all' ? 'الكل' : value}
+                    {value === 'all' ? t('الكل', 'All') : value}
                   </Button>
                 ))}
               </div>
             </FilterGroup>
 
-            <FilterGroup title="التشطيب">
+            <FilterGroup title={t('التشطيب', 'Finishing')}>
               <ChipGrid options={finishingOptions} selected={selectedFinishing} onToggle={(value) => toggleValue(value, selectedFinishing, setSelectedFinishing)} />
             </FilterGroup>
 
-            <FilterGroup title="الحالة">
+            <FilterGroup title={t('الحالة', 'Status')}>
               <ChipGrid options={statusOptions} selected={selectedStatuses} onToggle={(value) => toggleValue(value, selectedStatuses, setSelectedStatuses)} />
             </FilterGroup>
           </CardContent>
@@ -217,7 +226,7 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fi-muted)]" />
-              <Input className="pr-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="بحث بالمشروع أو الوحدة أو المطور..." />
+              <Input className="pr-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('بحث بالمشروع أو الوحدة أو المطور...', 'Search by project, unit, or developer...')} />
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -225,40 +234,36 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
                 value={sort}
                 onChange={(event) => setSort(event.target.value as InventorySortKey)}
                 className="h-8 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-2 text-sm text-[var(--fi-ink)]"
-                aria-label="ترتيب"
+                aria-label={t('ترتيب', 'Sort')}
               >
-                <option value="newest">الأحدث</option>
-                <option value="price_asc">السعر تصاعدي</option>
-                <option value="price_desc">السعر تنازلي</option>
-                <option value="area_desc">المساحة</option>
+                <option value="newest">{t('الأحدث', 'Newest')}</option>
+                <option value="price_asc">{t('السعر تصاعدي', 'Price Ascending')}</option>
+                <option value="price_desc">{t('السعر تنازلي', 'Price Descending')}</option>
+                <option value="area_desc">{t('المساحة', 'Area')}</option>
               </select>
               <Button type="button" variant="outline" onClick={() => setFiltersOpen((value) => !value)} className="lg:hidden">
                 <Filter className="size-4" />
-                الفلاتر
+                {t('الفلاتر', 'Filters')}
               </Button>
             </div>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-[var(--fi-muted)]">
-              عرض <strong className="text-[var(--fi-ink)]">{filtered.length}</strong> وحدة من أصل {localUnits.length}
+              {t('عرض', 'Showing')} <strong className="text-[var(--fi-ink)]">{filtered.length}</strong> {t('وحدة من أصل', 'units out of')} {localUnits.length}
             </p>
             <div className="flex rounded-lg border border-[var(--fi-line)] p-1">
-              {[
-                ['grid', LayoutGrid, 'بطاقات'],
-                ['list', List, 'قائمة'],
-                ['map', Map, 'خريطة'],
-              ].map(([key, Icon, label]) => (
+              {viewOptions.map(([key, Icon, label]) => (
                 <Button
-                  key={key as string}
+                  key={key}
                   type="button"
                   size="sm"
                   variant={view === key ? 'default' : 'ghost'}
                   onClick={() => setView(key as InventoryViewMode)}
-                  aria-label={label as string}
+                  aria-label={label}
                 >
                   <Icon className="size-4" />
-                  <span className="hidden sm:inline">{label as string}</span>
+                  <span className="hidden sm:inline">{label}</span>
                 </Button>
               ))}
             </div>
@@ -268,8 +273,8 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
         {filtered.length === 0 ? (
           <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-10 text-center">
             <Building2 className="mx-auto mb-3 size-10 text-[var(--fi-muted)]" />
-            <p className="font-black text-[var(--fi-ink)]">لا توجد وحدات تطابق الفلاتر الحالية</p>
-            <p className="mt-1 text-sm text-[var(--fi-muted)]">جرّب توسيع نطاق السعر أو إزالة بعض الفلاتر.</p>
+            <p className="font-black text-[var(--fi-ink)]">{t('لا توجد وحدات تطابق الفلاتر الحالية', 'No units match the current filters')}</p>
+            <p className="mt-1 text-sm text-[var(--fi-muted)]">{t('جرّب توسيع نطاق السعر أو إزالة بعض الفلاتر.', 'Try widening the price range or removing some filters.')}</p>
           </div>
         ) : view === 'grid' ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -286,7 +291,7 @@ export function InventoryClient({ units, developers, initialDeveloperIds = [] }:
               >
                 <span className="font-black text-[var(--fi-ink)]">{unit.projectNameAr} - {unit.unitNumber}</span>
                 <span className="text-sm text-[var(--fi-muted)]">{unit.developerNameAr}</span>
-                <span className="text-sm text-[var(--fi-muted)]">{unit.areaSqm} م² · {unit.bedrooms ?? 0} غرف</span>
+                <span className="text-sm text-[var(--fi-muted)]">{unit.areaSqm} {t('م²', 'm²')} · {unit.bedrooms ?? 0} {t('غرف', 'rooms')}</span>
                 <span className="font-black text-[var(--fi-ink)]">{formatEgp(unit.price)}</span>
                 <ChevronDown className="size-4 text-[var(--fi-muted)]" />
               </button>

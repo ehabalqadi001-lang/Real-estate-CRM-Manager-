@@ -13,6 +13,7 @@ import { holdInventoryUnit } from '@/app/dashboard/inventory/actions'
 import { AiPriceAnalyzerButton } from '@/components/ai/ai-price-analyzer-button'
 import { HoldTimer } from './hold-timer'
 import type { InventoryUnit } from './inventory-types'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface UnitDetailSheetProps {
   unit: InventoryUnit | null
@@ -21,43 +22,44 @@ interface UnitDetailSheetProps {
   onHeld: (unitId: string, heldUntil: string) => void
 }
 
-const unitTypeLabels: Record<string, string> = {
-  apartment: 'شقة',
-  villa: 'فيلا',
-  duplex: 'دوبلكس',
-  penthouse: 'بنتهاوس',
-  studio: 'استوديو',
-  office: 'مكتب',
-  shop: 'محل',
-  chalet: 'شاليه',
-  townhouse: 'تاون هاوس',
-}
-
-const finishingLabels: Record<string, string> = {
-  fully_finished: 'تشطيب كامل',
-  semi_finished: 'نصف تشطيب',
-  core_shell: 'بدون تشطيب',
-  furnished: 'مفروش',
-}
-
-function formatEgp(value: number) {
-  return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function frequencyLabel(value: string | null) {
-  if (value === 'quarterly') return 'ربع سنوي'
-  if (value === 'semi_annual') return 'نصف سنوي'
-  if (value === 'annual') return 'سنوي'
-  return 'شهري'
-}
-
 export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetailSheetProps) {
+  const { t, numLocale } = useI18n()
   const [emblaRef] = useEmblaCarousel({ direction: 'rtl', loop: true })
   const images = unit ? Array.from(new Set([unit.coverImageUrl, ...unit.galleryUrls].filter(Boolean))) as string[] : []
+
+  const unitTypeLabels: Record<string, string> = {
+    apartment: t('شقة', 'Apartment'),
+    villa: t('فيلا', 'Villa'),
+    duplex: t('دوبلكس', 'Duplex'),
+    penthouse: t('بنتهاوس', 'Penthouse'),
+    studio: t('استوديو', 'Studio'),
+    office: t('مكتب', 'Office'),
+    shop: t('محل', 'Shop'),
+    chalet: t('شاليه', 'Chalet'),
+    townhouse: t('تاون هاوس', 'Townhouse'),
+  }
+
+  const finishingLabels: Record<string, string> = {
+    fully_finished: t('تشطيب كامل', 'Fully Finished'),
+    semi_finished: t('نصف تشطيب', 'Semi-Finished'),
+    core_shell: t('بدون تشطيب', 'Core & Shell'),
+    furnished: t('مفروش', 'Furnished'),
+  }
+
+  function formatEgp(value: number) {
+    return new Intl.NumberFormat(numLocale, {
+      style: 'currency',
+      currency: 'EGP',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+
+  function frequencyLabel(value: string | null) {
+    if (value === 'quarterly') return t('ربع سنوي', 'Quarterly')
+    if (value === 'semi_annual') return t('نصف سنوي', 'Semi-Annual')
+    if (value === 'annual') return t('سنوي', 'Annual')
+    return t('شهري', 'Monthly')
+  }
 
   async function handleHold() {
     if (!unit) return
@@ -75,7 +77,7 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
     if (!unit) return
     const url = `${window.location.origin}/inventory?unit=${unit.id}`
     await navigator.clipboard.writeText(url)
-    toast.success('تم نسخ رابط الوحدة للعميل')
+    toast.success(t('تم نسخ رابط الوحدة للعميل', 'Unit link copied for client'))
   }
 
   return (
@@ -119,10 +121,10 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { icon: Building2, label: 'النوع', value: unitTypeLabels[unit.unitType] ?? unit.unitType },
-                  { icon: Ruler, label: 'المساحة', value: `${unit.areaSqm} م²` },
-                  { icon: BedDouble, label: 'الغرف', value: unit.bedrooms ?? 0 },
-                  { icon: Bath, label: 'الحمامات', value: unit.bathrooms ?? 0 },
+                  { icon: Building2, label: t('النوع', 'Type'), value: unitTypeLabels[unit.unitType] ?? unit.unitType },
+                  { icon: Ruler, label: t('المساحة', 'Area'), value: `${unit.areaSqm} ${t('م²', 'm²')}` },
+                  { icon: BedDouble, label: t('الغرف', 'Rooms'), value: unit.bedrooms ?? 0 },
+                  { icon: Bath, label: t('الحمامات', 'Bathrooms'), value: unit.bathrooms ?? 0 },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3">
                     <item.icon className="mb-2 size-4 text-[var(--fi-muted)]" />
@@ -135,20 +137,20 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
               <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs text-[var(--fi-muted)]">السعر الإجمالي</p>
+                    <p className="text-xs text-[var(--fi-muted)]">{t('السعر الإجمالي', 'Total Price')}</p>
                     <p className="mt-1 text-2xl font-black text-[var(--fi-ink)]">{formatEgp(unit.price)}</p>
                   </div>
                   <Badge className="border border-[var(--fi-line)] bg-[var(--fi-soft)] text-[var(--fi-ink)]">
-                    {finishingLabels[unit.finishing ?? ''] ?? 'التشطيب غير محدد'}
+                    {finishingLabels[unit.finishing ?? ''] ?? t('التشطيب غير محدد', 'Finishing not set')}
                   </Badge>
                 </div>
               </div>
 
               <Tabs defaultValue="plans" dir="rtl">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="plans">خطط السداد</TabsTrigger>
-                  <TabsTrigger value="specs">المواصفات</TabsTrigger>
-                  <TabsTrigger value="media">المخطط والجولة</TabsTrigger>
+                  <TabsTrigger value="plans">{t('خطط السداد', 'Payment Plans')}</TabsTrigger>
+                  <TabsTrigger value="specs">{t('المواصفات', 'Specifications')}</TabsTrigger>
+                  <TabsTrigger value="media">{t('المخطط والجولة', 'Floor Plan & Tour')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="plans" className="mt-4 space-y-3">
@@ -158,57 +160,57 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="font-black text-[var(--fi-ink)]">{plan.name}</p>
-                            <p className="mt-1 text-sm text-[var(--fi-muted)]">{plan.description ?? 'بدون وصف إضافي'}</p>
+                            <p className="mt-1 text-sm text-[var(--fi-muted)]">{plan.description ?? t('بدون وصف إضافي', 'No additional description')}</p>
                           </div>
                           <Badge className="border border-[var(--fi-line)] bg-[var(--fi-soft)] text-[var(--fi-ink)]">
                             {frequencyLabel(plan.installmentFrequency)}
                           </Badge>
                         </div>
                         <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
-                          <span>مقدم {plan.downPaymentPercentage ?? unit.downPayment ?? 0}%</span>
-                          <span>{plan.installmentYears ?? unit.installmentYears ?? 0} سنوات</span>
-                          <span>صيانة {plan.maintenanceFeePercentage ?? 0}%</span>
+                          <span>{t('مقدم', 'Down')} {plan.downPaymentPercentage ?? unit.downPayment ?? 0}%</span>
+                          <span>{plan.installmentYears ?? unit.installmentYears ?? 0} {t('سنوات', 'years')}</span>
+                          <span>{t('صيانة', 'Maint.')} {plan.maintenanceFeePercentage ?? 0}%</span>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-6 text-center text-sm text-[var(--fi-muted)]">
-                      لا توجد خطط سداد مسجلة لهذه الوحدة.
+                      {t('لا توجد خطط سداد مسجلة لهذه الوحدة.', 'No payment plans registered for this unit.')}
                     </div>
                   )}
                 </TabsContent>
 
                 <TabsContent value="specs" className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <Spec label="الدور" value={unit.floorNumber ?? 'غير محدد'} />
-                  <Spec label="المبنى" value={unit.building ?? 'غير محدد'} />
-                  <Spec label="الإطلالة" value={unit.view ?? 'غير محدد'} />
-                  <Spec label="المطور" value={unit.developerNameAr} />
-                  <Spec label="مقدم الحجز" value={unit.downPayment ? formatEgp(unit.downPayment) : 'غير محدد'} />
-                  <Spec label="القسط الشهري" value={unit.monthlyInstallment ? formatEgp(unit.monthlyInstallment) : 'غير محدد'} />
+                  <Spec label={t('الدور', 'Floor')} value={unit.floorNumber ?? t('غير محدد', 'N/A')} />
+                  <Spec label={t('المبنى', 'Building')} value={unit.building ?? t('غير محدد', 'N/A')} />
+                  <Spec label={t('الإطلالة', 'View')} value={unit.view ?? t('غير محدد', 'N/A')} />
+                  <Spec label={t('المطور', 'Developer')} value={unit.developerNameAr} />
+                  <Spec label={t('مقدم الحجز', 'Down Payment')} value={unit.downPayment ? formatEgp(unit.downPayment) : t('غير محدد', 'N/A')} />
+                  <Spec label={t('القسط الشهري', 'Monthly Installment')} value={unit.monthlyInstallment ? formatEgp(unit.monthlyInstallment) : t('غير محدد', 'N/A')} />
                 </TabsContent>
 
                 <TabsContent value="media" className="mt-4 space-y-4">
                   {unit.floorPlanUrl ? (
                     <Link href={unit.floorPlanUrl} target="_blank" className="flex items-center gap-2 rounded-lg border border-[var(--fi-line)] p-4 font-bold text-[var(--fi-ink)]">
                       <SquareStack className="size-4" />
-                      فتح مخطط الوحدة
+                      {t('فتح مخطط الوحدة', 'Open Floor Plan')}
                     </Link>
                   ) : (
                     <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-sm text-[var(--fi-muted)]">
-                      لا يوجد مخطط مرفق.
+                      {t('لا يوجد مخطط مرفق.', 'No floor plan attached.')}
                     </div>
                   )}
 
                   {unit.virtualTourUrl ? (
                     <iframe
                       src={unit.virtualTourUrl}
-                      title="جولة افتراضية"
+                      title={t('جولة افتراضية', 'Virtual Tour')}
                       className="aspect-video w-full rounded-lg border border-[var(--fi-line)]"
                       allowFullScreen
                     />
                   ) : (
                     <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 text-sm text-[var(--fi-muted)]">
-                      لا توجد جولة افتراضية.
+                      {t('لا توجد جولة افتراضية.', 'No virtual tour available.')}
                     </div>
                   )}
                 </TabsContent>
@@ -217,15 +219,15 @@ export function UnitDetailSheet({ unit, open, onOpenChange, onHeld }: UnitDetail
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Link href={`/dashboard/pipeline/new?unit=${unit.id}`} className={buttonVariants({ className: 'h-8 gap-1.5 px-2.5' })}>
                   <Send className="size-4" />
-                  إضافة لصفقة
+                  {t('إضافة لصفقة', 'Add to Deal')}
                 </Link>
                 <Button type="button" variant="outline" onClick={handleShare}>
                   <Copy className="size-4" />
-                  إرسال للعميل
+                  {t('إرسال للعميل', 'Send to Client')}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleHold} disabled={unit.status !== 'available'}>
                   <Hand className="size-4" />
-                  احتجاز ٤٨ ساعة
+                  {t('احتجاز ٤٨ ساعة', 'Hold for 48 Hours')}
                 </Button>
                 <AiPriceAnalyzerButton
                   input={{

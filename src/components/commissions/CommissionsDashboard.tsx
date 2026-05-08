@@ -9,15 +9,7 @@ import { CommissionRequestSheet } from './CommissionRequestSheet'
 import { CommissionCalculator } from './CommissionCalculator'
 import { downloadCommissionStatement } from './CommissionPdf'
 import type { CommissionLeadOption, CommissionProjectOption, CommissionRateOption, CommissionRow, CommissionStatus } from './commission-types'
-
-const STATUS_LABELS: Record<CommissionStatus, string> = {
-  pending: 'قيد المراجعة',
-  approved: 'معتمدة',
-  processing: 'طلب صرف',
-  paid: 'مدفوعة',
-  disputed: 'نزاع',
-  cancelled: 'ملغاة',
-}
+import { useI18n } from '@/hooks/use-i18n'
 
 const STATUS_CLASS: Record<CommissionStatus, string> = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -41,10 +33,46 @@ export function CommissionsDashboard({
   rates: CommissionRateOption[]
   leads: CommissionLeadOption[]
 }) {
+  const { t, numLocale } = useI18n()
   const [status, setStatus] = useState('all')
   const [agent, setAgent] = useState('all')
   const [project, setProject] = useState('all')
   const [range, setRange] = useState('all')
+
+  const STATUS_LABELS: Record<CommissionStatus, string> = {
+    pending: t('قيد المراجعة', 'Under Review'),
+    approved: t('معتمدة', 'Approved'),
+    processing: t('طلب صرف', 'Processing'),
+    paid: t('مدفوعة', 'Paid'),
+    disputed: t('نزاع', 'Disputed'),
+    cancelled: t('ملغاة', 'Cancelled'),
+  }
+
+  function formatMoney(value: number) {
+    return `${new Intl.NumberFormat(numLocale, { maximumFractionDigits: 0 }).format(value)} ${t('ج.م', 'EGP')}`
+  }
+
+  function exportExcel(rows: CommissionRow[]) {
+    const headers = [t('الصفقة', 'Deal'), t('العميل', 'Client'), t('المشروع', 'Project'), t('قيمة الصفقة', 'Deal Value'), t('نسبة العمولة', 'Commission Rate'), t('العمولة الإجمالية', 'Total Commission'), t('نصيبي', 'My Share'), t('الحالة', 'Status')]
+    const body = rows.map((row) => [
+      row.dealTitle,
+      row.clientName,
+      row.projectName,
+      row.grossDealValue,
+      row.commissionRate,
+      row.grossCommission,
+      row.agentAmount,
+      STATUS_LABELS[row.status],
+    ])
+    const csv = [headers, ...body].map((line) => line.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
+    const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `commissions-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const filtered = useMemo(() => commissions.filter((row) => {
     if (status !== 'all' && row.status !== status) return false
@@ -62,16 +90,17 @@ export function CommissionsDashboard({
   }), [filtered])
 
   const columns = useMemo<ColumnDef<CommissionRow>[]>(() => [
-    { header: 'الصفقة', accessorKey: 'dealTitle' },
-    { header: 'العميل', accessorKey: 'clientName' },
-    { header: 'المشروع', accessorKey: 'projectName' },
-    { header: 'قيمة الصفقة', cell: ({ row }) => formatMoney(row.original.grossDealValue) },
-    { header: 'نسبة العمولة', cell: ({ row }) => `${row.original.commissionRate.toLocaleString('ar-EG')}٪` },
-    { header: 'العمولة الإجمالية', cell: ({ row }) => formatMoney(row.original.grossCommission) },
-    { header: 'نصيبي', cell: ({ row }) => <span className="font-black text-[var(--fi-emerald)]">{formatMoney(row.original.agentAmount)}</span> },
-    { header: 'الحالة', cell: ({ row }) => <Badge className={STATUS_CLASS[row.original.status]}>{STATUS_LABELS[row.original.status]}</Badge> },
-    { header: 'الإجراء', cell: ({ row }) => row.original.status !== 'paid' ? <CommissionRequestSheet commission={row.original} /> : <Button size="sm" variant="outline" onClick={() => downloadCommissionStatement([row.original], 'إيصال عمولة')}>PDF</Button> },
-  ], [])
+    { header: t('الصفقة', 'Deal'), accessorKey: 'dealTitle' },
+    { header: t('العميل', 'Client'), accessorKey: 'clientName' },
+    { header: t('المشروع', 'Project'), accessorKey: 'projectName' },
+    { header: t('قيمة الصفقة', 'Deal Value'), cell: ({ row }) => formatMoney(row.original.grossDealValue) },
+    { header: t('نسبة العمولة', 'Commission Rate'), cell: ({ row }) => `${row.original.commissionRate.toLocaleString(numLocale)}٪` },
+    { header: t('العمولة الإجمالية', 'Total Commission'), cell: ({ row }) => formatMoney(row.original.grossCommission) },
+    { header: t('نصيبي', 'My Share'), cell: ({ row }) => <span className="font-black text-[var(--fi-emerald)]">{formatMoney(row.original.agentAmount)}</span> },
+    { header: t('الحالة', 'Status'), cell: ({ row }) => <Badge className={STATUS_CLASS[row.original.status]}>{STATUS_LABELS[row.original.status]}</Badge> },
+    { header: t('الإجراء', 'Action'), cell: ({ row }) => row.original.status !== 'paid' ? <CommissionRequestSheet commission={row.original} /> : <Button size="sm" variant="outline" onClick={() => downloadCommissionStatement([row.original], t('إيصال عمولة', 'Commission Receipt'))}>PDF</Button> },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [numLocale, t])
 
   // TanStack Table intentionally returns stable methods that React Compiler cannot memoize safely.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -93,10 +122,10 @@ export function CommissionsDashboard({
               </span>
               <div>
                 <p className="text-xs font-black text-[var(--fi-emerald)]">FAST COMMISSIONS</p>
-                <h1 className="text-2xl font-black text-[var(--fi-ink)]">إدارة العمولات</h1>
+                <h1 className="text-2xl font-black text-[var(--fi-ink)]">{t('إدارة العمولات', 'Commission Management')}</h1>
               </div>
             </div>
-            <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">متابعة مستحقات الوسطاء واعتماد طلبات الصرف وتصدير كشوفات احترافية.</p>
+            <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">{t('متابعة مستحقات الوسطاء واعتماد طلبات الصرف وتصدير كشوفات احترافية.', 'Track broker dues, approve payout requests, and export professional statements.')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <CommissionCalculator projects={projects} rates={rates} leads={leads} />
@@ -113,30 +142,30 @@ export function CommissionsDashboard({
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
-        <Kpi label="إجمالي مستحق" value={formatMoney(summary.pending)} />
-        <Kpi label="إجمالي مدفوع" value={formatMoney(summary.paid)} />
-        <Kpi label="قيد المراجعة" value={summary.review.toLocaleString('ar-EG')} />
-        <Kpi label="هذا الشهر" value={formatMoney(summary.month)} />
+        <Kpi label={t('إجمالي مستحق', 'Total Due')} value={formatMoney(summary.pending)} />
+        <Kpi label={t('إجمالي مدفوع', 'Total Paid')} value={formatMoney(summary.paid)} />
+        <Kpi label={t('قيد المراجعة', 'Under Review')} value={summary.review.toLocaleString(numLocale)} />
+        <Kpi label={t('هذا الشهر', 'This Month')} value={formatMoney(summary.month)} />
       </div>
 
       <div className="grid gap-2 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3 md:grid-cols-4">
         <select className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold" value={status} onChange={(event) => setStatus(event.target.value)}>
-          <option value="all">كل الحالات</option>
+          <option value="all">{t('كل الحالات', 'All Statuses')}</option>
           {Object.entries(STATUS_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
         <select className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold" value={agent} onChange={(event) => setAgent(event.target.value)}>
-          <option value="all">كل الوسطاء</option>
+          <option value="all">{t('كل الوسطاء', 'All Agents')}</option>
           {agents.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
         </select>
         <select className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold" value={project} onChange={(event) => setProject(event.target.value)}>
-          <option value="all">كل المشاريع</option>
+          <option value="all">{t('كل المشاريع', 'All Projects')}</option>
           {Array.from(new Set(commissions.map((row) => row.projectName).filter(Boolean))).map((name) => <option key={name} value={name}>{name}</option>)}
         </select>
         <select className="h-10 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold" value={range} onChange={(event) => setRange(event.target.value)}>
-          <option value="all">كل التواريخ</option>
-          <option value="week">هذا الأسبوع</option>
-          <option value="month">هذا الشهر</option>
-          <option value="quarter">آخر 3 أشهر</option>
+          <option value="all">{t('كل التواريخ', 'All Dates')}</option>
+          <option value="week">{t('هذا الأسبوع', 'This Week')}</option>
+          <option value="month">{t('هذا الشهر', 'This Month')}</option>
+          <option value="quarter">{t('آخر 3 أشهر', 'Last 3 Months')}</option>
         </select>
       </div>
 
@@ -156,7 +185,7 @@ export function CommissionsDashboard({
             </thead>
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
-                <tr><td colSpan={columns.length} className="px-4 py-12 text-center font-bold text-[var(--fi-muted)]">لا توجد عمولات مطابقة للفلاتر</td></tr>
+                <tr><td colSpan={columns.length} className="px-4 py-12 text-center font-bold text-[var(--fi-muted)]">{t('لا توجد عمولات مطابقة للفلاتر', 'No commissions match the filters')}</td></tr>
               ) : table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="border-t border-[var(--fi-line)]">
                   {row.getVisibleCells().map((cell) => (
@@ -191,30 +220,4 @@ function matchesRange(value: string, range: string) {
   if (range === 'month') return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
   if (range === 'quarter') return diff <= 90
   return true
-}
-
-function exportExcel(rows: CommissionRow[]) {
-  const headers = ['الصفقة', 'العميل', 'المشروع', 'قيمة الصفقة', 'نسبة العمولة', 'العمولة الإجمالية', 'نصيبي', 'الحالة']
-  const body = rows.map((row) => [
-    row.dealTitle,
-    row.clientName,
-    row.projectName,
-    row.grossDealValue,
-    row.commissionRate,
-    row.grossCommission,
-    row.agentAmount,
-    STATUS_LABELS[row.status],
-  ])
-  const csv = [headers, ...body].map((line) => line.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
-  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `commissions-${Date.now()}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function formatMoney(value: number) {
-  return `${new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(value)} ج.م`
 }
