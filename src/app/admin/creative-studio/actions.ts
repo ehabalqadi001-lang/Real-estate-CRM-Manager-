@@ -54,8 +54,17 @@ Skill focus: ${skillKey || assetType}
 
 Generate 3 variations. Format clearly with --- between each.`
 
-  const provider = getAIProvider(model)
-  const outputText = await provider.generate(prompt, { maxTokens: 1024 })
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.GEMINI_API_KEY) {
+    return { error: 'لم يتم إعداد مفتاح AI — أضف ANTHROPIC_API_KEY أو GEMINI_API_KEY في Vercel env vars' }
+  }
+
+  let outputText: string
+  try {
+    const provider = getAIProvider(model)
+    outputText = await provider.generate(prompt, { maxTokens: 1024 })
+  } catch (err) {
+    return { error: `فشل توليد المحتوى: ${err instanceof Error ? err.message : 'خطأ غير معروف'}` }
+  }
   const providerName = model.startsWith('gemini') ? 'gemini' : 'claude'
 
   await supabase.from('creative_assets').insert({

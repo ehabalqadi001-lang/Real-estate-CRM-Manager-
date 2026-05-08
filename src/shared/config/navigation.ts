@@ -190,13 +190,24 @@ export const dashboardNavigation: NavigationGroup[] = [
     ],
   },
   {
+    title: 'التسويق الذكي',
+    titleKey: 'marketing',
+    items: [
+      { title: 'مركز التسويق', titleKey: 'marketingHub', href: '/dashboard/marketing', permission: 'messages.read', icon: Megaphone },
+      { title: 'مكتبة المهارات', titleKey: 'marketingSkills', href: '/dashboard/marketing/skills', permission: 'messages.read', icon: BookOpen },
+      { title: 'مكتبة الأصول', titleKey: 'marketingAssets', href: '/dashboard/marketing/assets', permission: 'messages.read', icon: Wand2 },
+      { title: 'فريق التسويق', titleKey: 'marketingTeam', href: '/dashboard/marketing/team', permission: 'erp.hr.view', icon: Users },
+      { title: 'الحملات التسويقية', titleKey: 'marketingCampaigns', href: '/dashboard/marketing/campaigns', permission: 'messages.create', icon: Megaphone },
+      { title: 'مولّد SEO', titleKey: 'seoBlog', href: '/admin/seo-blog', permission: 'platform.manage', icon: PenLine },
+      { title: 'Ads API Connector', titleKey: 'adsApi', href: '/admin/ads-api', permission: 'platform.manage', icon: Megaphone },
+    ],
+  },
+  {
     title: 'NEXUS AI OS',
     titleKey: 'nexus',
     items: [
       { title: 'تقييم العملاء بالـ AI', titleKey: 'aiLeadScoring', href: '/dashboard/ai-lead-scoring', permission: 'lead.view.own', icon: Brain },
       { title: 'AI Creative Studio', titleKey: 'creativeStudio', href: '/admin/creative-studio', permission: 'platform.manage', icon: Wand2 },
-      { title: 'SEO Blog Generator', titleKey: 'seoBlog', href: '/admin/seo-blog', permission: 'platform.manage', icon: PenLine },
-      { title: 'Ads API Connector', titleKey: 'adsApi', href: '/admin/ads-api', permission: 'platform.manage', icon: Megaphone },
       { title: 'Feature Flags', titleKey: 'featureFlags', href: '/admin/feature-flags', permission: 'platform.manage', icon: ToggleLeft },
       { title: 'API Vault', titleKey: 'apiVault', href: '/admin/api-vault', permission: 'platform.manage', icon: KeyRound },
     ],

@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import {
   BarChart3,
-  Briefcase,
   Building2,
   ChevronDown,
   CircleDollarSign,
   Code2,
   Coins,
   Headphones,
+  KeyRound,
   LayoutGrid,
   LayoutDashboard,
   Megaphone,
@@ -15,9 +15,10 @@ import {
   ReceiptText,
   ShieldAlert,
   ShieldCheck,
+  ToggleLeft,
   UserSearch,
   Users,
-  UserCog,
+  Wand2,
 } from 'lucide-react'
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { hasPermission, type Permission } from '@/shared/rbac/permissions'
@@ -137,11 +138,11 @@ const adminGroups: AdminNavGroup[] = [
     ],
   },
   {
-    title: 'Account Managers & HR',
+    title: 'NEXUS AI OS',
     items: [
-      { href: '/dashboard/account-manager', label: 'لوحة Account Managers', icon: Briefcase, permission: 'account_manager.view_portfolio' },
-      { href: '/dashboard/hr/assign-managers', label: 'تعيين AMs (HR)', icon: UserCog, permission: 'broker.assign_manager' },
-      { href: '/dashboard/partners', label: 'إدارة الشركاء', icon: Users, permission: 'broker.manage' },
+      { href: '/admin/creative-studio', label: 'AI Creative Studio', icon: Wand2, permission: 'platform.manage' },
+      { href: '/admin/feature-flags', label: 'Feature Flags', icon: ToggleLeft, permission: 'platform.manage' },
+      { href: '/admin/api-vault', label: 'API Vault', icon: KeyRound, permission: 'platform.manage' },
     ],
   },
   {

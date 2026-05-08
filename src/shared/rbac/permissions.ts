@@ -103,6 +103,9 @@ export type Permission =
   | 'broker.assign_manager'
   | 'account_manager.view_portfolio'
   | 'account_manager.manage_portfolio'
+  // ── Marketing Department ──
+  | 'marketing.view'
+  | 'marketing.manage'
 
 const ALL_COMPANY_PERMISSIONS: Permission[] = [
   'dashboard.view.company',
@@ -148,10 +151,12 @@ const ALL_COMPANY_PERMISSIONS: Permission[] = [
   'inventory.update',
   'inventory.delete',
   'inventory.import',
+  'marketing.view',
+  'marketing.manage',
 ]
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
-  super_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage', 'broker.assign_manager', 'account_manager.view_portfolio', 'account_manager.manage_portfolio'],
+  super_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', ...ALL_COMPANY_PERMISSIONS, 'erp.hr.view', 'erp.hr.manage', 'erp.hr.onboard', 'erp.attendance.use', 'erp.attendance.manage', 'erp.payroll.view', 'erp.payroll.run', 'erp.legal.view', 'erp.legal.manage', 'erp.finance.view', 'erp.finance.manage', 'broker.assign_manager', 'account_manager.view_portfolio', 'account_manager.manage_portfolio', 'marketing.view', 'marketing.manage'],
   platform_admin: ['dashboard.view.platform', 'platform.manage', 'platform.audit', 'platform.reports', 'admin.view', 'audit.view.company', 'report.view.company', 'support.view'],
   company_owner: [...ALL_COMPANY_PERMISSIONS, 'erp.attendance.use'],
   company_admin: [...ALL_COMPANY_PERMISSIONS, 'erp.attendance.use'],
@@ -252,8 +257,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   finance_manager: ['dashboard.view.company', 'transactions.read', 'transactions.create', 'transactions.update', 'transactions.delete', 'transactions.approve_payout', 'transactions.export', 'commissions.read', 'commissions.update', 'commissions.approve', 'finance.view', 'finance.manage', 'payout.view.company', 'payout.manage', 'users.read', 'platform.reports', 'report.view.company', 'notification.view.own', 'erp.finance.view', 'erp.finance.manage', 'erp.payroll.view'],
   inventory_rep: ['dashboard.view.own', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.import', 'projects.read', 'notification.view.own'],
   data_manager: ['dashboard.view.team', 'inventory.read', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.import', 'projects.read', 'projects.create', 'projects.update', 'projects.delete', 'developer.view', 'report.view.team', 'notification.view.own'],
-  campaign_specialist: ['dashboard.view.own', 'messages.read', 'messages.create', 'messages.broadcast', 'ads.read', 'users.read', 'notification.view.own'],
-  marketing_manager: ['dashboard.view.company', 'messages.read', 'messages.create', 'messages.broadcast', 'messages.whatsapp', 'ads.read', 'users.read', 'platform.reports', 'projects.read', 'report.view.company', 'notification.view.own'],
+  campaign_specialist: ['dashboard.view.own', 'messages.read', 'messages.create', 'messages.broadcast', 'ads.read', 'users.read', 'notification.view.own', 'marketing.view'],
+  marketing_manager: ['dashboard.view.company', 'messages.read', 'messages.create', 'messages.broadcast', 'messages.whatsapp', 'ads.read', 'users.read', 'platform.reports', 'projects.read', 'report.view.company', 'notification.view.own', 'marketing.view', 'marketing.manage'],
   cs_agent: ['dashboard.view.own', 'admin.view', 'messages.read', 'messages.create', 'messages.whatsapp', 'users.read', 'ads.read', 'support.view', 'notification.view.own'],
   cs_supervisor: ['dashboard.view.team', 'messages.read', 'messages.create', 'messages.broadcast', 'messages.whatsapp', 'users.read', 'users.update', 'ads.read', 'support.view', 'support.manage', 'report.view.team', 'notification.view.own'],
 }
