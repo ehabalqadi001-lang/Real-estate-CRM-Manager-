@@ -12,11 +12,11 @@ export function FeatureFlagRow({ flag }: Props) {
   const [pending, start] = useTransition()
 
   const handleGlobal = (val: boolean) => {
-    start(() => toggleFlagGlobal(flag.id, val))
+    start(async () => { await toggleFlagGlobal(flag.id, val) })
   }
 
   const handleRole = (role: string, checked: boolean) => {
-    start(() => toggleFlagRole(flag.id, role, checked))
+    start(async () => { await toggleFlagRole(flag.id, role, checked) })
   }
 
   return (

@@ -25,12 +25,15 @@ import {
   GraduationCap,
   Handshake,
   Home,
+  Inbox,
   Kanban,
   Landmark,
   LayoutDashboard,
   Map,
+  Megaphone,
   MessageCircle,
   Network,
+  PenLine,
   PlugZap,
   Scale,
   Settings,
@@ -43,6 +46,7 @@ import {
   UserSearch,
   Users,
   WalletCards,
+  Zap,
 } from 'lucide-react'
 import type { Permission } from '@/shared/rbac/permissions'
 
@@ -158,6 +162,8 @@ export const dashboardNavigation: NavigationGroup[] = [
     titleKey: 'operations',
     items: [
       { title: 'واتساب والمكالمات', titleKey: 'whatsapp', href: '/dashboard/whatsapp', permission: 'messages.whatsapp', icon: MessageCircle },
+      { title: 'صندوق الوارد الموحد', titleKey: 'omnichannel', href: '/dashboard/omnichannel', permission: 'messages.read', icon: Inbox },
+      { title: 'التحليلات التنبؤية', titleKey: 'predictiveAnalytics', href: '/dashboard/predictive-analytics', permission: 'report.view.own', icon: Zap },
       { title: 'سجل العمليات', titleKey: 'audit', href: '/dashboard/audit', permission: 'audit.view.company', icon: ClipboardCheck },
       { title: 'الإعدادات', titleKey: 'settings', href: '/dashboard/settings', permission: 'dashboard.view.own', icon: Settings },
     ],
@@ -188,6 +194,8 @@ export const dashboardNavigation: NavigationGroup[] = [
     titleKey: 'nexus',
     items: [
       { title: 'AI Creative Studio', titleKey: 'creativeStudio', href: '/admin/creative-studio', permission: 'platform.manage', icon: Wand2 },
+      { title: 'SEO Blog Generator', titleKey: 'seoBlog', href: '/admin/seo-blog', permission: 'platform.manage', icon: PenLine },
+      { title: 'Ads API Connector', titleKey: 'adsApi', href: '/admin/ads-api', permission: 'platform.manage', icon: Megaphone },
       { title: 'Feature Flags', titleKey: 'featureFlags', href: '/admin/feature-flags', permission: 'platform.manage', icon: ToggleLeft },
       { title: 'API Vault', titleKey: 'apiVault', href: '/admin/api-vault', permission: 'platform.manage', icon: KeyRound },
     ],

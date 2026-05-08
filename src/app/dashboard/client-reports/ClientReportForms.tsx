@@ -126,7 +126,7 @@ export function DeleteReportButton({ reportId }: { reportId: string }) {
   const [pending, start] = useTransition()
   const handle = () => {
     if (!confirm('حذف هذا التقرير نهائياً؟')) return
-    start(() => deleteReportAction(reportId))
+    start(async () => { await deleteReportAction(reportId) })
   }
   return (
     <button disabled={pending} onClick={handle} className="text-red-400 hover:text-red-600" aria-label="Delete report">

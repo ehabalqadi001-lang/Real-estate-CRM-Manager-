@@ -44,7 +44,7 @@ export function ApiKeyForm({ existing }: { existing: ExistingKey[] }) {
   }
 
   const handleDelete = (id: string) => {
-    start(() => deleteApiKey(id))
+    start(async () => { await deleteApiKey(id) })
   }
 
   return (
