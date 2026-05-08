@@ -55,7 +55,7 @@ class GeminiProvider implements AIProvider {
 
   constructor(model: AIModel = 'gemini-2.0-flash') {
     this.model = model
-    this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY ?? '')
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
   }
 
   async generate(prompt: string, options: AIGenerateOptions = {}): Promise<string> {
