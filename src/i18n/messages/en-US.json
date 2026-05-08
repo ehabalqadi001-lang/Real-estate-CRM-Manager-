@@ -64,7 +64,8 @@
       "operations": "Operations",
       "realEstateMarket": "Real Estate Market",
       "marketplaceAdmin": "Marketplace Hub (Admin)",
-      "platform": "Platform"
+      "platform": "Platform",
+      "nexus": "NEXUS AI OS"
     },
     "items": {
       "home": "Home",
@@ -133,7 +134,17 @@
       "clients360": "Clients 360°",
       "appearance": "Appearance",
       "pointsWallets": "Points & Wallets",
-      "adminDashboard": "Platform Admin"
+      "adminDashboard": "Platform Admin",
+      "marketIntel": "Market Intelligence",
+      "clientReports": "Client Reports",
+      "omnichannel": "Omnichannel Inbox",
+      "predictiveAnalytics": "Predictive Analytics",
+      "seoBlog": "SEO Blog Generator",
+      "adsApi": "Ads API Connector",
+      "creativeStudio": "AI Creative Studio",
+      "featureFlags": "Feature Flags",
+      "apiVault": "API Vault",
+      "aiLeadScoring": "AI Lead Scoring"
     }
   },
   "sidebar": {

@@ -193,6 +193,7 @@ export const dashboardNavigation: NavigationGroup[] = [
     title: 'NEXUS AI OS',
     titleKey: 'nexus',
     items: [
+      { title: 'تقييم العملاء بالـ AI', titleKey: 'aiLeadScoring', href: '/dashboard/ai-lead-scoring', permission: 'lead.view.own', icon: Brain },
       { title: 'AI Creative Studio', titleKey: 'creativeStudio', href: '/admin/creative-studio', permission: 'platform.manage', icon: Wand2 },
       { title: 'SEO Blog Generator', titleKey: 'seoBlog', href: '/admin/seo-blog', permission: 'platform.manage', icon: PenLine },
       { title: 'Ads API Connector', titleKey: 'adsApi', href: '/admin/ads-api', permission: 'platform.manage', icon: Megaphone },

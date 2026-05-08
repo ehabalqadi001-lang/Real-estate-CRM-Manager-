@@ -7,13 +7,14 @@ import { saveApiKey, deleteApiKey } from './actions'
 import { Plus, Trash2, Eye, EyeOff, CheckCircle2, AlertCircle, KeyRound } from 'lucide-react'
 
 const KEY_PRESETS = [
-  { name: 'openai',         label: 'OpenAI API Key',         placeholder: 'sk-...' },
-  { name: 'heygen',         label: 'HeyGen API Key',         placeholder: 'heygen-...' },
-  { name: 'elevenlabs',     label: 'ElevenLabs API Key',     placeholder: 'xi-...' },
-  { name: 'meta_ads',       label: 'Meta Ads Access Token',  placeholder: 'EAA...' },
+  { name: 'openai',         label: 'OpenAI API Key',             placeholder: 'sk-...' },
+  { name: 'gemini',         label: 'Google Gemini API Key',      placeholder: 'AI...' },
+  { name: 'heygen',         label: 'HeyGen API Key',             placeholder: 'heygen-...' },
+  { name: 'elevenlabs',     label: 'ElevenLabs API Key',         placeholder: 'xi-...' },
+  { name: 'meta_ads',       label: 'Meta Ads Access Token',      placeholder: 'EAA...' },
   { name: 'google_ads',     label: 'Google Ads Developer Token', placeholder: 'token...' },
-  { name: 'resend',         label: 'Resend API Key',         placeholder: 're_...' },
-  { name: 'whatsapp_token', label: 'WhatsApp Access Token',  placeholder: 'Bearer...' },
+  { name: 'resend',         label: 'Resend API Key',             placeholder: 're_...' },
+  { name: 'whatsapp_token', label: 'WhatsApp Access Token',      placeholder: 'Bearer...' },
 ]
 
 interface ExistingKey { id: string; key_name: string; hint: string | null; updated_at: string }

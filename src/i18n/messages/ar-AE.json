@@ -64,7 +64,8 @@
       "operations": "الأقسام التشغيلية",
       "realEstateMarket": "السوق العقاري",
       "marketplaceAdmin": "Marketplace Hub (Admin)",
-      "platform": "المنصة"
+      "platform": "المنصة",
+      "nexus": "NEXUS AI OS"
     },
     "items": {
       "home": "الرئيسية",
@@ -133,7 +134,17 @@
       "clients360": "العملاء 360°",
       "appearance": "الواجهة والمظهر",
       "pointsWallets": "النقاط والمحافظ",
-      "adminDashboard": "لوحة إدارة المنصة"
+      "adminDashboard": "لوحة إدارة المنصة",
+      "marketIntel": "ذكاء السوق",
+      "clientReports": "تقارير العملاء",
+      "omnichannel": "صندوق الوارد الموحد",
+      "predictiveAnalytics": "التحليلات التنبؤية",
+      "seoBlog": "مولّد مقالات SEO",
+      "adsApi": "Ads API Connector",
+      "creativeStudio": "AI Creative Studio",
+      "featureFlags": "Feature Flags",
+      "apiVault": "API Vault",
+      "aiLeadScoring": "تقييم العملاء بالـ AI"
     }
   },
   "sidebar": {

@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { generateCopyAction, generateVideoAction } from './actions'
+import { MODEL_OPTIONS, type AIModel } from '@/lib/ai-provider'
 import { Wand2, Video, FileText, MessageSquare, Mail, Copy, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 
 type AssetType = 'ad_copy' | 'social_post' | 'email' | 'script'
@@ -23,6 +24,7 @@ export function CreativeStudioClient() {
   const [propertyRef, setPropertyRef] = useState('')
   const [audience, setAudience] = useState('مشترين عقاريين مصريين، 30-50 سنة')
   const [tone, setTone] = useState('احترافي ومقنع')
+  const [selectedModel, setSelectedModel] = useState<AIModel>('claude-sonnet-4-6')
   const [output, setOutput] = useState('')
   const [videoScript, setVideoScript] = useState('')
   const [videoResult, setVideoResult] = useState('')
@@ -38,6 +40,7 @@ export function CreativeStudioClient() {
     fd.set('property_ref', propertyRef)
     fd.set('audience', audience)
     fd.set('tone', tone)
+    fd.set('model', selectedModel)
     start(async () => {
       const res = await generateCopyAction(fd)
       if (res?.error) setError(res.error)
@@ -114,6 +117,22 @@ export function CreativeStudioClient() {
             <div>
               <label className="mb-1 block text-xs font-black text-slate-500">أسلوب الكتابة</label>
               <Input value={tone} onChange={(e) => setTone(e.target.value)} />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-black text-slate-500">نموذج الذكاء الاصطناعي</label>
+              <div className="flex flex-wrap gap-2">
+                {MODEL_OPTIONS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setSelectedModel(m.value as AIModel)}
+                    className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition ${selectedModel === m.value ? 'border-[#0F8F83] bg-[#0F8F83]/10 text-[#0F8F83]' : 'border-[#DDE6E4] text-slate-500'}`}
+                  >
+                    {m.badge} {m.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {error && (

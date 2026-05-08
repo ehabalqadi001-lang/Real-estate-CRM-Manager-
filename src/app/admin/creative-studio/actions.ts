@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createRawClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/shared/rbac/require-permission'
 import { decrypt } from '@/lib/crypto'
-import Anthropic from '@anthropic-ai/sdk'
+import { getAIProvider, type AIModel } from '@/lib/ai-provider'
 
 async function getCompanyKey(companyId: string, keyName: string): Promise<string | null> {
   const supabase = await createRawClient()
@@ -28,11 +28,12 @@ export async function generateCopyAction(formData: FormData) {
   const { data: profile } = await supabase.from('user_profiles').select('company_id, full_name').eq('id', user.id).single()
   const companyId = profile?.company_id ?? user.id
 
-  const assetType  = formData.get('asset_type') as string   // ad_copy | social_post | email | script
+  const assetType   = formData.get('asset_type') as string
   const propertyRef = formData.get('property_ref') as string
-  const audience   = formData.get('audience') as string
-  const tone       = formData.get('tone') as string
-  const skillKey   = formData.get('skill_key') as string    // copywriting | ad-creative | email-sequence | social-content
+  const audience    = formData.get('audience') as string
+  const tone        = formData.get('tone') as string
+  const skillKey    = formData.get('skill_key') as string
+  const model       = (formData.get('model') as AIModel) || 'claude-sonnet-4-6'
 
   if (!assetType || !propertyRef) return { error: 'نوع المحتوى والمرجع مطلوبان' }
 
@@ -44,25 +45,18 @@ export async function generateCopyAction(formData: FormData) {
   }
 
   const systemPrompt = SKILL_PROMPTS[assetType] ?? SKILL_PROMPTS.ad_copy
-
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `${systemPrompt}
+  const prompt = `${systemPrompt}
 
 Property/Context: ${propertyRef}
 Target Audience: ${audience || 'Egyptian real estate buyers and investors'}
 Tone: ${tone || 'professional and persuasive'}
 Skill focus: ${skillKey || assetType}
 
-Generate 3 variations. Format clearly with --- between each.`,
-    }],
-  })
+Generate 3 variations. Format clearly with --- between each.`
 
-  const outputText = message.content[0].type === 'text' ? message.content[0].text : ''
+  const provider = getAIProvider(model)
+  const outputText = await provider.generate(prompt, { maxTokens: 1024 })
+  const providerName = model.startsWith('gemini') ? 'gemini' : 'claude'
 
   await supabase.from('creative_assets').insert({
     company_id: companyId,
@@ -70,10 +64,10 @@ Generate 3 variations. Format clearly with --- between each.`,
     asset_type: assetType,
     prompt_used: propertyRef,
     output_text: outputText,
-    provider: 'claude',
+    provider: providerName,
     property_ref: propertyRef,
     status: 'completed',
-    metadata: { audience, tone, skill_key: skillKey },
+    metadata: { audience, tone, skill_key: skillKey, model },
   })
 
   revalidatePath('/admin/creative-studio')
