@@ -28,7 +28,7 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
   )
 
   return (
-    <form action={formAction} className="flex h-full flex-col rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+    <form action={formAction} className="flex h-full flex-col rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
       <input type="hidden" name="package_id" value={pointPackage.id} />
       <input type="hidden" name="payment_method" value={method} />
       <input type="hidden" name="accepted_terms" value={accepted ? 'on' : ''} />
@@ -61,11 +61,11 @@ export function TopUpCheckout({ pointPackage }: { pointPackage: PointPackage }) 
         </div>
       )}
 
-      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] p-3 text-sm font-bold leading-6 text-[#334155] transition hover:border-[#27AE60]/50">
+      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-3 text-sm font-bold leading-6 text-[#334155] transition hover:border-[#27AE60]/50">
         <span
           className={cn(
             'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition',
-            accepted ? 'border-[#27AE60] bg-[#27AE60] text-white' : 'border-[#A7B7B2] bg-white text-transparent'
+            accepted ? 'border-[#27AE60] bg-[#27AE60] text-white' : 'border-[#A7B7B2] bg-[var(--fi-paper)] text-transparent'
           )}
         >
           <Check className="size-3.5" />
@@ -132,7 +132,7 @@ function PaymentMethodButton({
       onClick={onClick}
       className={cn(
         'flex h-10 items-center justify-center gap-2 rounded-md text-sm font-black transition',
-        active ? 'bg-white text-[#27AE60] shadow-sm ring-1 ring-[#27AE60]/20' : 'text-[#64748B] hover:text-[#102033]'
+        active ? 'bg-[var(--fi-paper)] text-[#27AE60] shadow-sm ring-1 ring-[#27AE60]/20' : 'text-[var(--fi-muted)] hover:text-[var(--fi-ink)]'
       )}
     >
       <Icon className="size-4" />

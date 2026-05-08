@@ -120,7 +120,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
         const val = info.getValue() as string
         return (
           <span className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-            val === 'earned' ? 'bg-[#EEF6F5] text-[#27AE60]' : 
+            val === 'earned' ? 'bg-[var(--fi-soft)] text-[#27AE60]' : 
             val === 'redeemed' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
           }`}>
             {val}
@@ -189,7 +189,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
       </AnimatePresence>
 
       {/* Leaderboard Chart Section */}
-      <section className="rounded-lg border border-[#DDE6E4] bg-white p-4 sm:p-6 shadow-sm">
+      <section className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 sm:p-6 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="size-6 text-[#C9964A]" />
@@ -198,7 +198,7 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
               <p className="text-sm font-semibold text-[#64748B]">Realtime point accumulation supporting the 110M EGP Target.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-[#F6FAF7] px-4 py-2 rounded-full border border-[#DDE6E4]">
+          <div className="flex items-center gap-2 bg-[var(--fi-soft)] px-4 py-2 rounded-full border border-[var(--fi-line)]">
              <Target className="size-4 text-[#27AE60]" />
              <span className="text-sm font-black text-[#0B1120]">Company Target: 110M EGP</span>
           </div>
@@ -221,26 +221,26 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
       </section>
 
       {/* Ledger History Data Table */}
-      <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <div className="border-b border-[#DDE6E4] px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="border-b border-[var(--fi-line)] px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="font-black flex items-center gap-2 text-[#0B1120]">
             <Star className="size-5 text-[#27AE60]" />
             Points Ledger History
           </h2>
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#64748B]" />
-            <Input 
-              placeholder="Search agent, action..." 
+            <Input
+              placeholder="Search agent, action..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 bg-[#F6FAF7] border-[#DDE6E4]"
+              className="pl-9 bg-[var(--fi-soft)] border-[var(--fi-line)]"
             />
           </div>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
-            <thead className="bg-[#F6FAF7] border-b border-[#DDE6E4]">
+            <thead className="bg-[var(--fi-soft)] border-b border-[var(--fi-line)]">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
@@ -251,10 +251,10 @@ export function GamificationDashboard({ users }: GamificationDashboardProps) {
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-[#DDE6E4]">
+            <tbody className="divide-y divide-[var(--fi-line)]">
               {table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className="transition hover:bg-[#F6FAF7]">
+                  <tr key={row.id} className="transition hover:bg-[var(--fi-soft)]">
                     {row.getVisibleCells().map(cell => (
                       <td key={cell.id} className="px-4 py-3">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

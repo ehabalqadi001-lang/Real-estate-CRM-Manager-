@@ -112,9 +112,9 @@ export default async function PredictiveAnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">NEXUS Foresight Engine</p>
-        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">التحليلات التنبؤية</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS Foresight Engine</p>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">التحليلات التنبؤية</h1>
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           توقعات المبيعات، قمع العملاء المحتملين، وأداء المناطق — مدعومة بالذكاء الاصطناعي.
         </p>
       </div>
@@ -122,15 +122,15 @@ export default async function PredictiveAnalyticsPage() {
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
         {[
-          { icon: <BarChart3 className="size-5" />, value: totalDeals,                               label: 'صفقات مغلقة',     color: 'text-[#0F8F83]' },
+          { icon: <BarChart3 className="size-5" />, value: totalDeals,                               label: 'صفقات مغلقة',     color: 'text-[var(--fi-emerald)]' },
           { icon: <TrendingUp className="size-5" />, value: `${avgDealValue.toLocaleString('ar-EG')} ج.م`, label: 'متوسط الصفقة', color: 'text-[#C9964A]' },
           { icon: <Target className="size-5" />,    value: `${conversionRate}%`,                    label: 'معدل التحويل',    color: 'text-purple-600' },
           { icon: <Zap className="size-5" />,       value: leads.length,                            label: 'عملاء محتملون',   color: 'text-blue-500' },
         ].map((k) => (
-          <div key={k.label} className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+          <div key={k.label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
             <div className={`mb-2 ${k.color}`}>{k.icon}</div>
-            <p className="text-xl font-black text-[#102033] dark:text-white">{k.value}</p>
-            <p className="text-xs font-semibold text-slate-500">{k.label}</p>
+            <p className="text-xl font-black text-[var(--fi-ink)]">{k.value}</p>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">{k.label}</p>
           </div>
         ))}
       </div>

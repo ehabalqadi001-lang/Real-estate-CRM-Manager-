@@ -91,7 +91,7 @@ interface GamificationUserRow {
 }
 
 const TX_TYPE_CLASSES: Record<string, string> = {
-  paymob_topup: 'bg-[#EEF6F5] text-[#27AE60]',
+  paymob_topup: 'bg-[var(--fi-soft)] text-[#27AE60]',
   manual_grant: 'bg-blue-50 text-blue-600',
   manual_deduct: 'bg-red-50 text-red-600',
   ad_spend: 'bg-[#FFF8EC] text-[#C9964A]',
@@ -131,7 +131,7 @@ function PackageEditor({
   const idPrefix = pointPackage?.id ?? 'new'
 
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+    <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h3 className="font-black text-[#0B1120]">{isNew ? 'Create New Offer' : pointPackage.name}</h3>
@@ -144,7 +144,7 @@ function PackageEditor({
         {!isNew && (
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-black ${
-              isActive ? 'bg-[#EEF6F5] text-[#27AE60]' : 'bg-slate-100 text-slate-600'
+              isActive ? 'bg-[var(--fi-soft)] text-[#27AE60]' : 'bg-slate-100 text-slate-600'
             }`}
           >
             {isActive ? 'Active' : 'Hidden'}
@@ -204,8 +204,8 @@ function PackageEditor({
               <option value="year">Yearly</option>
             </select>
           </div>
-          <label className="flex items-center gap-2 rounded-lg border border-[#DDE6E4] px-3 py-2 text-sm font-semibold text-[#334155]">
-            <input type="checkbox" name="is_active" defaultChecked={isActive} className="size-4 rounded border-[#DDE6E4]" />
+          <label className="flex items-center gap-2 rounded-lg border border-[var(--fi-line)] px-3 py-2 text-sm font-semibold text-[#334155]">
+            <input type="checkbox" name="is_active" defaultChecked={isActive} className="size-4 rounded border-[var(--fi-line)]" />
             Visible in marketplace
           </label>
         </div>
@@ -260,7 +260,7 @@ export function PointsDashboardClient({
 
   return (
     <div className="space-y-6 p-4 sm:p-6" dir="ltr">
-      <section className="rounded-lg border border-[#DDE6E4] bg-[#0B1120] p-4 sm:p-6 text-white shadow-xl">
+      <section className="rounded-lg border border-[var(--fi-line)] bg-[#0B1120] p-4 sm:p-6 text-white shadow-xl">
         <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-[#27AE60]">
           <ShieldCheck className="size-4" />
           FAST INVESTMENT Points Economy
@@ -274,21 +274,21 @@ export function PointsDashboardClient({
       <GamificationDashboard users={gamificationUsers} />
 
       <section className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <Activity className="size-4 text-[#27AE60]" />
             Circulating Points
           </div>
           <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">{totalCirculatingPoints.toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <TrendingUp className="size-4 text-[#27AE60]" />
             Lifetime Issued
           </div>
           <p className="mt-2 text-xl sm:text-3xl font-black text-[#0B1120]">{totalLifetimeEarned.toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <CreditCard className="size-4 text-[#C9964A]" />
             Recent Top-ups Revenue
@@ -297,7 +297,7 @@ export function PointsDashboardClient({
             {recentTopupsEGP.toLocaleString()} <span className="text-lg text-[#64748B]">EGP</span>
           </p>
         </div>
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center gap-2 text-sm font-bold text-[#64748B]">
             <Package className="size-4 text-[#27AE60]" />
             Active Offers
@@ -307,7 +307,7 @@ export function PointsDashboardClient({
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[420px_1fr]">
-        <form action={updateAdCosts} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+        <form action={updateAdCosts} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
             <Settings2 className="size-5 text-[#27AE60]" />
             <h2 className="font-black">Ad Cost Configurator</h2>
@@ -336,7 +336,7 @@ export function PointsDashboardClient({
           </SubmitButton>
         </form>
 
-        <form action={manualWalletOverride} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+        <form action={manualWalletOverride} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
             <Coins className="size-5 text-[#27AE60]" />
             <h2 className="font-black">Manual Override</h2>
@@ -372,7 +372,7 @@ export function PointsDashboardClient({
       </section>
 
       <section className="space-y-5">
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
             <Package className="size-5 text-[#27AE60]" />
             <div>
@@ -393,7 +393,7 @@ export function PointsDashboardClient({
       </section>
 
       <section>
-        <form action={updatePaymobSettings} className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+        <form action={updatePaymobSettings} className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
             <KeyRound className="size-5 text-[#C9964A]" />
             <h2 className="font-black">Paymob API Credentials</h2>
@@ -425,11 +425,11 @@ export function PointsDashboardClient({
         </form>
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <div className="border-b border-[#DDE6E4] px-5 py-4">
+      <section className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="border-b border-[var(--fi-line)] px-5 py-4">
           <h2 className="font-black">Recent Wallets</h2>
         </div>
-        <div className="divide-y divide-[#DDE6E4]">
+        <div className="divide-y divide-[var(--fi-line)]">
           {(wallets ?? []).map((wallet) => {
             const owner = userById.get(wallet.user_id)
             return (
@@ -447,13 +447,13 @@ export function PointsDashboardClient({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <div className="border-b border-[#DDE6E4] px-5 py-4">
+      <section className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="border-b border-[var(--fi-line)] px-5 py-4">
           <h2 className="font-black">All Transactions (last 50)</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
-            <thead className="bg-[#F6FAF7]">
+            <thead className="bg-[var(--fi-soft)]">
               <tr>
                 {['User', 'Type', 'Points', 'Balance After', 'EGP', 'Reason', 'Paymob TX ID', 'Date'].map((header) => (
                   <th key={header} className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.14em] text-[#64748B]">
@@ -462,11 +462,11 @@ export function PointsDashboardClient({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DDE6E4]">
+            <tbody className="divide-y divide-[var(--fi-line)]">
               {(transactions ?? []).map((tx) => {
                 const owner = tx.user_id ? userById.get(tx.user_id) : undefined
                 return (
-                  <tr key={tx.id} className="transition hover:bg-[#F6FAF7]">
+                  <tr key={tx.id} className="transition hover:bg-[var(--fi-soft)]">
                     <td className="px-4 py-3 font-semibold">{owner?.full_name ?? owner?.email ?? String(tx.user_id ?? '').slice(0, 8)}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tx.type ? (TX_TYPE_CLASSES[tx.type] ?? 'bg-gray-100 text-gray-600') : 'bg-gray-100 text-gray-600'}`}>

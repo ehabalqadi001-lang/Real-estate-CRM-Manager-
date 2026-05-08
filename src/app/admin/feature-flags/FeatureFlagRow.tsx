@@ -20,15 +20,15 @@ export function FeatureFlagRow({ flag }: Props) {
   }
 
   return (
-    <div className={`rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900 ${pending ? 'opacity-60' : ''}`}>
+    <div className={`rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm ${pending ? 'opacity-60' : ''}`}>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <p className="font-black text-[#102033] dark:text-white">{flag.label}</p>
-          {flag.description && <p className="mt-0.5 text-xs font-semibold text-slate-500">{flag.description}</p>}
-          <code className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500 dark:bg-slate-800">{flag.flag_key}</code>
+          <p className="font-black text-[var(--fi-ink)]">{flag.label}</p>
+          {flag.description && <p className="mt-0.5 text-xs font-semibold text-[var(--fi-muted)]">{flag.description}</p>}
+          <code className="mt-1 inline-block rounded bg-[var(--fi-soft)] px-1.5 py-0.5 text-xs text-[var(--fi-muted)]">{flag.flag_key}</code>
         </div>
         <label className="flex cursor-pointer items-center gap-2">
-          <span className="text-xs font-black text-slate-500">GLOBAL</span>
+          <span className="text-xs font-black text-[var(--fi-muted)]">GLOBAL</span>
           <div className="relative">
             <input
               type="checkbox"
@@ -36,7 +36,7 @@ export function FeatureFlagRow({ flag }: Props) {
               checked={flag.is_global}
               onChange={(e) => handleGlobal(e.target.checked)}
             />
-            <div className={`h-6 w-11 rounded-full transition-colors ${flag.is_global ? 'bg-[#0F8F83]' : 'bg-slate-200'}`} />
+            <div className={`h-6 w-11 rounded-full transition-colors ${flag.is_global ? 'bg-[var(--fi-emerald)]' : 'bg-slate-200'}`} />
             <div className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${flag.is_global ? 'translate-x-5' : ''}`} />
           </div>
         </label>
@@ -52,8 +52,8 @@ export function FeatureFlagRow({ flag }: Props) {
               onClick={() => handleRole(role, !active)}
               className={`rounded-lg border px-2.5 py-1 text-xs font-bold transition ${
                 active
-                  ? 'border-[#0F8F83] bg-[#0F8F83]/10 text-[#0F8F83]'
-                  : 'border-[#DDE6E4] text-slate-400 hover:border-[#0F8F83]/40'
+                  ? 'border-[var(--fi-emerald)] bg-[var(--fi-emerald)]/10 text-[var(--fi-emerald)]'
+                  : 'border-[var(--fi-line)] text-[var(--fi-muted)] hover:border-[var(--fi-emerald)]/40'
               } disabled:opacity-40`}
             >
               {role.replace(/_/g, ' ')}

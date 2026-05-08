@@ -64,17 +64,17 @@ export function LeadScoringClient({ leads }: Props) {
   return (
     <div className="space-y-5">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <div className="flex items-center gap-2">
-          <Brain className="size-4 text-[#0F8F83]" />
-          <p className="text-sm font-black text-[#102033] dark:text-white">النموذج</p>
+          <Brain className="size-4 text-[var(--fi-emerald)]" />
+          <p className="text-sm font-black text-[var(--fi-ink)]">النموذج</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {MODEL_OPTIONS.map(m => (
             <button
               key={m.value}
               onClick={() => setModel(m.value as AIModel)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-black transition-all ${model === m.value ? 'bg-[#0F8F83] text-white shadow' : 'border border-[#DDE6E4] text-slate-600 hover:border-[#0F8F83]/40 dark:text-slate-300'}`}
+              className={`rounded-lg px-3 py-1.5 text-xs font-black transition-all ${model === m.value ? 'bg-[var(--fi-emerald)] text-white shadow' : 'border border-[var(--fi-line)] text-[var(--fi-muted)] hover:border-[var(--fi-emerald)]/40'}`}
             >
               {m.badge} {m.label}
             </button>
@@ -82,7 +82,7 @@ export function LeadScoringClient({ leads }: Props) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           {batchDone && (
-            <span className="flex items-center gap-1 text-xs font-semibold text-[#0F8F83]">
+            <span className="flex items-center gap-1 text-xs font-semibold text-[var(--fi-emerald)]">
               <CheckCircle2 className="size-3.5" />تم تقييم {batchDone.count} عميل
               {batchDone.errors > 0 && <span className="text-red-500">({batchDone.errors} خطأ)</span>}
             </span>
@@ -91,7 +91,7 @@ export function LeadScoringClient({ leads }: Props) {
             size="sm"
             disabled={pending}
             onClick={handleBatchScore}
-            className="bg-[#0F8F83] text-white hover:bg-[#0B6F66] gap-1.5"
+            className="fi-primary-button gap-1.5"
           >
             {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
             تقييم الكل (أول 20)
@@ -100,8 +100,8 @@ export function LeadScoringClient({ leads }: Props) {
       </div>
 
       {/* Leads table */}
-      <div className="overflow-hidden rounded-xl border border-[#DDE6E4] bg-white shadow-sm dark:bg-slate-900">
-        <div className="divide-y divide-[#DDE6E4]">
+      <div className="overflow-hidden rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="divide-y divide-[var(--fi-line)]">
           {leads.map(lead => {
             const result  = results[lead.id]
             const temp    = getTemp(lead, result)
@@ -120,26 +120,26 @@ export function LeadScoringClient({ leads }: Props) {
                 {/* Lead info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-black text-[#102033] dark:text-white">{lead.full_name ?? 'غير محدد'}</p>
+                    <p className="font-black text-[var(--fi-ink)]">{lead.full_name ?? 'غير محدد'}</p>
                     {temp && (
                       <span className={`rounded-md px-2 py-0.5 text-xs font-bold ${TEMP_CONFIG[temp].bg} ${TEMP_CONFIG[temp].color}`}>
                         {TEMP_CONFIG[temp].label}
                       </span>
                     )}
-                    {lead.status && <span className="text-xs text-slate-400">{lead.status}</span>}
+                    {lead.status && <span className="text-xs text-[var(--fi-muted)]">{lead.status}</span>}
                   </div>
 
                   {result ? (
                     <div className="mt-1 space-y-0.5">
-                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        <span className="font-black text-[#0F8F83]">السبب:</span> {result.reason}
+                      <p className="text-xs font-semibold text-[var(--fi-muted)]">
+                        <span className="font-black text-[var(--fi-emerald)]">السبب:</span> {result.reason}
                       </p>
-                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      <p className="text-xs font-semibold text-[var(--fi-muted)]">
                         <span className="font-black text-[#C9964A]">الخطوة:</span> {result.nextAction}
                       </p>
                     </div>
                   ) : (
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="mt-0.5 text-xs text-[var(--fi-muted)]">
                       {lead.source && `المصدر: ${lead.source}`}
                       {lead.budget && ` · الميزانية: ${Number(lead.budget).toLocaleString('ar-EG')} ج.م`}
                     </p>

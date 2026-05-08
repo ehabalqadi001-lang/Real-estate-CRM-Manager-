@@ -44,9 +44,9 @@ export default async function AdsAPIPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">NEXUS Ads Engine</p>
-        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">Ads API Connector</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS Ads Engine</p>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">Ads API Connector</h1>
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           إدارة حملات Meta Ads و Google Ads مباشرةً — من إنشاء الحملة إلى تتبع الأداء.
         </p>
       </div>
@@ -54,35 +54,35 @@ export default async function AdsAPIPage() {
       {/* Global KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
         {[
-          { icon: <Megaphone className="size-5" />,    value: totalCampaigns, label: 'حملات نشطة',     color: 'text-[#0F8F83]' },
+          { icon: <Megaphone className="size-5" />,    value: totalCampaigns, label: 'حملات نشطة',     color: 'text-[var(--fi-emerald)]' },
           { icon: <TrendingUp className="size-5" />,   value: `${totalSpend.toLocaleString('ar-EG')} ج.م`, label: 'إجمالي الإنفاق', color: 'text-[#C9964A]' },
           { icon: <Eye className="size-5" />,          value: '234K',         label: 'مشاهدات',         color: 'text-blue-500' },
           { icon: <MousePointer className="size-5" />, value: '3,740',        label: 'نقرات',            color: 'text-purple-600' },
         ].map((k) => (
-          <div key={k.label} className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+          <div key={k.label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
             <div className={`mb-2 ${k.color}`}>{k.icon}</div>
-            <p className="text-xl font-black text-[#102033] dark:text-white">{k.value}</p>
-            <p className="text-xs font-semibold text-slate-500">{k.label}</p>
+            <p className="text-xl font-black text-[var(--fi-ink)]">{k.value}</p>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">{k.label}</p>
           </div>
         ))}
       </div>
 
       {/* Recent campaigns */}
       {campaigns.length > 0 && (
-        <div className="rounded-xl border border-[#DDE6E4] bg-white shadow-sm dark:bg-slate-900 overflow-hidden">
-          <div className="border-b border-[#DDE6E4] px-5 py-3">
-            <p className="font-black text-[#102033] dark:text-white">الحملات الأخيرة</p>
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm overflow-hidden">
+          <div className="border-b border-[var(--fi-line)] px-5 py-3">
+            <p className="font-black text-[var(--fi-ink)]">الحملات الأخيرة</p>
           </div>
-          <div className="divide-y divide-[#DDE6E4]">
+          <div className="divide-y divide-[var(--fi-line)]">
             {campaigns.map(c => (
               <div key={c.id} className="flex items-center justify-between px-5 py-3">
                 <div>
-                  <p className="text-sm font-black text-[#102033] dark:text-white">{c.title}</p>
-                  <p className="text-xs text-slate-400">{c.metadata?.platform} · {c.metadata?.objective}</p>
+                  <p className="text-sm font-black text-[var(--fi-ink)]">{c.title}</p>
+                  <p className="text-xs text-[var(--fi-muted)]">{c.metadata?.platform} · {c.metadata?.objective}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-semibold text-slate-500">{c.metadata?.daily_budget ? `${c.metadata.daily_budget} ج.م/يوم` : '—'}</p>
-                  <p className="text-xs text-slate-400">{new Date(c.created_at).toLocaleDateString('ar-EG')}</p>
+                  <p className="text-xs font-semibold text-[var(--fi-muted)]">{c.metadata?.daily_budget ? `${c.metadata.daily_budget} ج.م/يوم` : '—'}</p>
+                  <p className="text-xs text-[var(--fi-muted)]">{new Date(c.created_at).toLocaleDateString('ar-EG')}</p>
                 </div>
               </div>
             ))}

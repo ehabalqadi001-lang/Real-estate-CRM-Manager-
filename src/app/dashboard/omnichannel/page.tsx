@@ -38,9 +38,9 @@ export default async function OmnichannelInboxPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">NEXUS Omnichannel</p>
-        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">صندوق الوارد الموحد</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS Omnichannel</p>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">صندوق الوارد الموحد</h1>
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           إدارة جميع القنوات — واتساب، بريد إلكتروني، ورسائل داخلية — من مكان واحد مع ردود AI.
         </p>
       </div>
@@ -48,15 +48,15 @@ export default async function OmnichannelInboxPage() {
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
         {[
-          { icon: <MessageCircle className="size-5" />, value: messages.length, label: 'رسائل داخلية',   color: 'text-[#0F8F83]' },
+          { icon: <MessageCircle className="size-5" />, value: messages.length, label: 'رسائل داخلية',   color: 'text-[var(--fi-emerald)]' },
           { icon: <Phone className="size-5" />,         value: waLogs.length,   label: 'رسائل WhatsApp', color: 'text-[#25D366]' },
           { icon: <Mail className="size-5" />,          value: 0,               label: 'بريد إلكتروني',  color: 'text-[#C9964A]' },
           { icon: <Users className="size-5" />,         value: unreadInternal,  label: 'غير مقروء',      color: 'text-red-500' },
         ].map((k) => (
-          <div key={k.label} className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+          <div key={k.label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
             <div className={`mb-2 ${k.color}`}>{k.icon}</div>
-            <p className="text-2xl font-black text-[#102033] dark:text-white">{k.value}</p>
-            <p className="text-xs font-semibold text-slate-500">{k.label}</p>
+            <p className="text-2xl font-black text-[var(--fi-ink)]">{k.value}</p>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">{k.label}</p>
           </div>
         ))}
       </div>

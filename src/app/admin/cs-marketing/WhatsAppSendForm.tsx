@@ -39,10 +39,10 @@ export function WhatsAppSendForm() {
         onChange={(e) => setBody(e.target.value)}
         placeholder="اكتب رسالتك هنا…"
         rows={3}
-        className="w-full resize-none rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-sm font-semibold text-[#102033] outline-none focus:ring-2 focus:ring-[#0F8F83]/30 dark:bg-slate-800 dark:text-white"
+        className="w-full resize-none rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 py-2 text-sm font-semibold text-[var(--fi-ink)] outline-none focus:ring-2 focus:ring-[var(--fi-emerald)]/30"
       />
       {result && (
-        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
           {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
           {result.msg}
         </p>
@@ -84,7 +84,7 @@ export function BroadcastForm() {
       <select
         value={segment}
         onChange={(e) => setSegment(e.target.value)}
-        className="w-full rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-sm font-semibold dark:bg-slate-800"
+        className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 py-2 text-sm font-semibold"
       >
         <option value="all">كل المستخدمين</option>
         <option value="active">المستخدمون النشطون</option>
@@ -94,10 +94,10 @@ export function BroadcastForm() {
         onChange={(e) => setBody(e.target.value)}
         placeholder="نص الحملة…"
         rows={3}
-        className="w-full resize-none rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-sm font-semibold text-[#102033] outline-none focus:ring-2 focus:ring-[#C9964A]/30 dark:bg-slate-800 dark:text-white"
+        className="w-full resize-none rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 py-2 text-sm font-semibold text-[var(--fi-ink)] outline-none focus:ring-2 focus:ring-[#C9964A]/30"
       />
       {result && (
-        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
           {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
           {result.msg}
         </p>

@@ -7,9 +7,9 @@ export const metadata = {
 
 export default function PaymentTermsPage() {
   return (
-    <main className="min-h-screen bg-[#F7FBF8] px-4 py-8 text-[#102033]">
-      <section className="mx-auto max-w-4xl overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <header className="border-b border-[#DDE6E4] bg-[#27AE60] px-4 sm:px-6 py-8 text-white md:px-10">
+    <main className="min-h-screen bg-[var(--fi-soft)] px-4 py-8 text-[var(--fi-ink)]">
+      <section className="mx-auto max-w-4xl overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <header className="border-b border-[var(--fi-line)] bg-[#27AE60] px-4 sm:px-6 py-8 text-white md:px-10">
           <div className="flex items-center gap-3">
             <span className="flex size-11 items-center justify-center rounded-lg bg-white/15">
               <ShieldCheck className="size-6" />

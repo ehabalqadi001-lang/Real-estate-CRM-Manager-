@@ -69,12 +69,12 @@ export function CreativeStudioClient() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-2 rounded-2xl border border-[#DDE6E4] bg-[#FBFCFA] p-1.5 dark:bg-slate-800">
+      <div className="flex gap-2 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-1.5">
         {([['copy', 'توليد النصوص', <Wand2 className="size-4" key="w" />], ['video', 'توليد الفيديو', <Video className="size-4" key="v" />]] as [Tab, string, React.ReactNode][]).map(([key, label, icon]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-black transition ${tab === key ? 'bg-[#0F8F83] text-white shadow' : 'text-slate-500 hover:text-[#0F8F83]'}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-black transition ${tab === key ? 'bg-[var(--fi-emerald)] text-white shadow' : 'text-[var(--fi-muted)] hover:text-[var(--fi-emerald)]'}`}
           >
             {icon}{label}
           </button>
@@ -84,15 +84,15 @@ export function CreativeStudioClient() {
       {tab === 'copy' && (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Input */}
-          <div className="space-y-4 rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-            <p className="font-black text-[#102033] dark:text-white">إعدادات المحتوى</p>
+          <div className="space-y-4 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+            <p className="font-black text-[var(--fi-ink)]">إعدادات المحتوى</p>
 
             <div className="flex flex-wrap gap-2">
               {ASSET_TYPES.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setAssetType(t.key)}
-                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition ${assetType === t.key ? 'border-[#0F8F83] bg-[#0F8F83]/10 text-[#0F8F83]' : 'border-[#DDE6E4] text-slate-500'}`}
+                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition ${assetType === t.key ? 'border-[var(--fi-emerald)] bg-[var(--fi-emerald)]/10 text-[var(--fi-emerald)]' : 'border-[var(--fi-line)] text-[var(--fi-muted)]'}`}
                 >
                   {t.icon}{t.label}
                 </button>
@@ -100,7 +100,7 @@ export function CreativeStudioClient() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">العقار أو السياق</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">العقار أو السياق</label>
               <Textarea
                 placeholder="مثال: فيلا 350م في التجمع الخامس، كمبوند سيليا، 4 غرف نوم، حمام سباحة، تسليم 2026"
                 value={propertyRef}
@@ -110,24 +110,24 @@ export function CreativeStudioClient() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">الجمهور المستهدف</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الجمهور المستهدف</label>
               <Input value={audience} onChange={(e) => setAudience(e.target.value)} />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">أسلوب الكتابة</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">أسلوب الكتابة</label>
               <Input value={tone} onChange={(e) => setTone(e.target.value)} />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">نموذج الذكاء الاصطناعي</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">نموذج الذكاء الاصطناعي</label>
               <div className="flex flex-wrap gap-2">
                 {MODEL_OPTIONS.map((m) => (
                   <button
                     key={m.value}
                     type="button"
                     onClick={() => setSelectedModel(m.value as AIModel)}
-                    className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition ${selectedModel === m.value ? 'border-[#0F8F83] bg-[#0F8F83]/10 text-[#0F8F83]' : 'border-[#DDE6E4] text-slate-500'}`}
+                    className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition ${selectedModel === m.value ? 'border-[var(--fi-emerald)] bg-[var(--fi-emerald)]/10 text-[var(--fi-emerald)]' : 'border-[var(--fi-line)] text-[var(--fi-muted)]'}`}
                   >
                     {m.badge} {m.label}
                   </button>
@@ -144,18 +144,18 @@ export function CreativeStudioClient() {
             <Button
               disabled={pending || !propertyRef}
               onClick={handleGenerate}
-              className="w-full bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]"
+              className="w-full fi-primary-button font-semibold"
             >
               {pending ? <><Loader2 className="size-4 animate-spin" />جاري التوليد…</> : <><Wand2 className="size-4" />توليد 3 نسخ</>}
             </Button>
           </div>
 
           {/* Output */}
-          <div className="relative rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+          <div className="relative rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <p className="font-black text-[#102033] dark:text-white">النتيجة</p>
+              <p className="font-black text-[var(--fi-ink)]">النتيجة</p>
               {output && (
-                <button onClick={handleCopy} className="flex items-center gap-1 text-xs font-semibold text-[#0F8F83]">
+                <button onClick={handleCopy} className="flex items-center gap-1 text-xs font-semibold text-[var(--fi-emerald)]">
                   {copied ? <CheckCircle2 className="size-3.5" /> : <Copy className="size-3.5" />}
                   {copied ? 'تم النسخ' : 'نسخ'}
                 </button>
@@ -163,14 +163,14 @@ export function CreativeStudioClient() {
             </div>
             {pending && (
               <div className="flex h-40 items-center justify-center">
-                <Loader2 className="size-8 animate-spin text-[#0F8F83]" />
+                <Loader2 className="size-8 animate-spin text-[var(--fi-emerald)]" />
               </div>
             )}
             {!pending && output && (
-              <pre className="whitespace-pre-wrap text-sm font-semibold text-[#102033] leading-7 dark:text-slate-200">{output}</pre>
+              <pre className="whitespace-pre-wrap text-sm font-semibold text-[var(--fi-ink)] leading-7">{output}</pre>
             )}
             {!pending && !output && (
-              <div className="flex h-40 items-center justify-center text-sm font-semibold text-slate-300">
+              <div className="flex h-40 items-center justify-center text-sm font-semibold text-[var(--fi-line)]">
                 سيظهر المحتوى المولّد هنا…
               </div>
             )}
@@ -179,10 +179,10 @@ export function CreativeStudioClient() {
       )}
 
       {tab === 'video' && (
-        <div className="max-w-2xl space-y-4 rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-          <p className="font-black text-[#102033] dark:text-white">توليد فيديو HeyGen</p>
-          <p className="text-xs font-semibold text-slate-500">
-            يتطلب إضافة HeyGen API Key في <a href="/admin/api-vault" className="text-[#0F8F83] underline">API Vault</a> أولاً.
+        <div className="max-w-2xl space-y-4 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+          <p className="font-black text-[var(--fi-ink)]">توليد فيديو HeyGen</p>
+          <p className="text-xs font-semibold text-[var(--fi-muted)]">
+            يتطلب إضافة HeyGen API Key في <a href="/admin/api-vault" className="text-[var(--fi-emerald)] underline">API Vault</a> أولاً.
           </p>
 
           <div>
@@ -201,7 +201,7 @@ export function CreativeStudioClient() {
             </p>
           )}
           {videoResult && (
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-[#0F8F83]">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-[var(--fi-emerald)]">
               <CheckCircle2 className="size-3.5" />{videoResult}
             </p>
           )}

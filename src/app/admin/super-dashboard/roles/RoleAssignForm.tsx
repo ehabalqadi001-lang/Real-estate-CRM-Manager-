@@ -41,7 +41,7 @@ export function RoleAssignForm({ userId, currentRole, roles }: Props) {
       <select
         value={selected}
         onChange={(e) => { setSelected(e.target.value); setSaved(false) }}
-        className="flex-1 rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-xs font-semibold text-[#102033] dark:bg-slate-800 dark:text-white"
+        className="flex-1 rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 py-2 text-xs font-semibold text-[var(--fi-ink)]"
       >
         <optgroup label="Legacy Roles">
           {['super_admin','company_admin','company_owner','sales_director','team_leader','broker','freelancer','finance_officer','hr_officer','customer_support','agent','viewer'].map((r) => (
@@ -59,7 +59,7 @@ export function RoleAssignForm({ userId, currentRole, roles }: Props) {
         size="sm"
         disabled={pending || selected === currentRole}
         onClick={save}
-        className={`h-8 px-3 ${saved ? 'bg-[#0F8F83]' : 'bg-[#C9964A]'} font-semibold text-white hover:opacity-90`}
+        className={`h-8 px-3 ${saved ? 'bg-[var(--fi-emerald)]' : 'bg-[#C9964A]'} font-semibold text-white hover:opacity-90`}
       >
         {pending ? <Loader2 className="size-3.5 animate-spin" /> : saved ? <CheckCircle2 className="size-3.5" /> : 'حفظ'}
       </Button>

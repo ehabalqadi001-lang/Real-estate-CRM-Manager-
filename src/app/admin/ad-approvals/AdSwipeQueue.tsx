@@ -113,10 +113,10 @@ export function AdSwipeQueue({ initialAds }: Props) {
 
   if (!ad) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#DDE6E4] bg-[#FBFCFA] py-24 text-center dark:bg-slate-800/30">
-        <CheckCircle2 className="mb-4 size-16 text-[#0F8F83]" />
-        <p className="text-xl font-black text-[#102033] dark:text-white">تم الانتهاء من جميع الإعلانات!</p>
-        <p className="mt-2 text-sm font-semibold text-slate-500">
+      <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] py-24 text-center">
+        <CheckCircle2 className="mb-4 size-16 text-[var(--fi-emerald)]" />
+        <p className="text-xl font-black text-[var(--fi-ink)]">تم الانتهاء من جميع الإعلانات!</p>
+        <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">
           {approvedCount} موافقة · {rejectedCount} رفض
         </p>
       </div>
@@ -131,18 +131,18 @@ export function AdSwipeQueue({ initialAds }: Props) {
       <div className="flex items-center gap-3">
         <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
-            className="h-full rounded-full bg-[#0F8F83] transition-all duration-500"
+            className="h-full rounded-full bg-[var(--fi-emerald)] transition-all duration-500"
             style={{ width: `${((current) / queue.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs font-black text-slate-500">{remaining} متبقي</span>
-        <Badge className="bg-[#EEF6F5] text-[#0F8F83]">✓ {approvedCount}</Badge>
+        <span className="text-xs font-black text-[var(--fi-muted)]">{remaining} متبقي</span>
+        <Badge className="bg-[var(--fi-soft)] text-[var(--fi-emerald)]">✓ {approvedCount}</Badge>
         <Badge className="bg-red-100 text-red-600">✗ {rejectedCount}</Badge>
       </div>
 
       {/* Card */}
       <div
-        className={`relative overflow-hidden rounded-2xl border border-[#DDE6E4] bg-white shadow-xl transition-all duration-300 dark:bg-slate-900 ${
+        className={`relative overflow-hidden rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-xl transition-all duration-300 ${
           swipeDir === 'right'
             ? 'translate-x-24 rotate-6 opacity-0'
             : swipeDir === 'left'
@@ -151,13 +151,13 @@ export function AdSwipeQueue({ initialAds }: Props) {
         }`}
       >
         {/* Image */}
-        <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#EEF6F5] to-[#DDE6E4]">
+        <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[var(--fi-soft)] to-[var(--fi-line)]">
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageUrl} alt={ad.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <Layers className="size-16 text-[#0F8F83]/30" />
+              <Layers className="size-16 text-[var(--fi-emerald)]/30" />
             </div>
           )}
           {/* Badges overlay */}
@@ -171,7 +171,7 @@ export function AdSwipeQueue({ initialAds }: Props) {
           </div>
           {/* Swipe indicators */}
           {swipeDir === 'right' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0F8F83]/30">
+            <div className="absolute inset-0 flex items-center justify-center bg-[var(--fi-emerald)]/30">
               <CheckCircle2 className="size-24 text-white drop-shadow-xl" />
             </div>
           )}
@@ -186,9 +186,9 @@ export function AdSwipeQueue({ initialAds }: Props) {
         <div className="p-5">
           <div className="mb-3 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-black text-[#102033] dark:text-white">{ad.title}</h2>
+              <h2 className="text-xl font-black text-[var(--fi-ink)]">{ad.title}</h2>
               {ad.compound_name && (
-                <p className="mt-0.5 text-sm font-semibold text-[#0F8F83]">{ad.compound_name}</p>
+                <p className="mt-0.5 text-sm font-semibold text-[var(--fi-emerald)]">{ad.compound_name}</p>
               )}
             </div>
             <p className="text-xl font-black text-[#C9964A]">
@@ -196,33 +196,33 @@ export function AdSwipeQueue({ initialAds }: Props) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3 text-sm font-semibold text-slate-500">
+          <div className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--fi-muted)]">
             {ad.location && (
               <span className="flex items-center gap-1">
-                <MapPin className="size-3.5 text-[#0F8F83]" />
+                <MapPin className="size-3.5 text-[var(--fi-emerald)]" />
                 {ad.city ?? ad.location}
               </span>
             )}
             {ad.area_sqm && (
               <span className="flex items-center gap-1">
-                <Ruler className="size-3.5 text-[#0F8F83]" />
+                <Ruler className="size-3.5 text-[var(--fi-emerald)]" />
                 {ad.area_sqm} م²
               </span>
             )}
             {ad.bedrooms != null && (
               <span className="flex items-center gap-1">
-                <BedDouble className="size-3.5 text-[#0F8F83]" />
+                <BedDouble className="size-3.5 text-[var(--fi-emerald)]" />
                 {ad.bedrooms} غرف
               </span>
             )}
             {ad.bathrooms != null && (
               <span className="flex items-center gap-1">
-                <Bath className="size-3.5 text-[#0F8F83]" />
+                <Bath className="size-3.5 text-[var(--fi-emerald)]" />
                 {ad.bathrooms}
               </span>
             )}
             {ad.property_type && (
-              <Badge variant="outline" className="border-[#DDE6E4] text-xs capitalize">
+              <Badge variant="outline" className="border-[var(--fi-line)] text-xs capitalize">
                 {ad.property_type}
               </Badge>
             )}
@@ -275,7 +275,7 @@ export function AdSwipeQueue({ initialAds }: Props) {
           size="lg"
           disabled={pending}
           onClick={approve}
-          className="flex-1 bg-[#0F8F83] font-black text-white hover:bg-[#0B6F66]"
+          className="flex-1 fi-primary-button font-black"
         >
           موافقة
           <ChevronRight className="size-5" />
@@ -283,7 +283,7 @@ export function AdSwipeQueue({ initialAds }: Props) {
         </Button>
       </div>
 
-      <p className="text-center text-xs font-semibold text-slate-400">
+      <p className="text-center text-xs font-semibold text-[var(--fi-muted)]">
         اضغط ← للرفض · ← + Enter للتأكيد · → للموافقة · Esc للإلغاء
       </p>
     </div>

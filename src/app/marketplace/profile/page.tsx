@@ -81,7 +81,7 @@ export default async function ClientProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F7FAF8_52%,#FBFCFA_100%)] text-[#102033]" dir="rtl" lang="ar">
+    <div className="min-h-screen bg-[var(--fi-soft)] text-[var(--fi-ink)]" dir="rtl" lang="ar">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <ClientProfileDashboard

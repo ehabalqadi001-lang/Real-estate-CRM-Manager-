@@ -62,7 +62,7 @@ export function AdsClient({ assets, keys, stats }: Props) {
           <button
             key={p.key}
             onClick={() => setTab(p.key)}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition-all ${tab === p.key ? 'bg-[#0F8F83] text-white shadow-md' : 'border border-[#DDE6E4] bg-white text-slate-600 hover:border-[#0F8F83]/40 dark:bg-slate-800'}`}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition-all ${tab === p.key ? 'bg-[var(--fi-emerald)] text-white shadow-md' : 'border border-[var(--fi-line)] bg-[var(--fi-paper)] text-[var(--fi-muted)] hover:border-[var(--fi-emerald)]/40'}`}
           >
             <span>{p.logo}</span> {p.label}
             {p.configured
@@ -95,9 +95,9 @@ export function AdsClient({ assets, keys, stats }: Props) {
             { label: 'مشاهدات',       value: platformStats.impressions.toLocaleString('ar-EG') },
             { label: 'CTR',            value: `${platformStats.ctr}%` },
           ].map(s => (
-            <div key={s.label} className="rounded-xl border border-[#DDE6E4] bg-white p-3 shadow-sm dark:bg-slate-900">
-              <p className="text-lg font-black text-[#102033] dark:text-white">{s.value}</p>
-              <p className="text-xs font-semibold text-slate-500">{s.label}</p>
+            <div key={s.label} className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-3 shadow-sm">
+              <p className="text-lg font-black text-[var(--fi-ink)]">{s.value}</p>
+              <p className="text-xs font-semibold text-[var(--fi-muted)]">{s.label}</p>
             </div>
           ))}
         </div>
@@ -118,7 +118,7 @@ export function AdsClient({ assets, keys, stats }: Props) {
         <Button
           size="sm"
           onClick={() => setShowForm(v => !v)}
-          className="bg-[#0F8F83] text-white hover:bg-[#0B6F66] gap-1.5"
+          className="fi-primary-button gap-1.5"
         >
           <Megaphone className="size-3.5" />
           إنشاء حملة جديدة
@@ -136,19 +136,19 @@ export function AdsClient({ assets, keys, stats }: Props) {
 
       {/* Create campaign form */}
       {showForm && (
-        <form onSubmit={handleCreate} className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900 space-y-4">
-          <p className="font-black text-[#102033] dark:text-white">
+        <form onSubmit={handleCreate} className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm space-y-4">
+          <p className="font-black text-[var(--fi-ink)]">
             إنشاء حملة — {tab === 'meta' ? 'Meta Ads' : 'Google Ads'}
           </p>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">اسم الحملة *</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">اسم الحملة *</label>
               <Input name="campaign_name" placeholder="حملة مشاريع يونيو 2026" required />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">الهدف</label>
-              <select name="objective" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الهدف</label>
+              <select name="objective" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
                 <option value="awareness">الوعي بالعلامة التجارية</option>
                 <option value="traffic">حركة المرور للموقع</option>
                 <option value="leads">جذب عملاء محتملين</option>
@@ -159,18 +159,18 @@ export function AdsClient({ assets, keys, stats }: Props) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">الميزانية اليومية (ج.م)</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الميزانية اليومية (ج.م)</label>
               <Input name="daily_budget" type="number" min="50" placeholder="500" />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">الجمهور المستهدف</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الجمهور المستهدف</label>
               <Input name="audience" placeholder="رجال 30-55، القاهرة، مهتمون بالعقارات" />
             </div>
           </div>
 
           <div>
             <label className="mb-1 block text-xs font-black text-slate-500">الإعلان الإبداعي (من Creative Studio)</label>
-            <select name="asset_id" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+            <select name="asset_id" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
               <option value="">— اختر محتوى إعلاني —</option>
               {assets.map(a => (
                 <option key={a.id} value={a.id}>{a.title || `${a.asset_type} — ${a.id.slice(0, 8)}`}</option>
@@ -179,7 +179,7 @@ export function AdsClient({ assets, keys, stats }: Props) {
           </div>
 
           {result && (
-            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
               {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
               {result.msg}
             </p>
@@ -187,7 +187,7 @@ export function AdsClient({ assets, keys, stats }: Props) {
 
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">إلغاء</Button>
-            <Button type="submit" disabled={pending} className="flex-1 bg-[#0F8F83] text-white">
+            <Button type="submit" disabled={pending} className="flex-1 fi-primary-button">
               {pending ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}
               إنشاء الحملة
             </Button>
@@ -196,7 +196,7 @@ export function AdsClient({ assets, keys, stats }: Props) {
       )}
 
       {result && !showForm && (
-        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
           {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
           {result.msg}
         </p>

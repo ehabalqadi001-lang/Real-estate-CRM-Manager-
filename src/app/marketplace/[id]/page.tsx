@@ -44,11 +44,11 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
   if (!property) notFound()
 
   return (
-    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]" dir="rtl">
+    <div className="min-h-screen bg-[var(--fi-soft)] text-[var(--fi-ink)]" dir="rtl">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <section className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
+          <section className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
             <Image
               src={property.imageUrl ?? ''}
               alt={property.title ?? ''}
@@ -65,20 +65,20 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
 
             {/* VR & Video Section */}
             {(property.virtualTourUrl || property.videoUrl) && (
-               <div className="border-t border-[#DDE6E4] p-5 bg-[#FBFCFA]">
+               <div className="border-t border-[var(--fi-line)] p-5 bg-[var(--fi-soft)]">
                  <h2 className="mb-4 text-xl font-black flex items-center gap-2">
-                   <Video className="size-5 text-[#0F8F83]" />
+                   <Video className="size-5 text-[var(--fi-emerald)]" />
                    جولة افتراضية و ميديا
                  </h2>
                  <div className="grid gap-4 sm:grid-cols-2">
                    {property.virtualTourUrl && (
-                     <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-slate-200 border border-[#DDE6E4] shadow-inner relative">
+                     <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-slate-200 border border-[var(--fi-line)] shadow-inner relative">
                         <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded">360° VR Tour</div>
                         <iframe src={property.virtualTourUrl} className="h-full w-full border-0" allowFullScreen />
                      </div>
                    )}
                    {property.videoUrl && (
-                     <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-slate-200 border border-[#DDE6E4] shadow-inner relative">
+                     <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-slate-200 border border-[var(--fi-line)] shadow-inner relative">
                         <div className="absolute top-2 right-2 bg-red-600/80 text-white text-[10px] font-bold px-2 py-1 rounded">Video</div>
                         <iframe src={property.videoUrl} className="h-full w-full border-0" allowFullScreen />
                      </div>
@@ -88,21 +88,21 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
             )}
           </section>
           <aside className="space-y-4">
-            <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
+            <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
               <p className="flex items-center gap-2 font-black">
-                <ShieldCheck className="size-4 text-[#0F8F83]" />
+                <ShieldCheck className="size-4 text-[var(--fi-emerald)]" />
                 تواصل آمن
               </p>
               <p className="mt-2 text-sm font-semibold leading-7 text-[#64748B]">
                 رقم الهاتف مخفي. ابدأ محادثة داخلية لحماية بيانات الطرفين وتوثيق الطلب.
               </p>
-              <Button className="mt-4 w-full bg-[#0F8F83] text-white hover:bg-[#0B6F66]">
+              <Button className="mt-4 w-full fi-primary-button">
                 <MessageCircle className="ms-1 size-4" />
                 بدء محادثة
               </Button>
             </div>
             
-            <div className="rounded-lg border border-[#DDE6E4] bg-[#EEF6F5] p-4 shadow-sm">
+            <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 shadow-sm">
               <p className="flex items-center gap-2 font-black text-[#17375E]">
                 <Map className="size-4" />
                 الموقع على الخريطة
@@ -112,7 +112,7 @@ export default async function MarketplaceDetailPage({ params }: { params: Promis
                   خريطة تفاعلية (Interactive Map)
                 </div>
               </div>
-              <Button variant="outline" className="mt-3 w-full border-[#0F8F83] text-[#0F8F83] hover:bg-[#0F8F83] hover:text-white">
+              <Button variant="outline" className="mt-3 w-full border-[var(--fi-emerald)] text-[var(--fi-emerald)] hover:bg-[var(--fi-emerald)] hover:text-white">
                 فتح الموقع الدقيق
               </Button>
             </div>

@@ -28,9 +28,9 @@ export default async function ApiVaultPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-black text-[#0F8F83]">NEXUS Security</p>
-          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">API Vault</h1>
-          <p className="mt-1 text-sm font-semibold text-slate-500">
+          <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS Security</p>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">API Vault</h1>
+          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
             احفظ مفاتيح API الخاصة بك مشفرة بـ AES-256 — لا يتم تخزين القيم بنص واضح.
           </p>
         </div>
@@ -44,12 +44,12 @@ export default async function ApiVaultPage() {
         <ApiKeyForm existing={keys ?? []} />
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-[#DDE6E4] bg-[#FBFCFA] p-5 dark:bg-slate-800">
+          <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-5">
             <div className="mb-3 flex items-center gap-2">
-              <Shield className="size-4 text-[#0F8F83]" />
-              <p className="font-black text-[#102033] dark:text-white">كيف يعمل Vault</p>
+              <Shield className="size-4 text-[var(--fi-emerald)]" />
+              <p className="font-black text-[var(--fi-ink)]">كيف يعمل Vault</p>
             </div>
-            <ul className="space-y-2 text-xs font-semibold text-slate-500">
+            <ul className="space-y-2 text-xs font-semibold text-[var(--fi-muted)]">
               <li>• المفاتيح تُشفَّر بـ AES-256-GCM قبل التخزين في Supabase</li>
               <li>• لا أحد يستطيع رؤية القيمة الكاملة بعد الحفظ — حتى مديري المنصة</li>
               <li>• يتم فك التشفير فقط داخل Server Actions عند الحاجة للاستخدام</li>
@@ -57,8 +57,8 @@ export default async function ApiVaultPage() {
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-[#DDE6E4] bg-[#FBFCFA] p-5 dark:bg-slate-800">
-            <p className="mb-3 font-black text-[#102033] dark:text-white">المفاتيح المطلوبة للمودولات</p>
+          <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-soft)] p-5">
+            <p className="mb-3 font-black text-[var(--fi-ink)]">المفاتيح المطلوبة للمودولات</p>
             <div className="space-y-2 text-xs font-semibold">
               {[
                 { key: 'openai',         module: 'FAST Agent / Creative Studio' },
@@ -69,9 +69,9 @@ export default async function ApiVaultPage() {
                 { key: 'whatsapp_token', module: 'WhatsApp Business Cloud' },
                 { key: 'resend',         module: 'Email Reports Delivery' },
               ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between rounded-lg border border-[#DDE6E4] px-3 py-2 bg-white dark:bg-slate-900">
-                  <code className="text-slate-500">{item.key}</code>
-                  <span className="text-[#0F8F83]">{item.module}</span>
+                <div key={item.key} className="flex items-center justify-between rounded-lg border border-[var(--fi-line)] px-3 py-2 bg-[var(--fi-paper)]">
+                  <code className="text-[var(--fi-muted)]">{item.key}</code>
+                  <span className="text-[var(--fi-emerald)]">{item.module}</span>
                 </div>
               ))}
             </div>

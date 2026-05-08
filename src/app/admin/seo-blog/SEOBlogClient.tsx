@@ -49,25 +49,25 @@ export function SEOBlogClient({ assets }: Props) {
     <div className="space-y-5">
       {/* Generate button */}
       {!open && (
-        <Button onClick={() => setOpen(true)} className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]">
+        <Button onClick={() => setOpen(true)} className="fi-primary-button font-semibold">
           <Plus className="size-4" />توليد مقال جديد
         </Button>
       )}
 
       {/* Form */}
       {open && (
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900 space-y-4">
-          <p className="font-black text-[#102033] dark:text-white">توليد مقال SEO جديد</p>
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm space-y-4">
+          <p className="font-black text-[var(--fi-ink)]">توليد مقال SEO جديد</p>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">نوع المقال</label>
-              <select name="blog_type" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">نوع المقال</label>
+              <select name="blog_type" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
                 {BLOG_TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">المدينة / المنطقة</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">المدينة / المنطقة</label>
               <Input name="city" placeholder="مثال: القاهرة الجديدة، التجمع الخامس" />
             </div>
           </div>
@@ -84,12 +84,12 @@ export function SEOBlogClient({ assets }: Props) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">الجمهور المستهدف</label>
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الجمهور المستهدف</label>
               <Input name="audience" placeholder="مستثمرون عقاريون في مصر" />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-black text-slate-500">عدد الكلمات</label>
-              <select name="word_count" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+              <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">عدد الكلمات</label>
+              <select name="word_count" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
                 <option value="400">400 كلمة (قصير)</option>
                 <option value="600" selected>600 كلمة (متوسط)</option>
                 <option value="1000">1000 كلمة (طويل)</option>
@@ -99,7 +99,7 @@ export function SEOBlogClient({ assets }: Props) {
           </div>
 
           {result && (
-            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
               {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
               {result.msg}
             </p>
@@ -107,7 +107,7 @@ export function SEOBlogClient({ assets }: Props) {
 
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">إلغاء</Button>
-            <Button type="submit" disabled={pending} className="flex-1 bg-[#0F8F83] text-white">
+            <Button type="submit" disabled={pending} className="flex-1 fi-primary-button">
               {pending ? <><Loader2 className="size-4 animate-spin" />جاري التوليد…</> : 'توليد المقال بالـ AI'}
             </Button>
           </div>
@@ -117,9 +117,9 @@ export function SEOBlogClient({ assets }: Props) {
       {/* Preview modal */}
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
-            <button onClick={() => setPreview(null)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 font-black text-lg">✕</button>
-            <div className="prose prose-sm max-w-none text-[#102033] dark:text-slate-200 leading-7" dangerouslySetInnerHTML={{ __html: preview }} />
+          <div className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl bg-[var(--fi-paper)] p-6 shadow-2xl">
+            <button onClick={() => setPreview(null)} className="absolute right-4 top-4 text-[var(--fi-muted)] hover:text-[var(--fi-ink)] font-black text-lg">✕</button>
+            <div className="prose prose-sm max-w-none text-[var(--fi-ink)] leading-7" dangerouslySetInnerHTML={{ __html: preview }} />
           </div>
         </div>
       )}
@@ -127,31 +127,31 @@ export function SEOBlogClient({ assets }: Props) {
       {/* Assets list */}
       <div className="space-y-3">
         {assets.length === 0 && (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#DDE6E4] py-14 text-center">
-            <FileText className="size-10 text-slate-300" />
-            <p className="font-bold text-slate-400">لا توجد مقالات بعد</p>
-            <p className="text-xs text-slate-400">اضغط &quot;توليد مقال جديد&quot; لإنشاء أول مقال SEO</p>
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--fi-line)] py-14 text-center">
+            <FileText className="size-10 text-[var(--fi-line)]" />
+            <p className="font-bold text-[var(--fi-muted)]">لا توجد مقالات بعد</p>
+            <p className="text-xs text-[var(--fi-muted)]">اضغط &quot;توليد مقال جديد&quot; لإنشاء أول مقال SEO</p>
           </div>
         )}
         {assets.map((a) => (
-          <div key={a.id} className="flex items-start gap-3 rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
-            <div className="mt-0.5 rounded-lg bg-[#0F8F83]/10 p-2 text-[#0F8F83]">
+          <div key={a.id} className="flex items-start gap-3 rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+            <div className="mt-0.5 rounded-lg bg-[var(--fi-emerald)]/10 p-2 text-[var(--fi-emerald)]">
               <FileText className="size-4" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-black text-[#102033] dark:text-white">{a.title}</p>
+                <p className="font-black text-[var(--fi-ink)]">{a.title}</p>
                 <span className={`rounded-lg px-2 py-0.5 text-xs font-bold ${a.status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                   {a.status === 'published' ? 'منشور' : 'مسودة'}
                 </span>
-                {a.metadata?.city && <span className="text-xs text-slate-400">{a.metadata.city}</span>}
+                {a.metadata?.city && <span className="text-xs text-[var(--fi-muted)]">{a.metadata.city}</span>}
               </div>
-              {a.metadata?.keywords && <p className="mt-1 text-xs text-slate-400 truncate">🔑 {a.metadata.keywords}</p>}
-              <p className="mt-1 text-xs text-slate-400">{new Date(a.created_at).toLocaleDateString('ar-EG')}</p>
+              {a.metadata?.keywords && <p className="mt-1 text-xs text-[var(--fi-muted)] truncate">🔑 {a.metadata.keywords}</p>}
+              <p className="mt-1 text-xs text-[var(--fi-muted)]">{new Date(a.created_at).toLocaleDateString('ar-EG')}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {a.output_text && (
-                <button onClick={() => setPreview(a.output_text)} className="flex items-center gap-1 text-xs font-semibold text-[#0F8F83] hover:underline">
+                <button onClick={() => setPreview(a.output_text)} className="flex items-center gap-1 text-xs font-semibold text-[var(--fi-emerald)] hover:underline">
                   <Eye className="size-3.5" />معاينة
                 </button>
               )}

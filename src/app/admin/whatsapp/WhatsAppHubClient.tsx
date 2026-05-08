@@ -79,11 +79,11 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]" dir="rtl">
-      <aside className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm">
+      <aside className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-xs font-black text-[#27AE60]">FAST CONTACTS</p>
-            <h2 className="mt-1 text-lg font-black text-[#102033]">العملاء والمستخدمون</h2>
+            <h2 className="mt-1 text-lg font-black text-[var(--fi-ink)]">العملاء والمستخدمون</h2>
           </div>
           <div className="flex size-10 items-center justify-center rounded-lg bg-[#EAF8F0] text-[#27AE60]">
             <UsersRound className="size-5" />
@@ -96,13 +96,13 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="بحث بالاسم أو الهاتف"
-            className="h-10 bg-[#FBFCFA] pr-9 font-bold"
+            className="h-10 bg-[var(--fi-soft)] pr-9 font-bold"
           />
         </label>
 
         <div className="mt-4 max-h-[640px] space-y-2 overflow-y-auto pl-1">
           {filteredUsers.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[#DDE6E4] p-4 sm:p-6 text-center text-sm font-bold text-[#64748B]">
+            <div className="rounded-lg border border-dashed border-[var(--fi-line)] p-4 sm:p-6 text-center text-sm font-bold text-[#64748B]">
               لا توجد نتائج مطابقة
             </div>
           ) : (
@@ -116,19 +116,19 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
                   className={`w-full rounded-lg border p-3 text-right transition ${
                     active
                       ? 'border-[#27AE60] bg-[#EAF8F0] shadow-sm'
-                      : 'border-[#DDE6E4] bg-[#FBFCFA] hover:border-[#27AE60]/50 hover:bg-white'
+                      : 'border-[var(--fi-line)] bg-[var(--fi-soft)] hover:border-[#27AE60]/50 hover:bg-[var(--fi-paper)]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-[#27AE60] text-white' : 'bg-white text-[#27AE60]'}`}>
+                    <div className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-[#27AE60] text-white' : 'bg-[var(--fi-paper)] text-[#27AE60]'}`}>
                       <UserRound className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-black text-[#102033]">{displayName(user)}</p>
+                      <p className="truncate text-sm font-black text-[var(--fi-ink)]">{displayName(user)}</p>
                       <p className="mt-1 truncate text-xs font-bold text-[#64748B]" dir="ltr">{user.phone ?? 'No phone'}</p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        <span className="rounded-md bg-white px-2 py-1 text-[11px] font-black text-[#27AE60]">{user.account_type ?? user.role ?? 'user'}</span>
-                        {user.status && <span className="rounded-md bg-white px-2 py-1 text-[11px] font-black text-[#64748B]">{user.status}</span>}
+                        <span className="rounded-md bg-[var(--fi-paper)] px-2 py-1 text-[11px] font-black text-[#27AE60]">{user.account_type ?? user.role ?? 'user'}</span>
+                        {user.status && <span className="rounded-md bg-[var(--fi-paper)] px-2 py-1 text-[11px] font-black text-[#64748B]">{user.status}</span>}
                       </div>
                     </div>
                   </div>
@@ -140,11 +140,11 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
       </aside>
 
       <main className="grid gap-4 lg:grid-cols-3">
-        <section className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm lg:col-span-2">
+        <section className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm lg:col-span-2">
           <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <p className="text-xs font-black text-[#27AE60]">RESPOND.IO COMPOSER</p>
-              <h1 className="mt-1 text-2xl font-black text-[#102033]">WhatsApp & Communications</h1>
+              <h1 className="mt-1 text-2xl font-black text-[var(--fi-ink)]">WhatsApp & Communications</h1>
               <p className="mt-1 text-sm font-bold text-[#64748B]">مركز إرسال رسائل WhatsApp لفريق خدمة العملاء</p>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-[#2ECC71]/30 bg-[#EAFBF1] px-3 py-2 text-sm font-black text-[#1E874B]">
@@ -154,14 +154,14 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] p-4">
-              <p className="mb-2 flex items-center gap-2 text-sm font-black text-[#102033]">
+            <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
+              <p className="mb-2 flex items-center gap-2 text-sm font-black text-[var(--fi-ink)]">
                 <UserRound className="size-4 text-[#27AE60]" />
                 المستلم المحدد
               </p>
               {selectedUser ? (
                 <div>
-                  <p className="text-lg font-black text-[#102033]">{displayName(selectedUser)}</p>
+                  <p className="text-lg font-black text-[var(--fi-ink)]">{displayName(selectedUser)}</p>
                   <p className="mt-1 font-bold text-[#27AE60]" dir="ltr">{selectedUser.phone ?? 'No phone'}</p>
                   <p className="mt-2 text-xs font-bold text-[#64748B]">{selectedUser.email ?? 'لا يوجد بريد إلكتروني'}</p>
                 </div>
@@ -170,8 +170,8 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
               )}
             </div>
 
-            <div className="rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] p-4">
-              <p className="mb-2 flex items-center gap-2 text-sm font-black text-[#102033]">
+            <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
+              <p className="mb-2 flex items-center gap-2 text-sm font-black text-[var(--fi-ink)]">
                 <ShieldCheck className="size-4 text-[#27AE60]" />
                 معايير الإرسال
               </p>
@@ -184,13 +184,13 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
           </div>
 
           <label className="mt-5 block">
-            <span className="mb-2 block text-sm font-black text-[#102033]">نص الرسالة</span>
+            <span className="mb-2 block text-sm font-black text-[var(--fi-ink)]">نص الرسالة</span>
             <textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               rows={8}
               placeholder="اكتب رسالة WhatsApp هنا..."
-              className="w-full resize-none rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] px-4 py-3 text-base font-bold leading-8 text-[#102033] outline-none transition focus:border-[#27AE60] focus:ring-4 focus:ring-[#27AE60]/15"
+              className="w-full resize-none rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 py-3 text-base font-bold leading-8 text-[var(--fi-ink)] outline-none transition focus:border-[#27AE60] focus:ring-4 focus:ring-[#27AE60]/15"
             />
           </label>
 
@@ -211,11 +211,11 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
         </section>
 
         <section className="space-y-4">
-          <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-black text-[#64748B]">إجمالي السجلات</p>
-                <p className="mt-1 text-xl sm:text-3xl font-black text-[#102033]">{users.length.toLocaleString('ar-EG')}</p>
+                <p className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">{users.length.toLocaleString('ar-EG')}</p>
               </div>
               <div className="flex size-11 items-center justify-center rounded-lg bg-[#EAF8F0] text-[#27AE60]">
                 <UsersRound className="size-5" />
@@ -223,11 +223,11 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#DDE6E4] bg-white p-5 shadow-sm">
+          <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-black text-[#64748B]">أرقام متاحة</p>
-                <p className="mt-1 text-xl sm:text-3xl font-black text-[#102033]">
+                <p className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">
                   {users.filter((user) => user.phone).length.toLocaleString('ar-EG')}
                 </p>
               </div>
@@ -237,7 +237,7 @@ export function WhatsAppHubClient({ users }: { users: WhatsAppHubUser[] }) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#DDE6E4] bg-[#102033] p-5 text-white shadow-sm">
+          <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-ink)] p-5 text-white shadow-sm">
             <MessageCircle className="mb-4 size-8 text-[#2ECC71]" />
             <p className="text-lg font-black">FAST INVESTMENT</p>
             <p className="mt-2 text-sm font-bold leading-7 text-white/70">

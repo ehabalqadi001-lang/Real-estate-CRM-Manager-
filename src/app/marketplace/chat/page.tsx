@@ -13,21 +13,21 @@ export default async function MarketplaceChatPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-[#FBFCFA] text-[#102033]">
+    <div className="min-h-screen bg-[var(--fi-soft)] text-[var(--fi-ink)]">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6">
-          <p className="text-sm font-black text-[#0F8F83]">مركز المحادثات</p>
+          <p className="text-sm font-black text-[var(--fi-emerald)]">مركز المحادثات</p>
           <h1 className="mt-2 text-2xl sm:text-4xl font-black">التواصل الداخلي للعقارات</h1>
           <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[#64748B]">
             هذه واجهة أولية لمحادثات المشتري والبائع. الربط الفعلي يستخدم React Query و Supabase Realtime عبر `useChatMessages`.
           </p>
         </div>
 
-        <div className="grid min-h-[560px] overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm lg:grid-cols-[320px_1fr]">
-          <aside className="border-b border-[#DDE6E4] bg-[#EEF6F5] p-4 lg:border-b-0 lg:border-l">
+        <div className="grid min-h-[560px] overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm lg:grid-cols-[320px_1fr]">
+          <aside className="border-b border-[var(--fi-line)] bg-[var(--fi-soft)] p-4 lg:border-b-0 lg:border-l">
             <p className="mb-4 flex items-center gap-2 font-black">
-              <MessageCircle className="size-4 text-[#0F8F83]" />
+              <MessageCircle className="size-4 text-[var(--fi-emerald)]" />
               المحادثات النشطة
             </p>
             {['شقة التجمع الخامس', 'فيلا الشروق', 'تاون هاوس زايد'].map((thread, index) => (
@@ -39,9 +39,9 @@ export default async function MarketplaceChatPage() {
           </aside>
 
           <section className="flex flex-col">
-            <div className="border-b border-[#DDE6E4] p-4">
+            <div className="border-b border-[var(--fi-line)] p-4">
               <p className="flex items-center gap-2 font-black">
-                <ShieldCheck className="size-4 text-[#0F8F83]" />
+                <ShieldCheck className="size-4 text-[var(--fi-emerald)]" />
                 محادثة آمنة بدون مشاركة رقم الهاتف
               </p>
             </div>
@@ -50,14 +50,14 @@ export default async function MarketplaceChatPage() {
               <Bubble mine text="نعم، يمكن تنسيق ميعاد عبر الفريق بدون تبادل أرقام." />
               <Bubble mine={false} text="ممتاز، أريد معرفة خطة السداد والموقع بدقة." />
             </div>
-            <div className="border-t border-[#DDE6E4] p-4">
+            <div className="border-t border-[var(--fi-line)] p-4">
               <div className="flex gap-2">
                 <input
                   aria-label="رسالة"
-                  className="min-h-10 flex-1 rounded-lg border border-[#DDE6E4] px-3 text-sm font-semibold outline-none focus:ring-3 focus:ring-[#0F8F83]/20"
+                  className="min-h-10 flex-1 rounded-lg border border-[var(--fi-line)] px-3 text-sm font-semibold outline-none focus:ring-3 focus:ring-[var(--fi-emerald)]/20"
                   placeholder="اكتب رسالتك..."
                 />
-                <button className="inline-flex size-10 items-center justify-center rounded-lg bg-[#0F8F83] text-white">
+                <button className="inline-flex size-10 items-center justify-center rounded-lg bg-[var(--fi-emerald)] text-white">
                   <Send className="size-4" />
                 </button>
               </div>
@@ -72,7 +72,7 @@ export default async function MarketplaceChatPage() {
 function Bubble({ text, mine }: { text: string; mine: boolean }) {
   return (
     <div className={`flex ${mine ? 'justify-start' : 'justify-end'}`}>
-      <p className={`max-w-md rounded-lg px-4 py-3 text-sm font-semibold leading-6 ${mine ? 'bg-[#17375E] text-white' : 'bg-[#EEF6F5] text-[#102033]'}`}>
+      <p className={`max-w-md rounded-lg px-4 py-3 text-sm font-semibold leading-6 ${mine ? 'bg-[#17375E] text-white' : 'bg-[var(--fi-soft)] text-[var(--fi-ink)]'}`}>
         {text}
       </p>
     </div>

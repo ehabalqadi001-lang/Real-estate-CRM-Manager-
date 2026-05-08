@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main
-      className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#EEF6F5_0%,#F7FAF8_45%,#FFFFFF_100%)] px-4 py-12 text-[var(--fi-ink)]"
+      className="relative flex min-h-screen items-center justify-center bg-[var(--fi-soft)] px-4 py-12 text-[var(--fi-ink)]"
       dir="rtl"
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(39,174,96,0.08),transparent_45%)]" aria-hidden="true" />

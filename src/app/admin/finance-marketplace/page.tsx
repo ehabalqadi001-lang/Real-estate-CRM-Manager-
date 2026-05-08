@@ -55,9 +55,9 @@ export default async function MarketplaceFinancePage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">Finance Team</p>
-        <h1 className="mt-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">إيرادات الباقات ومحافظ النقاط</h1>
-        <p className="mt-2 text-sm font-semibold text-slate-500">متابعة المدفوعات، أرصدة النقاط، وتسوية عمليات شراء الباقات.</p>
+        <p className="text-sm font-black text-[var(--fi-emerald)]">Finance Team</p>
+        <h1 className="mt-2 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">إيرادات الباقات ومحافظ النقاط</h1>
+        <p className="mt-2 text-sm font-semibold text-[var(--fi-muted)]">متابعة المدفوعات، أرصدة النقاط، وتسوية عمليات شراء الباقات.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -66,7 +66,7 @@ export default async function MarketplaceFinancePage() {
         <FinanceCard icon={<WalletCards />} label="محافظ نشطة" value={(activeWallets ?? 0).toLocaleString('ar-EG')} />
       </div>
 
-      <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+      <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
         <p className="mb-4 flex items-center gap-2 font-black">
           <ReceiptText className="size-5 text-[#C9964A]" />
           آخر العمليات (50)
@@ -74,7 +74,7 @@ export default async function MarketplaceFinancePage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#DDE6E4] text-xs font-black text-slate-400">
+              <tr className="border-b border-[var(--fi-line)] text-xs font-black text-[var(--fi-muted)]">
                 <th className="pb-2 text-right">المستخدم</th>
                 <th className="pb-2 text-right">النوع</th>
                 <th className="pb-2 text-right">النقاط</th>
@@ -84,12 +84,12 @@ export default async function MarketplaceFinancePage() {
                 <th className="pb-2 text-right">التاريخ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DDE6E4]">
+            <tbody className="divide-y divide-[var(--fi-line)]">
               {(transactions ?? []).map((tx) => {
                 const profile = tx.profiles as { email?: string } | null
                 return (
                   <tr key={tx.id} className="py-2 text-xs">
-                    <td className="py-2 font-medium text-slate-700 dark:text-slate-300 max-w-[160px] truncate">
+                    <td className="py-2 font-medium text-[var(--fi-muted)] max-w-[160px] truncate">
                       {profile?.email ?? tx.user_id.slice(0, 8) + '…'}
                     </td>
                     <td className="py-2">
@@ -100,12 +100,12 @@ export default async function MarketplaceFinancePage() {
                     <td className={`py-2 font-black ${Number(tx.points_delta) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {Number(tx.points_delta) >= 0 ? '+' : ''}{Number(tx.points_delta).toLocaleString('ar-EG')}
                     </td>
-                    <td className="py-2 text-slate-600">{Number(tx.balance_after).toLocaleString('ar-EG')}</td>
-                    <td className="py-2 text-slate-600">
+                    <td className="py-2 text-[var(--fi-muted)]">{Number(tx.balance_after).toLocaleString('ar-EG')}</td>
+                    <td className="py-2 text-[var(--fi-muted)]">
                       {tx.money_amount ? Number(tx.money_amount).toLocaleString('ar-EG') : '—'}
                     </td>
-                    <td className="py-2 max-w-[200px] truncate text-slate-500">{tx.reason ?? '—'}</td>
-                    <td className="py-2 text-slate-400 whitespace-nowrap" dir="ltr">
+                    <td className="py-2 max-w-[200px] truncate text-[var(--fi-muted)]">{tx.reason ?? '—'}</td>
+                    <td className="py-2 text-[var(--fi-muted)] whitespace-nowrap" dir="ltr">
                       {new Date(tx.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
                   </tr>
@@ -113,7 +113,7 @@ export default async function MarketplaceFinancePage() {
               })}
               {!(transactions?.length) && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">لا توجد معاملات بعد</td>
+                  <td colSpan={7} className="py-8 text-center text-[var(--fi-muted)]">لا توجد معاملات بعد</td>
                 </tr>
               )}
             </tbody>
@@ -126,12 +126,12 @@ export default async function MarketplaceFinancePage() {
 
 function FinanceCard({ icon, label, value }: { icon: ReactElement; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
-      <div className="flex items-center gap-2 text-[#0F8F83]">
+    <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-[var(--fi-emerald)]">
         {icon}
-        <span className="text-sm font-black text-slate-500">{label}</span>
+        <span className="text-sm font-black text-[var(--fi-muted)]">{label}</span>
       </div>
-      <p className="mt-3 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">{value}</p>
+      <p className="mt-3 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">{value}</p>
     </div>
   )
 }

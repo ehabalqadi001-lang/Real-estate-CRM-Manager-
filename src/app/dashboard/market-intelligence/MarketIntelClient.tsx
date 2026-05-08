@@ -27,61 +27,61 @@ export function AddMarketDataForm({ companyId: _ }: Props) {
   }
 
   if (!open) return (
-    <Button onClick={() => setOpen(true)} className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]">
+    <Button onClick={() => setOpen(true)} className="fi-primary-button font-semibold">
       <Plus className="size-4" />إضافة بيانات سوق
     </Button>
   )
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900 space-y-3">
-      <p className="font-black text-[#102033] dark:text-white">إضافة بيانات سوق جديدة</p>
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm space-y-3">
+      <p className="font-black text-[var(--fi-ink)]">إضافة بيانات سوق جديدة</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">المنطقة *</label>
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">المنطقة *</label>
           <Input name="region" placeholder="مثال: التجمع الخامس" required />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">الزون / الكمبوند</label>
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">الزون / الكمبوند</label>
           <Input name="zone" placeholder="مثال: R7، المنطقة المركزية" />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">متوسط السعر (ج.م/م²)</label>
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">متوسط السعر (ج.م/م²)</label>
           <Input name="avg_price_sqm" type="number" placeholder="85000" />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">تغير السعر %</label>
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">تغير السعر %</label>
           <Input name="price_change_pct" type="number" step="0.1" placeholder="5.2" />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">مستوى الطلب</label>
-          <select name="demand_level" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">مستوى الطلب</label>
+          <select name="demand_level" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
             <option value="high">مرتفع</option>
             <option value="medium" selected>متوسط</option>
             <option value="low">منخفض</option>
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">وحدات معروضة</label>
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">وحدات معروضة</label>
           <Input name="supply_units" type="number" placeholder="250" />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-xs font-black text-slate-500">ملاحظات</label>
+        <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">ملاحظات</label>
         <Textarea name="notes" placeholder="تفاصيل إضافية عن السوق…" rows={2} />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-black text-slate-500">رابط المصدر</label>
+        <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">رابط المصدر</label>
         <Input name="source_url" type="url" placeholder="https://..." dir="ltr" />
       </div>
       {result && (
-        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
           {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
           {result.msg}
         </p>
       )}
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">إلغاء</Button>
-        <Button type="submit" disabled={pending} className="flex-1 bg-[#0F8F83] text-white">
+        <Button type="submit" disabled={pending} className="flex-1 fi-primary-button">
           {pending ? <Loader2 className="size-4 animate-spin" /> : 'حفظ'}
         </Button>
       </div>
@@ -114,7 +114,7 @@ export function AIInsightButton({ region, priceData }: InsightProps) {
       </Button>
       {insight && (
         <div className="mt-3 rounded-xl border border-[#C9964A]/30 bg-[#C9964A]/5 p-3">
-          <p className="text-xs font-semibold leading-6 text-[#102033] dark:text-slate-200 whitespace-pre-wrap">{insight}</p>
+          <p className="text-xs font-semibold leading-6 text-[var(--fi-ink)] whitespace-pre-wrap">{insight}</p>
         </div>
       )}
     </div>

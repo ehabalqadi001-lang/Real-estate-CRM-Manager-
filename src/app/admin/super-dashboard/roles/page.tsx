@@ -40,30 +40,30 @@ export default async function RoleAssignmentPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">Super Admin</p>
-        <h1 className="mt-1 flex items-center gap-2 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">Super Admin</p>
+        <h1 className="mt-1 flex items-center gap-2 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">
           <ShieldCheck className="size-8 text-[#C9964A]" />
           تعيين الأدوار الوظيفية
         </h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           عيّن أدوار Fast Investment لكل مستخدم. يمكن تعيين أدوار متعددة لنفس المستخدم.
         </p>
       </div>
 
       {/* User list with role assignment */}
-      <div className="overflow-hidden rounded-xl border border-[#DDE6E4] bg-white shadow-sm dark:bg-slate-900">
-        <div className="flex items-center gap-2 border-b border-[#DDE6E4] px-5 py-4">
-          <Users className="size-4 text-[#0F8F83]" />
-          <p className="font-black text-[#102033] dark:text-white">المستخدمون</p>
-          <Badge className="bg-[#EEF6F5] text-[#0F8F83]">{profiles?.length ?? 0}</Badge>
+      <div className="overflow-hidden rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="flex items-center gap-2 border-b border-[var(--fi-line)] px-5 py-4">
+          <Users className="size-4 text-[var(--fi-emerald)]" />
+          <p className="font-black text-[var(--fi-ink)]">المستخدمون</p>
+          <Badge className="bg-[var(--fi-soft)] text-[var(--fi-emerald)]">{profiles?.length ?? 0}</Badge>
         </div>
 
-        <div className="divide-y divide-[#DDE6E4]">
+        <div className="divide-y divide-[var(--fi-line)]">
           {(profiles ?? []).map((profile) => (
             <div key={profile.id} className="grid items-center gap-4 px-5 py-4 md:grid-cols-[200px_1fr_240px]">
               <div>
-                <p className="font-black text-[#102033] dark:text-white">{profile.full_name ?? 'بدون اسم'}</p>
-                <p className="truncate text-xs font-semibold text-slate-500">{profile.email ?? '—'}</p>
+                <p className="font-black text-[var(--fi-ink)]">{profile.full_name ?? 'بدون اسم'}</p>
+                <p className="truncate text-xs font-semibold text-[var(--fi-muted)]">{profile.email ?? '—'}</p>
               </div>
               <Badge className={`w-fit text-xs ${ROLE_COLOR[profile.role ?? ''] ?? 'bg-slate-100 text-slate-500'}`}>
                 {profile.role ?? 'viewer'}

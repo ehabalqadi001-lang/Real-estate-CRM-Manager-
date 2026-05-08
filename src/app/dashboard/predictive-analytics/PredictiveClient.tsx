@@ -54,19 +54,19 @@ export function PredictiveClient({
   return (
     <div className="space-y-6">
       {/* AI Forecast CTA */}
-      <div className="flex items-center justify-between rounded-xl border border-[#0F8F83]/20 bg-[#EEF6F5] p-4">
+      <div className="flex items-center justify-between rounded-xl border border-[var(--fi-emerald)]/20 bg-[var(--fi-soft)] p-4">
         <div className="flex items-center gap-3">
-          <Brain className="size-5 text-[#0F8F83] shrink-0" />
+          <Brain className="size-5 text-[var(--fi-emerald)] shrink-0" />
           <div>
-            <p className="text-sm font-black text-[#102033] dark:text-white">تحليل AI التنبؤي</p>
-            <p className="text-xs font-semibold text-slate-500">توقعات الأشهر 3 القادمة بالذكاء الاصطناعي</p>
+            <p className="text-sm font-black text-[var(--fi-ink)]">تحليل AI التنبؤي</p>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">توقعات الأشهر 3 القادمة بالذكاء الاصطناعي</p>
           </div>
         </div>
         <Button
           size="sm"
           disabled={pending}
           onClick={handleNarrative}
-          className="bg-[#0F8F83] text-white hover:bg-[#0B6F66]"
+          className="fi-primary-button"
         >
           {pending ? <Loader2 className="size-4 animate-spin" /> : <Brain className="size-4" />}
           توليد التوقعات
@@ -74,16 +74,16 @@ export function PredictiveClient({
       </div>
 
       {narrative && (
-        <div className="rounded-xl border border-[#0F8F83]/30 bg-white p-4 shadow-sm dark:bg-slate-900">
-          <p className="mb-2 text-xs font-black text-[#0F8F83]">تحليل AI</p>
-          <p className="text-sm font-semibold leading-7 text-[#102033] dark:text-slate-200">{narrative}</p>
+        <div className="rounded-xl border border-[var(--fi-emerald)]/30 bg-[var(--fi-paper)] p-4 shadow-sm">
+          <p className="mb-2 text-xs font-black text-[var(--fi-emerald)]">تحليل AI</p>
+          <p className="text-sm font-semibold leading-7 text-[var(--fi-ink)]">{narrative}</p>
         </div>
       )}
 
       {/* Monthly Trend Chart */}
-      <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+      <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-black text-[#102033] dark:text-white">اتجاه الصفقات الشهري</p>
+          <p className="font-black text-[var(--fi-ink)]">اتجاه الصفقات الشهري</p>
           <span className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold ${trend >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
             {trend >= 0 ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
             {Math.abs(trend)}%
@@ -109,8 +109,8 @@ export function PredictiveClient({
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Lead Funnel */}
-        <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-          <p className="mb-4 font-black text-[#102033] dark:text-white">قمع المبيعات</p>
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+          <p className="mb-4 font-black text-[var(--fi-ink)]">قمع المبيعات</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={leadFunnel} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#EEF6F5" horizontal={false} />
@@ -123,8 +123,8 @@ export function PredictiveClient({
         </div>
 
         {/* Top Regions */}
-        <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-          <p className="mb-4 font-black text-[#102033] dark:text-white">أداء المناطق</p>
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+          <p className="mb-4 font-black text-[var(--fi-ink)]">أداء المناطق</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={topRegions.slice(0, 6)} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#EEF6F5" />

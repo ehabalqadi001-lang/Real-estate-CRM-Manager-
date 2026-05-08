@@ -23,9 +23,9 @@ export default async function AdApprovalsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">Ad Approval Team</p>
-        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">طابور مراجعة الإعلانات</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">Ad Approval Team</p>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">طابور مراجعة الإعلانات</h1>
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           راجع كل إعلان بضغطة واحدة — موافقة أو رفض مع سبب. اختصارات لوحة المفاتيح: → موافقة · ← رفض.
         </p>
       </div>
@@ -45,12 +45,12 @@ export default async function AdApprovalsPage() {
 
 function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
-      <div className="flex items-center gap-2 text-[#0F8F83]">
+    <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-[var(--fi-emerald)]">
         {icon}
-        <span className="text-sm font-black text-slate-500">{label}</span>
+        <span className="text-sm font-black text-[var(--fi-muted)]">{label}</span>
       </div>
-      <p className="mt-3 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">{value}</p>
+      <p className="mt-3 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">{value}</p>
     </div>
   )
 }

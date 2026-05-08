@@ -32,9 +32,9 @@ export default async function MarketIntelligencePage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-black text-[#0F8F83]">NEXUS Intelligence</p>
-          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">ذكاء السوق العقاري</h1>
-          <p className="mt-1 text-sm font-semibold text-slate-500">
+          <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS Intelligence</p>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">ذكاء السوق العقاري</h1>
+          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
             تتبع أسعار السوق، مستويات الطلب، واتجاهات التطوير في كل منطقة.
           </p>
         </div>
@@ -43,46 +43,46 @@ export default async function MarketIntelligencePage() {
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
-          <div className="mb-2 text-[#0F8F83]"><BarChart3 className="size-5" /></div>
-          <p className="text-2xl font-black text-[#102033] dark:text-white">
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+          <div className="mb-2 text-[var(--fi-emerald)]"><BarChart3 className="size-5" /></div>
+          <p className="text-2xl font-black text-[var(--fi-ink)]">
             {avgPrice ? avgPrice.toLocaleString('ar-EG') : '—'}
           </p>
-          <p className="text-xs font-semibold text-slate-500">متوسط السعر ج.م/م²</p>
+          <p className="text-xs font-semibold text-[var(--fi-muted)]">متوسط السعر ج.م/م²</p>
         </div>
-        <div className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
           <div className="mb-2 text-emerald-600"><TrendingUp className="size-5" /></div>
-          <p className="text-2xl font-black text-[#102033] dark:text-white">{highDemand}</p>
-          <p className="text-xs font-semibold text-slate-500">منطقة بطلب مرتفع</p>
+          <p className="text-2xl font-black text-[var(--fi-ink)]">{highDemand}</p>
+          <p className="text-xs font-semibold text-[var(--fi-muted)]">منطقة بطلب مرتفع</p>
         </div>
-        <div className="rounded-xl border border-[#DDE6E4] bg-white p-4 shadow-sm dark:bg-slate-900">
+        <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
           <div className="mb-2 text-[#C9964A]"><Globe className="size-5" /></div>
-          <p className="text-2xl font-black text-[#102033] dark:text-white">{regions}</p>
-          <p className="text-xs font-semibold text-slate-500">منطقة مرصودة</p>
+          <p className="text-2xl font-black text-[var(--fi-ink)]">{regions}</p>
+          <p className="text-xs font-semibold text-[var(--fi-muted)]">منطقة مرصودة</p>
         </div>
       </div>
 
       {/* Records Table */}
       {records.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#DDE6E4] py-16 text-center">
-          <BarChart3 className="size-10 text-slate-300" />
-          <p className="font-bold text-slate-400">لا توجد بيانات سوق بعد</p>
-          <p className="text-xs text-slate-400">أضف أول نقطة بيانات باستخدام زر &quot;إضافة بيانات سوق&quot;</p>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--fi-line)] py-16 text-center">
+          <BarChart3 className="size-10 text-[var(--fi-line)]" />
+          <p className="font-bold text-[var(--fi-muted)]">لا توجد بيانات سوق بعد</p>
+          <p className="text-xs text-[var(--fi-muted)]">أضف أول نقطة بيانات باستخدام زر &quot;إضافة بيانات سوق&quot;</p>
         </div>
       ) : (
         <div className="space-y-4">
           {records.map((r) => (
-            <div key={r.id} className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+            <div key={r.id} className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-black text-[#102033] dark:text-white">{r.region}</h3>
-                    {r.zone && <span className="text-xs font-semibold text-slate-500">— {r.zone}</span>}
+                    <h3 className="font-black text-[var(--fi-ink)]">{r.region}</h3>
+                    {r.zone && <span className="text-xs font-semibold text-[var(--fi-muted)]">— {r.zone}</span>}
                     <DemandBadge level={r.demand_level ?? 'medium'} />
                   </div>
                   <div className="mt-2 flex flex-wrap gap-4 text-sm">
                     {r.avg_price_sqm && (
-                      <span className="font-black text-[#0F8F83]">
+                      <span className="font-black text-[var(--fi-emerald)]">
                         {Number(r.avg_price_sqm).toLocaleString('ar-EG')} ج.م/م²
                       </span>
                     )}
@@ -93,17 +93,17 @@ export default async function MarketIntelligencePage() {
                       </span>
                     )}
                     {r.supply_units && (
-                      <span className="font-semibold text-slate-500">{r.supply_units.toLocaleString('ar-EG')} وحدة معروضة</span>
+                      <span className="font-semibold text-[var(--fi-muted)]">{r.supply_units.toLocaleString('ar-EG')} وحدة معروضة</span>
                     )}
                   </div>
-                  {r.notes && <p className="mt-2 text-xs font-semibold text-slate-500">{r.notes}</p>}
+                  {r.notes && <p className="mt-2 text-xs font-semibold text-[var(--fi-muted)]">{r.notes}</p>}
                   {r.source_url && (
-                    <a href={r.source_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-semibold text-[#0F8F83] underline">
+                    <a href={r.source_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-semibold text-[var(--fi-emerald)] underline">
                       المصدر
                     </a>
                   )}
                 </div>
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-xs font-semibold text-[var(--fi-muted)]">
                   {new Date(r.created_at).toLocaleDateString('ar-EG')}
                 </span>
               </div>

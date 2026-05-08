@@ -31,11 +31,11 @@ export default async function CSMarketingHubPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-black text-[#0F8F83]">CS & Marketing Hub</p>
-          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">مركز خدمة العملاء والتسويق</h1>
-          <p className="mt-1 text-sm font-semibold text-slate-500">صندوق موحد + WhatsApp Business API + بث جماعي</p>
+          <p className="text-sm font-black text-[var(--fi-emerald)]">CS & Marketing Hub</p>
+          <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">مركز خدمة العملاء والتسويق</h1>
+          <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">صندوق موحد + WhatsApp Business API + بث جماعي</p>
         </div>
-        <Button className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]">
+        <Button className="fi-primary-button font-semibold">
           <Filter className="size-4" />
           فلتر متقدم
         </Button>
@@ -51,34 +51,34 @@ export default async function CSMarketingHubPage() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
         {/* Inbox */}
-        <div className="overflow-hidden rounded-xl border border-[#DDE6E4] bg-white shadow-sm dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-[#DDE6E4] px-5 py-4">
-            <p className="flex items-center gap-2 font-black text-[#102033] dark:text-white">
-              <Headphones className="size-4 text-[#0F8F83]" />
+        <div className="overflow-hidden rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+          <div className="flex items-center justify-between border-b border-[var(--fi-line)] px-5 py-4">
+            <p className="flex items-center gap-2 font-black text-[var(--fi-ink)]">
+              <Headphones className="size-4 text-[var(--fi-emerald)]" />
               صندوق الوارد
             </p>
             {unreadCount > 0 && <Badge className="bg-[#C9964A]/10 text-[#C9964A]">{unreadCount} غير مقروء</Badge>}
           </div>
           {msgs.length === 0 ? (
             <div className="p-10 text-center">
-              <MessageSquare className="mx-auto mb-3 size-10 text-slate-200" />
-              <p className="font-semibold text-slate-500">لا توجد رسائل بعد</p>
+              <MessageSquare className="mx-auto mb-3 size-10 text-[var(--fi-line)]" />
+              <p className="font-semibold text-[var(--fi-muted)]">لا توجد رسائل بعد</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#DDE6E4]">
+            <div className="divide-y divide-[var(--fi-line)]">
               {msgs.map((msg) => (
-                <div key={msg.id} className={`flex items-start gap-3 px-5 py-3 hover:bg-[#EEF6F5]/30 ${!msg.is_read ? 'bg-[#EEF6F5]/20' : ''}`}>
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEF6F5]">
-                    <Users className="size-4 text-[#0F8F83]" />
+                <div key={msg.id} className={`flex items-start gap-3 px-5 py-3 hover:bg-[var(--fi-soft)]/30 ${!msg.is_read ? 'bg-[var(--fi-soft)]/20' : ''}`}>
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--fi-soft)]">
+                    <Users className="size-4 text-[var(--fi-emerald)]" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       {!msg.is_read && <span className="h-2 w-2 rounded-full bg-[#C9964A]" />}
                     </div>
-                    <p className={`mt-0.5 text-sm ${!msg.is_read ? 'font-black text-[#102033] dark:text-white' : 'font-semibold text-slate-600'}`}>
+                    <p className={`mt-0.5 text-sm ${!msg.is_read ? 'font-black text-[var(--fi-ink)]' : 'font-semibold text-[var(--fi-muted)]'}`}>
                       {(msg.content ?? '').slice(0, 90)}{(msg.content ?? '').length > 90 ? '…' : ''}
                     </p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-400">
+                    <p className="mt-0.5 text-xs font-semibold text-[var(--fi-muted)]">
                       {msg.created_at ? new Date(msg.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) : '—'}
                     </p>
                   </div>
@@ -91,8 +91,8 @@ export default async function CSMarketingHubPage() {
         {/* Right sidebar */}
         <div className="space-y-5">
           {/* WhatsApp send */}
-          <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-            <p className="mb-3 flex items-center gap-2 font-black text-[#102033] dark:text-white">
+          <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+            <p className="mb-3 flex items-center gap-2 font-black text-[var(--fi-ink)]">
               <Phone className="size-4 text-[#25D366]" />
               WhatsApp — رسالة فردية
             </p>
@@ -100,8 +100,8 @@ export default async function CSMarketingHubPage() {
           </div>
 
           {/* Broadcast */}
-          <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-            <p className="mb-3 flex items-center gap-2 font-black text-[#102033] dark:text-white">
+          <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+            <p className="mb-3 flex items-center gap-2 font-black text-[var(--fi-ink)]">
               <Megaphone className="size-4 text-[#C9964A]" />
               بث جماعي
             </p>
@@ -110,13 +110,13 @@ export default async function CSMarketingHubPage() {
 
           {/* WA Log */}
           {waLogs && waLogs.length > 0 && (
-            <div className="rounded-xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
-              <p className="mb-3 font-black text-[#102033] dark:text-white">آخر رسائل WhatsApp</p>
+            <div className="rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
+              <p className="mb-3 font-black text-[var(--fi-ink)]">آخر رسائل WhatsApp</p>
               <div className="space-y-2">
                 {waLogs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="flex items-center justify-between rounded-lg bg-[#FBFCFA] px-3 py-2 text-xs dark:bg-slate-800">
-                    <span className="font-semibold text-slate-600 dark:text-slate-300" dir="ltr">{log.recipient_phone}</span>
-                    <Badge className={log.status === 'sent' ? 'bg-[#EEF6F5] text-[#0F8F83]' : 'bg-[#C9964A]/10 text-[#C9964A]'}>
+                  <div key={log.id} className="flex items-center justify-between rounded-lg bg-[var(--fi-soft)] px-3 py-2 text-xs">
+                    <span className="font-semibold text-[var(--fi-muted)]" dir="ltr">{log.recipient_phone}</span>
+                    <Badge className={log.status === 'sent' ? 'bg-[var(--fi-soft)] text-[var(--fi-emerald)]' : 'bg-[#C9964A]/10 text-[#C9964A]'}>
                       {log.status}
                     </Badge>
                   </div>
@@ -132,10 +132,10 @@ export default async function CSMarketingHubPage() {
 
 function HubKpi({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
-    <div className={`rounded-xl border p-4 shadow-sm ${accent ? 'border-[#C9964A]/30 bg-[#C9964A]/5' : 'border-[#DDE6E4] bg-white dark:bg-slate-900'}`}>
-      <div className={`mb-2 ${accent ? 'text-[#C9964A]' : 'text-[#0F8F83]'}`}>{icon}</div>
-      <p className={`text-3xl font-black ${accent ? 'text-[#C9964A]' : 'text-[#102033] dark:text-white'}`}>{value}</p>
-      <p className="mt-1 text-xs font-semibold text-slate-500">{label}</p>
+    <div className={`rounded-xl border p-4 shadow-sm ${accent ? 'border-[#C9964A]/30 bg-[#C9964A]/5' : 'border-[var(--fi-line)] bg-[var(--fi-paper)]'}`}>
+      <div className={`mb-2 ${accent ? 'text-[#C9964A]' : 'text-[var(--fi-emerald)]'}`}>{icon}</div>
+      <p className={`text-3xl font-black ${accent ? 'text-[#C9964A]' : 'text-[var(--fi-ink)]'}`}>{value}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--fi-muted)]">{label}</p>
     </div>
   )
 }

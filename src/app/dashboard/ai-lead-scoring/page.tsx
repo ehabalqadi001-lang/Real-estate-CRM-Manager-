@@ -33,9 +33,9 @@ export default async function AILeadScoringPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-black text-[#0F8F83]">NEXUS AI Lead Scoring 2.0</p>
-        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[#102033] dark:text-white">تقييم العملاء بالذكاء الاصطناعي</h1>
-        <p className="mt-1 text-sm font-semibold text-slate-500">
+        <p className="text-sm font-black text-[var(--fi-emerald)]">NEXUS AI Lead Scoring 2.0</p>
+        <h1 className="mt-1 text-xl sm:text-3xl font-black text-[var(--fi-ink)]">تقييم العملاء بالذكاء الاصطناعي</h1>
+        <p className="mt-1 text-sm font-semibold text-[var(--fi-muted)]">
           صنّف عملاءك المحتملين تلقائياً — ساخن / دافئ / بارد — مع سبب واضح والخطوة التالية. يعمل بـ Claude وGemini.
         </p>
       </div>
@@ -48,18 +48,18 @@ export default async function AILeadScoringPage() {
           { icon: <Target className="size-5" />,     value: cold,     label: 'بارد',        color: 'text-blue-400',  bg: 'border-blue-100 bg-blue-50' },
           { icon: <Brain className="size-5" />,      value: unscored, label: 'لم يُقيَّم بعد', color: 'text-slate-400', bg: 'border-slate-200 bg-slate-50' },
         ].map(k => (
-          <div key={k.label} className={`rounded-xl border p-4 shadow-sm ${k.bg} dark:bg-slate-900 dark:border-slate-700`}>
+          <div key={k.label} className={`rounded-xl border p-4 shadow-sm ${k.bg}`}>
             <div className={`mb-2 ${k.color}`}>{k.icon}</div>
-            <p className="text-2xl font-black text-[#102033] dark:text-white">{k.value}</p>
-            <p className="text-xs font-semibold text-slate-500">{k.label}</p>
+            <p className="text-2xl font-black text-[var(--fi-ink)]">{k.value}</p>
+            <p className="text-xs font-semibold text-[var(--fi-muted)]">{k.label}</p>
           </div>
         ))}
       </div>
 
       {leads.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#DDE6E4] py-16 text-center">
-          <Brain className="size-10 text-slate-300" />
-          <p className="font-bold text-slate-400">لا يوجد عملاء محتملون بعد</p>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--fi-line)] py-16 text-center">
+          <Brain className="size-10 text-[var(--fi-line)]" />
+          <p className="font-bold text-[var(--fi-muted)]">لا يوجد عملاء محتملون بعد</p>
         </div>
       ) : (
         <LeadScoringClient leads={leads} />

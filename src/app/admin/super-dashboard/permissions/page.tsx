@@ -83,23 +83,23 @@ export default async function PermissionMatrixPage() {
 
   return (
     <div className="mx-auto w-full max-w-[calc(100vw-2rem)] space-y-5 px-3 py-4 sm:px-5 lg:max-w-[1180px]" dir="rtl">
-      <header className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-        <div className="flex flex-col gap-5 border-b border-[#DDE6E4] bg-[#F7FBF8] p-5 lg:flex-row lg:items-center lg:justify-between">
+      <header className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+        <div className="flex flex-col gap-5 border-b border-[var(--fi-line)] bg-[var(--fi-soft)] p-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#27AE60]">
               <ShieldCheck className="size-4" />
               Super Admin
             </p>
-            <h1 className="mt-2 text-2xl font-black leading-tight text-[#102033] sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-black leading-tight text-[var(--fi-ink)] sm:text-3xl">
               مصفوفة الصلاحيات
             </h1>
-            <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-[var(--fi-muted)]">
               امنح أو امنع صلاحيات محددة لكل مستخدم. الاستثناءات هنا تتغلب على صلاحيات الدور الافتراضية فوراً.
             </p>
           </div>
 
           <div className="grid gap-2 text-xs font-bold text-slate-600 sm:grid-cols-3">
-            <Legend label="افتراضي من الدور" value="~" className="border-slate-200 bg-slate-50 text-slate-500" />
+            <Legend label="افتراضي من الدور" value="~" className="border-slate-200 bg-slate-50 text-[var(--fi-muted)]" />
             <Legend label="ممنوح كاستثناء" value="✓" className="border-[#27AE60] bg-[#27AE60] text-white" />
             <Legend label="ممنوع كاستثناء" value="×" className="border-red-200 bg-red-50 text-red-700" />
           </div>
@@ -114,28 +114,28 @@ export default async function PermissionMatrixPage() {
 
       <div className="space-y-4">
         {resources.map((resource) => (
-          <section key={resource} className="overflow-hidden rounded-lg border border-[#DDE6E4] bg-white shadow-sm">
-            <div className="flex flex-col gap-2 border-b border-[#DDE6E4] bg-[#FBFCFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <section key={resource} className="overflow-hidden rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] shadow-sm">
+            <div className="flex flex-col gap-2 border-b border-[var(--fi-line)] bg-[var(--fi-soft)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-black text-[#102033]">{labelResource(resource)}</h2>
-                <p className="mt-1 text-xs font-bold text-slate-500">
+                <h2 className="text-lg font-black text-[var(--fi-ink)]">{labelResource(resource)}</h2>
+                <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">
                   {grouped[resource].length.toLocaleString('ar-EG')} صلاحية قابلة للتحكم
                 </p>
               </div>
-              <p className="text-xs font-semibold text-slate-400">اضغط على الخانة للتبديل: منح ← منع ← افتراضي</p>
+              <p className="text-xs font-semibold text-[var(--fi-muted)]">اضغط على الخانة للتبديل: منح ← منع ← افتراضي</p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#DDE6E4] bg-white">
-                    <th className="sticky right-0 z-20 w-[240px] bg-white px-4 py-3 text-right text-xs font-black text-[#102033] shadow-[-8px_0_14px_-14px_rgba(15,23,42,0.45)]">
+                  <tr className="border-b border-[var(--fi-line)] bg-[var(--fi-paper)]">
+                    <th className="sticky right-0 z-20 w-[240px] bg-[var(--fi-paper)] px-4 py-3 text-right text-xs font-black text-[var(--fi-ink)] shadow-[-8px_0_14px_-14px_rgba(15,23,42,0.45)]">
                       المستخدم
                     </th>
                     {grouped[resource].map((permission) => (
                       <th key={permission.id} title={permission.description ?? permission.key} className="min-w-[92px] px-2 py-3 text-center">
-                        <span className="block text-xs font-black text-[#102033]">{labelAction(permission.action)}</span>
-                        <span className="mt-1 block text-[10px] font-semibold text-slate-400">{permission.key}</span>
+                        <span className="block text-xs font-black text-[var(--fi-ink)]">{labelAction(permission.action)}</span>
+                        <span className="mt-1 block text-[10px] font-semibold text-[var(--fi-muted)]">{permission.key}</span>
                       </th>
                     ))}
                   </tr>
@@ -145,14 +145,14 @@ export default async function PermissionMatrixPage() {
                     const role = (profile.role ?? 'viewer') as AppRole
 
                     return (
-                      <tr key={`${resource}-${profile.id}`} className={`border-b border-[#EEF2F1] ${index % 2 ? 'bg-[#FBFCFA]' : 'bg-white'}`}>
+                      <tr key={`${resource}-${profile.id}`} className={`border-b border-[#EEF2F1] ${index % 2 ? 'bg-[var(--fi-soft)]' : 'bg-white'}`}>
                         <td className="sticky right-0 z-10 w-[240px] bg-inherit px-4 py-3 shadow-[-8px_0_14px_-14px_rgba(15,23,42,0.45)]">
-                          <p className="truncate text-sm font-black text-[#102033]">{profile.full_name ?? profile.email ?? 'Unknown'}</p>
+                          <p className="truncate text-sm font-black text-[var(--fi-ink)]">{profile.full_name ?? profile.email ?? 'Unknown'}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-1.5">
                             <Badge className={`rounded-full px-2 py-0.5 text-[10px] ${ROLE_COLOR[role] ?? 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'}`}>
                               {ROLE_LABELS[role] ?? role}
                             </Badge>
-                            {profile.email && <span className="max-w-[150px] truncate text-[10px] font-semibold text-slate-400">{profile.email}</span>}
+                            {profile.email && <span className="max-w-[150px] truncate text-[10px] font-semibold text-[var(--fi-muted)]">{profile.email}</span>}
                           </div>
                         </td>
 
@@ -186,8 +186,8 @@ export default async function PermissionMatrixPage() {
       </div>
 
       {profiles.length === 0 && (
-        <div className="rounded-lg border border-[#DDE6E4] bg-white p-10 text-center">
-          <p className="font-black text-[#102033]">لا يوجد مستخدمون لعرضهم.</p>
+        <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] p-10 text-center">
+          <p className="font-black text-[var(--fi-ink)]">لا يوجد مستخدمون لعرضهم.</p>
         </div>
       )}
     </div>
@@ -212,7 +212,7 @@ function labelAction(action: string) {
 
 function Legend({ label, value, className }: { label: string; value: string; className: string }) {
   return (
-    <span className="flex items-center gap-2 rounded-lg border border-[#DDE6E4] bg-white px-3 py-2">
+    <span className="flex items-center gap-2 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2">
       <span className={`flex size-7 items-center justify-center rounded-md border text-sm font-black ${className}`}>{value}</span>
       {label}
     </span>
@@ -221,10 +221,10 @@ function Legend({ label, value, className }: { label: string; value: string; cla
 
 function Metric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#DDE6E4] bg-[#FBFCFA] p-4">
+    <div className="rounded-lg border border-[var(--fi-line)] bg-[var(--fi-soft)] p-4">
       <Icon className="size-5 text-[#27AE60]" />
-      <p className="mt-3 text-2xl font-black text-[#102033]">{value}</p>
-      <p className="mt-1 text-xs font-bold text-slate-500">{label}</p>
+      <p className="mt-3 text-2xl font-black text-[var(--fi-ink)]">{value}</p>
+      <p className="mt-1 text-xs font-bold text-[var(--fi-muted)]">{label}</p>
     </div>
   )
 }

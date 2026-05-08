@@ -79,7 +79,7 @@ export default async function GlobalAdsManagerPage({
 
           <Link
             href="/admin/marketplace/ads/new"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-black text-[#17375E] transition hover:bg-[#EEF6F5]"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-black text-[#17375E] transition hover:bg-[var(--fi-soft)]"
           >
             <Plus className="size-4" />
             Create New Ad

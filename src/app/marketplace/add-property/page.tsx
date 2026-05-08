@@ -35,18 +35,18 @@ export default async function AddPropertyPage({
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#E9F4EF_0%,#F7FAF8_55%,#FBFCFA_100%)] text-[#102033]" dir="rtl">
+    <div className="min-h-screen bg-[var(--fi-soft)] text-[var(--fi-ink)]" dir="rtl">
       <MarketplaceHeader user={currentUser} />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_360px]">
           <section>
-            <p className="text-sm font-black text-[#0F8F83]">إضافة وحدة عقارية</p>
+            <p className="text-sm font-black text-[var(--fi-emerald)]">إضافة وحدة عقارية</p>
             <h1 className="mt-2 text-2xl sm:text-4xl font-black">محرك إدراج وحدات FAST INVESTMENT</h1>
             <p className="mt-3 max-w-3xl text-base font-semibold leading-8 text-[#64748B]">
               أضف بيانات وحدتك في نموذج متعدد الخطوات. كل إعلان يدخل حالة المراجعة أولا، ولا تظهر أرقام الهاتف للعامة؛ التواصل يتم عبر محادثة داخل النظام لحماية العميل والمشتري.
             </p>
           </section>
-          <aside className="rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm">
+          <aside className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
             <p className="flex items-center gap-2 text-sm font-black text-[#17375E]">
               <Coins className="size-4 text-[#C9964A]" />
               محفظة الإعلانات
@@ -59,7 +59,7 @@ export default async function AddPropertyPage({
         </div>
 
         {feedback.submitted && (
-          <div className="mb-6 rounded-2xl border border-[#0F8F83]/25 bg-[#EEF6F5] p-4 text-sm font-black text-[#0F8F83]">
+          <div className="mb-6 rounded-2xl border border-[var(--fi-emerald)]/25 bg-[var(--fi-soft)] p-4 text-sm font-black text-[var(--fi-emerald)]">
             تم إرسال الإعلان للمراجعة بنجاح. لن يظهر في السوق قبل الموافقة اليدوية.
           </div>
         )}
@@ -77,8 +77,8 @@ export default async function AddPropertyPage({
           />
 
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm">
-              <p className="flex items-center gap-2 text-sm font-black text-[#0F8F83]">
+            <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
+              <p className="flex items-center gap-2 text-sm font-black text-[var(--fi-emerald)]">
                 <ShieldCheck className="size-4" />
                 قواعد الخصوصية
               </p>
@@ -100,11 +100,11 @@ export default async function AddPropertyPage({
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[#DDE6E4] bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-4 shadow-sm">
               <p className="text-sm font-black text-[#17375E]">الباقات المتاحة</p>
               <div className="mt-3 space-y-3">
                 {marketplacePackages.map((plan) => (
-                  <div key={plan.id} className="rounded-xl bg-[#EEF6F5] p-3">
+                  <div key={plan.id} className="rounded-xl bg-[var(--fi-soft)] p-3">
                     <p className="font-black">{plan.name}</p>
                     <p className="mt-1 text-sm font-semibold text-[#64748B]">
                       {plan.adsIncluded} إعلان / {plan.price.toLocaleString('ar-EG')} ج.م

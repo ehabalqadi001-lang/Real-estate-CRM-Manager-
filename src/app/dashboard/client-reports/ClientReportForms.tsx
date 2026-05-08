@@ -32,27 +32,27 @@ export function CreateReportForm({ clients }: { clients: Client[] }) {
   }
 
   if (!open) return (
-    <Button onClick={() => setOpen(true)} className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]">
+    <Button onClick={() => setOpen(true)} className="fi-primary-button font-semibold">
       <Plus className="size-4" />إنشاء تقرير جديد
     </Button>
   )
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900 space-y-4">
-      <p className="font-black text-[#102033] dark:text-white">إنشاء تقرير جديد</p>
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm space-y-4">
+      <p className="font-black text-[var(--fi-ink)]">إنشاء تقرير جديد</p>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">نوع التقرير</label>
-          <select name="report_type" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">نوع التقرير</label>
+          <select name="report_type" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
             {REPORT_TYPES.map((t) => (
               <option key={t.key} value={t.key}>{t.label}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">قناة الإرسال</label>
-          <select name="delivery_channel" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">قناة الإرسال</label>
+          <select name="delivery_channel" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
             <option value="email">بريد إلكتروني</option>
             <option value="whatsapp">واتساب</option>
             <option value="both">الاثنان</option>
@@ -67,8 +67,8 @@ export function CreateReportForm({ clients }: { clients: Client[] }) {
 
       {clients.length > 0 && (
         <div>
-          <label className="mb-1 block text-xs font-black text-slate-500">إرسال إلى عميل (اختياري)</label>
-          <select name="client_id" className="w-full rounded-xl border border-[#DDE6E4] bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-800">
+          <label className="mb-1 block text-xs font-black text-[var(--fi-muted)]">إرسال إلى عميل (اختياري)</label>
+          <select name="client_id" className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 py-2 text-sm font-semibold">
             <option value="">— بدون عميل محدد —</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>{c.full_name ?? c.email ?? c.id.slice(0, 8)}</option>
@@ -88,7 +88,7 @@ export function CreateReportForm({ clients }: { clients: Client[] }) {
       </div>
 
       {result && (
-        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
           {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
           {result.msg}
         </p>
@@ -96,7 +96,7 @@ export function CreateReportForm({ clients }: { clients: Client[] }) {
 
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">إلغاء</Button>
-        <Button type="submit" disabled={pending} className="flex-1 bg-[#0F8F83] text-white">
+        <Button type="submit" disabled={pending} className="flex-1 fi-primary-button">
           {pending ? <><Loader2 className="size-4 animate-spin" />جاري التوليد…</> : 'توليد التقرير'}
         </Button>
       </div>
@@ -113,9 +113,9 @@ export function SendReportButton({ reportId }: { reportId: string }) {
       if (!res?.error) setDone(true)
     })
   }
-  if (done) return <span className="flex items-center gap-1 text-xs font-semibold text-[#0F8F83]"><CheckCircle2 className="size-3.5" />أُرسل</span>
+  if (done) return <span className="flex items-center gap-1 text-xs font-semibold text-[var(--fi-emerald)]"><CheckCircle2 className="size-3.5" />أُرسل</span>
   return (
-    <Button size="sm" disabled={pending} onClick={handle} className="bg-[#0F8F83] text-white hover:bg-[#0B6F66]">
+    <Button size="sm" disabled={pending} onClick={handle} className="fi-primary-button">
       {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
       إرسال
     </Button>
@@ -139,15 +139,15 @@ export function ReportPreview({ content }: { content: string }) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button onClick={() => setOpen(true)} className="flex items-center gap-1 text-xs font-semibold text-[#0F8F83] hover:underline">
+      <button onClick={() => setOpen(true)} className="flex items-center gap-1 text-xs font-semibold text-[var(--fi-emerald)] hover:underline">
         <FileText className="size-3.5" />معاينة
       </button>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
-            <button onClick={() => setOpen(false)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 font-black text-lg">✕</button>
+          <div className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-[var(--fi-paper)] p-6 shadow-2xl">
+            <button onClick={() => setOpen(false)} className="absolute right-4 top-4 text-[var(--fi-muted)] hover:text-[var(--fi-ink)] font-black text-lg">✕</button>
             <div
-              className="prose prose-sm max-w-none text-[#102033] dark:text-slate-200 leading-7"
+              className="prose prose-sm max-w-none text-[var(--fi-ink)] leading-7"
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>

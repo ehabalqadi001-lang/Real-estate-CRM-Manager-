@@ -51,16 +51,16 @@ export function ApiKeyForm({ existing }: { existing: ExistingKey[] }) {
   return (
     <div className="space-y-6">
       {/* Add Key */}
-      <div className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+      <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
-          <Plus className="size-4 text-[#0F8F83]" />
-          <p className="font-black text-[#102033] dark:text-white">إضافة مفتاح API</p>
+          <Plus className="size-4 text-[var(--fi-emerald)]" />
+          <p className="font-black text-[var(--fi-ink)]">إضافة مفتاح API</p>
         </div>
         <div className="space-y-3">
           <select
             value={selectedPreset}
             onChange={(e) => setSelectedPreset(e.target.value)}
-            className="w-full rounded-xl border border-[#DDE6E4] bg-[#FBFCFA] px-3 py-2 text-sm font-semibold dark:bg-slate-800"
+            className="w-full rounded-xl border border-[var(--fi-line)] bg-[var(--fi-soft)] px-3 py-2 text-sm font-semibold"
           >
             {KEY_PRESETS.map((p) => (
               <option key={p.name} value={p.name}>{p.label}</option>
@@ -89,14 +89,14 @@ export function ApiKeyForm({ existing }: { existing: ExistingKey[] }) {
             <button
               type="button"
               onClick={() => setShowValue((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fi-muted)]"
             >
               {showValue ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
 
           {result && (
-            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+            <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
               {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
               {result.msg}
             </p>
@@ -105,7 +105,7 @@ export function ApiKeyForm({ existing }: { existing: ExistingKey[] }) {
           <Button
             disabled={pending || !value || !keyName}
             onClick={handleSave}
-            className="w-full bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]"
+            className="w-full fi-primary-button font-semibold"
           >
             {pending ? 'جاري التشفير والحفظ…' : 'حفظ المفتاح'}
           </Button>
@@ -114,17 +114,17 @@ export function ApiKeyForm({ existing }: { existing: ExistingKey[] }) {
 
       {/* Existing Keys */}
       {existing.length > 0 && (
-        <div className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+        <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <KeyRound className="size-4 text-[#C9964A]" />
-            <p className="font-black text-[#102033] dark:text-white">المفاتيح المحفوظة</p>
+            <p className="font-black text-[var(--fi-ink)]">المفاتيح المحفوظة</p>
           </div>
           <div className="space-y-2">
             {existing.map((k) => (
-              <div key={k.id} className="flex items-center justify-between rounded-xl border border-[#DDE6E4] px-3 py-2.5">
+              <div key={k.id} className="flex items-center justify-between rounded-xl border border-[var(--fi-line)] px-3 py-2.5">
                 <div>
-                  <p className="text-sm font-black text-[#102033] dark:text-white">{k.key_name}</p>
-                  <p className="font-mono text-xs text-slate-400">{k.hint ?? '••••'}</p>
+                  <p className="text-sm font-black text-[var(--fi-ink)]">{k.key_name}</p>
+                  <p className="font-mono text-xs text-[var(--fi-muted)]">{k.hint ?? '••••'}</p>
                 </div>
                 <button
                   onClick={() => handleDelete(k.id)}
