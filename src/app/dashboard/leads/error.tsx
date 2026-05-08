@@ -2,6 +2,7 @@
 
 import { AlertTriangle, RefreshCcw } from 'lucide-react'
 import { useEffect } from 'react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function LeadsError({
   error,
@@ -10,8 +11,8 @@ export default function LeadsError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { t } = useI18n()
   useEffect(() => {
-    // تسجيل الخطأ أمنياً في الخلفية
     console.error("Leads Pipeline Error:", error)
   }, [error])
 
@@ -19,9 +20,9 @@ export default function LeadsError({
     <div className="flex h-[80vh] flex-col items-center justify-center p-4 sm:p-8 text-center">
       <div className="bg-red-50 p-4 sm:p-8 rounded-3xl border border-red-100 max-w-lg w-full shadow-lg">
         <AlertTriangle className="mx-auto text-red-500 mb-6" size={64} />
-        <h2 className="text-2xl font-black text-slate-900 mb-3">عذراً، حدث خلل في مسار المبيعات</h2>
+        <h2 className="text-2xl font-black text-slate-900 mb-3">{t('عذراً، حدث خلل في مسار المبيعات', 'Sales Pipeline Error')}</h2>
         <p className="text-slate-600 mb-8 font-medium">
-          صائد الأخطاء التقط مشكلة تمنع تحميل العملاء. تفاصيل النظام: <br/>
+          {t('صائد الأخطاء التقط مشكلة تمنع تحميل العملاء. تفاصيل النظام:', 'An error prevented loading the sales pipeline. Details:')} <br/>
           <span className="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg font-mono" dir="ltr">
             {error.message}
           </span>
@@ -31,7 +32,7 @@ export default function LeadsError({
           className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-md shadow-red-900/20"
         >
           <RefreshCcw size={18} />
-          إعادة تحميل مسار المبيعات
+          {t('إعادة تحميل مسار المبيعات', 'Reload Sales Pipeline')}
         </button>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { FileSpreadsheet, Loader2, UploadCloud } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 type DeveloperOption = { id: string; name_ar: string | null; name: string | null }
 
@@ -14,6 +15,7 @@ type ImportResult = {
 }
 
 export function InventoryImportForm({ developers }: { developers: DeveloperOption[] }) {
+  const { t } = useI18n()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
@@ -33,13 +35,13 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
       const payload = await response.json()
 
       if (!response.ok) {
-        throw new Error(payload.error ?? 'تعذر رفع الملف.')
+        throw new Error(payload.error ?? t('تعذر رفع الملف.', 'Failed to upload file.'))
       }
 
       setResult(payload)
       event.currentTarget.reset()
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'تعذر استيراد الملف.')
+      setError(caughtError instanceof Error ? caughtError.message : t('تعذر استيراد الملف.', 'Failed to import file.'))
     } finally {
       setPending(false)
     }
@@ -54,7 +56,7 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
         <div>
           <h2 className="text-xl font-black text-[var(--fi-ink)]">استيراد Excel / CSV</h2>
           <p className="text-sm font-semibold text-[var(--fi-muted)]">
-            رفع ملف المطور وإنشاء batch مع Auto Mapping للحقول قبل تطبيقه على المخزون.
+            {t('رفع ملف المطور وإنشاء batch مع Auto Mapping للحقول قبل تطبيقه على المخزون.', 'Upload the developer file and create a batch with auto field mapping before applying it to inventory.')}
           </p>
         </div>
       </div>
@@ -67,16 +69,16 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
 
       {result ? (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold leading-7 text-emerald-700">
-          تم إنشاء batch بنجاح: {result.totalRows} صفوف. راجع Auto-Mapping قبل المعالجة النهائية. صفوف تحتاج انتباه: {result.failedRows}.
+          {t('تم إنشاء batch بنجاح:', 'Batch created successfully:')} {result.totalRows} {t('صفوف. راجع Auto-Mapping قبل المعالجة النهائية. صفوف تحتاج انتباه:', 'rows. Review Auto-Mapping before final processing. Rows needing attention:')} {result.failedRows}.
           <Link className="ms-2 underline" href={`/dashboard/integrations/batches/${result.batchId}`}>
-            فتح شاشة المراجعة
+            {t('فتح شاشة المراجعة', 'Open Review Screen')}
           </Link>
         </div>
       ) : null}
 
       <form onSubmit={submitImport} className="grid gap-4">
         <select name="developerId" className="h-11 rounded-lg border border-[var(--fi-line)] bg-white px-3 text-sm font-bold dark:bg-white/5" defaultValue="">
-          <option value="">بدون مطور محدد</option>
+          <option value="">{t('بدون مطور محدد', 'No specific developer')}</option>
           {developers.map((developer) => (
             <option key={developer.id} value={developer.id}>
               {developer.name_ar || developer.name}
@@ -92,7 +94,7 @@ export function InventoryImportForm({ developers }: { developers: DeveloperOptio
         />
         <button type="submit" disabled={pending} className="fi-primary-button flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60">
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <UploadCloud className="size-4" aria-hidden="true" />}
-          {pending ? 'جاري الاستيراد...' : 'رفع وتحليل الملف'}
+          {pending ? t('جاري الاستيراد...', 'Importing...') : t('رفع وتحليل الملف', 'Upload & Analyze File')}
         </button>
       </form>
     </section>
