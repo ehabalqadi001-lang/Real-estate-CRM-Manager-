@@ -48,13 +48,13 @@ export function ImportPanel({ title, description, accept = '.csv,.xlsx', action,
     <div
       onDrop={onDrop}
       onDragOver={(e) => e.preventDefault()}
-      className="rounded-xl border-2 border-dashed border-[#DDE6E4] bg-[#FBFCFA] p-5 transition-colors hover:border-[#0F8F83]/40 dark:bg-slate-800/50"
+      className="rounded-xl border-2 border-dashed border-[var(--fi-line)] bg-[var(--fi-soft)] p-5 transition-colors hover:border-[var(--fi-emerald)]/40"
     >
       <div className="mb-3 flex items-center gap-2">
         {icon}
-        <p className="font-black text-[#102033] dark:text-white">{title}</p>
+        <p className="font-black text-[var(--fi-ink)]">{title}</p>
       </div>
-      <p className="mb-4 text-xs font-semibold text-slate-500">{description}</p>
+      <p className="mb-4 text-xs font-semibold text-[var(--fi-muted)]">{description}</p>
 
       <input
         ref={inputRef}
@@ -69,7 +69,7 @@ export function ImportPanel({ title, description, accept = '.csv,.xlsx', action,
           size="sm"
           disabled={pending}
           onClick={() => inputRef.current?.click()}
-          className="bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]"
+          className="fi-primary-button font-semibold text-white"
         >
           {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
           {pending ? 'جاري الرفع…' : 'رفع ملف'}
@@ -78,7 +78,7 @@ export function ImportPanel({ title, description, accept = '.csv,.xlsx', action,
           <a
             href={templateHref}
             download
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#DDE6E4] bg-white px-3 text-xs font-semibold text-[#102033] hover:bg-[#FBFCFA] dark:bg-slate-900 dark:text-white"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[var(--fi-line)] bg-[var(--fi-paper)] px-3 text-xs font-semibold text-[var(--fi-ink)] hover:bg-[var(--fi-soft)]"
           >
             تحميل القالب
           </a>
@@ -87,7 +87,7 @@ export function ImportPanel({ title, description, accept = '.csv,.xlsx', action,
 
       {/* Result */}
       {result && (
-        <div className={`mt-3 rounded-lg p-3 text-xs font-semibold ${result.errors.length ? 'bg-red-50 text-red-700' : 'bg-[#EEF6F5] text-[#0F8F83]'}`}>
+        <div className={`mt-3 rounded-lg p-3 text-xs font-semibold ${result.errors.length ? 'bg-red-50 text-red-700' : 'bg-[var(--fi-soft)] text-[var(--fi-emerald)]'}`}>
           {result.errors.length === 0 ? (
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5" />

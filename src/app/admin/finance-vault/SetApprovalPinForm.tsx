@@ -31,14 +31,14 @@ export function SetApprovalPinForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-[#DDE6E4] bg-white p-5 shadow-sm dark:bg-slate-900">
+    <div className="rounded-2xl border border-[var(--fi-line)] bg-[var(--fi-paper)] p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-3">
-        <div className="rounded-xl bg-[#0F8F83]/10 p-2">
-          <KeyRound className="size-5 text-[#0F8F83]" />
+        <div className="rounded-xl bg-[var(--fi-soft)] p-2">
+          <KeyRound className="size-5 text-[var(--fi-emerald)]" />
         </div>
         <div>
-          <p className="font-black text-[#102033] dark:text-white">رمز موافقة الدفعات</p>
-          <p className="text-xs font-semibold text-slate-500">رمز مكون من 4-6 أرقام يُطلب عند إصدار كل دفعة</p>
+          <p className="font-black text-[var(--fi-ink)]">رمز موافقة الدفعات</p>
+          <p className="text-xs font-semibold text-[var(--fi-muted)]">رمز مكون من 4-6 أرقام يُطلب عند إصدار كل دفعة</p>
         </div>
       </div>
       <div className="space-y-3">
@@ -61,7 +61,7 @@ export function SetApprovalPinForm() {
           className="text-center tracking-[0.4em]"
         />
         {result && (
-          <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[#0F8F83]' : 'text-red-600'}`}>
+          <p className={`flex items-center gap-1.5 text-xs font-semibold ${result.ok ? 'text-[var(--fi-emerald)]' : 'text-red-600'}`}>
             {result.ok ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
             {result.msg}
           </p>
@@ -69,7 +69,7 @@ export function SetApprovalPinForm() {
         <Button
           disabled={pending || pin.length < 4 || confirmPin.length < 4}
           onClick={handleSet}
-          className="w-full bg-[#0F8F83] font-semibold text-white hover:bg-[#0B6F66]"
+          className="fi-primary-button w-full font-semibold text-white"
         >
           {pending ? 'جاري الحفظ…' : 'حفظ الرمز'}
         </Button>
