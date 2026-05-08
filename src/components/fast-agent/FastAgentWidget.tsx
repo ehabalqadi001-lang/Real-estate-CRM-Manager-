@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useRef, useState, type FormEvent } from 'react'
-import { Bot, Loader2, Maximize2, MessageSquareText, Minimize2, Send, ShieldCheck, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { Bot, GripVertical, Loader2, Maximize2, MessageSquareText, Minimize2, Send, ShieldCheck, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useI18n } from '@/hooks/use-i18n'
@@ -39,6 +39,45 @@ export default function FastAgentWidget() {
   const [meta, setMeta] = useState<Pick<FastResponse, 'mode' | 'role' | 'tools'> | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
+  // Drag state
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragOffset = useRef({ x: 0, y: 0 })
+
+  // After first paint: read the CSS-positioned rect and lock it as inline style
+  // so dragging can work in pixel coordinates from that point on.
+  useEffect(() => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    setPos({ x: rect.left, y: rect.top })
+  }, [])
+
+  const onHeaderPointerDown = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    // Don't start drag when a button inside the header is clicked
+    if ((event.target as HTMLElement).closest('button')) return
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    dragOffset.current = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    setDragging(true)
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }, [])
+
+  const onHeaderPointerMove = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+    if (!containerRef.current) return
+    const w = containerRef.current.offsetWidth
+    const h = containerRef.current.offsetHeight
+    const x = Math.max(0, Math.min(event.clientX - dragOffset.current.x, window.innerWidth - w))
+    const y = Math.max(0, Math.min(event.clientY - dragOffset.current.y, window.innerHeight - h))
+    setPos({ x, y })
+  }, [])
+
+  const onHeaderPointerUp = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    event.currentTarget.releasePointerCapture(event.pointerId)
+    setDragging(false)
+  }, [])
+
   const visibleMessages = useMemo(() => messages.slice(-10), [messages])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -73,16 +112,27 @@ export default function FastAgentWidget() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 z-toast font-cairo" dir="rtl">
+    <div
+      ref={containerRef}
+      className={`fixed z-toast font-cairo ${pos ? '' : 'bottom-4 left-4'}`}
+      style={pos ? { left: pos.x, top: pos.y } : undefined}
+      dir="rtl"
+    >
       {open && (
         <section
-          className={`mb-3 overflow-hidden rounded-3xl border border-market-line bg-white shadow-[0_24px_80px_rgba(16,32,51,0.20)] transition-all ${
+          className={`mb-3 overflow-hidden rounded-3xl border border-market-line bg-white shadow-[0_24px_80px_rgba(16,32,51,0.20)] transition-[width,height] ${
             expanded ? 'h-[78vh] w-[min(720px,calc(100vw-2rem))]' : 'h-[560px] w-[min(420px,calc(100vw-2rem))]'
           }`}
           aria-label="FAST AI Agent"
         >
-          <header className="flex items-center justify-between gap-3 border-b border-market-line bg-[#0D1B2E] px-4 py-3 text-white">
+          <header
+            className={`flex select-none items-center justify-between gap-3 border-b border-market-line bg-[#0D1B2E] px-4 py-3 text-white ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onPointerDown={onHeaderPointerDown}
+            onPointerMove={onHeaderPointerMove}
+            onPointerUp={onHeaderPointerUp}
+          >
             <div className="flex min-w-0 items-center gap-3">
+              <GripVertical className="size-4 shrink-0 text-white/40" aria-hidden="true" />
               <span className="flex size-10 items-center justify-center rounded-2xl bg-white/10">
                 <Bot className="size-5 text-[#E8C488]" />
               </span>
