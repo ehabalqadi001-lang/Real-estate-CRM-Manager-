@@ -50,8 +50,8 @@ export default async function RootLayout({
       className={cn(cairo.variable, inter.variable, geist.variable, 'font-cairo')}
       suppressHydrationWarning
     >
-      <body className="font-cairo bg-slate-50 text-navy-dark antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-        <ThemeProvider attribute={['class', 'data-theme']} defaultTheme="system" enableSystem>
+      <body className="font-cairo bg-[var(--fi-bg)] text-[var(--fi-ink)] antialiased">
+        <ThemeProvider attribute={['class', 'data-theme']} defaultTheme="light" enableSystem={false}>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <Providers>
               <CommandPalette />
